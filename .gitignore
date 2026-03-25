@@ -51,3 +51,6 @@ coverage/
 
 # Misc
 *.pem
+
+# VS Code workspace
+*.code-workspace
