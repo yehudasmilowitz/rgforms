@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-bg: #0a0a0f;
+  --color-surface: #111118;
+  --color-surface-2: #1a1a24;
+  --color-border: #2a2a38;
+  --color-text: #f0f0f8;
+  --color-muted: #8888aa;
+  --color-accent: #6c63ff;
+  --color-accent-hover: #5b53ee;
+  --color-accent-glow: rgba(108, 99, 255, 0.3);
+  --color-success: #22c55e;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+
+  /* Font */
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  /* Animations */
+  @keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 var(--color-accent-glow);
+    }
+    70% {
+      transform: scale(1);
+      box-shadow: 0 0 0 10px rgba(108, 99, 255, 0);
+    }
+    100% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(108, 99, 255, 0);
+    }
+  }
+
+  @keyframes slide-up {
+    0% {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+}
+
+/* Global base styles */
+html {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+}
+
+/* Step running pulse animation */
+.step-running {
+  animation: pulse-ring 1.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+}
+
+/* Slide up animation utility */
+.animate-slide-up {
+  animation: slide-up 0.4s ease-out both;
+}
+
+/* Fade in animation utility */
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out both;
+}
