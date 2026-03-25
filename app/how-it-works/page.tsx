@@ -156,22 +156,26 @@ export default function HowItWorksPage() {
             className="rounded-xl border p-5 font-mono text-xs leading-loose overflow-x-auto"
             style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}
           >
-            <pre>{`Your Browser
-    │
+            <pre>{`Provisioning (one-time setup):
+
+Your Browser
     ├─── Google OAuth (sign-in, access token)
-    │
     ├─── Google Sheets API  ──▶  Creates your spreadsheet
-    │
     ├─── Apps Script API    ──▶  Creates & deploys your handler
-    │
     └─── (no rgforms server involved)
 
-Later, when your form is submitted:
+"Try it out" test submissions (rgforms dashboard only):
+
+Your Browser
+    └─── POST /api/submit-form  ──▶  rgforms server
+              └─── Apps Script doPost()
+                        ├─── Appends row to Google Sheet
+                        └─── Sends email to you
+
+Live form submissions (your embedded form):
 
 Visitor's Browser
-    │
     └─── fetch(deploymentUrl, { mode: 'no-cors' })
-              │
               └─── Apps Script doPost()
                         ├─── Appends row to Google Sheet
                         └─── Sends email to you`}</pre>
@@ -197,7 +201,7 @@ Visitor's Browser
           <StepCard
             number={3}
             title="Apps Script is created"
-            description="Using your access token, rgforms calls the Google Apps Script API to create a new script project in your Google Drive. The script is pre-written — a doPost() function that handles incoming form submissions."
+            description="Using your access token, rgforms calls the Google Apps Script API to create a new script project in your Google Drive. The script is pre-written — a doPost() handler that maps form data to your sheet columns and sends email notifications, plus a doGet() that returns a simple confirmation page."
           />
 
           <StepCard
@@ -220,6 +224,12 @@ Visitor's Browser
 
           <StepCard
             number={7}
+            title="Authorize your script"
+            description="Because the script was deployed via API rather than the Apps Script editor, Google requires you to authorize it once before it can write to your Sheet and send email. rgforms shows you an 'Authorize script' button — click it, sign in if prompted, and approve the permissions dialog. You only need to do this once."
+          />
+
+          <StepCard
+            number={8}
             title="Embed snippet is generated"
             description="rgforms generates a self-contained HTML+JS snippet with your deployment URL baked in. Paste it anywhere in your HTML and the form is live. No additional configuration needed."
           />
@@ -261,9 +271,11 @@ Visitor's Browser
             >
               mode: &apos;no-cors&apos;
             </code>{' '}
-            when fetching, which means the browser doesn&apos;t need CORS headers from the Apps Script
-            endpoint. The trade-off is that the response body can&apos;t be read — but since the script
-            always succeeds or throws, the fetch resolving is sufficient to show a success state.
+            when fetching, so the browser doesn&apos;t need CORS headers from the Apps Script endpoint.
+            The trade-off is that the response body can&apos;t be read from the visitor&apos;s browser — but
+            for the live embed, a resolving fetch is sufficient to show a success state. The
+            &ldquo;Try it out&rdquo; panel in the rgforms dashboard routes through a server-side proxy
+            instead, which can read the real response and surface any errors.
           </P>
         </Section>
 
@@ -316,6 +328,10 @@ Visitor's Browser
                 body: 'Google Apps Script free accounts are limited to roughly 100 email notifications per day. This is a Google-imposed limit and applies to your personal Apps Script quota.',
               },
               {
+                title: 'One-time script authorization required',
+                body: 'After provisioning, you must visit the deployment URL once while signed in to Google to authorize the script. This is a Google requirement for scripts deployed via the API — the normal permissions dialog only appears when you do this manually. rgforms walks you through it.',
+              },
+              {
                 title: 'Apps Script API must be enabled',
                 body: 'The Google Apps Script API must be enabled in your Google account before provisioning. rgforms will show a direct link to enable it if needed — it only takes a few seconds.',
               },
@@ -346,11 +362,12 @@ Visitor's Browser
 
         {/* Trust */}
         <CalloutBox>
-          <strong style={{ color: 'var(--color-text)' }}>No data leaves your Google account.</strong>{' '}
-          rgforms is a static site that makes API calls on your behalf using a short-lived access
-          token that never touches our servers. Your form submissions go directly from your
-          visitors&apos; browsers to your own Apps Script endpoint, and land in your own Google Sheet.
-          We never see them.{' '}
+          <strong style={{ color: 'var(--color-text)' }}>Your data stays in your Google account.</strong>{' '}
+          Provisioning is done entirely from your browser — your OAuth token never touches rgforms
+          servers. Live form submissions from your embedded form go directly from your visitors&apos;
+          browsers to your own Apps Script endpoint and into your own Google Sheet. The only
+          exception is the &ldquo;Try it out&rdquo; panel, which routes through a server-side proxy solely
+          to surface real error responses — that data is not stored or logged.{' '}
           <Link href="/privacy" style={{ color: 'var(--color-accent)' }} className="underline hover:no-underline">
             Read our privacy policy.
           </Link>
