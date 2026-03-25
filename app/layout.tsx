@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import Link from 'next/link';
 import Script from 'next/script';
 import { AppProvider } from '@/context/AppContext';
 import './globals.css';
@@ -41,6 +42,40 @@ export default function RootLayout({
       <body
         className={`${inter.className} bg-[var(--color-bg)] text-[var(--color-text)]`}
       >
+        <header
+          style={{
+            borderBottom: '1px solid var(--color-border)',
+            background: 'rgba(10,10,15,0.85)',
+            backdropFilter: 'blur(8px)',
+            position: 'sticky',
+            top: 0,
+            zIndex: 50,
+          }}
+        >
+          <div className="max-w-5xl mx-auto px-4 h-12 flex items-center justify-between">
+            <Link
+              href="/"
+              className="text-sm font-bold tracking-tight"
+              style={{ color: 'var(--color-accent)' }}
+            >
+              rgforms
+            </Link>
+            <nav className="flex items-center gap-5">
+              <Link
+                href="/how-it-works"
+                className="text-xs font-medium nav-link"
+              >
+                How it works
+              </Link>
+              <Link
+                href="/privacy"
+                className="text-xs font-medium nav-link"
+              >
+                Privacy
+              </Link>
+            </nav>
+          </div>
+        </header>
         <AppProvider>{children}</AppProvider>
       </body>
     </html>

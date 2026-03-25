@@ -85,3 +85,12 @@ body {
 .animate-fade-in {
   animation: fade-in 0.3s ease-out both;
 }
+
+/* Nav link */
+.nav-link {
+  color: var(--color-muted);
+  transition: color 0.15s;
+}
+.nav-link:hover {
+  color: var(--color-text);
+}
