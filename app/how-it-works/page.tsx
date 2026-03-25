@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Sheet, Zap } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'How RG Forms works — Zero-backend HTML contact forms',
@@ -280,12 +281,12 @@ Visitor's Browser (or "Try it out" panel)
           <div className="flex flex-col gap-3">
             {[
               {
-                icon: '📊',
+                icon: <Sheet size={18} aria-hidden="true" />,
                 title: 'A Google Spreadsheet',
                 body: 'Named after your form. Contains a header row matching your fields, and a hidden _config tab with metadata. All submissions are appended as rows.',
               },
               {
-                icon: '⚡',
+                icon: <Zap size={18} aria-hidden="true" />,
                 title: 'A Google Apps Script project',
                 body: 'Contains the doPost() handler. You can view and edit it at any time via script.google.com. It runs under your Google account.',
               },
@@ -295,7 +296,7 @@ Visitor's Browser (or "Try it out" panel)
                 className="flex gap-4 rounded-xl border p-5"
                 style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
               >
-                <span className="text-xl leading-none mt-0.5 shrink-0">{icon}</span>
+                <span className="leading-none mt-0.5 shrink-0">{icon}</span>
                 <div className="flex flex-col gap-1">
                   <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
                     {title}

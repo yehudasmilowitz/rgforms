@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { clsx } from 'clsx';
+import { Check } from 'lucide-react';
 import type { FormField } from '@/types';
 
 export interface FieldRowProps {
@@ -205,7 +206,9 @@ export function FieldRow({
               <polyline points="9 17 4 12 9 7" />
               <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
             </svg>
-            {isReplyTo ? 'Reply-to: this field ✓' : 'Use as reply-to'}
+            {isReplyTo ? (
+              <>Reply-to: this field <Check size={10} className="inline" aria-hidden="true" /></>
+            ) : 'Use as reply-to'}
           </button>
         )}
       </div>

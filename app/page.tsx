@@ -3,6 +3,7 @@
 import { useApp } from '@/context/AppContext'
 import { motion } from 'motion/react'
 import { heroContainer, fadeUp, scaleIn } from '@/lib/animations'
+import { Sheet, Zap, FolderOpen } from 'lucide-react'
 import { HeroScene } from '@/components/three/HeroScene'
 import AuthButton from '@/components/AuthButton'
 import Dashboard from '@/components/Dashboard'
@@ -116,7 +117,7 @@ export default function Page() {
           </p>
 
           <div className="flex items-start gap-3">
-            <span className="text-xl leading-none mt-0.5" aria-hidden="true">📊</span>
+            <Sheet size={18} className="shrink-0 mt-0.5" aria-hidden="true" />
             <div>
               <p className="font-medium text-sm" style={{ color: 'var(--color-text)' }}>
                 Create a Google Sheet
@@ -128,7 +129,7 @@ export default function Page() {
           </div>
 
           <div className="flex items-start gap-3">
-            <span className="text-xl leading-none mt-0.5" aria-hidden="true">⚡</span>
+            <Zap size={18} className="shrink-0 mt-0.5" aria-hidden="true" />
             <div>
               <p className="font-medium text-sm" style={{ color: 'var(--color-text)' }}>
                 Create an Apps Script
@@ -144,7 +145,7 @@ export default function Page() {
           </div>
 
           <div className="flex items-start gap-3">
-            <span className="text-xl leading-none mt-0.5" aria-hidden="true">📁</span>
+            <FolderOpen size={18} className="shrink-0 mt-0.5" aria-hidden="true" />
             <div>
               <p className="font-medium text-sm" style={{ color: 'var(--color-text)' }}>
                 Access Drive files we create

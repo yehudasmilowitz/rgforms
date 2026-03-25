@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Check, X } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy — RG Forms',
@@ -101,13 +102,12 @@ export default function PrivacyPage() {
               'Usage analytics or behavioral data',
             ].map((item) => (
               <li key={item} className="flex items-start gap-2">
-                <span
-                  className="text-xs mt-1 shrink-0"
+                <X
+                  size={13}
+                  className="mt-1 shrink-0"
                   style={{ color: 'var(--color-accent)' }}
                   aria-hidden="true"
-                >
-                  ✕
-                </span>
+                />
                 <span className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
                   {item}
                 </span>
@@ -130,13 +130,12 @@ export default function PrivacyPage() {
               'Is never transmitted to any RG Forms server or third-party service.',
             ].map((item) => (
               <li key={item} className="flex items-start gap-2">
-                <span
-                  className="text-xs mt-1 shrink-0"
+                <Check
+                  size={13}
+                  className="mt-1 shrink-0"
                   style={{ color: 'var(--color-success)' }}
                   aria-hidden="true"
-                >
-                  ✓
-                </span>
+                />
                 <span className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
                   {item}
                 </span>
