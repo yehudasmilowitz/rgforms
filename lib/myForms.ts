@@ -14,7 +14,7 @@ async function readConfigTab(
 ): Promise<Record<string, string>> {
   try {
     const res = await fetch(
-      `${SHEETS_VALUES_API}/${sheetId}/values/_config!A1:B10`,
+      `${SHEETS_VALUES_API}/${sheetId}/values/_config!A1:B15`,
       { headers: authHeaders(accessToken) }
     );
     if (!res.ok) return {};

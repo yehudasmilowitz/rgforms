@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, KeyboardEvent } from 'react';
 import { clsx } from 'clsx';
 import { useApp } from '@/context/AppContext';
 import { provision, AppsScriptApiDisabledError } from '@/lib/provision';
@@ -68,6 +68,111 @@ function isValid(errors: ValidationErrors): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// EmailTagInput — chip-style multi-email input
+// ---------------------------------------------------------------------------
+
+interface EmailTagInputProps {
+  id: string;
+  emails: string[];
+  inputValue: string;
+  placeholder?: string;
+  onInputChange: (val: string) => void;
+  onAdd: (email: string) => void;
+  onRemove: (email: string) => void;
+}
+
+function EmailTagInput({
+  id,
+  emails,
+  inputValue,
+  placeholder,
+  onInputChange,
+  onAdd,
+  onRemove,
+}: EmailTagInputProps) {
+  function commit(raw: string) {
+    const email = raw.trim().replace(/,+$/, '');
+    if (email && isValidEmail(email) && !emails.includes(email)) {
+      onAdd(email);
+      onInputChange('');
+    } else if (email && !isValidEmail(email)) {
+      // leave it in the input so the user can see what's wrong
+    } else {
+      onInputChange('');
+    }
+  }
+
+  function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter' || e.key === ',' || e.key === 'Tab') {
+      if (inputValue.trim()) {
+        e.preventDefault();
+        commit(inputValue);
+      }
+    }
+    if (e.key === 'Backspace' && inputValue === '' && emails.length > 0) {
+      onRemove(emails[emails.length - 1]);
+    }
+  }
+
+  function handleBlur() {
+    if (inputValue.trim()) commit(inputValue);
+  }
+
+  return (
+    <div
+      className={clsx(
+        'flex flex-wrap gap-1.5 px-2.5 py-2 rounded-lg min-h-[42px]',
+        'bg-[var(--color-surface-2)] border border-[var(--color-border)]',
+        'focus-within:ring-2 focus-within:ring-[var(--color-accent)] focus-within:border-[var(--color-accent)]',
+        'transition-colors duration-150 cursor-text',
+      )}
+      onClick={(e) => {
+        const input = (e.currentTarget as HTMLDivElement).querySelector('input');
+        input?.focus();
+      }}
+    >
+      {emails.map((email) => (
+        <span
+          key={email}
+          className={clsx(
+            'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium',
+            'bg-[var(--color-accent)]/15 text-[var(--color-accent)]',
+            'border border-[var(--color-accent)]/30',
+          )}
+        >
+          {email}
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onRemove(email); }}
+            className="opacity-60 hover:opacity-100 transition-opacity leading-none ml-0.5 focus:outline-none"
+            aria-label={`Remove ${email}`}
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </span>
+      ))}
+      <input
+        id={id}
+        type="email"
+        value={inputValue}
+        onChange={(e) => onInputChange(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={handleBlur}
+        placeholder={emails.length === 0 ? (placeholder ?? 'Type an email, press Enter to add') : ''}
+        className={clsx(
+          'flex-1 min-w-[180px] bg-transparent text-sm outline-none',
+          'text-[var(--color-text)] placeholder:text-[var(--color-muted)]',
+          'py-0.5',
+        )}
+        autoComplete="off"
+      />
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // FormBuilderScreen component
 // ---------------------------------------------------------------------------
 
@@ -79,14 +184,25 @@ export function FormBuilderScreen() {
   const user = state.auth.user!;
   const accessToken = state.auth.accessToken!;
 
-  // Local editable copies of form-level fields
+  // Core form settings
   const [formName, setFormName] = useState(formConfig.name);
   const [notifyEmail, setNotifyEmail] = useState(
     formConfig.notifyEmail || user.email,
   );
   const [fields, setFields] = useState<FormField[]>(formConfig.fields);
 
-  // Touch state for form-level fields
+  // Email notification settings
+  const [ccEmails, setCcEmails] = useState<string[]>(formConfig.ccEmails ?? []);
+  const [bccEmails, setBccEmails] = useState<string[]>(formConfig.bccEmails ?? []);
+  const [emailSubject, setEmailSubject] = useState(formConfig.emailSubject ?? '');
+  const [senderName, setSenderName] = useState(formConfig.senderName ?? '');
+  const [replyToFieldId, setReplyToFieldId] = useState<string | null>(formConfig.replyToFieldId ?? null);
+
+  // Tag input buffer values
+  const [ccInput, setCcInput] = useState('');
+  const [bccInput, setBccInput] = useState('');
+
+  // Touch state
   const [formNameTouched, setFormNameTouched] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
 
@@ -126,6 +242,7 @@ export function FormBuilderScreen() {
         prev.map((f) => (f.id === id ? { ...f, ...updates } : f)),
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
@@ -199,9 +316,13 @@ export function FormBuilderScreen() {
       name: formName.trim(),
       notifyEmail: notifyEmail.trim(),
       fields,
+      ccEmails: ccEmails.length > 0 ? ccEmails : undefined,
+      bccEmails: bccEmails.length > 0 ? bccEmails : undefined,
+      emailSubject: emailSubject.trim() || undefined,
+      senderName: senderName.trim() || undefined,
+      replyToFieldId: replyToFieldId ?? undefined,
     };
 
-    // Sync latest config to global state before provisioning
     dispatch({ type: 'SET_FORM_CONFIG', payload: config });
     dispatch({ type: 'START_PROVISIONING' });
 
@@ -239,7 +360,6 @@ export function FormBuilderScreen() {
   // Render
   // ---------------------------------------------------------------------------
 
-  // Derive validation errors to show inline (only after field is touched)
   const showFormNameError = formNameTouched && !!errors.formName;
   const showEmailError = emailTouched && !!errors.notifyEmail;
 
@@ -248,12 +368,10 @@ export function FormBuilderScreen() {
       {/* Header bar */}
       <header className="sticky top-0 z-10 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
-          {/* Logo */}
           <span className="font-semibold text-[var(--color-text)] mr-auto text-sm tracking-tight">
             rg<span className="text-[var(--color-accent)]">forms</span>
           </span>
 
-          {/* User avatar + name */}
           <div className="flex items-center gap-2 min-w-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -273,7 +391,6 @@ export function FormBuilderScreen() {
             </div>
           </div>
 
-          {/* Sign out */}
           <button
             type="button"
             onClick={handleSignOut}
@@ -336,7 +453,9 @@ export function FormBuilderScreen() {
           </div>
         )}
 
-        {/* Form settings card */}
+        {/* ----------------------------------------------------------------- */}
+        {/* Form settings card                                                  */}
+        {/* ----------------------------------------------------------------- */}
         <section
           className={clsx(
             'rounded-xl border border-[var(--color-border)]',
@@ -376,26 +495,22 @@ export function FormBuilderScreen() {
               aria-describedby={showFormNameError ? 'form-name-error' : undefined}
             />
             {showFormNameError && (
-              <p
-                id="form-name-error"
-                role="alert"
-                className="text-xs text-[var(--color-error)]"
-              >
+              <p id="form-name-error" role="alert" className="text-xs text-[var(--color-error)]">
                 {errors.formName}
               </p>
             )}
           </div>
 
-          {/* Notification email */}
+          {/* Notification email (To) */}
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="notify-email"
               className="text-sm font-medium text-[var(--color-text)]"
             >
-              Notification email <span className="text-[var(--color-error)]">*</span>
+              Notify email <span className="text-[var(--color-error)]">*</span>
             </label>
             <p className="text-xs text-[var(--color-muted)]">
-              New submissions will be emailed here.
+              Primary recipient for new submission emails.
             </p>
             <input
               id="notify-email"
@@ -418,18 +533,138 @@ export function FormBuilderScreen() {
               aria-describedby={showEmailError ? 'notify-email-error' : undefined}
             />
             {showEmailError && (
-              <p
-                id="notify-email-error"
-                role="alert"
-                className="text-xs text-[var(--color-error)]"
-              >
+              <p id="notify-email-error" role="alert" className="text-xs text-[var(--color-error)]">
                 {errors.notifyEmail}
               </p>
             )}
           </div>
         </section>
 
-        {/* Fields section */}
+        {/* ----------------------------------------------------------------- */}
+        {/* Email notifications card                                            */}
+        {/* ----------------------------------------------------------------- */}
+        <section
+          className={clsx(
+            'rounded-xl border border-[var(--color-border)]',
+            'bg-[var(--color-surface)] p-6 flex flex-col gap-5',
+          )}
+        >
+          <div>
+            <h2 className="text-sm font-semibold text-[var(--color-text)] uppercase tracking-wider">
+              Email notifications
+            </h2>
+            <p className="text-xs text-[var(--color-muted)] mt-1">
+              All fields below are optional. Press <kbd className="px-1 py-0.5 rounded text-[10px] bg-[var(--color-surface-2)] border border-[var(--color-border)] font-mono">Enter</kbd> or <kbd className="px-1 py-0.5 rounded text-[10px] bg-[var(--color-surface-2)] border border-[var(--color-border)] font-mono">,</kbd> to add each email in CC / BCC.
+            </p>
+          </div>
+
+          {/* CC */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="cc-input" className="text-sm font-medium text-[var(--color-text)]">
+              CC
+            </label>
+            <p className="text-xs text-[var(--color-muted)]">
+              These addresses will be CC'd on every submission email.
+            </p>
+            <EmailTagInput
+              id="cc-input"
+              emails={ccEmails}
+              inputValue={ccInput}
+              placeholder="cc@example.com"
+              onInputChange={setCcInput}
+              onAdd={(e) => setCcEmails((prev) => [...prev, e])}
+              onRemove={(e) => setCcEmails((prev) => prev.filter((x) => x !== e))}
+            />
+          </div>
+
+          {/* BCC */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="bcc-input" className="text-sm font-medium text-[var(--color-text)]">
+              BCC
+            </label>
+            <p className="text-xs text-[var(--color-muted)]">
+              These addresses will be BCC'd — hidden from other recipients.
+            </p>
+            <EmailTagInput
+              id="bcc-input"
+              emails={bccEmails}
+              inputValue={bccInput}
+              placeholder="bcc@example.com"
+              onInputChange={setBccInput}
+              onAdd={(e) => setBccEmails((prev) => [...prev, e])}
+              onRemove={(e) => setBccEmails((prev) => prev.filter((x) => x !== e))}
+            />
+          </div>
+
+          {/* Email subject */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="email-subject" className="text-sm font-medium text-[var(--color-text)]">
+              Email subject
+            </label>
+            <input
+              id="email-subject"
+              type="text"
+              value={emailSubject}
+              onChange={(e) => setEmailSubject(e.target.value)}
+              placeholder={`New submission: ${formName || 'your form name'}`}
+              className={clsx(
+                'w-full px-3 py-2.5 rounded-lg text-sm',
+                'bg-[var(--color-surface-2)] text-[var(--color-text)]',
+                'border border-[var(--color-border)] transition-colors duration-150',
+                'placeholder:text-[var(--color-muted)]',
+                'focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]',
+              )}
+            />
+            <p className="text-xs text-[var(--color-muted)]">
+              Leave blank to use the default: &ldquo;New submission: {formName || 'form name'}&rdquo;
+            </p>
+          </div>
+
+          {/* Sender name */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="sender-name" className="text-sm font-medium text-[var(--color-text)]">
+              Sender name
+            </label>
+            <input
+              id="sender-name"
+              type="text"
+              value={senderName}
+              onChange={(e) => setSenderName(e.target.value)}
+              placeholder="e.g. Acme Contact Form"
+              className={clsx(
+                'w-full px-3 py-2.5 rounded-lg text-sm',
+                'bg-[var(--color-surface-2)] text-[var(--color-text)]',
+                'border border-[var(--color-border)] transition-colors duration-150',
+                'placeholder:text-[var(--color-muted)]',
+                'focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]',
+              )}
+            />
+            <p className="text-xs text-[var(--color-muted)]">
+              The display name shown in the &ldquo;From&rdquo; field of the email.
+            </p>
+          </div>
+
+          {/* Reply-to info */}
+          <div className={clsx(
+            'flex items-start gap-3 px-3.5 py-3 rounded-lg',
+            'bg-[var(--color-surface-2)] border border-[var(--color-border)]',
+          )}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-[var(--color-muted)]" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <p className="text-xs text-[var(--color-muted)] leading-relaxed">
+              <strong className="text-[var(--color-text)] font-medium">Reply-to:</strong> on any{' '}
+              <span className="text-[var(--color-text)]">Email</span>-type field in the Fields section below, click{' '}
+              <span className="text-[var(--color-accent)]">Use as reply-to</span> to route notification replies to the address your visitor submits.
+            </p>
+          </div>
+        </section>
+
+        {/* ----------------------------------------------------------------- */}
+        {/* Fields section                                                      */}
+        {/* ----------------------------------------------------------------- */}
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div>
@@ -451,17 +686,7 @@ export function FormBuilderScreen() {
                 'focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]',
               )}
             >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
@@ -506,6 +731,8 @@ export function FormBuilderScreen() {
                   onMoveUp={handleMoveUp}
                   onMoveDown={handleMoveDown}
                   dragHandleProps={{}}
+                  isReplyTo={replyToFieldId === field.id}
+                  onSetReplyTo={(id) => setReplyToFieldId(id)}
                 />
               </div>
             ))}
@@ -519,23 +746,12 @@ export function FormBuilderScreen() {
                 'text-[var(--color-muted)] text-sm',
               )}
             >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="opacity-50"
-                aria-hidden="true"
-              >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-50" aria-hidden="true">
                 <rect x="3" y="3" width="18" height="18" rx="2" />
                 <line x1="12" y1="8" x2="12" y2="16" />
                 <line x1="8" y1="12" x2="16" y2="12" />
               </svg>
-              <p>No fields yet — click "Add field" to get started.</p>
+              <p>No fields yet — click &ldquo;Add field&rdquo; to get started.</p>
             </div>
           )}
         </section>
@@ -565,42 +781,15 @@ export function FormBuilderScreen() {
           >
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">
-                <svg
-                  className="animate-spin h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                  />
+                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                 </svg>
                 Generating…
               </span>
             ) : (
               <span className="flex items-center justify-center gap-2">
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
                 </svg>
                 Generate my form
@@ -632,7 +821,6 @@ export function FormBuilderScreen() {
               border: '1px solid var(--color-border)',
             }}
           >
-            {/* Header */}
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div
@@ -662,12 +850,10 @@ export function FormBuilderScreen() {
               </button>
             </div>
 
-            {/* Body */}
             <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
               To use rgforms, you need to enable the <strong style={{ color: 'var(--color-text)' }}>Apps Script API</strong> in your Google account. This is a one-time step.
             </p>
 
-            {/* Steps */}
             <ol className="flex flex-col gap-2 text-sm" style={{ color: 'var(--color-muted)' }}>
               {[
                 <>Click <strong style={{ color: 'var(--color-text)' }}>Enable the Apps Script API</strong> below.</>,
@@ -687,7 +873,6 @@ export function FormBuilderScreen() {
               ))}
             </ol>
 
-            {/* Actions */}
             <div className="flex gap-3 pt-1">
               <a
                 href="https://script.google.com/home/usersettings"

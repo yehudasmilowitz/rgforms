@@ -141,6 +141,11 @@ async function addConfigTab(
     ['fields', JSON.stringify(config.fields)],
     ['createdAt', new Date().toISOString()],
     ['scriptId', scriptId],
+    ['ccEmails', JSON.stringify(config.ccEmails ?? [])],
+    ['bccEmails', JSON.stringify(config.bccEmails ?? [])],
+    ['emailSubject', config.emailSubject ?? ''],
+    ['senderName', config.senderName ?? ''],
+    ['replyToFieldId', config.replyToFieldId ?? ''],
   ];
 
   await apiCall<unknown>(`${SHEETS_API}/${sheetId}/values:batchUpdate`, {
@@ -170,7 +175,7 @@ async function saveDeploymentUrl(
     headers: authHeaders(accessToken),
     body: JSON.stringify({
       valueInputOption: 'RAW',
-      data: [{ range: '_config!A6:B6', values: [['deploymentUrl', deploymentUrl]] }],
+      data: [{ range: '_config!A11:B11', values: [['deploymentUrl', deploymentUrl]] }],
     }),
   }).catch(() => {});
 }
@@ -199,9 +204,9 @@ async function uploadScriptCode(
   accessToken: string,
   scriptId: string,
   sheetId: string,
-  notifyEmail: string
+  config: FormConfig
 ): Promise<void> {
-  const code = generateAppsScript(sheetId, notifyEmail);
+  const code = generateAppsScript(sheetId, config);
 
   await apiCall<unknown>(`${SCRIPT_API}/${scriptId}/content`, {
     method: 'PUT',
@@ -305,7 +310,7 @@ export async function provision(
   // Step 4 — Upload handler code
   onStepUpdate('code', 'running');
   try {
-    await uploadScriptCode(accessToken, scriptId, sheetId, config.notifyEmail);
+    await uploadScriptCode(accessToken, scriptId, sheetId, config);
     onStepUpdate('code', 'complete');
   } catch (err) {
     onStepUpdate('code', 'error', (err as Error).message);

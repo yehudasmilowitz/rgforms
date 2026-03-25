@@ -10,6 +10,11 @@ export interface FormConfig {
   name: string;
   notifyEmail: string;
   fields: FormField[];
+  ccEmails?: string[];
+  bccEmails?: string[];
+  emailSubject?: string;
+  senderName?: string;
+  replyToFieldId?: string; // ID of the email-type field whose value becomes the reply-to address
 }
 
 export interface ProvisioningResult {

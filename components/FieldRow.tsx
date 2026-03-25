@@ -13,6 +13,8 @@ export interface FieldRowProps {
   onMoveUp: (id: string) => void;
   onMoveDown: (id: string) => void;
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
+  isReplyTo?: boolean;
+  onSetReplyTo?: (id: string | null) => void;
 }
 
 export function FieldRow({
@@ -24,6 +26,8 @@ export function FieldRow({
   onMoveUp,
   onMoveDown,
   dragHandleProps,
+  isReplyTo = false,
+  onSetReplyTo,
 }: FieldRowProps) {
   const [labelError, setLabelError] = useState(false);
 
@@ -39,6 +43,8 @@ export function FieldRow({
   function handleTypeChange(val: FormField['type']) {
     const updates: Partial<FormField> = { type: val };
     if (val !== 'select') updates.options = undefined;
+    // If this field was the reply-to and type is changing away from email, clear it
+    if (val !== 'email' && isReplyTo) onSetReplyTo?.(null);
     onUpdate(field.id, updates);
   }
 
@@ -177,6 +183,30 @@ export function FieldRow({
               )}
             />
           </div>
+        )}
+
+        {/* Reply-to toggle — only for email-type fields */}
+        {field.type === 'email' && onSetReplyTo && (
+          <button
+            type="button"
+            onClick={() => onSetReplyTo(isReplyTo ? null : field.id)}
+            className={clsx(
+              'self-start inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium',
+              'border transition-colors duration-150',
+              'focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]',
+              isReplyTo
+                ? 'bg-[var(--color-accent)]/15 border-[var(--color-accent)]/40 text-[var(--color-accent)]'
+                : 'bg-transparent border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-border)]',
+            )}
+            title={isReplyTo ? 'Remove reply-to on this field' : 'Replies to notification emails will go to the address submitted in this field'}
+          >
+            {/* Reply arrow icon */}
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="9 17 4 12 9 7" />
+              <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
+            </svg>
+            {isReplyTo ? 'Reply-to: this field ✓' : 'Use as reply-to'}
+          </button>
         )}
       </div>
 
