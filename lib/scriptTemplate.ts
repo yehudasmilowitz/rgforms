@@ -8,6 +8,7 @@ export function generateAppsScript(sheetId: string, config: FormConfig): string 
     emailSubject,
     senderName,
     replyToFieldId,
+    enableHoneypot,
     fields,
     name: formName,
   } = config;
@@ -29,6 +30,7 @@ export function generateAppsScript(sheetId: string, config: FormConfig): string 
     senderName: senderName || '',
     replyToKey,   // normalized field key resolved at runtime from e.parameter
     formName,
+    honeypot: enableHoneypot ? true : false,
   });
 
   return `var CONFIG = ${configJson};
@@ -159,6 +161,13 @@ function buildEmailHtml(headers, params, formName, timestamp) {
 
 function doPost(e) {
   try {
+    // Honeypot check — silently succeed so bots don't know they were blocked
+    if (CONFIG.honeypot && e.parameter['_hp']) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ result: 'success' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     var sheet = SpreadsheetApp.openById(CONFIG.sheetId).getActiveSheet();
     var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
     var newRow = headers.map(function(header) {

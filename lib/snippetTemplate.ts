@@ -20,12 +20,15 @@ function getInputHtml(field: FormField, indent: string = '  '): string {
 
 export function generateEmbedSnippet(config: FormConfig, deploymentUrl: string): string {
   const fieldInputs = config.fields.map((f) => getInputHtml(f)).join('\n');
+  const honeypotField = config.enableHoneypot
+    ? `\n  <input type="text" name="_hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;" />`
+    : '';
   const formId = `rg-form-${Math.random().toString(36).slice(2, 7)}`;
 
   return `<form class="rgforms-form" id="${formId}"
       action="${deploymentUrl}"
       method="POST">
-${fieldInputs}
+${fieldInputs}${honeypotField}
   <button type="submit">Send</button>
   <div id="${formId}-success" style="display:none">
     Thanks! Your message has been sent.
