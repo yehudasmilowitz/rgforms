@@ -43,7 +43,7 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'SIGN_IN':
       return {
         ...state,
-        screen: 'builder',
+        screen: 'dashboard',
         auth: { user: action.payload.user, accessToken: action.payload.accessToken },
         formConfig: {
           ...state.formConfig,
@@ -86,9 +86,20 @@ function reducer(state: AppState, action: AppAction): AppState {
         screen: 'result',
         result: action.payload,
       };
+    case 'GO_TO_BUILDER':
+      return {
+        ...initialState,
+        screen: 'builder',
+        auth: state.auth,
+        formConfig: {
+          ...DEFAULT_FORM_CONFIG,
+          notifyEmail: state.auth.user?.email ?? '',
+        },
+      };
     case 'RESET':
       return {
         ...initialState,
+        screen: 'dashboard',
         auth: state.auth,
         formConfig: {
           ...DEFAULT_FORM_CONFIG,

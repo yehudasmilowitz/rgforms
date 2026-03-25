@@ -2,6 +2,7 @@
 
 import { useApp } from '@/context/AppContext';
 import AuthButton from '@/components/AuthButton';
+import Dashboard from '@/components/Dashboard';
 import FormBuilderScreen from '@/components/FormBuilder';
 import ProvisioningSteps from '@/components/ProvisioningSteps';
 import ResultPanel from '@/components/ResultPanel';
@@ -9,6 +10,7 @@ import ResultPanel from '@/components/ResultPanel';
 export default function Page() {
   const { state } = useApp();
 
+  if (state.screen === 'dashboard') return <Dashboard />;
   if (state.screen === 'builder') return <FormBuilderScreen />;
   if (state.screen === 'provisioning') return <ProvisioningSteps />;
   if (state.screen === 'result') return <ResultPanel />;

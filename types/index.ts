@@ -41,7 +41,17 @@ export interface AuthState {
   accessToken: string | null;
 }
 
-export type AppScreen = 'landing' | 'builder' | 'provisioning' | 'result';
+export interface FormSummary {
+  sheetId: string;
+  sheetUrl: string;
+  formName: string;
+  createdAt: string;
+  scriptId?: string;
+  scriptUrl?: string;
+  deploymentUrl?: string;
+}
+
+export type AppScreen = 'landing' | 'dashboard' | 'builder' | 'provisioning' | 'result';
 
 export interface AppState {
   screen: AppScreen;
@@ -57,6 +67,7 @@ export type AppAction =
   | { type: 'SIGN_IN'; payload: { user: GoogleUser; accessToken: string } }
   | { type: 'SIGN_OUT' }
   | { type: 'SET_FORM_CONFIG'; payload: Partial<FormConfig> }
+  | { type: 'GO_TO_BUILDER' }
   | { type: 'START_PROVISIONING' }
   | { type: 'UPDATE_STEP'; payload: { id: string; status: StepStatus; error?: string } }
   | { type: 'SET_RESULT'; payload: ProvisioningResult }

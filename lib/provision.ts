@@ -104,7 +104,8 @@ async function createSheet(
 async function addConfigTab(
   accessToken: string,
   sheetId: string,
-  config: FormConfig
+  config: FormConfig,
+  scriptId: string
 ): Promise<void> {
   // Add the _config sheet
   await apiCall<unknown>(`${SHEETS_API}/${sheetId}:batchUpdate`, {
@@ -139,6 +140,7 @@ async function addConfigTab(
     ['formName', config.name],
     ['fields', JSON.stringify(config.fields)],
     ['createdAt', new Date().toISOString()],
+    ['scriptId', scriptId],
   ];
 
   await apiCall<unknown>(`${SHEETS_API}/${sheetId}/values:batchUpdate`, {
@@ -154,6 +156,23 @@ async function addConfigTab(
       ],
     }),
   });
+}
+
+// Save the deployment URL into the _config tab after the web app is deployed
+async function saveDeploymentUrl(
+  accessToken: string,
+  sheetId: string,
+  deploymentUrl: string
+): Promise<void> {
+  // Best-effort — a failure here shouldn't break the overall provisioning result
+  await fetch(`${SHEETS_API}/${sheetId}/values:batchUpdate`, {
+    method: 'POST',
+    headers: authHeaders(accessToken),
+    body: JSON.stringify({
+      valueInputOption: 'RAW',
+      data: [{ range: '_config!A6:B6', values: [['deploymentUrl', deploymentUrl]] }],
+    }),
+  }).catch(() => {});
 }
 
 // Step 1: Create a standalone Apps Script project (verifies the API is enabled before touching Sheets)
@@ -276,7 +295,7 @@ export async function provision(
   // Step 3 — Add _config tab
   onStepUpdate('config', 'running');
   try {
-    await addConfigTab(accessToken, sheetId, config);
+    await addConfigTab(accessToken, sheetId, config, scriptId);
     onStepUpdate('config', 'complete');
   } catch (err) {
     onStepUpdate('config', 'error', (err as Error).message);
@@ -302,6 +321,9 @@ export async function provision(
     onStepUpdate('deploy', 'error', (err as Error).message);
     throw err;
   }
+
+  // Save deployment URL to _config tab so the dashboard can regenerate embed snippets
+  await saveDeploymentUrl(accessToken, sheetId, deploymentUrl);
 
   return { sheetId, sheetUrl, scriptId, scriptUrl, deploymentUrl };
 }
