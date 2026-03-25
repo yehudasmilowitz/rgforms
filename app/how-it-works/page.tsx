@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'How rgforms works — Zero-backend HTML contact forms',
+  title: 'How RG Forms works — Zero-backend HTML contact forms',
   description:
-    'A deep dive into how rgforms automates the DWYL serverless form pattern: Google OAuth, Apps Script, and Sheets — all from your browser.',
+    'A deep dive into how RG Forms automates the DWYL serverless form pattern: Google OAuth, Apps Script, and Sheets — all from your browser.',
 };
 
 function Section({ children }: { children: React.ReactNode }) {
@@ -109,10 +109,10 @@ export default function HowItWorksPage() {
             className="text-3xl sm:text-4xl font-extrabold tracking-tight"
             style={{ color: 'var(--color-text)' }}
           >
-            How rgforms works
+            How RG Forms works
           </h1>
           <p className="text-base sm:text-lg leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            rgforms automates a proven serverless form pattern — giving you a fully functional
+            RG Forms automates a proven serverless form pattern — giving you a fully functional
             HTML contact form in under two minutes, backed entirely by infrastructure you already
             own in Google Drive.
           </p>
@@ -140,7 +140,7 @@ export default function HowItWorksPage() {
             solves this elegantly: use a Google Apps Script as a free, serverless HTTP endpoint
             that writes submissions to a Google Sheet and emails you. The catch? Setting it up
             manually takes 20–30 minutes and involves navigating multiple Google dashboards.
-            rgforms does it for you in seconds.
+            RG Forms does it for you in seconds.
           </P>
         </Section>
 
@@ -148,7 +148,7 @@ export default function HowItWorksPage() {
         <Section>
           <H2>Architecture overview</H2>
           <P>
-            rgforms is a fully static web app — there is no rgforms server, no database, and no
+            RG Forms is a fully static web app — there is no RG Forms server, no database, and no
             third-party storage. Every API call is made directly from your browser using your
             own Google OAuth access token. The resources created belong entirely to you.
           </P>
@@ -164,7 +164,7 @@ export default function HowItWorksPage() {
     │
     ├─── Apps Script API    ──▶  Creates & deploys your handler
     │
-    └─── (no rgforms server involved)
+    └─── (no RG Forms server involved)
 
 Later, when your form is submitted:
 
@@ -185,7 +185,7 @@ Visitor's Browser (or "Try it out" panel)
           <StepCard
             number={1}
             title="Sign in with Google"
-            description="You grant rgforms a temporary OAuth access token. This token lives only in browser memory — it's never sent to any rgforms server, never written to disk, and is gone the moment you close the tab."
+            description="You grant RG Forms a temporary OAuth access token. This token lives only in browser memory — it's never sent to any RG Forms server, never written to disk, and is gone the moment you close the tab."
           />
 
           <StepCard
@@ -197,13 +197,13 @@ Visitor's Browser (or "Try it out" panel)
           <StepCard
             number={3}
             title="Apps Script is created"
-            description="Using your access token, rgforms calls the Google Apps Script API to create a new script project in your Google Drive. The script is pre-written — a doPost() handler that maps form data to your sheet columns and sends email notifications, plus a doGet() that returns a simple confirmation page."
+            description="Using your access token, RG Forms calls the Google Apps Script API to create a new script project in your Google Drive. The script is pre-written — a doPost() handler that maps form data to your sheet columns and sends email notifications, plus a doGet() that returns a simple confirmation page."
           />
 
           <StepCard
             number={4}
             title="Google Sheet is created"
-            description="rgforms creates a new Google Spreadsheet in your Drive, titled with your form name. A hidden _config tab stores metadata. The first row of the main sheet is pre-populated with your field names as column headers."
+            description="RG Forms creates a new Google Spreadsheet in your Drive, titled with your form name. A hidden _config tab stores metadata. The first row of the main sheet is pre-populated with your field names as column headers."
           />
 
           <StepCard
@@ -221,13 +221,13 @@ Visitor's Browser (or "Try it out" panel)
           <StepCard
             number={7}
             title="Authorize your script"
-            description="Because the script was deployed via API rather than the Apps Script editor, Google requires you to authorize it once before it can write to your Sheet and send email. rgforms shows you an 'Authorize script' button — click it, sign in if prompted, and approve the permissions dialog. You only need to do this once."
+            description="Because the script was deployed via API rather than the Apps Script editor, Google requires you to authorize it once before it can write to your Sheet and send email. RG Forms shows you an 'Authorize script' button — click it, sign in if prompted, and approve the permissions dialog. You only need to do this once."
           />
 
           <StepCard
             number={8}
             title="Embed snippet is generated"
-            description="rgforms generates a self-contained HTML+JS snippet with your deployment URL baked in. Paste it anywhere in your HTML and the form is live. No additional configuration needed."
+            description="RG Forms generates a self-contained HTML+JS snippet with your deployment URL baked in. Paste it anywhere in your HTML and the form is live. No additional configuration needed."
           />
         </Section>
 
@@ -308,7 +308,7 @@ Visitor's Browser (or "Try it out" panel)
             ))}
           </div>
           <P>
-            Both files are owned by your Google account. rgforms has no ongoing access to them
+            Both files are owned by your Google account. RG Forms has no ongoing access to them
             after provisioning — it only calls the APIs during the one-time setup flow.
           </P>
         </Section>
@@ -324,11 +324,11 @@ Visitor's Browser (or "Try it out" panel)
               },
               {
                 title: 'One-time script authorization required',
-                body: 'After provisioning, you must visit the deployment URL once while signed in to Google to authorize the script. This is a Google requirement for scripts deployed via the API — the normal permissions dialog only appears when you do this manually. rgforms walks you through it.',
+                body: 'After provisioning, you must visit the deployment URL once while signed in to Google to authorize the script. This is a Google requirement for scripts deployed via the API — the normal permissions dialog only appears when you do this manually. RG Forms walks you through it.',
               },
               {
                 title: 'Apps Script API must be enabled',
-                body: 'The Google Apps Script API must be enabled in your Google account before provisioning. rgforms will show a direct link to enable it if needed — it only takes a few seconds.',
+                body: 'The Google Apps Script API must be enabled in your Google account before provisioning. RG Forms will show a direct link to enable it if needed — it only takes a few seconds.',
               },
               {
                 title: 'No file uploads',
@@ -358,7 +358,7 @@ Visitor's Browser (or "Try it out" panel)
         {/* Trust */}
         <CalloutBox>
           <strong style={{ color: 'var(--color-text)' }}>No data leaves your Google account.</strong>{' '}
-          rgforms is a static site that makes API calls on your behalf using a short-lived access
+          RG Forms is a static site that makes API calls on your behalf using a short-lived access
           token that never touches our servers. Form submissions — including the &ldquo;Try it out&rdquo;
           panel — go directly from the browser to your own Apps Script endpoint and land in your
           own Google Sheet. We never see them.{' '}

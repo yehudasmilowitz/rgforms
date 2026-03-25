@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'motion/react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { signIn } from '@/lib/auth';
@@ -35,7 +36,11 @@ export default function AuthButton({ className }: AuthButtonProps) {
   }
 
   return (
-    <div className={cn('flex flex-col items-center gap-3', className)}>
+    <motion.div
+      className={cn('flex flex-col items-center gap-3', className)}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+    >
       <button
         onClick={handleSignIn}
         disabled={loading}
@@ -120,6 +125,6 @@ export default function AuthButton({ className }: AuthButtonProps) {
           </button>
         </p>
       )}
-    </div>
+    </motion.div>
   );
 }

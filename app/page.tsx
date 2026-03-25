@@ -1,58 +1,115 @@
-'use client';
+'use client'
 
-import { useApp } from '@/context/AppContext';
-import AuthButton from '@/components/AuthButton';
-import Dashboard from '@/components/Dashboard';
-import FormBuilderScreen from '@/components/FormBuilder';
-import ProvisioningSteps from '@/components/ProvisioningSteps';
-import ResultPanel from '@/components/ResultPanel';
+import { useApp } from '@/context/AppContext'
+import { motion } from 'motion/react'
+import { heroContainer, fadeUp, scaleIn } from '@/lib/animations'
+import { HeroScene } from '@/components/three/HeroScene'
+import AuthButton from '@/components/AuthButton'
+import Dashboard from '@/components/Dashboard'
+import FormBuilderScreen from '@/components/FormBuilder'
+import ProvisioningSteps from '@/components/ProvisioningSteps'
+import ResultPanel from '@/components/ResultPanel'
 
 export default function Page() {
-  const { state } = useApp();
+  const { state } = useApp()
 
-  if (state.screen === 'dashboard') return <Dashboard />;
-  if (state.screen === 'builder') return <FormBuilderScreen />;
-  if (state.screen === 'provisioning') return <ProvisioningSteps />;
-  if (state.screen === 'result') return <ResultPanel />;
+  if (state.screen === 'dashboard') return <Dashboard />
+  if (state.screen === 'builder') return <FormBuilderScreen />
+  if (state.screen === 'provisioning') return <ProvisioningSteps />
+  if (state.screen === 'result') return <ResultPanel />
 
   // Landing screen
   return (
     <main
-      className="min-h-screen flex flex-col items-center justify-center px-4 py-16"
+      className="relative min-h-screen flex flex-col items-center justify-center px-4 py-16 overflow-hidden"
       style={{ background: 'var(--color-bg)', color: 'var(--color-text)' }}
     >
-      {/* Hero */}
-      <section className="w-full max-w-2xl flex flex-col items-center text-center gap-6">
+      {/* Three.js / CSS background */}
+      <HeroScene />
+
+      {/* Atmospheric gradient overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(ellipse at 50% 100%, oklch(0.07 0.015 285 / 0.9) 0%, transparent 60%),
+            radial-gradient(ellipse at 50% 0%, oklch(0.07 0.015 285 / 0.6) 0%, transparent 50%)
+          `,
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Hero grid texture */}
+      <div className="absolute inset-0 hero-grid pointer-events-none" aria-hidden="true" />
+
+      {/* Content */}
+      <motion.section
+        className="relative z-10 w-full max-w-2xl flex flex-col items-center text-center gap-6"
+        variants={heroContainer}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Badge */}
+        <motion.div variants={fadeUp}>
+          <span
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium border"
+            style={{
+              background: 'var(--color-accent-subtle)',
+              borderColor: 'var(--color-accent-border)',
+              color: 'var(--color-accent)',
+              fontFamily: 'var(--font-mono)',
+            }}
+          >
+            <span
+              className="w-1.5 h-1.5 rounded-full animate-glow-pulse"
+              style={{ background: 'var(--color-accent)' }}
+            />
+            Zero backend required
+          </span>
+        </motion.div>
+
         {/* Product name */}
-        <h1
-          className="text-5xl sm:text-6xl font-extrabold tracking-tight"
-          style={{ color: 'var(--color-accent)' }}
+        <motion.h1
+          className="text-[var(--text-hero)] font-extrabold tracking-tight leading-none"
+          style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-display)' }}
+          variants={fadeUp}
         >
-          rgforms
-        </h1>
+          RG Forms
+        </motion.h1>
 
         {/* Tagline */}
-        <p className="text-xl sm:text-2xl font-semibold leading-snug" style={{ color: 'var(--color-text)' }}>
+        <motion.p
+          className="text-xl sm:text-2xl font-semibold leading-snug"
+          style={{ color: 'var(--color-text)' }}
+          variants={fadeUp}
+        >
           HTML contact forms in 2 minutes —{' '}
           <span style={{ color: 'var(--color-muted)' }}>no backend, no subscription</span>
-        </p>
+        </motion.p>
 
         {/* Subtitle */}
-        <p className="text-base sm:text-lg leading-relaxed max-w-xl" style={{ color: 'var(--color-muted)' }}>
+        <motion.p
+          className="text-base sm:text-lg leading-relaxed max-w-xl"
+          style={{ color: 'var(--color-muted)' }}
+          variants={fadeUp}
+        >
           Sign in with Google to auto-create a Google Sheet + Apps Script that handles your form
           submissions. Everything lives in your Drive.
-        </p>
+        </motion.p>
 
         {/* AuthButton */}
-        <AuthButton className="mt-2" />
+        <motion.div variants={scaleIn} className="mt-2">
+          <AuthButton />
+        </motion.div>
 
         {/* Scope explanations */}
-        <div
+        <motion.div
           className="w-full rounded-xl border p-5 flex flex-col gap-4 text-left mt-2"
           style={{
             background: 'var(--color-surface)',
             borderColor: 'var(--color-border)',
           }}
+          variants={fadeUp}
         >
           <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--color-muted)' }}>
             Permissions requested
@@ -78,7 +135,7 @@ export default function Page() {
               </p>
               <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>
                 Deploys a serverless{' '}
-                <code className="font-mono text-xs px-1 rounded" style={{ background: 'var(--color-surface-2)' }}>
+                <code className="font-mono text-xs px-1 rounded" style={{ background: 'var(--color-surface-2)', fontFamily: 'var(--font-mono)' }}>
                   doPost()
                 </code>{' '}
                 handler that receives submissions and sends email notifications.
@@ -93,20 +150,28 @@ export default function Page() {
                 Access Drive files we create
               </p>
               <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>
-                Reads and organizes only the Sheet and Script files rgforms creates — nothing else in your Drive.
+                Reads and organizes only the Sheet and Script files RG Forms creates — nothing else in your Drive.
               </p>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Trust note */}
-        <p className="text-xs leading-relaxed max-w-sm" style={{ color: 'var(--color-muted)' }}>
+        <motion.p
+          className="text-xs leading-relaxed max-w-sm"
+          style={{ color: 'var(--color-muted)' }}
+          variants={fadeUp}
+        >
           We never store your data. Everything is created in your Google Drive. Tokens exist only in
           browser memory.
-        </p>
+        </motion.p>
 
         {/* Social proof */}
-        <p className="text-sm" style={{ color: 'var(--color-muted)' }}>
+        <motion.p
+          className="text-sm"
+          style={{ color: 'var(--color-muted)' }}
+          variants={fadeUp}
+        >
           Automates the{' '}
           <a
             href="https://github.com/dwyl/learn-to-send-email-via-google-script-html-no-server"
@@ -118,8 +183,8 @@ export default function Page() {
             DWYL serverless form pattern
           </a>{' '}
           — trusted by 3,000+ developers
-        </p>
-      </section>
+        </motion.p>
+      </motion.section>
     </main>
-  );
+  )
 }

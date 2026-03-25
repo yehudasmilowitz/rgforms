@@ -1,19 +1,33 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { Space_Grotesk, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import Link from 'next/link';
 import Script from 'next/script';
 import { AppProvider } from '@/context/AppContext';
 import './globals.css';
 
-const inter = Inter({
+const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
-  variable: '--font-inter',
+  variable: '--font-display',
+  display: 'swap',
+});
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-mono',
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: 'rgforms — Create HTML contact forms in 2 minutes',
+  title: 'RG Forms — Create HTML contact forms in 2 minutes',
   description:
     'Zero-backend contact forms powered by your own Google Drive. No subscription, no server.',
   icons: {
@@ -32,7 +46,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${spaceGrotesk.variable} ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}>
       <head>
         <Script
           src="https://accounts.google.com/gsi/client"
@@ -40,36 +54,37 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.className} bg-[var(--color-bg)] text-[var(--color-text)]`}
+        className={`${plusJakartaSans.className} bg-[var(--color-bg)] text-[var(--color-text)]`}
       >
+        <div className="scroll-progress" aria-hidden="true" />
         <header
           style={{
             borderBottom: '1px solid var(--color-border)',
-            background: 'rgba(10,10,15,0.85)',
-            backdropFilter: 'blur(8px)',
+            background: 'oklch(0.07 0.015 285 / 0.85)',
+            backdropFilter: 'blur(12px)',
             position: 'sticky',
             top: 0,
             zIndex: 50,
           }}
         >
-          <div className="max-w-5xl mx-auto px-4 h-12 flex items-center justify-between">
+          <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
             <Link
               href="/"
-              className="text-sm font-bold tracking-tight"
-              style={{ color: 'var(--color-accent)' }}
+              className="font-bold tracking-tight text-base"
+              style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-display)' }}
             >
-              rgforms
+              RG Forms
             </Link>
-            <nav className="flex items-center gap-5">
+            <nav className="flex items-center gap-6">
               <Link
                 href="/how-it-works"
-                className="text-xs font-medium nav-link"
+                className="text-sm font-medium nav-link"
               >
                 How it works
               </Link>
               <Link
                 href="/privacy"
-                className="text-xs font-medium nav-link"
+                className="text-sm font-medium nav-link"
               >
                 Privacy
               </Link>

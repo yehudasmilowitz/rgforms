@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { motion } from 'motion/react';
 import { clsx } from 'clsx';
 import { useApp } from '@/context/AppContext';
 import { listMyForms, deleteForm } from '@/lib/myForms';
@@ -297,9 +298,12 @@ export default function Dashboard() {
   }
 
   return (
-    <main
+    <motion.main
       className="min-h-screen flex flex-col px-4 py-8"
       style={{ background: 'var(--color-bg)', color: 'var(--color-text)' }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
     >
       <div className="w-full max-w-2xl mx-auto flex flex-col gap-8">
 
@@ -351,7 +355,7 @@ export default function Dashboard() {
               My Forms
             </h1>
             <p className="text-sm mt-0.5" style={{ color: 'var(--color-muted)' }}>
-              Forms you&apos;ve created with rgforms
+              Forms you&apos;ve created with RG Forms
             </p>
           </div>
 
@@ -434,13 +438,19 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            {forms.map((form) => (
-              <FormCard
+            {forms.map((form, index) => (
+              <motion.div
                 key={form.sheetId}
-                form={form}
-                onDelete={setPendingDelete}
-                deleting={deletingIds.has(form.sheetId)}
-              />
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.06, duration: 0.35 }}
+              >
+                <FormCard
+                  form={form}
+                  onDelete={setPendingDelete}
+                  deleting={deletingIds.has(form.sheetId)}
+                />
+              </motion.div>
             ))}
           </div>
         )}
@@ -454,6 +464,6 @@ export default function Dashboard() {
           onCancel={() => setPendingDelete(null)}
         />
       )}
-    </main>
+    </motion.main>
   );
 }

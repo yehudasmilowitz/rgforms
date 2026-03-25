@@ -1,6 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
+import { motion } from 'motion/react';
 import { useApp } from '@/context/AppContext';
 import type { ProvisioningStep } from '@/types';
 
@@ -158,7 +159,12 @@ export default function ProvisioningSteps() {
       className="min-h-screen flex flex-col items-center justify-center px-4 py-16"
       style={{ background: 'var(--color-bg)', color: 'var(--color-text)' }}
     >
-      <div className="w-full max-w-lg flex flex-col gap-8 animate-slide-up">
+      <motion.div
+        className="w-full max-w-lg flex flex-col gap-8"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.21, 1.02, 0.73, 0.99] }}
+      >
         {/* Header */}
         <div className="flex flex-col items-center text-center gap-2">
           <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
@@ -171,10 +177,16 @@ export default function ProvisioningSteps() {
 
         {/* Steps list */}
         <div className="flex flex-col gap-3" role="list" aria-label="Provisioning steps">
-          {steps.map((step) => (
-            <div key={step.id} role="listitem">
+          {steps.map((step, index) => (
+            <motion.div
+              key={step.id}
+              role="listitem"
+              initial={{ opacity: 0, x: -16 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.08, duration: 0.4 }}
+            >
               <StepRow step={step} />
-            </div>
+            </motion.div>
           ))}
         </div>
 
@@ -239,7 +251,7 @@ export default function ProvisioningSteps() {
             </button>
           </div>
         )}
-      </div>
+      </motion.div>
     </main>
   );
 }

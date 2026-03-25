@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — rgforms',
-  description: 'rgforms privacy policy: what data we collect (none), how Google OAuth is used, and where your form data lives.',
+  title: 'Privacy Policy — RG Forms',
+  description: 'RG Forms privacy policy: what data we collect (none), how Google OAuth is used, and where your form data lives.',
 };
 
 function Section({ children }: { children: React.ReactNode }) {
@@ -69,7 +69,7 @@ export default function PrivacyPage() {
             Short version
           </p>
           <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            rgforms does not collect, store, or transmit any of your personal data or form
+            RG Forms does not collect, store, or transmit any of your personal data or form
             submission data. We have no database, no analytics, and no server that receives
             your information. Your Google OAuth token exists only in your browser&apos;s memory
             for the duration of your session.
@@ -79,7 +79,7 @@ export default function PrivacyPage() {
         <Section>
           <H2>1. Who we are</H2>
           <P>
-            rgforms is a static web application that helps you create zero-backend HTML contact
+            RG Forms is a static web application that helps you create zero-backend HTML contact
             forms backed by your own Google Drive infrastructure. The service is provided as-is
             with no warranty.
           </P>
@@ -88,7 +88,7 @@ export default function PrivacyPage() {
         <Section>
           <H2>2. Data we do not collect</H2>
           <P>
-            rgforms does not operate any server-side infrastructure that processes your data.
+            RG Forms does not operate any server-side infrastructure that processes your data.
             Specifically, we do not collect:
           </P>
           <ul className="flex flex-col gap-2 list-none">
@@ -119,7 +119,7 @@ export default function PrivacyPage() {
         <Section>
           <H2>3. Google OAuth and access tokens</H2>
           <P>
-            To create Google Sheets and Apps Script projects on your behalf, rgforms requests
+            To create Google Sheets and Apps Script projects on your behalf, RG Forms requests
             a short-lived OAuth 2.0 access token from Google. This token:
           </P>
           <ul className="flex flex-col gap-2 list-none">
@@ -127,7 +127,7 @@ export default function PrivacyPage() {
               'Is stored only in your browser\'s memory (JavaScript variable) — never in localStorage, cookies, or any server.',
               'Is used exclusively to make Google API calls to create your Sheet and Apps Script.',
               'Is discarded automatically when you close or refresh the page.',
-              'Is never transmitted to any rgforms server or third-party service.',
+              'Is never transmitted to any RG Forms server or third-party service.',
             ].map((item) => (
               <li key={item} className="flex items-start gap-2">
                 <span
@@ -148,7 +148,7 @@ export default function PrivacyPage() {
         <Section>
           <H2>4. OAuth scopes requested</H2>
           <P>
-            When you sign in, Google will show you the permissions rgforms is requesting.
+            When you sign in, Google will show you the permissions RG Forms is requesting.
             Here is exactly what each scope is used for:
           </P>
           <div className="flex flex-col gap-3">
@@ -156,7 +156,7 @@ export default function PrivacyPage() {
               {
                 scope: 'drive.file',
                 label: 'Drive (app-created files only)',
-                use: 'Create and manage the spreadsheet and Apps Script files rgforms creates on your behalf. This scope cannot access any other files in your Drive.',
+                use: 'Create and manage the spreadsheet and Apps Script files RG Forms creates on your behalf. This scope cannot access any other files in your Drive.',
               },
               {
                 scope: 'script.projects',
@@ -171,7 +171,7 @@ export default function PrivacyPage() {
               {
                 scope: 'script.send_mail',
                 label: 'Send mail via Apps Script',
-                use: 'Allows the deployed Apps Script to send you email notifications when a form is submitted. This scope is used by the script itself, not by rgforms directly.',
+                use: 'Allows the deployed Apps Script to send you email notifications when a form is submitted. This scope is used by the script itself, not by RG Forms directly.',
               },
               {
                 scope: 'userinfo.email & profile',
@@ -198,11 +198,11 @@ export default function PrivacyPage() {
         <Section>
           <H2>5. Your form submissions</H2>
           <P>
-            After you generate a form with rgforms, visitors who submit that form send their
+            After you generate a form with RG Forms, visitors who submit that form send their
             data directly from their browser to your Google Apps Script deployment URL. That
             data goes directly into your Google Sheet and is emailed to you. The &ldquo;Try it out&rdquo;
             panel works the same way — it submits directly to your Apps Script, not through any
-            rgforms server. We never see, intercept, or store any form submissions.
+            RG Forms server. We never see, intercept, or store any form submissions.
           </P>
           <P>
             You are responsible for the data collected through forms you create. If you collect
@@ -219,7 +219,7 @@ export default function PrivacyPage() {
             are governed by Google&apos;s terms, not ours.
           </P>
           <P>
-            You can revoke rgforms&apos; access to your Google account at any time by visiting{' '}
+            You can revoke RG Forms&apos; access to your Google account at any time by visiting{' '}
             <a
               href="https://myaccount.google.com/permissions"
               target="_blank"
@@ -229,14 +229,14 @@ export default function PrivacyPage() {
             >
               myaccount.google.com/permissions
             </a>{' '}
-            and removing rgforms from the list of connected apps.
+            and removing RG Forms from the list of connected apps.
           </P>
         </Section>
 
         <Section>
           <H2>7. Cookies and tracking</H2>
           <P>
-            rgforms does not use cookies, local storage, session storage, or any tracking
+            RG Forms does not use cookies, local storage, session storage, or any tracking
             pixels. There are no analytics scripts running on this site. The only external
             script loaded is Google&apos;s Identity Services library (
             <code
@@ -268,7 +268,7 @@ export default function PrivacyPage() {
               style={{ color: 'var(--color-accent)' }}
               className="underline hover:no-underline"
             >
-              rgforms GitHub repository
+              RG Forms GitHub repository
             </a>
             .
           </P>
@@ -284,7 +284,7 @@ export default function PrivacyPage() {
             className="text-sm"
             style={{ color: 'var(--color-accent)' }}
           >
-            ← Back to rgforms
+            ← Back to RG Forms
           </Link>
           <Link
             href="/how-it-works"
