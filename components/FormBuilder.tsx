@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback, KeyboardEvent } from 'react';
+import { useState, useRef, useCallback, useEffect, KeyboardEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx } from 'clsx';
 import { useApp } from '@/context/AppContext';
@@ -292,7 +292,12 @@ export function FormBuilderScreen() {
   const [bccEmails, setBccEmails] = useState<string[]>(formConfig.bccEmails ?? []);
   const [emailSubject, setEmailSubject] = useState(formConfig.emailSubject ?? '');
   const [senderName, setSenderName] = useState(formConfig.senderName ?? '');
-  const [replyToFieldId, setReplyToFieldId] = useState<string | null>(formConfig.replyToFieldId ?? null);
+  const [replyToFieldId, setReplyToFieldId] = useState<string | null>(
+    formConfig.replyToFieldId ?? formConfig.fields.find((f) => f.type === 'email')?.id ?? null,
+  );
+  const prevEmailFieldIdsRef = useRef<Set<string>>(
+    new Set(formConfig.fields.filter((f) => f.type === 'email').map((f) => f.id)),
+  );
   const [enableHoneypot, setEnableHoneypot] = useState(formConfig.enableHoneypot ?? false);
 
   // Tag input buffer values
@@ -311,6 +316,17 @@ export function FormBuilderScreen() {
   // Drag-and-drop state
   const dragIndexRef = useRef<number | null>(null);
   const dragOverIndexRef = useRef<number | null>(null);
+
+  // Auto-select reply-to when a new email field is added and none is selected
+  useEffect(() => {
+    const currentEmailFields = fields.filter((f) => f.type === 'email');
+    const prevIds = prevEmailFieldIdsRef.current;
+    const newEmailField = currentEmailFields.find((f) => !prevIds.has(f.id));
+    prevEmailFieldIdsRef.current = new Set(currentEmailFields.map((f) => f.id));
+    if (newEmailField && replyToFieldId === null) {
+      setReplyToFieldId(newEmailField.id);
+    }
+  }, [fields, replyToFieldId]);
 
   // ---------------------------------------------------------------------------
   // Validation
