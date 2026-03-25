@@ -1,10 +1,12 @@
 import type { GoogleUser } from '@/types';
 
 const SCOPES = [
-  'https://www.googleapis.com/auth/spreadsheets',
+  // drive.file covers the Sheets API for app-created files — more restrictive than
+  // spreadsheets (which would grant access to all the user's spreadsheets)
+  'https://www.googleapis.com/auth/drive.file',
   'https://www.googleapis.com/auth/script.projects',
   'https://www.googleapis.com/auth/script.deployments',
-  'https://www.googleapis.com/auth/drive.file',
+  'https://www.googleapis.com/auth/script.send_mail',
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/userinfo.profile',
 ].join(' ');

@@ -89,12 +89,20 @@ function TryItOut({ fields, deploymentUrl }: { fields: FormField[]; deploymentUr
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitState('submitting');
-    const formData = new FormData();
+    const fieldEntries: Record<string, string> = {};
     fields.forEach((f) => {
-      formData.append(fieldName(f), values[fieldName(f)] ?? '');
+      fieldEntries[fieldName(f)] = values[fieldName(f)] ?? '';
     });
     try {
-      await fetch(deploymentUrl, { method: 'POST', body: formData, mode: 'no-cors' });
+      const res = await fetch('/api/submit-form', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deploymentUrl, fields: fieldEntries }),
+      });
+      if (!res.ok) {
+        setSubmitState('error');
+        return;
+      }
       setSubmitState('success');
       setValues({});
     } catch {
@@ -256,7 +264,7 @@ function TryItOut({ fields, deploymentUrl }: { fields: FormField[]; deploymentUr
 
               {submitState === 'error' && (
                 <p className="text-xs" style={{ color: 'var(--color-error)' }}>
-                  Submission failed. Check that your Apps Script deployment is active.
+                  Submission failed. Make sure you've completed the &quot;Authorize script&quot; step above.
                 </p>
               )}
 
@@ -344,6 +352,46 @@ export default function ResultPanel() {
           <p className="text-sm text-center" style={{ color: 'var(--color-muted)' }}>
             Copy the snippet below and paste it anywhere in your HTML.
           </p>
+        </div>
+
+        {/* Authorization required callout */}
+        <div
+          className="rounded-xl border p-5 flex flex-col gap-4"
+          style={{
+            background: 'rgba(234,179,8,0.07)',
+            borderColor: 'rgba(234,179,8,0.35)',
+          }}
+        >
+          <div className="flex items-start gap-3">
+            <svg className="w-5 h-5 shrink-0 mt-0.5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M10 2L2 17h16L10 2z" stroke="#eab308" strokeWidth="1.5" strokeLinejoin="round" />
+              <path d="M10 8v4M10 14.5v.5" stroke="#eab308" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-semibold" style={{ color: '#eab308' }}>
+                One more step — authorize your script
+              </p>
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                Google requires you to grant your script permission to write to Sheets and send email.
+                Click the button below, sign in if prompted, and approve the permissions dialog.
+                You only need to do this once.
+              </p>
+            </div>
+          </div>
+          <a
+            href={result.deploymentUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="self-start inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-opacity"
+            style={{
+              background: 'rgba(234,179,8,0.15)',
+              border: '1px solid rgba(234,179,8,0.4)',
+              color: '#eab308',
+            }}
+          >
+            Authorize script
+            <ExternalLinkIcon className="w-3.5 h-3.5" />
+          </a>
         </div>
 
         {/* Code block with copy button */}

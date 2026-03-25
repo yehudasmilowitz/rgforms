@@ -178,7 +178,7 @@ async function saveDeploymentUrl(
 // Step 1: Create a standalone Apps Script project (verifies the API is enabled before touching Sheets)
 async function createScriptProject(
   accessToken: string,
-  formName: string
+  formName: string,
 ): Promise<{ scriptId: string; scriptUrl: string }> {
   const result = await apiCall<{ scriptId: string }>(SCRIPT_API, {
     method: 'POST',
@@ -263,7 +263,7 @@ async function deployWebApp(accessToken: string, scriptId: string): Promise<stri
 export async function provision(
   accessToken: string,
   config: FormConfig,
-  onStepUpdate: StepCallback
+  onStepUpdate: StepCallback,
 ): Promise<ProvisioningResult> {
   let sheetId = '';
   let sheetUrl = '';
