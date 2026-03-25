@@ -69,12 +69,10 @@ export default function PrivacyPage() {
             Short version
           </p>
           <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            rgforms does not collect or store your personal data or form submission data. Your
-            Google OAuth token exists only in your browser&apos;s memory for the duration of your
-            session and is never sent to our servers. Live form submissions from your embedded
-            form go directly to your own Apps Script — we never see them. The &ldquo;Try it out&rdquo;
-            panel routes through a server-side proxy for error handling only; that data is not
-            stored or logged.
+            rgforms does not collect, store, or transmit any of your personal data or form
+            submission data. We have no database, no analytics, and no server that receives
+            your information. Your Google OAuth token exists only in your browser&apos;s memory
+            for the duration of your session.
           </p>
         </div>
 
@@ -98,7 +96,7 @@ export default function PrivacyPage() {
               'Your name, email address, or Google account information',
               'Your OAuth access token or refresh token',
               'Your form configuration (fields, names, settings)',
-              'Submissions sent through your embedded form (these go directly to your Apps Script)',
+              'Any submissions sent through forms you create',
               'IP addresses, device identifiers, or browser fingerprints',
               'Usage analytics or behavioral data',
             ].map((item) => (
@@ -200,21 +198,11 @@ export default function PrivacyPage() {
         <Section>
           <H2>5. Your form submissions</H2>
           <P>
-            Submissions through your embedded form go directly from your visitors&apos; browsers
-            to your Google Apps Script deployment URL — into your Google Sheet and emailed to
-            you. rgforms is not involved in that data flow at all.
-          </P>
-          <P>
-            The &ldquo;Try it out&rdquo; panel inside the rgforms dashboard is the one exception: test
-            submissions route through a server-side proxy at{' '}
-            <code
-              className="text-xs px-1.5 py-0.5 rounded font-mono"
-              style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}
-            >
-              /api/submit-form
-            </code>
-            {' '}so that real errors from Apps Script can be surfaced. This proxy forwards the
-            request and returns the response — it does not log or store the data.
+            After you generate a form with rgforms, visitors who submit that form send their
+            data directly from their browser to your Google Apps Script deployment URL. That
+            data goes directly into your Google Sheet and is emailed to you. The &ldquo;Try it out&rdquo;
+            panel works the same way — it submits directly to your Apps Script, not through any
+            rgforms server. We never see, intercept, or store any form submissions.
           </P>
           <P>
             You are responsible for the data collected through forms you create. If you collect

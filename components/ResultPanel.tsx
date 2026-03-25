@@ -89,20 +89,12 @@ function TryItOut({ fields, deploymentUrl }: { fields: FormField[]; deploymentUr
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitState('submitting');
-    const fieldEntries: Record<string, string> = {};
+    const formData = new FormData();
     fields.forEach((f) => {
-      fieldEntries[fieldName(f)] = values[fieldName(f)] ?? '';
+      formData.append(fieldName(f), values[fieldName(f)] ?? '');
     });
     try {
-      const res = await fetch('/api/submit-form', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ deploymentUrl, fields: fieldEntries }),
-      });
-      if (!res.ok) {
-        setSubmitState('error');
-        return;
-      }
+      await fetch(deploymentUrl, { method: 'POST', body: formData, mode: 'no-cors' });
       setSubmitState('success');
       setValues({});
     } catch {
@@ -264,7 +256,7 @@ function TryItOut({ fields, deploymentUrl }: { fields: FormField[]; deploymentUr
 
               {submitState === 'error' && (
                 <p className="text-xs" style={{ color: 'var(--color-error)' }}>
-                  Submission failed. Make sure you've completed the &quot;Authorize script&quot; step above.
+                  Submission failed. Make sure you&apos;ve authorized your script using the button above.
                 </p>
               )}
 

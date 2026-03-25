@@ -156,26 +156,22 @@ export default function HowItWorksPage() {
             className="rounded-xl border p-5 font-mono text-xs leading-loose overflow-x-auto"
             style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}
           >
-            <pre>{`Provisioning (one-time setup):
-
-Your Browser
+            <pre>{`Your Browser
+    │
     ├─── Google OAuth (sign-in, access token)
+    │
     ├─── Google Sheets API  ──▶  Creates your spreadsheet
+    │
     ├─── Apps Script API    ──▶  Creates & deploys your handler
+    │
     └─── (no rgforms server involved)
 
-"Try it out" test submissions (rgforms dashboard only):
+Later, when your form is submitted:
 
-Your Browser
-    └─── POST /api/submit-form  ──▶  rgforms server
-              └─── Apps Script doPost()
-                        ├─── Appends row to Google Sheet
-                        └─── Sends email to you
-
-Live form submissions (your embedded form):
-
-Visitor's Browser
+Visitor's Browser (or "Try it out" panel)
+    │
     └─── fetch(deploymentUrl, { mode: 'no-cors' })
+              │
               └─── Apps Script doPost()
                         ├─── Appends row to Google Sheet
                         └─── Sends email to you`}</pre>
@@ -264,7 +260,7 @@ Visitor's Browser
             ))}
           </ol>
           <P>
-            The embed snippet uses{' '}
+            Both the embed snippet and the &ldquo;Try it out&rdquo; panel use{' '}
             <code
               className="text-xs px-1.5 py-0.5 rounded font-mono"
               style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}
@@ -272,10 +268,9 @@ Visitor's Browser
               mode: &apos;no-cors&apos;
             </code>{' '}
             when fetching, so the browser doesn&apos;t need CORS headers from the Apps Script endpoint.
-            The trade-off is that the response body can&apos;t be read from the visitor&apos;s browser — but
-            for the live embed, a resolving fetch is sufficient to show a success state. The
-            &ldquo;Try it out&rdquo; panel in the rgforms dashboard routes through a server-side proxy
-            instead, which can read the real response and surface any errors.
+            The trade-off is that the response body can&apos;t be read — a resolving fetch is
+            sufficient to show a success state. The &ldquo;Try it out&rdquo; panel gives you the same
+            experience your visitors will have.
           </P>
         </Section>
 
@@ -362,12 +357,11 @@ Visitor's Browser
 
         {/* Trust */}
         <CalloutBox>
-          <strong style={{ color: 'var(--color-text)' }}>Your data stays in your Google account.</strong>{' '}
-          Provisioning is done entirely from your browser — your OAuth token never touches rgforms
-          servers. Live form submissions from your embedded form go directly from your visitors&apos;
-          browsers to your own Apps Script endpoint and into your own Google Sheet. The only
-          exception is the &ldquo;Try it out&rdquo; panel, which routes through a server-side proxy solely
-          to surface real error responses — that data is not stored or logged.{' '}
+          <strong style={{ color: 'var(--color-text)' }}>No data leaves your Google account.</strong>{' '}
+          rgforms is a static site that makes API calls on your behalf using a short-lived access
+          token that never touches our servers. Form submissions — including the &ldquo;Try it out&rdquo;
+          panel — go directly from the browser to your own Apps Script endpoint and land in your
+          own Google Sheet. We never see them.{' '}
           <Link href="/privacy" style={{ color: 'var(--color-accent)' }} className="underline hover:no-underline">
             Read our privacy policy.
           </Link>
