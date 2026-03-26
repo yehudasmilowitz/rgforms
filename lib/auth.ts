@@ -92,3 +92,20 @@ export async function signIn(clientId: string): Promise<{ user: GoogleUser; acce
   const user = await getUserInfo(accessToken);
   return { user, accessToken };
 }
+
+// Revoke the OAuth token at Google, removing all permissions granted to this app.
+// Returns true if Google confirmed the revocation, false on network error or non-OK response.
+export async function revokeToken(accessToken: string): Promise<boolean> {
+  try {
+    const response = await fetch(
+      `https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(accessToken)}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      },
+    );
+    return response.ok;
+  } catch {
+    return false;
+  }
+}

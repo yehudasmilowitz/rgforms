@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import { clsx } from 'clsx';
 import { useApp } from '@/context/AppContext';
 import { listMyForms, deleteForm } from '@/lib/myForms';
-import { requestDriveToken } from '@/lib/auth';
+import { requestDriveToken, revokeToken } from '@/lib/auth';
 import FormDetailModal from '@/components/FormDetailModal';
 import type { FormSummary } from '@/types';
 
@@ -220,6 +220,118 @@ function FormCard({ form, onDelete, onView, deleting }: FormCardProps) {
 }
 
 // ---------------------------------------------------------------------------
+// RevokeConfirmDialog
+// ---------------------------------------------------------------------------
+
+interface RevokeConfirmProps {
+  onConfirm: () => void;
+  onCancel: () => void;
+  revoking: boolean;
+  result: 'idle' | 'success' | 'error';
+}
+
+function RevokeConfirmDialog({ onConfirm, onCancel, revoking, result }: RevokeConfirmProps) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
+      <div
+        className="w-full max-w-sm rounded-2xl border p-6 flex flex-col gap-5"
+        style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+      >
+        <div className="flex flex-col gap-2">
+          <h2 className="text-base font-semibold" style={{ color: 'var(--color-text)' }}>
+            {result === 'success' ? 'Permissions revoked' : 'Revoke all permissions?'}
+          </h2>
+          {result === 'idle' && (
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+              This will immediately revoke RG Forms&apos; access to your Google account — Drive, Sheets, and Apps Script. Your existing forms will remain in your Drive, but you&apos;ll need to sign in again to use them here.{' '}
+              You can also do this any time at{' '}
+              <a
+                href="https://myaccount.google.com/permissions"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+                style={{ color: 'var(--color-accent)' }}
+              >
+                myaccount.google.com/permissions
+              </a>
+              .
+            </p>
+          )}
+          {result === 'success' && (
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+              RG Forms no longer has access to your Google account. Signing you out…
+            </p>
+          )}
+          {result === 'error' && (
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--color-error)' }}>
+              The revocation request failed — Google may be temporarily unavailable. You can try again, or manually remove RG Forms at{' '}
+              <a
+                href="https://myaccount.google.com/permissions"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+                style={{ color: 'var(--color-accent)' }}
+              >
+                myaccount.google.com/permissions
+              </a>
+              .
+            </p>
+          )}
+        </div>
+
+        {result === 'idle' && (
+          <div className="flex gap-3">
+            <button
+              onClick={onConfirm}
+              disabled={revoking}
+              className="flex-1 py-2 rounded-lg text-sm font-semibold transition-opacity focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50"
+              style={{ background: '#ef4444', color: '#fff' }}
+            >
+              {revoking ? 'Revoking…' : 'Revoke permissions'}
+            </button>
+            <button
+              onClick={onCancel}
+              disabled={revoking}
+              className="flex-1 py-2 rounded-lg border text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-50"
+              style={{
+                background: 'transparent',
+                borderColor: 'var(--color-border)',
+                color: 'var(--color-muted)',
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+
+        {result === 'error' && (
+          <div className="flex gap-3">
+            <button
+              onClick={onConfirm}
+              className="flex-1 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-400"
+              style={{ background: '#ef4444', color: '#fff' }}
+            >
+              Try again
+            </button>
+            <button
+              onClick={onCancel}
+              className="flex-1 py-2 rounded-lg border text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+              style={{
+                background: 'transparent',
+                borderColor: 'var(--color-border)',
+                color: 'var(--color-muted)',
+              }}
+            >
+              Close
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // DeleteConfirmDialog
 // ---------------------------------------------------------------------------
 
@@ -289,6 +401,10 @@ export default function Dashboard() {
   const [pendingDelete, setPendingDelete] = useState<FormSummary | null>(null);
   // IDs currently being deleted (for optimistic UI)
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+  // Revoke permissions flow
+  const [revokeConfirmOpen, setRevokeConfirmOpen] = useState(false);
+  const [revoking, setRevoking] = useState(false);
+  const [revokeResult, setRevokeResult] = useState<'idle' | 'success' | 'error'>('idle');
 
   useEffect(() => {
     let cancelled = false;
@@ -311,6 +427,23 @@ export default function Dashboard() {
 
     return () => { cancelled = true; };
   }, [accessToken]);
+
+  async function handleConfirmRevoke() {
+    setRevoking(true);
+    const succeeded = await revokeToken(accessToken);
+    setRevoking(false);
+    if (succeeded) {
+      setRevokeResult('success');
+      setTimeout(() => dispatch({ type: 'SIGN_OUT' }), 1500);
+    } else {
+      setRevokeResult('error');
+    }
+  }
+
+  function handleCloseRevokeDialog() {
+    setRevokeConfirmOpen(false);
+    setRevokeResult('idle');
+  }
 
   async function handleConfirmDelete() {
     if (!pendingDelete) return;
@@ -379,21 +512,48 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => dispatch({ type: 'SIGN_OUT' })}
-            className={clsx(
-              'shrink-0 px-3 py-1.5 rounded-lg border text-xs font-medium',
-              'transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]',
-            )}
-            style={{
-              background: 'transparent',
-              borderColor: 'var(--color-border)',
-              color: 'var(--color-muted)',
-            }}
-          >
-            Sign out
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => { setRevokeResult('idle'); setRevokeConfirmOpen(true); }}
+              className={clsx(
+                'px-3 py-1.5 rounded-lg border text-xs font-medium',
+                'transition-colors focus:outline-none focus:ring-2 focus:ring-red-400',
+              )}
+              style={{
+                background: 'transparent',
+                borderColor: 'var(--color-border)',
+                color: 'var(--color-muted)',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(239,68,68,0.5)';
+                (e.currentTarget as HTMLButtonElement).style.color = '#ef4444';
+                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-border)';
+                (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-muted)';
+                (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+              }}
+            >
+              Revoke permissions
+            </button>
+            <button
+              type="button"
+              onClick={() => dispatch({ type: 'SIGN_OUT' })}
+              className={clsx(
+                'px-3 py-1.5 rounded-lg border text-xs font-medium',
+                'transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]',
+              )}
+              style={{
+                background: 'transparent',
+                borderColor: 'var(--color-border)',
+                color: 'var(--color-muted)',
+              }}
+            >
+              Sign out
+            </button>
+          </div>
         </header>
 
         {/* Page title + create button */}
@@ -516,6 +676,16 @@ export default function Dashboard() {
           form={pendingDelete}
           onConfirm={handleConfirmDelete}
           onCancel={() => setPendingDelete(null)}
+        />
+      )}
+
+      {/* Revoke permissions confirmation dialog */}
+      {revokeConfirmOpen && (
+        <RevokeConfirmDialog
+          onConfirm={handleConfirmRevoke}
+          onCancel={handleCloseRevokeDialog}
+          revoking={revoking}
+          result={revokeResult}
         />
       )}
     </motion.main>
