@@ -177,11 +177,12 @@ Later, when your form is submitted:
 
 Visitor's Browser (or "Try it out" panel)
     │
-    └─── fetch(deploymentUrl, { mode: 'no-cors' })
+    └─── fetch(deploymentUrl, { body: URLSearchParams })
               │
               └─── Apps Script doPost()
                         ├─── Appends row to Google Sheet
-                        └─── Sends email to you`}</pre>
+                        ├─── Sends email to you
+                        └─── Returns JSON { result: 'success' }`}</pre>
           </div>
         </Section>
 
@@ -198,7 +199,7 @@ Visitor's Browser (or "Try it out" panel)
           <StepCard
             number={2}
             title="Configure your form"
-            description="Give your form a name (used as the spreadsheet title), set the email address for submission notifications, and add your fields. Supported types: text, email, textarea, phone, and select/dropdown."
+            description="Give your form a name (used as the spreadsheet title), set the email address for submission notifications, and add your fields. Supported types: text, email, textarea, phone, and select/dropdown. You can also customize email notifications with CC/BCC recipients, a custom subject line, sender name, and a dynamic reply-to field (automatically set to the first email field you add)."
           />
 
           <StepCard
@@ -216,7 +217,7 @@ Visitor's Browser (or "Try it out" panel)
           <StepCard
             number={5}
             title="Handler code is uploaded"
-            description="The doPost() function is generated based on your field definitions and uploaded to the Apps Script project. It maps incoming form data to the correct columns in your sheet and sends email notifications to your address."
+            description="The doPost() function is generated based on your field definitions and uploaded to the Apps Script project. It maps incoming form data to the correct columns in your sheet and sends a formatted HTML email notification — including any CC/BCC addresses, custom subject, sender name, and reply-to field you configured."
           />
 
           <StepCard
@@ -250,8 +251,8 @@ Visitor's Browser (or "Try it out" panel)
               'Reads the column headers from row 1 of your sheet.',
               'Maps each form field to its matching column.',
               'Appends a new row with the submission data and a timestamp.',
-              'Sends an email notification to your configured address.',
-              'Returns a JSON success response.',
+              'Sends an HTML email notification (with CC/BCC, custom subject, and reply-to if configured).',
+              'Returns a JSON response — { result: "success" } on success.',
             ].map((item, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span
@@ -267,17 +268,16 @@ Visitor's Browser (or "Try it out" panel)
             ))}
           </ol>
           <P>
-            Both the embed snippet and the &ldquo;Try it out&rdquo; panel use{' '}
+            The embed snippet posts using{' '}
             <code
               className="text-xs px-1.5 py-0.5 rounded font-mono"
               style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}
             >
-              mode: &apos;no-cors&apos;
+              URLSearchParams
             </code>{' '}
-            when fetching, so the browser doesn&apos;t need CORS headers from the Apps Script endpoint.
-            The trade-off is that the response body can&apos;t be read — a resolving fetch is
-            sufficient to show a success state. The &ldquo;Try it out&rdquo; panel gives you the same
-            experience your visitors will have.
+            and reads the JSON response to confirm success — showing a success message or an error
+            alert accordingly. The &ldquo;Try it out&rdquo; panel works the same way, giving you an accurate
+            preview of what your visitors will experience.
           </P>
         </Section>
 
@@ -342,8 +342,8 @@ Visitor's Browser (or "Try it out" panel)
                 body: 'The form supports text-based field types only. File inputs are not supported because the Apps Script endpoint handles URL-encoded form data, not multipart uploads.',
               },
               {
-                title: 'No CAPTCHA',
-                body: 'The generated embed does not include spam protection. For low-traffic personal sites this is usually fine; for higher-traffic forms, consider adding reCAPTCHA to your embed HTML manually.',
+                title: 'Basic spam protection only',
+                body: 'RG Forms offers an optional honeypot field — a hidden input that bots tend to fill in, causing the submission to be silently discarded by the Apps Script handler. For higher-traffic forms or stronger protection, consider adding reCAPTCHA to your embed HTML manually.',
               },
             ].map(({ title, body }) => (
               <div

@@ -170,11 +170,6 @@ export default function PrivacyPage() {
                 use: 'Deploy the script as a public web app to produce the form endpoint URL.',
               },
               {
-                scope: 'script.send_mail',
-                label: 'Send mail via Apps Script',
-                use: 'Allows the deployed Apps Script to send you email notifications when a form is submitted. This scope is used by the script itself, not by RG Forms directly.',
-              },
-              {
                 scope: 'userinfo.email & profile',
                 label: 'Your Google profile',
                 use: 'Display your name and avatar in the app, and pre-fill the notification email field with your address.',
@@ -194,6 +189,17 @@ export default function PrivacyPage() {
               </div>
             ))}
           </div>
+          <P>
+            The Apps Script handler that gets deployed to your Google Drive declares its own{' '}
+            <code
+              className="text-xs px-1.5 py-0.5 rounded font-mono"
+              style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}
+            >
+              script.send_mail
+            </code>{' '}
+            scope internally. This scope is requested by the script itself (running under your Google
+            account) when you authorize it — not by the RG Forms web app.
+          </P>
         </Section>
 
         <Section>
