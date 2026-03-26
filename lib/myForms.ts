@@ -1,6 +1,7 @@
 import type { FormField, FormSummary } from '@/types';
 
 const DRIVE_API = 'https://www.googleapis.com/drive/v3/files';
+const SCRIPT_API = 'https://script.googleapis.com/v1/projects';
 const SHEETS_VALUES_API = 'https://sheets.googleapis.com/v4/spreadsheets';
 
 function authHeaders(accessToken: string): HeadersInit {
@@ -92,7 +93,27 @@ export async function deleteForm(
 
   if (!scriptId) return;
 
-  // Try to permanently delete the Apps Script project via Drive API.
+  // Delete all deployments via the Apps Script API first — this deactivates the web app
+  // endpoint even if the Drive file delete below can't reach the project (drive.file scope
+  // does not cover script projects created via script.googleapis.com).
+  try {
+    const listRes = await fetch(`${SCRIPT_API}/${scriptId}/deployments`, { headers });
+    if (listRes.ok) {
+      const data = await listRes.json() as { deployments?: Array<{ deploymentId: string }> };
+      await Promise.all(
+        (data.deployments ?? []).map((d) =>
+          fetch(`${SCRIPT_API}/${scriptId}/deployments/${d.deploymentId}`, {
+            method: 'DELETE',
+            headers,
+          })
+        )
+      );
+    }
+  } catch {
+    // Best-effort — continue to Drive delete regardless.
+  }
+
+  // Permanently delete the script project file via Drive API.
   const scriptRes = await fetch(`${DRIVE_API}/${scriptId}`, {
     method: 'DELETE',
     headers,
@@ -100,13 +121,12 @@ export async function deleteForm(
 
   if (scriptRes.ok || scriptRes.status === 404) return;
 
-  // If permanent delete failed (e.g. drive.file scope doesn't cover script API–created files),
-  // fall back to trashing the script so it at least disappears from the user's Drive.
+  // Fall back to trashing if permanent delete fails (e.g. scope gap for script files).
   await fetch(`${DRIVE_API}/${scriptId}`, {
     method: 'PATCH',
     headers: { ...headers, 'Content-Type': 'application/json' },
     body: JSON.stringify({ trashed: true }),
   }).catch(() => {
-    // Best-effort — the sheet is already deleted; surface nothing further.
+    // Best-effort — the sheet and deployments are already gone.
   });
 }
