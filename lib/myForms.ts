@@ -1,4 +1,4 @@
-import type { FormSummary } from '@/types';
+import type { FormField, FormSummary } from '@/types';
 
 const DRIVE_API = 'https://www.googleapis.com/drive/v3/files';
 const SHEETS_VALUES_API = 'https://sheets.googleapis.com/v4/spreadsheets';
@@ -52,6 +52,10 @@ export async function listMyForms(accessToken: string): Promise<FormSummary[]> {
       if (!config.formName) return null;
 
       const scriptId = config.scriptId || undefined;
+      let fields: FormField[] | undefined;
+      try {
+        if (config.fields) fields = JSON.parse(config.fields) as FormField[];
+      } catch { /* ignore malformed fields */ }
       const summary: FormSummary = {
         sheetId: file.id,
         sheetUrl: file.webViewLink,
@@ -60,6 +64,7 @@ export async function listMyForms(accessToken: string): Promise<FormSummary[]> {
         scriptId,
         scriptUrl: scriptId ? `https://script.google.com/d/${scriptId}/edit` : undefined,
         deploymentUrl: config.deploymentUrl || undefined,
+        fields,
       };
       return summary;
     })
@@ -69,22 +74,39 @@ export async function listMyForms(accessToken: string): Promise<FormSummary[]> {
 }
 
 // Permanently delete a form's Sheet (and its associated Script if known).
-// Uses the Drive API trash-then-delete approach — both files go to trash.
 export async function deleteForm(
   accessToken: string,
   sheetId: string,
   scriptId?: string
 ): Promise<void> {
-  const trashFile = (fileId: string) =>
-    fetch(`${DRIVE_API}/${fileId}`, {
-      method: 'DELETE',
-      headers: authHeaders(accessToken),
-    });
+  const headers = authHeaders(accessToken);
 
-  await trashFile(sheetId);
-
-  if (scriptId) {
-    // Best-effort — script deletion failure should not surface as an error to the user
-    await trashFile(scriptId).catch(() => {});
+  // Delete the sheet — this is the primary resource and must succeed.
+  const sheetRes = await fetch(`${DRIVE_API}/${sheetId}`, {
+    method: 'DELETE',
+    headers,
+  });
+  if (!sheetRes.ok && sheetRes.status !== 404) {
+    throw new Error(`Failed to delete sheet (${sheetRes.status})`);
   }
+
+  if (!scriptId) return;
+
+  // Try to permanently delete the Apps Script project via Drive API.
+  const scriptRes = await fetch(`${DRIVE_API}/${scriptId}`, {
+    method: 'DELETE',
+    headers,
+  });
+
+  if (scriptRes.ok || scriptRes.status === 404) return;
+
+  // If permanent delete failed (e.g. drive.file scope doesn't cover script API–created files),
+  // fall back to trashing the script so it at least disappears from the user's Drive.
+  await fetch(`${DRIVE_API}/${scriptId}`, {
+    method: 'PATCH',
+    headers: { ...headers, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ trashed: true }),
+  }).catch(() => {
+    // Best-effort — the sheet is already deleted; surface nothing further.
+  });
 }

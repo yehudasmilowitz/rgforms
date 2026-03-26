@@ -55,6 +55,7 @@ export interface FormSummary {
   scriptId?: string;
   scriptUrl?: string;
   deploymentUrl?: string;
+  fields?: FormField[];
 }
 
 export type AppScreen = 'landing' | 'dashboard' | 'builder' | 'provisioning' | 'result';

@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { clsx } from 'clsx';
 import { useApp } from '@/context/AppContext';
 import { listMyForms, deleteForm } from '@/lib/myForms';
+import FormDetailModal from '@/components/FormDetailModal';
 import type { FormSummary } from '@/types';
 
 // ---------------------------------------------------------------------------
@@ -32,6 +33,14 @@ function PlusIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CodeIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M5 4L1 8l4 4M11 4l4 4-4 4M9 2l-2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -68,10 +77,11 @@ function formatDate(iso: string): string {
 interface FormCardProps {
   form: FormSummary;
   onDelete: (form: FormSummary) => void;
+  onView: (form: FormSummary) => void;
   deleting: boolean;
 }
 
-function FormCard({ form, onDelete, deleting }: FormCardProps) {
+function FormCard({ form, onDelete, onView, deleting }: FormCardProps) {
   return (
     <div
       className="rounded-xl border p-5 flex flex-col gap-4"
@@ -134,6 +144,28 @@ function FormCard({ form, onDelete, deleting }: FormCardProps) {
 
       {/* Action links */}
       <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => onView(form)}
+          disabled={deleting}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+          style={{
+            background: 'var(--color-surface-2)',
+            borderColor: 'var(--color-border)',
+            color: 'var(--color-text)',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-accent)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-accent)';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-border)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-text)';
+          }}
+        >
+          <CodeIcon className="w-3 h-3 shrink-0" />
+          Details
+        </button>
+
         <a
           href={form.sheetUrl}
           target="_blank"
@@ -250,6 +282,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  // The form whose details modal is open
+  const [selectedForm, setSelectedForm] = useState<FormSummary | null>(null);
   // The form pending deletion confirmation
   const [pendingDelete, setPendingDelete] = useState<FormSummary | null>(null);
   // IDs currently being deleted (for optimistic UI)
@@ -448,6 +482,7 @@ export default function Dashboard() {
                 <FormCard
                   form={form}
                   onDelete={setPendingDelete}
+                  onView={setSelectedForm}
                   deleting={deletingIds.has(form.sheetId)}
                 />
               </motion.div>
@@ -455,6 +490,11 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Form detail modal */}
+      {selectedForm && (
+        <FormDetailModal form={selectedForm} onClose={() => setSelectedForm(null)} />
+      )}
 
       {/* Delete confirmation dialog */}
       {pendingDelete && (
