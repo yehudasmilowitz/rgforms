@@ -49,13 +49,11 @@ export const metadata: Metadata = {
     title: 'RG Forms — HTML Contact Forms in 2 Minutes',
     description:
       'Zero-backend contact forms powered by your own Google Drive. No subscription, no server — just sign in and get a copy-paste embed snippet.',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'RG Forms — HTML contact forms in 2 minutes' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'RG Forms — HTML Contact Forms in 2 Minutes',
     description: 'Zero-backend contact forms powered by Google Drive. Free forever.',
-    images: ['/og-image.png'],
   },
   icons: {
     icon: '/favicon.svg',
