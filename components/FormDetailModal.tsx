@@ -33,6 +33,15 @@ function XIcon({ className }: { className?: string }) {
   );
 }
 
+function ExternalLinkIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M10 2h4v4M14 2L8 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -300,6 +309,34 @@ function TryItOut({ fields, deploymentUrl }: { fields: FormField[]; deploymentUr
 }
 
 // ---------------------------------------------------------------------------
+// AuthorizeBanner
+// ---------------------------------------------------------------------------
+
+function AuthorizeBanner({ deploymentUrl }: { deploymentUrl: string }) {
+  return (
+    <div className="flex items-center gap-3 flex-wrap px-1">
+      <svg className="w-3.5 h-3.5 shrink-0 opacity-60" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M8 1.5L1.5 14h13L8 1.5z" stroke="#eab308" strokeWidth="1.3" strokeLinejoin="round" />
+        <path d="M8 6.5v3M8 11.5v.5" stroke="#eab308" strokeWidth="1.3" strokeLinecap="round" />
+      </svg>
+      <span className="text-xs" style={{ color: 'var(--color-muted)' }}>
+        Script may need a one-time authorization —
+      </span>
+      <a
+        href={deploymentUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 text-xs font-medium transition-opacity hover:opacity-80"
+        style={{ color: '#eab308' }}
+      >
+        Authorize script
+        <ExternalLinkIcon className="w-3 h-3" />
+      </a>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // FormDetailModal
 // ---------------------------------------------------------------------------
 
@@ -379,6 +416,11 @@ export default function FormDetailModal({ form, onClose }: FormDetailModalProps)
               {/* Try it out */}
               <section>
                 <TryItOut fields={fields!} deploymentUrl={deploymentUrl!} />
+              </section>
+
+              {/* Authorization */}
+              <section>
+                <AuthorizeBanner deploymentUrl={deploymentUrl!} />
               </section>
             </>
           )}
