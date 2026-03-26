@@ -127,7 +127,7 @@ export default function PrivacyPage() {
           <ul className="flex flex-col gap-2 list-none">
             {[
               'Is stored only in your browser\'s memory (JavaScript variable) — never in localStorage, cookies, or any server.',
-              'Is used exclusively to make Google API calls to create your Sheet and Apps Script.',
+              'Is used exclusively to make Google API calls to create and manage your Sheet and Apps Script resources.',
               'Is discarded automatically when you close or refresh the page.',
               'Is never transmitted to any RG Forms server or third-party service.',
             ].map((item) => (
@@ -157,17 +157,22 @@ export default function PrivacyPage() {
               {
                 scope: 'drive.file',
                 label: 'Drive (app-created files only)',
-                use: 'Create and manage the spreadsheet and Apps Script files RG Forms creates on your behalf. This scope cannot access any other files in your Drive.',
+                use: 'Create and manage the spreadsheet RG Forms creates on your behalf. This scope cannot access any other files in your Drive.',
               },
               {
                 scope: 'script.projects',
                 label: 'Apps Script (projects)',
-                use: 'Create the Apps Script project that handles incoming form submissions.',
+                use: 'Create the Apps Script project that handles incoming form submissions, and delete its deployments when you remove a form from the dashboard.',
               },
               {
                 scope: 'script.deployments',
                 label: 'Apps Script (deployments)',
                 use: 'Deploy the script as a public web app to produce the form endpoint URL.',
+              },
+              {
+                scope: 'drive (full) — requested only on delete',
+                label: 'Drive (full) — requested only when deleting a form',
+                use: 'Permanently delete the Apps Script project file from your Drive when you remove a form. This scope is not requested at sign-in — it is requested incrementally, via a second Google consent screen, only at the moment you confirm a deletion. If you dismiss that prompt, the sheet and all deployments are still deleted; only the script file is left behind.',
               },
               {
                 scope: 'userinfo.email & profile',
