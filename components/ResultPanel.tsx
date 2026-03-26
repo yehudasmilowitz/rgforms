@@ -89,14 +89,18 @@ function TryItOut({ fields, deploymentUrl }: { fields: FormField[]; deploymentUr
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitState('submitting');
-    const formData = new FormData();
+    const params = new URLSearchParams();
     fields.forEach((f) => {
-      formData.append(fieldName(f), values[fieldName(f)] ?? '');
+      params.append(fieldName(f), values[fieldName(f)] ?? '');
     });
     try {
-      await fetch(deploymentUrl, { method: 'POST', body: formData, mode: 'no-cors' });
-      setSubmitState('success');
-      setValues({});
+      const res = await fetch(deploymentUrl, { method: 'POST', body: params });
+      if (!res.ok) {
+        setSubmitState('error');
+      } else {
+        setSubmitState('success');
+        setValues({});
+      }
     } catch {
       setSubmitState('error');
     }
