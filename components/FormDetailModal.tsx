@@ -124,9 +124,15 @@ function TryItOut({ fields, deploymentUrl }: { fields: FormField[]; deploymentUr
     fields.forEach((f) => params.append(fieldName(f), values[fieldName(f)] ?? ''));
     try {
       const res = await fetch(deploymentUrl, { method: 'POST', body: params });
-      setSubmitState(res.ok ? 'success' : 'error');
-      if (res.ok) setValues({});
+      const data = await res.json();
+      if (data?.result === 'success') {
+        setSubmitState('success');
+        setValues({});
+      } else {
+        setSubmitState('error');
+      }
     } catch {
+      // Non-JSON body (e.g. Google auth redirect HTML) or network error
       setSubmitState('error');
     }
   }
