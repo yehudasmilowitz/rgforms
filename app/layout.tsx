@@ -172,6 +172,23 @@ export default function RootLayout({
           </div>
         </header>
         <AppProvider>{children}</AppProvider>
+        <footer
+          style={{ borderTop: '1px solid var(--color-border)' }}
+          className="mt-auto py-6 text-center text-xs"
+        >
+          <span style={{ color: 'var(--color-text-muted)' }}>
+            RG Forms is a project of{' '}
+            <a
+              href="https://rgmarketinggroup.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:opacity-80 transition-opacity"
+              style={{ color: 'var(--color-text-muted)' }}
+            >
+              RG Marketing Group
+            </a>
+          </span>
+        </footer>
       </body>
     </html>
   );
