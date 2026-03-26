@@ -298,7 +298,8 @@ export function FormBuilderScreen() {
   const prevEmailFieldIdsRef = useRef<Set<string>>(
     new Set(formConfig.fields.filter((f) => f.type === 'email').map((f) => f.id)),
   );
-  const [enableHoneypot, setEnableHoneypot] = useState(formConfig.enableHoneypot ?? false);
+  const [enableHoneypot, setEnableHoneypot] = useState(formConfig.enableHoneypot ?? true);
+  const [additionalSettingsOpen, setAdditionalSettingsOpen] = useState(false);
 
   // Tag input buffer values
   const [ccInput, setCcInput] = useState('');
@@ -916,119 +917,6 @@ export function FormBuilderScreen() {
                   aria-hidden="true"
                 />
 
-                <div>
-                  <p className="text-xs text-[var(--color-muted)]">
-                    All fields below are optional. Press{' '}
-                    <kbd className="px-1 py-0.5 rounded text-[10px] bg-[var(--color-surface-2)] border border-[var(--color-border)] font-mono">Enter</kbd>{' '}
-                    or{' '}
-                    <kbd className="px-1 py-0.5 rounded text-[10px] bg-[var(--color-surface-2)] border border-[var(--color-border)] font-mono">,</kbd>{' '}
-                    to add each email in CC / BCC.
-                  </p>
-                </div>
-
-                {/* CC */}
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="cc-input" className="text-sm font-medium text-[var(--color-text)]">
-                    CC
-                  </label>
-                  <p className="text-xs text-[var(--color-muted)]">
-                    These addresses will be CC&apos;d on every submission email.
-                  </p>
-                  <EmailTagInput
-                    id="cc-input"
-                    emails={ccEmails}
-                    inputValue={ccInput}
-                    placeholder="cc@example.com"
-                    onInputChange={setCcInput}
-                    onAdd={(e) => setCcEmails((prev) => [...prev, e])}
-                    onRemove={(e) => setCcEmails((prev) => prev.filter((x) => x !== e))}
-                  />
-                </div>
-
-                {/* BCC */}
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="bcc-input" className="text-sm font-medium text-[var(--color-text)]">
-                    BCC
-                  </label>
-                  <p className="text-xs text-[var(--color-muted)]">
-                    These addresses will be BCC&apos;d — hidden from other recipients.
-                  </p>
-                  <EmailTagInput
-                    id="bcc-input"
-                    emails={bccEmails}
-                    inputValue={bccInput}
-                    placeholder="bcc@example.com"
-                    onInputChange={setBccInput}
-                    onAdd={(e) => setBccEmails((prev) => [...prev, e])}
-                    onRemove={(e) => setBccEmails((prev) => prev.filter((x) => x !== e))}
-                  />
-                </div>
-
-                {/* Email subject */}
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="email-subject" className="text-sm font-medium text-[var(--color-text)]">
-                    Email subject
-                  </label>
-                  <input
-                    id="email-subject"
-                    type="text"
-                    value={emailSubject}
-                    onChange={(e) => setEmailSubject(e.target.value)}
-                    placeholder={`New submission: ${formName || 'your form name'}`}
-                    className={clsx(
-                      'w-full px-4 py-3 rounded-lg text-sm',
-                      'bg-[var(--color-surface-2)] text-[var(--color-text)]',
-                      'border border-[var(--color-border)] transition-colors duration-150',
-                      'placeholder:text-[var(--color-muted)]',
-                      'focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]',
-                    )}
-                  />
-                  <p className="text-xs text-[var(--color-muted)]">
-                    Leave blank to use the default: &ldquo;New submission: {formName || 'form name'}&rdquo;
-                  </p>
-                </div>
-
-                {/* Sender name */}
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="sender-name" className="text-sm font-medium text-[var(--color-text)]">
-                    Sender name
-                  </label>
-                  <input
-                    id="sender-name"
-                    type="text"
-                    value={senderName}
-                    onChange={(e) => setSenderName(e.target.value)}
-                    placeholder="e.g. Acme Contact Form"
-                    className={clsx(
-                      'w-full px-4 py-3 rounded-lg text-sm',
-                      'bg-[var(--color-surface-2)] text-[var(--color-text)]',
-                      'border border-[var(--color-border)] transition-colors duration-150',
-                      'placeholder:text-[var(--color-muted)]',
-                      'focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]',
-                    )}
-                  />
-                  <p className="text-xs text-[var(--color-muted)]">
-                    The display name shown in the &ldquo;From&rdquo; field of the email.
-                  </p>
-                </div>
-
-                {/* Reply-to info */}
-                <div className={clsx(
-                  'flex items-start gap-3 px-3.5 py-3 rounded-lg',
-                  'bg-[var(--color-surface-2)] border border-[var(--color-border)]',
-                )}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-[var(--color-muted)]" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="16" x2="12" y2="12" />
-                    <line x1="12" y1="8" x2="12.01" y2="8" />
-                  </svg>
-                  <p className="text-xs text-[var(--color-muted)] leading-relaxed">
-                    <strong className="text-[var(--color-text)] font-medium">Reply-to:</strong> on any{' '}
-                    <span className="text-[var(--color-text)]">Email</span>-type field in the Fields step, click{' '}
-                    <span className="text-[var(--color-accent)]">Use as reply-to</span> to route notification replies to the address your visitor submits.
-                  </p>
-                </div>
-
                 {/* Honeypot spam protection */}
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex flex-col gap-1">
@@ -1060,6 +948,156 @@ export function FormBuilderScreen() {
                       )}
                     />
                   </button>
+                </div>
+
+                <div
+                  className={clsx(
+                    'h-px',
+                    'bg-[var(--color-border)]',
+                  )}
+                  aria-hidden="true"
+                />
+
+                {/* Additional settings (collapsible) */}
+                <div className="flex flex-col gap-0">
+                  <button
+                    type="button"
+                    onClick={() => setAdditionalSettingsOpen((v) => !v)}
+                    className={clsx(
+                      'flex items-center justify-between w-full',
+                      'text-sm font-medium text-[var(--color-muted)]',
+                      'hover:text-[var(--color-text)] transition-colors duration-150',
+                      'focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] rounded',
+                    )}
+                    aria-expanded={additionalSettingsOpen}
+                  >
+                    <span>Additional settings</span>
+                    <svg
+                      width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                      className={clsx('transition-transform duration-200', additionalSettingsOpen ? 'rotate-180' : '')}
+                      aria-hidden="true"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
+
+                  {additionalSettingsOpen && (
+                    <div className="flex flex-col gap-5 mt-5">
+                      <div>
+                        <p className="text-xs text-[var(--color-muted)]">
+                          Press{' '}
+                          <kbd className="px-1 py-0.5 rounded text-[10px] bg-[var(--color-surface-2)] border border-[var(--color-border)] font-mono">Enter</kbd>{' '}
+                          or{' '}
+                          <kbd className="px-1 py-0.5 rounded text-[10px] bg-[var(--color-surface-2)] border border-[var(--color-border)] font-mono">,</kbd>{' '}
+                          to add each email in CC / BCC.
+                        </p>
+                      </div>
+
+                      {/* CC */}
+                      <div className="flex flex-col gap-1.5">
+                        <label htmlFor="cc-input" className="text-sm font-medium text-[var(--color-text)]">
+                          CC
+                        </label>
+                        <p className="text-xs text-[var(--color-muted)]">
+                          These addresses will be CC&apos;d on every submission email.
+                        </p>
+                        <EmailTagInput
+                          id="cc-input"
+                          emails={ccEmails}
+                          inputValue={ccInput}
+                          placeholder="cc@example.com"
+                          onInputChange={setCcInput}
+                          onAdd={(e) => setCcEmails((prev) => [...prev, e])}
+                          onRemove={(e) => setCcEmails((prev) => prev.filter((x) => x !== e))}
+                        />
+                      </div>
+
+                      {/* BCC */}
+                      <div className="flex flex-col gap-1.5">
+                        <label htmlFor="bcc-input" className="text-sm font-medium text-[var(--color-text)]">
+                          BCC
+                        </label>
+                        <p className="text-xs text-[var(--color-muted)]">
+                          These addresses will be BCC&apos;d — hidden from other recipients.
+                        </p>
+                        <EmailTagInput
+                          id="bcc-input"
+                          emails={bccEmails}
+                          inputValue={bccInput}
+                          placeholder="bcc@example.com"
+                          onInputChange={setBccInput}
+                          onAdd={(e) => setBccEmails((prev) => [...prev, e])}
+                          onRemove={(e) => setBccEmails((prev) => prev.filter((x) => x !== e))}
+                        />
+                      </div>
+
+                      {/* Email subject */}
+                      <div className="flex flex-col gap-1.5">
+                        <label htmlFor="email-subject" className="text-sm font-medium text-[var(--color-text)]">
+                          Email subject
+                        </label>
+                        <input
+                          id="email-subject"
+                          type="text"
+                          value={emailSubject}
+                          onChange={(e) => setEmailSubject(e.target.value)}
+                          placeholder={`New submission: ${formName || 'your form name'}`}
+                          className={clsx(
+                            'w-full px-4 py-3 rounded-lg text-sm',
+                            'bg-[var(--color-surface-2)] text-[var(--color-text)]',
+                            'border border-[var(--color-border)] transition-colors duration-150',
+                            'placeholder:text-[var(--color-muted)]',
+                            'focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]',
+                          )}
+                        />
+                        <p className="text-xs text-[var(--color-muted)]">
+                          Leave blank to use the default: &ldquo;New submission: {formName || 'form name'}&rdquo;
+                        </p>
+                      </div>
+
+                      {/* Sender name */}
+                      <div className="flex flex-col gap-1.5">
+                        <label htmlFor="sender-name" className="text-sm font-medium text-[var(--color-text)]">
+                          Sender name
+                        </label>
+                        <input
+                          id="sender-name"
+                          type="text"
+                          value={senderName}
+                          onChange={(e) => setSenderName(e.target.value)}
+                          placeholder="e.g. Acme Contact Form"
+                          className={clsx(
+                            'w-full px-4 py-3 rounded-lg text-sm',
+                            'bg-[var(--color-surface-2)] text-[var(--color-text)]',
+                            'border border-[var(--color-border)] transition-colors duration-150',
+                            'placeholder:text-[var(--color-muted)]',
+                            'focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]',
+                          )}
+                        />
+                        <p className="text-xs text-[var(--color-muted)]">
+                          The display name shown in the &ldquo;From&rdquo; field of the email.
+                        </p>
+                      </div>
+
+                      {/* Reply-to info */}
+                      <div className={clsx(
+                        'flex items-start gap-3 px-3.5 py-3 rounded-lg',
+                        'bg-[var(--color-surface-2)] border border-[var(--color-border)]',
+                      )}>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-[var(--color-muted)]" aria-hidden="true">
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="12" y1="16" x2="12" y2="12" />
+                          <line x1="12" y1="8" x2="12.01" y2="8" />
+                        </svg>
+                        <p className="text-xs text-[var(--color-muted)] leading-relaxed">
+                          <strong className="text-[var(--color-text)] font-medium">Reply-to:</strong> on any{' '}
+                          <span className="text-[var(--color-text)]">Email</span>-type field in the Fields step, click{' '}
+                          <span className="text-[var(--color-accent)]">Use as reply-to</span> to route notification replies to the address your visitor submits.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </section>
 
