@@ -195,12 +195,12 @@ function StepIndicator({ currentStep }: StepIndicatorProps) {
         const isActive = step.number === currentStep;
 
         return (
-          <div key={step.number} className="flex items-center">
+          <div key={step.number} className="flex items-start">
             {/* Connector line before (not before step 1) */}
             {i > 0 && (
               <div
                 className={clsx(
-                  'h-px w-10 sm:w-16 transition-colors duration-300',
+                  'h-px w-10 sm:w-16 mt-4 transition-colors duration-300',
                   step.number <= currentStep
                     ? 'bg-[var(--color-accent)]'
                     : 'bg-[var(--color-border)]',
