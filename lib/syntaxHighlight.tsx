@@ -272,3 +272,71 @@ export function tokenizeVue(code: string): Token[] {
   // which already handles <script> blocks as JS.
   return tokenizeHTML(code);
 }
+
+// ---------------------------------------------------------------------------
+// Shell / bash tokenizer (for curl examples etc.)
+// ---------------------------------------------------------------------------
+
+const SHELL_BUILTINS = new Set(['curl', 'wget', 'npm', 'npx', 'node', 'git', 'echo', 'export']);
+
+export function tokenizeShell(code: string): Token[] {
+  const tokens: Token[] = [];
+  let i = 0;
+
+  while (i < code.length) {
+    // Comment
+    if (code[i] === '#') {
+      const end = code.indexOf('\n', i);
+      const slice = end === -1 ? code.slice(i) : code.slice(i, end);
+      tokens.push({ text: slice, color: C.comment });
+      i += slice.length;
+      continue;
+    }
+
+    // String (double or single quoted)
+    if (code[i] === '"' || code[i] === "'") {
+      const q = code[i];
+      let j = i + 1;
+      while (j < code.length) {
+        if (code[j] === '\\') { j += 2; continue; }
+        if (code[j] === q) { j++; break; }
+        j++;
+      }
+      tokens.push({ text: code.slice(i, j), color: C.attrVal });
+      i = j;
+      continue;
+    }
+
+    // Flag (starts with -)
+    if (code[i] === '-' && /[a-zA-Z-]/.test(code[i + 1] ?? '')) {
+      const m = code.slice(i).match(/^--?[a-zA-Z][a-zA-Z0-9-]*/);
+      if (m) {
+        tokens.push({ text: m[0], color: C.attr });
+        i += m[0].length;
+        continue;
+      }
+    }
+
+    // Word (identifier — check if it's a builtin command)
+    if (/[a-zA-Z_]/.test(code[i])) {
+      const m = code.slice(i).match(/^[a-zA-Z_][a-zA-Z0-9_]*/);
+      if (m) {
+        tokens.push({ text: m[0], color: SHELL_BUILTINS.has(m[0]) ? C.builtin : C.default });
+        i += m[0].length;
+        continue;
+      }
+    }
+
+    // Line continuation backslash
+    if (code[i] === '\\' && (code[i + 1] === '\n' || code[i + 1] === '\r')) {
+      tokens.push({ text: code.slice(i, i + 2), color: C.comment });
+      i += 2;
+      continue;
+    }
+
+    tokens.push({ text: code[i], color: C.default });
+    i++;
+  }
+
+  return tokens;
+}
