@@ -3,9 +3,15 @@ import Link from 'next/link';
 import { Sheet, Zap } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'How RG Forms works — Zero-backend HTML contact forms',
+  title: 'How It Works',
   description:
-    'A deep dive into how RG Forms automates the DWYL serverless form pattern: Google OAuth, Apps Script, and Sheets — all from your browser.',
+    'Learn how RG Forms automates the DWYL serverless form pattern in 5 API calls — Google OAuth, Apps Script, and Sheets, all from your browser with no backend.',
+  alternates: { canonical: 'https://rgforms.com/how-it-works/' },
+  openGraph: {
+    title: 'How RG Forms Works — Zero-Backend Contact Forms',
+    description: 'Five API calls. Ten seconds. A fully working contact form backed by your own Google Drive.',
+    url: 'https://rgforms.com/how-it-works/',
+  },
 };
 
 function Section({ children }: { children: React.ReactNode }) {

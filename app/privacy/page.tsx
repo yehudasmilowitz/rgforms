@@ -3,8 +3,10 @@ import Link from 'next/link';
 import { Check, X } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — RG Forms',
-  description: 'RG Forms privacy policy: what data we collect (none), how Google OAuth is used, and where your form data lives.',
+  title: 'Privacy Policy',
+  description: 'RG Forms collects no user data, runs no backend, and stores nothing. Your OAuth token lives only in browser memory. Plain-English privacy policy.',
+  alternates: { canonical: 'https://rgforms.com/privacy/' },
+  robots: { index: false, follow: false },
 };
 
 function Section({ children }: { children: React.ReactNode }) {

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Disallow: /builder/
+Disallow: /_next/
+
+Sitemap: https://rgforms.com/sitemap.xml

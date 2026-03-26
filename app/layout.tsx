@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Space_Grotesk, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
+import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
 import { AppProvider } from '@/context/AppContext';
@@ -26,18 +27,57 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 });
 
+const siteUrl = 'https://rgforms.com';
+
 export const metadata: Metadata = {
-  title: 'RG Forms — Create HTML contact forms in 2 minutes',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: 'RG Forms — HTML Contact Forms in 2 Minutes',
+    template: '%s — RG Forms',
+  },
   description:
-    'Zero-backend contact forms powered by your own Google Drive. No subscription, no server.',
+    'Create fully functional HTML contact forms in under 2 minutes. Zero backend, no subscription — form submissions go straight to your Google Drive.',
+  keywords: ['contact form', 'HTML form', 'Google Sheets form', 'serverless form', 'no backend form', 'free contact form', 'embed form'],
+  authors: [{ name: 'RG Forms' }],
+  creator: 'RG Forms',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: siteUrl,
+    siteName: 'RG Forms',
+    title: 'RG Forms — HTML Contact Forms in 2 Minutes',
+    description:
+      'Zero-backend contact forms powered by your own Google Drive. No subscription, no server — just sign in and get a copy-paste embed snippet.',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'RG Forms — HTML contact forms in 2 minutes' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'RG Forms — HTML Contact Forms in 2 Minutes',
+    description: 'Zero-backend contact forms powered by Google Drive. Free forever.',
+    images: ['/og-image.png'],
+  },
   icons: {
     icon: '/favicon.svg',
+    apple: '/apple-touch-icon.png',
+    other: [
+      { rel: 'icon', url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { rel: 'icon', url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+  },
+  alternates: {
+    canonical: siteUrl,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
   },
 };
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  themeColor: '#060411',
 };
 
 export default function RootLayout({
@@ -51,6 +91,34 @@ export default function RootLayout({
         <Script
           src="https://accounts.google.com/gsi/client"
           strategy="beforeInteractive"
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'SoftwareApplication',
+              name: 'RG Forms',
+              url: siteUrl,
+              applicationCategory: 'DeveloperApplication',
+              operatingSystem: 'Web',
+              offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+              description:
+                'Create fully functional HTML contact forms in under 2 minutes. Zero backend, no subscription — form submissions go straight to your Google Drive.',
+              logo: { '@type': 'ImageObject', url: `${siteUrl}/logo.svg` },
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              name: 'RG Forms',
+              url: siteUrl,
+            }),
+          }}
         />
       </head>
       <body
@@ -70,12 +138,24 @@ export default function RootLayout({
           <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
             <Link
               href="/"
-              className="font-bold tracking-tight text-base"
-              style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-display)' }}
+              className="flex items-center gap-2"
+              aria-label="RG Forms home"
             >
-              RG Forms
+              <Image
+                src="/favicon.svg"
+                alt="RG Forms logo"
+                width={28}
+                height={28}
+                priority
+              />
+              <span
+                className="font-bold tracking-tight text-base"
+                style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-display)' }}
+              >
+                Forms
+              </span>
             </Link>
-            <nav className="flex items-center gap-6">
+            <nav className="flex items-center gap-6" aria-label="Main navigation">
               <Link
                 href="/how-it-works"
                 className="text-sm font-medium nav-link"
