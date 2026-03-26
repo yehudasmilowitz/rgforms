@@ -41,12 +41,19 @@ ${fieldInputs}${honeypotField}
     var btn = form.querySelector('button[type="submit"]');
     btn.disabled = true;
     btn.textContent = 'Sending...';
-    fetch(form.action, { method: 'POST', body: new FormData(form), mode: 'no-cors' })
-      .then(function() {
-        document.getElementById('${formId}-success').style.display = 'block';
-        form.reset();
-        btn.disabled = false;
-        btn.textContent = 'Send';
+    fetch(form.action, { method: 'POST', body: new URLSearchParams(new FormData(form)) })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data && data.result === 'success') {
+          document.getElementById('${formId}-success').style.display = 'block';
+          form.reset();
+          btn.disabled = false;
+          btn.textContent = 'Send';
+        } else {
+          btn.disabled = false;
+          btn.textContent = 'Send';
+          alert('Something went wrong. Please try again.');
+        }
       })
       .catch(function() {
         btn.disabled = false;
