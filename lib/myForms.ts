@@ -74,18 +74,15 @@ export async function listMyForms(accessToken: string): Promise<FormSummary[]> {
   return forms.filter((f): f is FormSummary => f !== null);
 }
 
-// Permanently delete a form's Sheet (and its associated Script if known).
-// driveAccessToken should be a token with the full drive scope — needed to delete
-// the Apps Script project file, which drive.file cannot reach. If omitted, the
-// Drive delete is still attempted (and silently skipped on 404).
+// Delete a form's Sheet and deactivate its deployments.
+// The Apps Script project file is not deleted — users can remove it manually
+// from their Google Drive (script.google.com or drive.google.com).
 export async function deleteForm(
   accessToken: string,
   sheetId: string,
   scriptId?: string,
-  driveAccessToken?: string,
 ): Promise<void> {
   const headers = authHeaders(accessToken);
-  const driveHeaders = driveAccessToken ? authHeaders(driveAccessToken) : headers;
 
   // Delete the sheet — this is the primary resource and must succeed.
   const sheetRes = await fetch(`${DRIVE_API}/${sheetId}`, {
@@ -98,9 +95,7 @@ export async function deleteForm(
 
   if (!scriptId) return;
 
-  // Delete all deployments via the Apps Script API first — this deactivates the web app
-  // endpoint even if the Drive file delete below can't reach the project (drive.file scope
-  // does not cover script projects created via script.googleapis.com).
+  // Delete all deployments to deactivate the web app endpoint.
   try {
     const listRes = await fetch(`${SCRIPT_API}/${scriptId}/deployments`, { headers });
     if (listRes.ok) {
@@ -115,24 +110,6 @@ export async function deleteForm(
       );
     }
   } catch {
-    // Best-effort — continue to Drive delete regardless.
+    // Best-effort.
   }
-
-  // Permanently delete the script project file via Drive API.
-  // driveHeaders carries the full drive scope token when the user granted it at delete time.
-  const scriptRes = await fetch(`${DRIVE_API}/${scriptId}`, {
-    method: 'DELETE',
-    headers: driveHeaders,
-  });
-
-  if (scriptRes.ok || scriptRes.status === 404) return;
-
-  // Fall back to trashing if permanent delete fails (e.g. drive scope not granted).
-  await fetch(`${DRIVE_API}/${scriptId}`, {
-    method: 'PATCH',
-    headers: { ...driveHeaders, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ trashed: true }),
-  }).catch(() => {
-    // Best-effort — the sheet and deployments are already gone.
-  });
 }

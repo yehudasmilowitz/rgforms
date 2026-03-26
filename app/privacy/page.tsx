@@ -170,11 +170,6 @@ export default function PrivacyPage() {
                 use: 'Deploy the script as a public web app to produce the form endpoint URL.',
               },
               {
-                scope: 'drive (full) — requested only on delete',
-                label: 'Drive (full) — requested only when deleting a form',
-                use: 'Permanently delete the Apps Script project file from your Drive when you remove a form. This scope is not requested at sign-in — it is requested incrementally, via a second Google consent screen, only at the moment you confirm a deletion. If you dismiss that prompt, the sheet and all deployments are still deleted; only the script file is left behind.',
-              },
-              {
                 scope: 'userinfo.email & profile',
                 label: 'Your Google profile',
                 use: 'Display your name and avatar in the app, and pre-fill the notification email field with your address.',
@@ -194,6 +189,31 @@ export default function PrivacyPage() {
               </div>
             ))}
           </div>
+          <P>
+            RG Forms never requests full Drive access. When you delete a form, the Google Sheet is
+            permanently deleted and all deployments are deactivated, but the Apps Script project
+            file remains in your Drive. You can delete it yourself at{' '}
+            <a
+              href="https://script.google.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+              style={{ color: 'var(--color-accent)' }}
+            >
+              script.google.com
+            </a>{' '}
+            or via{' '}
+            <a
+              href="https://drive.google.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+              style={{ color: 'var(--color-accent)' }}
+            >
+              Google Drive
+            </a>
+            .
+          </P>
           <P>
             The Apps Script handler that gets deployed to your Google Drive declares its own{' '}
             <code

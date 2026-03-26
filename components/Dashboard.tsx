@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import { clsx } from 'clsx';
 import { useApp } from '@/context/AppContext';
 import { listMyForms, deleteForm } from '@/lib/myForms';
-import { requestDriveToken, revokeToken } from '@/lib/auth';
+import { revokeToken } from '@/lib/auth';
 import FormDetailModal from '@/components/FormDetailModal';
 import type { FormSummary } from '@/types';
 
@@ -353,7 +353,17 @@ function DeleteConfirmDialog({ form, onConfirm, onCancel }: DeleteConfirmProps) 
             Delete &ldquo;{form.formName}&rdquo;?
           </h2>
           <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            This will permanently delete the Google Sheet and Apps Script from your Drive. This cannot be undone.
+            This will permanently delete the Google Sheet and deactivate all form deployments. The Apps Script file will remain in your Google Drive — you can delete it yourself at{' '}
+            <a
+              href="https://script.google.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+              style={{ color: 'var(--color-accent)' }}
+            >
+              script.google.com
+            </a>
+            .
           </p>
         </div>
 
@@ -451,21 +461,8 @@ export default function Dashboard() {
     setPendingDelete(null);
     setDeletingIds((prev) => new Set(prev).add(form.sheetId));
 
-    // Request the full drive scope incrementally so we can permanently delete the
-    // Apps Script project file. If the user dismisses the consent screen, we still
-    // proceed — the sheet and deployments will be deleted regardless.
-    let driveToken: string | undefined;
-    if (form.scriptId) {
-      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? '';
-      try {
-        driveToken = await requestDriveToken(clientId);
-      } catch {
-        // User denied or GIS unavailable — partial delete is still useful.
-      }
-    }
-
     try {
-      await deleteForm(accessToken, form.sheetId, form.scriptId, driveToken);
+      await deleteForm(accessToken, form.sheetId, form.scriptId);
       setForms((prev) => prev.filter((f) => f.sheetId !== form.sheetId));
     } catch {
       // If delete fails, just remove from deleting set so it re-appears

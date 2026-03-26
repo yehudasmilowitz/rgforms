@@ -10,9 +10,6 @@ const SCOPES = [
   'https://www.googleapis.com/auth/userinfo.profile',
 ].join(' ');
 
-// Requested incrementally at delete time — needed to permanently delete Apps Script project
-// files, which are not covered by drive.file (they were created via script.googleapis.com).
-const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive';
 
 declare global {
   interface Window {
@@ -53,25 +50,6 @@ export function requestAccessToken(clientId: string): Promise<string> {
   });
 }
 
-// Request an incremental drive token at the moment it's needed (e.g. on delete).
-// Uses prompt: '' so Google silently issues the token if the user already granted
-// the scope, or shows a focused consent screen if they haven't yet.
-export function requestDriveToken(clientId: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const tokenClient = window.google.accounts.oauth2.initTokenClient({
-      client_id: clientId,
-      scope: DRIVE_SCOPE,
-      callback: (response: google.accounts.oauth2.TokenResponse) => {
-        if (response.error) {
-          reject(new Error(response.error_description ?? response.error));
-          return;
-        }
-        resolve(response.access_token);
-      },
-    });
-    tokenClient.requestAccessToken({ prompt: '' });
-  });
-}
 
 export async function getUserInfo(accessToken: string): Promise<GoogleUser> {
   const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
