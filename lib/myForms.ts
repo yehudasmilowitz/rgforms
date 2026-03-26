@@ -75,12 +75,17 @@ export async function listMyForms(accessToken: string): Promise<FormSummary[]> {
 }
 
 // Permanently delete a form's Sheet (and its associated Script if known).
+// driveAccessToken should be a token with the full drive scope — needed to delete
+// the Apps Script project file, which drive.file cannot reach. If omitted, the
+// Drive delete is still attempted (and silently skipped on 404).
 export async function deleteForm(
   accessToken: string,
   sheetId: string,
-  scriptId?: string
+  scriptId?: string,
+  driveAccessToken?: string,
 ): Promise<void> {
   const headers = authHeaders(accessToken);
+  const driveHeaders = driveAccessToken ? authHeaders(driveAccessToken) : headers;
 
   // Delete the sheet — this is the primary resource and must succeed.
   const sheetRes = await fetch(`${DRIVE_API}/${sheetId}`, {
@@ -114,17 +119,18 @@ export async function deleteForm(
   }
 
   // Permanently delete the script project file via Drive API.
+  // driveHeaders carries the full drive scope token when the user granted it at delete time.
   const scriptRes = await fetch(`${DRIVE_API}/${scriptId}`, {
     method: 'DELETE',
-    headers,
+    headers: driveHeaders,
   });
 
   if (scriptRes.ok || scriptRes.status === 404) return;
 
-  // Fall back to trashing if permanent delete fails (e.g. scope gap for script files).
+  // Fall back to trashing if permanent delete fails (e.g. drive scope not granted).
   await fetch(`${DRIVE_API}/${scriptId}`, {
     method: 'PATCH',
-    headers: { ...headers, 'Content-Type': 'application/json' },
+    headers: { ...driveHeaders, 'Content-Type': 'application/json' },
     body: JSON.stringify({ trashed: true }),
   }).catch(() => {
     // Best-effort — the sheet and deployments are already gone.

@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { clsx } from 'clsx';
 import { useApp } from '@/context/AppContext';
 import { listMyForms, deleteForm } from '@/lib/myForms';
+import { requestDriveToken } from '@/lib/auth';
 import FormDetailModal from '@/components/FormDetailModal';
 import type { FormSummary } from '@/types';
 
@@ -317,8 +318,21 @@ export default function Dashboard() {
     setPendingDelete(null);
     setDeletingIds((prev) => new Set(prev).add(form.sheetId));
 
+    // Request the full drive scope incrementally so we can permanently delete the
+    // Apps Script project file. If the user dismisses the consent screen, we still
+    // proceed — the sheet and deployments will be deleted regardless.
+    let driveToken: string | undefined;
+    if (form.scriptId) {
+      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? '';
+      try {
+        driveToken = await requestDriveToken(clientId);
+      } catch {
+        // User denied or GIS unavailable — partial delete is still useful.
+      }
+    }
+
     try {
-      await deleteForm(accessToken, form.sheetId, form.scriptId);
+      await deleteForm(accessToken, form.sheetId, form.scriptId, driveToken);
       setForms((prev) => prev.filter((f) => f.sheetId !== form.sheetId));
     } catch {
       // If delete fails, just remove from deleting set so it re-appears
