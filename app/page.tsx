@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useApp } from '@/context/AppContext'
 import { motion } from 'motion/react'
 import { heroContainer, fadeUp, scaleIn } from '@/lib/animations'
@@ -13,6 +14,10 @@ import ResultPanel from '@/components/ResultPanel'
 
 export default function Page() {
   const { state } = useApp()
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [state.screen])
 
   if (state.screen === 'dashboard') return <Dashboard />
   if (state.screen === 'builder') return <FormBuilderScreen />

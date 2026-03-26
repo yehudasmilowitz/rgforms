@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { generateEmbedSnippet } from '@/lib/snippetTemplate';
+import EmbedCodeBlock from '@/components/EmbedCodeBlock';
 import type { FormField, FormSummary } from '@/types';
 
 // ---------------------------------------------------------------------------
@@ -349,9 +349,9 @@ export default function FormDetailModal({ form, onClose }: FormDetailModalProps)
   const { deploymentUrl, fields, formName } = form;
   const hasDetails = !!(deploymentUrl && fields?.length);
 
-  const snippet = hasDetails
-    ? generateEmbedSnippet({ name: formName, notifyEmail: '', fields: fields! }, deploymentUrl!)
-    : '';
+  const embedConfig = hasDetails
+    ? { name: formName, notifyEmail: '', fields: fields! }
+    : null;
 
   const curlExample = hasDetails
     ? `curl -X POST "${deploymentUrl}" \\\n  -d "${fields!.map((f) => `${fieldName(f)}=value`).join('&')}"`
@@ -410,7 +410,9 @@ export default function FormDetailModal({ form, onClose }: FormDetailModalProps)
                 <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--color-muted)' }}>
                   Embed snippet
                 </h3>
-                <CopyBlock label="embed.html" content={snippet} />
+                {embedConfig && (
+                  <EmbedCodeBlock formConfig={embedConfig} deploymentUrl={deploymentUrl!} />
+                )}
               </section>
 
               {/* Try it out */}

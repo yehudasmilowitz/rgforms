@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
 import { AppProvider } from '@/context/AppContext';
+import ScrollToTop from '@/components/ScrollToTop';
 import './globals.css';
 
 const spaceGrotesk = Space_Grotesk({
@@ -171,6 +172,7 @@ export default function RootLayout({
             </nav>
           </div>
         </header>
+        <ScrollToTop />
         <AppProvider>{children}</AppProvider>
         <footer
           style={{ borderTop: '1px solid var(--color-border)' }}
