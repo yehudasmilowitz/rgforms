@@ -215,15 +215,11 @@ export default function PrivacyPage() {
             .
           </P>
           <P>
-            The Apps Script handler that gets deployed to your Google Drive declares its own{' '}
-            <code
-              className="text-xs px-1.5 py-0.5 rounded font-mono"
-              style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}
-            >
-              script.send_mail
-            </code>{' '}
-            scope internally. This scope is requested by the script itself (running under your Google
-            account) when you authorize it — not by the RG Forms web app.
+            The Apps Script handler deployed to your Google Drive declares its own scopes
+            internally. When you authorize the script, Google will show it requesting access to
+            Spreadsheets, sending mail on your behalf, and your Drive files. These permissions are
+            granted to the script running under your own Google account — not to the RG Forms web
+            app.
           </P>
         </Section>
 
