@@ -7,6 +7,7 @@ import { useApp } from '@/context/AppContext';
 import { provision, AppsScriptApiDisabledError } from '@/lib/provision';
 import { FieldRow } from './FieldRow';
 import type { FormField } from '@/types';
+import UserAvatar from '@/components/UserAvatar';
 
 // ---------------------------------------------------------------------------
 // Validation helpers
@@ -519,14 +520,7 @@ export function FormBuilderScreen() {
           </div>
 
           <div className="flex items-center gap-2 min-w-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={user.picture}
-              alt={user.name}
-              width={32}
-              height={32}
-              className="rounded-full shrink-0 border border-[var(--color-border)]"
-            />
+            <UserAvatar name={user.name} picture={user.picture} />
             <div className="hidden sm:flex flex-col min-w-0">
               <span className="text-xs font-medium text-[var(--color-text)] truncate leading-none">
                 {user.name}

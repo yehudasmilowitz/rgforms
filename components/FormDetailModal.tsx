@@ -76,7 +76,7 @@ export default function FormDetailModal({ form, onClose }: FormDetailModalProps)
   const hasDetails = !!(deploymentUrl && fields?.length);
 
   const embedConfig = hasDetails
-    ? { name: formName, notifyEmail: '', fields: fields! }
+    ? { name: formName, notifyEmail: '', fields: fields!, enableHoneypot: form.enableHoneypot }
     : null;
 
   const curlExample = hasDetails

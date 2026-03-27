@@ -66,6 +66,7 @@ export async function listMyForms(accessToken: string): Promise<FormSummary[]> {
         scriptUrl: scriptId ? `https://script.google.com/d/${scriptId}/edit` : undefined,
         deploymentUrl: config.deploymentUrl || undefined,
         fields,
+        enableHoneypot: config.enableHoneypot === 'true' ? true : undefined,
       };
       return summary;
     })

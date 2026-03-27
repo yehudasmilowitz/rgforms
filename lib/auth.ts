@@ -10,46 +10,66 @@ const SCOPES = [
   'https://www.googleapis.com/auth/userinfo.profile',
 ].join(' ');
 
+const OAUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/auth';
+const POPUP_MESSAGE_TYPE = 'RG_FORMS_OAUTH_CALLBACK';
 
-declare global {
-  interface Window {
-    google: typeof google;
-    onGoogleLibraryLoad?: () => void;
-  }
-}
-
-export function loadGisScript(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (typeof window === 'undefined') return resolve();
-    if (window.google?.accounts?.oauth2) return resolve();
-
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Failed to load Google Identity Services'));
-    document.head.appendChild(script);
-  });
-}
-
+// Opens a standard OAuth 2.0 implicit-grant popup — no third-party SDK required.
+// The popup redirects to /oauth-callback, which postMessages the token back.
 export function requestAccessToken(clientId: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const tokenClient = window.google.accounts.oauth2.initTokenClient({
+    const redirectUri = `${window.location.origin}/oauth-callback`;
+
+    const params = new URLSearchParams({
       client_id: clientId,
+      redirect_uri: redirectUri,
+      response_type: 'token',
       scope: SCOPES,
-      callback: (response: google.accounts.oauth2.TokenResponse) => {
-        if (response.error) {
-          reject(new Error(response.error_description ?? response.error));
-          return;
-        }
-        resolve(response.access_token);
-      },
+      prompt: 'consent',
     });
-    tokenClient.requestAccessToken({ prompt: 'consent' });
+
+    const left = Math.round(window.screen.width / 2 - 250);
+    const top = Math.round(window.screen.height / 2 - 325);
+    const popup = window.open(
+      `${OAUTH_ENDPOINT}?${params}`,
+      'google-oauth',
+      `width=500,height=650,left=${left},top=${top}`,
+    );
+
+    if (!popup) {
+      reject(new Error('Popup blocked. Please allow popups for this site and try again.'));
+      return;
+    }
+
+    function handleMessage(event: MessageEvent) {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== POPUP_MESSAGE_TYPE) return;
+
+      window.removeEventListener('message', handleMessage);
+      clearInterval(closedCheck);
+
+      if (event.data.error) {
+        reject(new Error(event.data.error));
+      } else if (event.data.access_token) {
+        resolve(event.data.access_token as string);
+      } else {
+        reject(new Error('No access token received'));
+      }
+    }
+
+    window.addEventListener('message', handleMessage);
+
+    // Detect popup closed without completing auth
+    const closedCheck = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(closedCheck);
+        window.removeEventListener('message', handleMessage);
+        reject(new Error('Sign-in cancelled'));
+      }
+    }, 500);
   });
 }
 
+export const OAUTH_CALLBACK_MESSAGE_TYPE = POPUP_MESSAGE_TYPE;
 
 export async function getUserInfo(accessToken: string): Promise<GoogleUser> {
   const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
@@ -65,7 +85,6 @@ export async function getUserInfo(accessToken: string): Promise<GoogleUser> {
 }
 
 export async function signIn(clientId: string): Promise<{ user: GoogleUser; accessToken: string }> {
-  await loadGisScript();
   const accessToken = await requestAccessToken(clientId);
   const user = await getUserInfo(accessToken);
   return { user, accessToken };

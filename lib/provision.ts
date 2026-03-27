@@ -146,6 +146,7 @@ async function addConfigTab(
     ['emailSubject', config.emailSubject ?? ''],
     ['senderName', config.senderName ?? ''],
     ['replyToFieldId', config.replyToFieldId ?? ''],
+    ['enableHoneypot', config.enableHoneypot ? 'true' : ''],
   ];
 
   await apiCall<unknown>(`${SHEETS_API}/${sheetId}/values:batchUpdate`, {
@@ -175,7 +176,7 @@ async function saveDeploymentUrl(
     headers: authHeaders(accessToken),
     body: JSON.stringify({
       valueInputOption: 'RAW',
-      data: [{ range: '_config!A11:B11', values: [['deploymentUrl', deploymentUrl]] }],
+      data: [{ range: '_config!A12:B12', values: [['deploymentUrl', deploymentUrl]] }],
     }),
   }).catch(() => {});
 }

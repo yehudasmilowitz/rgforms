@@ -56,6 +56,7 @@ export interface FormSummary {
   scriptUrl?: string;
   deploymentUrl?: string;
   fields?: FormField[];
+  enableHoneypot?: boolean;
 }
 
 export type AppScreen = 'landing' | 'dashboard' | 'builder' | 'provisioning' | 'result';
