@@ -53,7 +53,7 @@ function doGet() {
     '<!DOCTYPE html><html lang="en"><head>',
     '<meta charset="utf-8">',
     '<meta name="viewport" content="width=device-width,initial-scale=1">',
-    '<title>Form Active \u2014 rgforms</title>',
+    '<title>Form Active \u2014 RG Forms</title>',
     '<style>',
     '*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}',
     'body{min-height:100vh;display:flex;align-items:center;justify-content:center;',
@@ -77,6 +77,10 @@ function doGet() {
     '.footer strong{color:#71717a;font-weight:600;}',
     '</style></head><body>',
     '<div class="card">',
+    '<div style="text-align:center;margin-bottom:24px;">',
+    '<img src="https://rgforms.com/logo.svg" alt="RG Forms" width="56" height="56"',
+    ' style="display:inline-block;border-radius:12px;">',
+    '</div>',
     '<div class="icon">',
     '<svg width="26" height="26" viewBox="0 0 24 24" fill="none"',
     ' stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">',
@@ -86,13 +90,13 @@ function doGet() {
     '<p>This form is live and accepting submissions.<br>',
     'POST your form data to this URL to capture responses and trigger email notifications.</p>',
     '<span class="badge"><span class="dot"></span>Listening for submissions</span>',
-    '<div class="footer">Powered by <strong>rgforms</strong></div>',
+    '<div class="footer">Powered by <strong>RG Forms</strong></div>',
     '</div>',
     '</body></html>'
   ].join('');
   return HtmlService
     .createHtmlOutput(html)
-    .setTitle('Form Active \u2014 rgforms');
+    .setTitle('Form Active \u2014 RG Forms');
 }
 
 function buildEmailHtml(headers, params, formName, timestamp) {
@@ -131,7 +135,7 @@ function buildEmailHtml(headers, params, formName, timestamp) {
     '.field-empty{color:#d4d4d8;font-style:italic;}',
     '.meta{padding:16px 32px;background:#fafafa;border-top:1px solid #f4f4f5;',
     'display:flex;justify-content:space-between;align-items:center;gap:8px;}',
-    '.meta-label{font-size:12px;color:#a1a1aa;}',
+    '.meta-label{font-size:12px;color:#a1a1aa;margin-right:12px;}',
     '.meta-value{font-size:12px;color:#71717a;font-weight:500;}',
     '.footer{text-align:center;padding:24px 16px 8px;}',
     '.footer-text{font-size:12px;color:#a1a1aa;margin:0;}',
@@ -150,11 +154,17 @@ function buildEmailHtml(headers, params, formName, timestamp) {
     + '</div>'
     + '<div class="body">' + rows + '</div>'
     + '<div class="meta">'
-    + '<span class="meta-label">Received</span>'
+    + '<span class="meta-label">Received:</span>'
     + '<span class="meta-value">' + escapeHtml(timestamp) + '</span>'
     + '</div>'
     + '</div>'
-    + '<div class="footer"><p class="footer-text">Powered by rgforms</p></div>'
+    + '<div class="footer">'
+    + '<p class="footer-text">Powered by</p>'
+    + '<div style="display:inline-flex;align-items:center;gap:6px;margin-top:6px;">'
+    + '<img src="https://rgforms.com/icon-192.png" alt="" width="20" height="20" style="display:inline-block;border-radius:4px;vertical-align:middle;">'
+    + '<span style="font-size:13px;font-weight:600;color:#71717a;vertical-align:middle;">Forms</span>'
+    + '</div>'
+    + '</div>'
     + '</div>'
     + '</body></html>';
 }
