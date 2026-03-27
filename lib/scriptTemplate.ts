@@ -172,7 +172,7 @@ function buildEmailHtml(headers, params, formName, timestamp) {
 function doPost(e) {
   try {
     // Honeypot check — silently succeed so bots don't know they were blocked
-    if (CONFIG.honeypot && e.parameter['_hp']) {
+    if (CONFIG.honeypot && e.parameter['website']) {
       return ContentService
         .createTextOutput(JSON.stringify({ result: 'success' }))
         .setMimeType(ContentService.MimeType.JSON);

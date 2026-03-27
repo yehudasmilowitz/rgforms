@@ -138,7 +138,7 @@ const EMBED_CSS = `.rgforms-form {
 export function generateEmbedSnippet(config: FormConfig, deploymentUrl: string): string {
   const fieldInputs = config.fields.map((f) => getInputHtml(f)).join('\n');
   const honeypotField = config.enableHoneypot
-    ? `\n  <input type="text" name="_hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;" />`
+    ? `\n  <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;" />`
     : '';
   const formId = `rg-form-${Math.random().toString(36).slice(2, 7)}`;
 
@@ -314,7 +314,7 @@ export function generateAgentInstructions(config: FormConfig, deploymentUrl: str
   const honeypotNote = config.enableHoneypot
     ? `\nHoneypot (spam protection) — include this hidden field exactly as written;\n` +
       `do NOT display it to the user:\n` +
-      `  <input type="text" name="_hp" tabindex="-1" autocomplete="off"\n` +
+      `  <input type="text" name="website" tabindex="-1" autocomplete="off"\n` +
       `         aria-hidden="true" style="position:absolute;left:-9999px;\n` +
       `         width:1px;height:1px;opacity:0;pointer-events:none;" />\n`
     : '';

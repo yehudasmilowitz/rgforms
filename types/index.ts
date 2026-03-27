@@ -15,7 +15,7 @@ export interface FormConfig {
   emailSubject?: string;
   senderName?: string;
   replyToFieldId?: string; // ID of the email-type field whose value becomes the reply-to address
-  enableHoneypot?: boolean; // Add a hidden _hp field; submissions that fill it are silently discarded
+  enableHoneypot?: boolean; // Add a hidden website field; submissions that fill it are silently discarded
 }
 
 export interface ProvisioningResult {
