@@ -4,7 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Terms of Service',
   description: 'RG Forms terms of service. Free to use, no warranty, no liability. Plain-English terms for a zero-backend form builder.',
-  alternates: { canonical: 'https://rgforms.com/terms/' },
+
   robots: { index: false, follow: false },
 };
 
@@ -209,9 +209,8 @@ export default function TermsPage() {
         <Section>
           <H2>8. Intellectual property</H2>
           <P>
-            The RG Forms source code is open source. The name, logo, and branding of RG Forms
-            are the property of RG Marketing Group. Forms and content you create using the Service
-            belong to you.
+            The RG Forms name, logo, and branding are the property of RG Marketing Group. Forms
+            and content you create using the Service belong to you.
           </P>
         </Section>
 
@@ -227,15 +226,15 @@ export default function TermsPage() {
         <Section>
           <H2>10. Contact</H2>
           <P>
-            Questions about these terms? Open an issue on the{' '}
+            Questions about these terms? Contact us at{' '}
             <a
-              href="https://github.com/rgforms/rgforms"
+              href="https://rgmarketinggroup.com/"
               target="_blank"
               rel="noopener noreferrer"
               style={{ color: 'var(--color-accent)' }}
               className="underline hover:no-underline"
             >
-              RG Forms GitHub repository
+              RG Marketing Group
             </a>
             .
           </P>
