@@ -324,6 +324,12 @@ export default function PrivacyPage() {
           >
             How it works
           </Link>
+          <Link
+            href="/terms"
+            className="text-sm nav-link"
+          >
+            Terms of Service
+          </Link>
         </div>
 
       </article>

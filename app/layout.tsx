@@ -167,6 +167,12 @@ export default function RootLayout({
               >
                 Privacy
               </Link>
+              <Link
+                href="/terms"
+                className="text-sm font-medium nav-link"
+              >
+                Terms
+              </Link>
             </nav>
           </div>
         </header>
