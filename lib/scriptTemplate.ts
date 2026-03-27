@@ -1,4 +1,5 @@
 import type { FormConfig } from '@/types';
+import { honeypotFieldName } from '@/lib/snippetTemplate';
 
 export function generateAppsScript(sheetId: string, config: FormConfig): string {
   const {
@@ -30,7 +31,7 @@ export function generateAppsScript(sheetId: string, config: FormConfig): string 
     senderName: senderName || '',
     replyToKey,   // normalized field key resolved at runtime from e.parameter
     formName,
-    honeypot: enableHoneypot ? true : false,
+    honeypotField: enableHoneypot ? honeypotFieldName(fields) : '',
   });
 
   return `var CONFIG = ${configJson};
@@ -172,7 +173,7 @@ function buildEmailHtml(headers, params, formName, timestamp) {
 function doPost(e) {
   try {
     // Honeypot check — silently succeed so bots don't know they were blocked
-    if (CONFIG.honeypot && e.parameter['website']) {
+    if (CONFIG.honeypotField && e.parameter[CONFIG.honeypotField]) {
       return ContentService
         .createTextOutput(JSON.stringify({ result: 'success' }))
         .setMimeType(ContentService.MimeType.JSON);
