@@ -292,15 +292,15 @@ export default function PrivacyPage() {
         <Section>
           <H2>9. Contact</H2>
           <P>
-            Questions about this privacy policy? Open an issue on the{' '}
+            Questions about this privacy policy? Contact us at{' '}
             <a
-              href="https://github.com/rgforms/rgforms"
+              href="https://rgmarketinggroup.com/"
               target="_blank"
               rel="noopener noreferrer"
               style={{ color: 'var(--color-accent)' }}
               className="underline hover:no-underline"
             >
-              RG Forms GitHub repository
+              RG Marketing Group
             </a>
             .
           </P>
