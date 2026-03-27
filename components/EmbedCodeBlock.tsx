@@ -7,9 +7,14 @@ import {
   generateReactSnippet,
   generateVueSnippet,
   generateAngularSnippet,
+  generateAgentInstructions,
 } from '@/lib/snippetTemplate';
 import { tokenizeHTML, tokenizeJS, tokenizeVue } from '@/lib/syntaxHighlight';
 import type { Token } from '@/lib/syntaxHighlight';
+
+function tokenizePlain(code: string): Token[] {
+  return [{ text: code, color: '#c9d1d9' }];
+}
 
 // ---------------------------------------------------------------------------
 // Icons
@@ -36,7 +41,7 @@ function CheckIcon({ className }: { className?: string }) {
 // Tab definitions
 // ---------------------------------------------------------------------------
 
-type TabId = 'html' | 'react' | 'vue' | 'angular';
+type TabId = 'html' | 'react' | 'vue' | 'angular' | 'agent';
 
 interface Tab {
   id: TabId;
@@ -46,10 +51,11 @@ interface Tab {
 }
 
 const TABS: Tab[] = [
-  { id: 'html',    label: 'HTML',    filename: 'embed.html',           tokenize: tokenizeHTML },
-  { id: 'react',   label: 'React',   filename: 'ContactForm.tsx',      tokenize: tokenizeJS   },
-  { id: 'vue',     label: 'Vue',     filename: 'ContactForm.vue',      tokenize: tokenizeVue  },
-  { id: 'angular', label: 'Angular', filename: 'contact-form.component.ts', tokenize: tokenizeJS },
+  { id: 'html',    label: 'HTML',       filename: 'embed.html',                tokenize: tokenizeHTML  },
+  { id: 'react',   label: 'React',      filename: 'ContactForm.tsx',           tokenize: tokenizeJS    },
+  { id: 'vue',     label: 'Vue',        filename: 'ContactForm.vue',           tokenize: tokenizeVue   },
+  { id: 'angular', label: 'Angular',    filename: 'contact-form.component.ts', tokenize: tokenizeJS    },
+  { id: 'agent',   label: 'AI Agent',   filename: 'agent-prompt.txt',          tokenize: tokenizePlain },
 ];
 
 // ---------------------------------------------------------------------------
@@ -84,8 +90,9 @@ export default function EmbedCodeBlock({ formConfig, deploymentUrl }: EmbedCodeB
     react:   generateReactSnippet(formConfig, deploymentUrl),
     vue:     generateVueSnippet(formConfig, deploymentUrl),
     angular: generateAngularSnippet(formConfig, deploymentUrl),
+    agent:   generateAgentInstructions(formConfig, deploymentUrl),
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [deploymentUrl, formConfig.fields, formConfig.enableHoneypot]);
+  }), [deploymentUrl, formConfig.fields, formConfig.enableHoneypot, formConfig.name]);
 
   const tab = TABS.find((t) => t.id === activeTab)!;
   const code = snippets[activeTab];

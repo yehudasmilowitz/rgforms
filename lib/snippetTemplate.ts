@@ -296,6 +296,80 @@ async function handleSubmit(e: Event) {
 }
 
 // ---------------------------------------------------------------------------
+// AI Agent instructions (plain-text prompt for Claude Code / Cursor)
+// ---------------------------------------------------------------------------
+
+export function generateAgentInstructions(config: FormConfig, deploymentUrl: string): string {
+  const fieldList = config.fields.map((f) => {
+    const typeLabel = f.type === 'textarea' ? 'multi-line text' : f.type;
+    const req = f.required ? 'required' : 'optional';
+    const fieldKey = fieldName(f.label);
+    const extra =
+      f.type === 'select' && f.options?.length
+        ? ` (options: ${f.options.join(', ')})`
+        : '';
+    return `  - ${f.label}  [name="${fieldKey}", type=${typeLabel}, ${req}]${extra}`;
+  }).join('\n');
+
+  const honeypotNote = config.enableHoneypot
+    ? `\nHoneypot (spam protection) — include this hidden field exactly as written;\n` +
+      `do NOT display it to the user:\n` +
+      `  <input type="text" name="_hp" tabindex="-1" autocomplete="off"\n` +
+      `         aria-hidden="true" style="position:absolute;left:-9999px;\n` +
+      `         width:1px;height:1px;opacity:0;pointer-events:none;" />\n`
+    : '';
+
+  return `You are helping me integrate a contact form into my codebase.
+Use my existing project's UI components, design system, and styling conventions —
+do not add new CSS files, UI libraries, or external dependencies.
+
+─────────────────────────────────────────
+FORM DETAILS
+─────────────────────────────────────────
+  Name:     ${config.name}
+  Endpoint: ${deploymentUrl}
+
+FIELDS
+${fieldList}
+${honeypotNote}─────────────────────────────────────────
+API CONTRACT
+─────────────────────────────────────────
+  Method:       POST
+  URL:          ${deploymentUrl}
+  Content-Type: application/x-www-form-urlencoded
+  Body:         URL-encoded form data using the field names listed above
+
+  Success →  { "result": "success" }
+  Error   →  { "result": "error", "error": "..." }
+
+─────────────────────────────────────────
+IMPLEMENTATION REQUIREMENTS
+─────────────────────────────────────────
+1. Create a form component that renders all fields listed above.
+   • Use my existing input, textarea, select, label, and button components if
+     they exist. Match my project's naming conventions and file structure.
+   • If my project has a shared form-field wrapper or validation library, use it.
+
+2. Submit by POSTing to the endpoint:
+   • Collect data with FormData, encode with URLSearchParams.
+   • Use fetch (or my project's preferred HTTP client if one exists).
+
+3. Manage three UI states:
+   • idle      — form enabled, submit button shows "Send" (or match my copy style).
+   • submitting — disable the submit button; show a loading indicator if available.
+   • result    — show an inline success or error message; on success reset the form.
+
+4. Accessibility:
+   • Associate every input with a visible <label> (or use my labelled field components).
+   • Add aria-live="polite" to the success/error message region.
+   • Ensure full keyboard navigation.
+
+5. Do NOT include hardcoded CSS or inline styles — rely entirely on my design system.
+
+6. Place the file wherever similar form components live in my project.`;
+}
+
+// ---------------------------------------------------------------------------
 // Angular snippet (standalone component)
 // ---------------------------------------------------------------------------
 
