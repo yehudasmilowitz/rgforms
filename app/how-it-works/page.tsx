@@ -331,7 +331,7 @@ Visitor's Browser (or "Try it out" panel)
               },
               {
                 title: 'One-time script authorization required',
-                body: 'After provisioning, you must visit the deployment URL once while signed in to Google to authorize the script. This is a Google requirement for scripts deployed via the API — the normal permissions dialog only appears when you do this manually. RG Forms walks you through it.',
+                body: 'After provisioning, you must visit the deployment URL once while signed in to Google to authorize the script. This is a Google requirement for scripts deployed via the API — the normal permissions dialog only appears when you do this manually. RG Forms walks you through it. When you authorize it, Google will show the permissions the script is requesting — including Spreadsheets access, sending mail on your behalf, and access to your Drive files. These are granted to the script running under your own Google account, not to RG Forms.',
               },
               {
                 title: 'Apps Script API must be enabled',
