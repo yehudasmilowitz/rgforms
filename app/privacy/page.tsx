@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Check, X } from 'lucide-react';
+import { GoogleDriveIcon, GoogleAppsScriptIcon, GoogleProfileIcon } from '@/components/google-icons';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
@@ -155,37 +156,40 @@ export default function PrivacyPage() {
           <div className="flex flex-col gap-3">
             {[
               {
-                scope: 'drive.file',
+                icon: <GoogleDriveIcon />,
                 label: 'Drive (app-created files only)',
                 use: 'Create and manage the spreadsheet RG Forms creates on your behalf. This scope cannot access any other files in your Drive.',
               },
               {
-                scope: 'script.projects',
+                icon: <GoogleAppsScriptIcon />,
                 label: 'Apps Script (projects)',
                 use: 'Create the Apps Script project that handles incoming form submissions, and delete its deployments when you remove a form from the dashboard.',
               },
               {
-                scope: 'script.deployments',
+                icon: <GoogleAppsScriptIcon />,
                 label: 'Apps Script (deployments)',
                 use: 'Deploy the script as a public web app to produce the form endpoint URL.',
               },
               {
-                scope: 'userinfo.email & profile',
+                icon: <GoogleProfileIcon />,
                 label: 'Your Google profile',
                 use: 'Display your name and avatar in the app, and pre-fill the notification email field with your address.',
               },
-            ].map(({ scope: _, label, use }) => (
+            ].map(({ icon, label, use }) => (
               <div
                 key={label}
-                className="rounded-xl border p-4 flex flex-col gap-1"
+                className="rounded-xl border p-4 flex items-start gap-3"
                 style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
               >
-                <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
-                  {label}
-                </p>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-                  {use}
-                </p>
+                <span className="shrink-0 mt-0.5">{icon}</span>
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+                    {label}
+                  </p>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                    {use}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -265,15 +269,9 @@ export default function PrivacyPage() {
           <H2>7. Cookies and tracking</H2>
           <P>
             RG Forms does not use cookies, local storage, session storage, or any tracking
-            pixels. There are no analytics scripts running on this site. The only external
-            script loaded is Google&apos;s Identity Services library (
-            <code
-              className="text-xs px-1.5 py-0.5 rounded font-mono"
-              style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}
-            >
-              accounts.google.com/gsi/client
-            </code>
-            ), which is required to implement the Google Sign-In flow.
+            pixels. There are no analytics scripts or external sign-in SDKs loaded on this
+            site. Sign-in is handled by opening a standard OAuth 2.0 popup directly to
+            Google&apos;s authorization endpoint — no third-party scripts are injected.
           </P>
         </Section>
 

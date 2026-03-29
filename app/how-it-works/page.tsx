@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Sheet, Zap } from 'lucide-react';
+import { GoogleSheetsIcon, GoogleAppsScriptIcon } from '@/components/google-icons';
 
 export const metadata: Metadata = {
   title: 'How It Works',
@@ -287,12 +287,12 @@ Visitor's Browser (or "Try it out" panel)
           <div className="flex flex-col gap-3">
             {[
               {
-                icon: <Sheet size={18} aria-hidden="true" />,
+                icon: <GoogleSheetsIcon />,
                 title: 'A Google Spreadsheet',
                 body: 'Named after your form. Contains a header row matching your fields, and a hidden _config tab with metadata. All submissions are appended as rows.',
               },
               {
-                icon: <Zap size={18} aria-hidden="true" />,
+                icon: <GoogleAppsScriptIcon />,
                 title: 'A Google Apps Script project',
                 body: 'Contains the doPost() handler. You can view and edit it at any time via script.google.com. It runs under your Google account.',
               },

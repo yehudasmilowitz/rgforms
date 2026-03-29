@@ -9,19 +9,12 @@ import { revokeToken } from '@/lib/auth';
 import FormDetailModal from '@/components/FormDetailModal';
 import type { FormSummary } from '@/types';
 import UserAvatar from '@/components/UserAvatar';
+import { GoogleSheetsIcon, GoogleAppsScriptIcon } from '@/components/google-icons';
 
 // ---------------------------------------------------------------------------
 // Icons
 // ---------------------------------------------------------------------------
 
-function ExternalLinkIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M6 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M10 2h4v4M14 2L8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 function TrashIcon({ className }: { className?: string }) {
   return (
@@ -47,14 +40,6 @@ function CodeIcon({ className }: { className?: string }) {
   );
 }
 
-function SpreadsheetIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
-  return (
-    <svg className={className} style={style} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M3 7h14M3 11h14M7 7v10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -101,7 +86,7 @@ function FormCard({ form, onDelete, onView, deleting }: FormCardProps) {
             className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
             style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}
           >
-            <SpreadsheetIcon className="w-4 h-4" style={{ color: 'var(--color-accent)' } as React.CSSProperties} />
+            <GoogleSheetsIcon className="w-4 h-4" />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text)' }}>
@@ -187,7 +172,7 @@ function FormCard({ form, onDelete, onView, deleting }: FormCardProps) {
             (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text)';
           }}
         >
-          <ExternalLinkIcon className="w-3 h-3 shrink-0" />
+          <GoogleSheetsIcon className="w-3 h-3 shrink-0" />
           Google Sheet
         </a>
 
@@ -211,7 +196,7 @@ function FormCard({ form, onDelete, onView, deleting }: FormCardProps) {
               (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text)';
             }}
           >
-            <ExternalLinkIcon className="w-3 h-3 shrink-0" />
+            <GoogleAppsScriptIcon className="w-3 h-3 shrink-0" />
             Apps Script
           </a>
         )}
@@ -616,7 +601,7 @@ export default function Dashboard() {
               className="w-12 h-12 rounded-xl flex items-center justify-center"
               style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}
             >
-              <SpreadsheetIcon className="w-6 h-6" style={{ color: 'var(--color-muted)' } as React.CSSProperties} />
+              <GoogleSheetsIcon className="w-6 h-6" />
             </div>
             <div>
               <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>

@@ -4,13 +4,13 @@ import { useEffect } from 'react'
 import { useApp } from '@/context/AppContext'
 import { motion } from 'motion/react'
 import { heroContainer, fadeUp, scaleIn } from '@/lib/animations'
-import { Sheet, Zap, FolderOpen } from 'lucide-react'
 import { HeroScene } from '@/components/three/HeroScene'
 import AuthButton from '@/components/AuthButton'
 import Dashboard from '@/components/Dashboard'
 import FormBuilderScreen from '@/components/FormBuilder'
 import ProvisioningSteps from '@/components/ProvisioningSteps'
 import ResultPanel from '@/components/ResultPanel'
+import { GoogleSheetsIcon, GoogleAppsScriptIcon, GoogleDriveIcon } from '@/components/google-icons'
 
 export default function Page() {
   const { state } = useApp()
@@ -122,7 +122,7 @@ export default function Page() {
           </p>
 
           <div className="flex items-start gap-3">
-            <Sheet size={18} className="shrink-0 mt-0.5" aria-hidden="true" />
+            <span className="shrink-0 mt-0.5"><GoogleSheetsIcon /></span>
             <div>
               <p className="font-medium text-sm" style={{ color: 'var(--color-text)' }}>
                 Create a Google Sheet
@@ -134,7 +134,7 @@ export default function Page() {
           </div>
 
           <div className="flex items-start gap-3">
-            <Zap size={18} className="shrink-0 mt-0.5" aria-hidden="true" />
+            <span className="shrink-0 mt-0.5"><GoogleAppsScriptIcon /></span>
             <div>
               <p className="font-medium text-sm" style={{ color: 'var(--color-text)' }}>
                 Create an Apps Script
@@ -150,7 +150,7 @@ export default function Page() {
           </div>
 
           <div className="flex items-start gap-3">
-            <FolderOpen size={18} className="shrink-0 mt-0.5" aria-hidden="true" />
+            <span className="shrink-0 mt-0.5"><GoogleDriveIcon /></span>
             <div>
               <p className="font-medium text-sm" style={{ color: 'var(--color-text)' }}>
                 Access Drive files we create
