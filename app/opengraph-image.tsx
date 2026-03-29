@@ -1,4 +1,6 @@
 import { ImageResponse } from 'next/og';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 export const dynamic = 'force-static';
 export const alt = 'RG Forms — HTML Contact Forms in 2 Minutes';
@@ -6,6 +8,9 @@ export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
 export default function OGImage() {
+  const logoData = readFileSync(join(process.cwd(), 'public/icon-192.png'));
+  const logoSrc = `data:image/png;base64,${logoData.toString('base64')}`;
+
   return new ImageResponse(
     <div
       style={{
@@ -37,23 +42,14 @@ export default function OGImage() {
 
       {/* Logo row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '44px' }}>
-        <div
-          style={{
-            width: '52px',
-            height: '52px',
-            background: 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)',
-            borderRadius: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '22px',
-            fontWeight: '800',
-            color: 'white',
-            letterSpacing: '-0.5px',
-          }}
-        >
-          RG
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={logoSrc}
+          width={52}
+          height={52}
+          style={{ borderRadius: '12px' }}
+          alt="RG Forms logo"
+        />
         <span
           style={{
             color: '#a78bfa',
@@ -62,7 +58,7 @@ export default function OGImage() {
             letterSpacing: '-0.5px',
           }}
         >
-          RG Forms
+          Forms
         </span>
       </div>
 
