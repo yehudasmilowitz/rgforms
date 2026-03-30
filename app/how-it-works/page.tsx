@@ -204,14 +204,14 @@ Visitor's Browser (or "Try it out" panel)
 
           <StepCard
             number={3}
-            title="Apps Script is created"
-            description="Using your access token, RG Forms calls the Google Apps Script API to create a new script project in your Google Drive. The script is pre-written — a doPost() handler that maps form data to your sheet columns and sends email notifications, plus a doGet() that returns a simple confirmation page."
+            title="Google Sheet is created"
+            description="RG Forms creates a new Google Spreadsheet in your Drive, titled with your form name. A hidden _config tab stores metadata. The first row of the main sheet is pre-populated with your field names as column headers."
           />
 
           <StepCard
             number={4}
-            title="Google Sheet is created"
-            description="RG Forms creates a new Google Spreadsheet in your Drive, titled with your form name. A hidden _config tab stores metadata. The first row of the main sheet is pre-populated with your field names as column headers."
+            title="Apps Script is created"
+            description="Using your access token, RG Forms calls the Google Apps Script API to create a new script project bound directly to the spreadsheet. Binding the script to its sheet means it only needs access to that one file — not all your spreadsheets. The script is pre-written — a doPost() handler that maps form data to your sheet columns and sends email notifications, plus a doGet() that returns a simple confirmation page."
           />
 
           <StepCard
@@ -229,7 +229,7 @@ Visitor's Browser (or "Try it out" panel)
           <StepCard
             number={7}
             title="Authorize your script"
-            description="Because the script was deployed via API rather than the Apps Script editor, Google requires you to authorize it once before it can write to your Sheet and send email. RG Forms shows you an 'Authorize script' button — click it, sign in if prompted, and approve the permissions dialog. You only need to do this once."
+            description="Because the script was deployed via API rather than the Apps Script editor, Google requires you to authorize it once before it can run. RG Forms shows you an 'Authorize script' button — click it, sign in if prompted, and approve the permissions dialog. The script only requests access to this one spreadsheet (not all your Drive files) and the ability to send email on your behalf. You only need to do this once."
           />
 
           <StepCard
@@ -294,7 +294,7 @@ Visitor's Browser (or "Try it out" panel)
               {
                 icon: <GoogleAppsScriptIcon />,
                 title: 'A Google Apps Script project',
-                body: 'Contains the doPost() handler. You can view and edit it at any time via script.google.com. It runs under your Google account.',
+                body: 'Contains the doPost() handler. Bound to its spreadsheet, so it only has access to that one file. You can view and edit it at any time via script.google.com. It runs under your Google account.',
               },
             ].map(({ icon, title, body }) => (
               <div
@@ -331,11 +331,11 @@ Visitor's Browser (or "Try it out" panel)
               },
               {
                 title: 'One-time script authorization required',
-                body: 'After provisioning, you must visit the deployment URL once while signed in to Google to authorize the script. This is a Google requirement for scripts deployed via the API — the normal permissions dialog only appears when you do this manually. RG Forms walks you through it. When you authorize it, Google will show the permissions the script is requesting — including Spreadsheets access, sending mail on your behalf, and access to your Drive files. These are granted to the script running under your own Google account, not to RG Forms.',
+                body: 'After provisioning, you must visit the deployment URL once while signed in to Google to authorize the script. This is a Google requirement for scripts deployed via the API. RG Forms walks you through it. When you authorize, Google will show the script requesting access to this one spreadsheet only (not all your spreadsheets) and the ability to send email on your behalf. These permissions are granted to the script running under your own Google account, not to RG Forms.',
               },
               {
                 title: 'Apps Script API must be enabled',
-                body: 'The Google Apps Script API must be enabled in your Google account before provisioning. RG Forms will show a direct link to enable it if needed — it only takes a few seconds.',
+                body: 'The Google Apps Script API must be enabled in your Google account as part of the initial setup. If it isn\'t enabled when you generate a form, RG Forms will let you know and show a direct link to turn it on — it\'s a single toggle in your Google settings.',
               },
               {
                 title: 'No file uploads',

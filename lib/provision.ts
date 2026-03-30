@@ -39,24 +39,6 @@ async function apiCall<T>(url: string, options: RequestInit): Promise<T> {
   return res.json() as T;
 }
 
-/**
- * Preflight: verify the Apps Script API is enabled before touching anything.
- * Uses a GET to a nonexistent project — returns 404 if the API is reachable
- * (project not found), or 403 PERMISSION_DENIED if the API is disabled.
- * Must be called before START_PROVISIONING so the caller's component is still mounted.
- */
-export async function checkAppsScriptApiEnabled(accessToken: string): Promise<void> {
-  const res = await fetch(`${SCRIPT_API}/preflight_check`, {
-    headers: authHeaders(accessToken),
-  });
-  if (res.status === 403) {
-    const body = await res.json().catch(() => ({})) as { error?: { status?: string } };
-    if (body.error?.status === 'PERMISSION_DENIED') {
-      throw new AppsScriptApiDisabledError();
-    }
-  }
-  // Any other response (200, 404 "not found", etc.) means the API is reachable — proceed.
-}
 
 // Step 1: Create the Google Sheet with bold header row
 async function createSheet(
@@ -181,16 +163,20 @@ async function saveDeploymentUrl(
   }).catch(() => {});
 }
 
-// Step 1: Create a standalone Apps Script project (verifies the API is enabled before touching Sheets)
+// Step 2: Create a container-bound Apps Script project attached to the spreadsheet.
+// Binding to the sheet allows the script to use spreadsheets.currentonly instead of
+// the broad spreadsheets scope, so the user is only asked for access to this one file.
 async function createScriptProject(
   accessToken: string,
   formName: string,
+  parentId: string,
 ): Promise<{ scriptId: string; scriptUrl: string }> {
   const result = await apiCall<{ scriptId: string }>(SCRIPT_API, {
     method: 'POST',
     headers: authHeaders(accessToken),
     body: JSON.stringify({
       title: `${formName} Form Handler`,
+      parentId,
     }),
   });
 
@@ -204,10 +190,9 @@ async function createScriptProject(
 async function uploadScriptCode(
   accessToken: string,
   scriptId: string,
-  sheetId: string,
   config: FormConfig
 ): Promise<void> {
-  const code = generateAppsScript(sheetId, config);
+  const code = generateAppsScript(config);
 
   await apiCall<unknown>(`${SCRIPT_API}/${scriptId}/content`, {
     method: 'PUT',
@@ -277,24 +262,35 @@ export async function provision(
   let scriptUrl = '';
   let deploymentUrl = '';
 
-  // Step 1 — Create Apps Script project (must come first: verifies the Script API is enabled
-  // before any Sheets resources are created, so a disabled API fails with nothing to clean up)
-  onStepUpdate('script', 'running');
-  try {
-    ({ scriptId, scriptUrl } = await createScriptProject(accessToken, config.name));
-    onStepUpdate('script', 'complete');
-  } catch (err) {
-    onStepUpdate('script', 'error', (err as Error).message);
-    throw err;
-  }
-
-  // Step 2 — Create Sheet
+  // Step 1 — Create Sheet (must come first so we have its ID to bind the script to).
+  // If script creation subsequently fails due to the Apps Script API being disabled,
+  // the sheet is cleaned up in the step 2 catch block to avoid orphaned resources.
   onStepUpdate('sheet', 'running');
   try {
     ({ sheetId, sheetUrl } = await createSheet(accessToken, config));
     onStepUpdate('sheet', 'complete');
   } catch (err) {
     onStepUpdate('sheet', 'error', (err as Error).message);
+    throw err;
+  }
+
+  // Step 2 — Create container-bound Apps Script project attached to the sheet
+  onStepUpdate('script', 'running');
+  try {
+    ({ scriptId, scriptUrl } = await createScriptProject(accessToken, config.name, sheetId));
+    onStepUpdate('script', 'complete');
+  } catch (err) {
+    // If the Apps Script API is disabled, don't mark the step as errored —
+    // the provisioning screen will transition away immediately and we don't
+    // want a red flash. Just clean up the sheet and rethrow.
+    if (err instanceof AppsScriptApiDisabledError) {
+      await fetch(`https://www.googleapis.com/drive/v3/files/${sheetId}`, {
+        method: 'DELETE',
+        headers: authHeaders(accessToken),
+      }).catch(() => {});
+    } else {
+      onStepUpdate('script', 'error', (err as Error).message);
+    }
     throw err;
   }
 
@@ -311,7 +307,7 @@ export async function provision(
   // Step 4 — Upload handler code
   onStepUpdate('code', 'running');
   try {
-    await uploadScriptCode(accessToken, scriptId, sheetId, config);
+    await uploadScriptCode(accessToken, scriptId, config);
     onStepUpdate('code', 'complete');
   } catch (err) {
     onStepUpdate('code', 'error', (err as Error).message);

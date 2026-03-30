@@ -1,7 +1,7 @@
 import type { FormConfig } from '@/types';
 import { honeypotFieldName } from '@/lib/snippetTemplate';
 
-export function generateAppsScript(sheetId: string, config: FormConfig): string {
+export function generateAppsScript(config: FormConfig): string {
   const {
     notifyEmail,
     ccEmails = [],
@@ -23,7 +23,6 @@ export function generateAppsScript(sheetId: string, config: FormConfig): string 
 
   // Embed config as a JSON constant — JSON.stringify handles all escaping
   const configJson = JSON.stringify({
-    sheetId,
     notifyEmail,
     cc: ccEmails.join(','),
     bcc: bccEmails.join(','),
@@ -179,7 +178,7 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
-    var sheet = SpreadsheetApp.openById(CONFIG.sheetId).getActiveSheet();
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Submissions');
     var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
     var newRow = headers.map(function(header) {
       return header === 'Timestamp' ? new Date() : e.parameter[normalizeHeader(header)];
@@ -228,7 +227,7 @@ export const APPS_SCRIPT_MANIFEST = {
   // Explicitly declare scopes so the script shares the user's already-granted
   // authorization from the app's OAuth flow (requires same GCP project via parentId).
   oauthScopes: [
-    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/spreadsheets.currentonly',
     'https://www.googleapis.com/auth/script.send_mail',
   ],
 } as const;

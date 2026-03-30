@@ -21,8 +21,8 @@ const DEFAULT_FORM_CONFIG: FormConfig = {
 };
 
 const PROVISIONING_STEPS: ProvisioningStep[] = [
-  { id: 'script', label: 'Creating Apps Script', description: 'Initializing your form handler project', status: 'pending' },
   { id: 'sheet', label: 'Creating Google Sheet', description: 'Setting up your submission spreadsheet', status: 'pending' },
+  { id: 'script', label: 'Creating Apps Script', description: 'Initializing your form handler project', status: 'pending' },
   { id: 'config', label: 'Adding configuration', description: 'Writing field schema and notification settings', status: 'pending' },
   { id: 'code', label: 'Uploading handler code', description: 'Deploying the doPost() email handler', status: 'pending' },
   { id: 'deploy', label: 'Publishing web app', description: 'Making your form endpoint live', status: 'pending' },
@@ -36,6 +36,7 @@ const initialState: AppState = {
   result: null,
   provisionError: null,
   appsScriptApiDisabled: false,
+  builderInitialStep: 1,
 };
 
 function reducer(state: AppState, action: AppAction): AppState {
@@ -63,12 +64,11 @@ function reducer(state: AppState, action: AppAction): AppState {
         screen: 'provisioning',
         steps: PROVISIONING_STEPS,
         provisionError: null,
-        appsScriptApiDisabled: false,
       };
     case 'PROVISION_ERROR':
-      return { ...state, screen: 'builder', provisionError: action.payload };
-    case 'APPS_SCRIPT_API_DISABLED':
-      return { ...state, screen: 'builder', appsScriptApiDisabled: true };
+      return { ...state, screen: 'builder', provisionError: action.payload, builderInitialStep: 3 };
+    case 'PROVISION_FAILED_API_DISABLED':
+      return { ...state, screen: 'builder', appsScriptApiDisabled: true, builderInitialStep: 3 };
     case 'CLEAR_ERROR':
       return { ...state, provisionError: null, appsScriptApiDisabled: false };
     case 'UPDATE_STEP':

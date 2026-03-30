@@ -163,7 +163,7 @@ export default function PrivacyPage() {
               {
                 icon: <GoogleAppsScriptIcon />,
                 label: 'Apps Script (projects)',
-                use: 'Create the Apps Script project that handles incoming form submissions, and delete its deployments when you remove a form from the dashboard.',
+                use: 'Create the Apps Script project that handles incoming form submissions, and delete its deployments when you remove a form from the dashboard. The script is created as a container-bound project attached to its spreadsheet, so when Google asks you to authorize the script it only requests access to that one file — not all your spreadsheets.',
               },
               {
                 icon: <GoogleAppsScriptIcon />,
@@ -219,11 +219,11 @@ export default function PrivacyPage() {
             .
           </P>
           <P>
-            The Apps Script handler deployed to your Google Drive declares its own scopes
-            internally. When you authorize the script, Google will show it requesting access to
-            Spreadsheets, sending mail on your behalf, and your Drive files. These permissions are
-            granted to the script running under your own Google account — not to the RG Forms web
-            app.
+            The Apps Script deployed to your Google Drive declares its own scopes separately from
+            the RG Forms web app. When you authorize the script, Google will show it requesting
+            access to that one spreadsheet only (using the <code className="text-xs px-1 rounded" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>spreadsheets.currentonly</code> scope — not
+            all your spreadsheets) and the ability to send email on your behalf. These permissions
+            are granted to the script running under your own Google account — not to RG Forms.
           </P>
         </Section>
 

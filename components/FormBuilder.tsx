@@ -277,8 +277,8 @@ export function FormBuilderScreen() {
   const user = state.auth.user!;
   const accessToken = state.auth.accessToken!;
 
-  // Wizard step
-  const [wizardStep, setWizardStep] = useState<1 | 2 | 3>(1);
+  // Wizard step — initialise to the last step if returning from a failed provision
+  const [wizardStep, setWizardStep] = useState<1 | 2 | 3>(state.builderInitialStep ?? 1);
   const directionRef = useRef(1);
 
   // Core form settings
@@ -459,7 +459,7 @@ export function FormBuilderScreen() {
       setIsSubmitting(false);
       dispatch({ type: 'SET_FORM_CONFIG', payload: config });
       if (err instanceof AppsScriptApiDisabledError) {
-        dispatch({ type: 'APPS_SCRIPT_API_DISABLED' });
+        dispatch({ type: 'PROVISION_FAILED_API_DISABLED' });
       } else {
         dispatch({
           type: 'PROVISION_ERROR',
@@ -552,6 +552,39 @@ export function FormBuilderScreen() {
 
         {/* Step indicator */}
         <StepIndicator currentStep={wizardStep} />
+
+        {/* Apps Script API disabled banner — shown after a failed provision attempt */}
+        {appsScriptApiDisabled && (
+          <div
+            className="rounded-xl border p-4 flex items-start gap-3"
+            style={{ background: 'rgba(234,179,8,0.06)', borderColor: 'rgba(234,179,8,0.3)' }}
+          >
+            <svg className="shrink-0 mt-0.5" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgb(202,138,4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <div className="flex flex-col gap-2 min-w-0 flex-1">
+              <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+                One setup step required
+              </p>
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                The <strong style={{ color: 'var(--color-text)' }}>Google Apps Script API</strong> needs to be enabled in your Google account. This is part of the initial setup and only needs to be done once.
+              </p>
+              <a
+                href="https://script.google.com/home/usersettings"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold self-start mt-1"
+                style={{ background: 'rgba(202,138,4,0.15)', color: 'rgb(202,138,4)', border: '1px solid rgba(234,179,8,0.4)' }}
+              >
+                Enable in Google settings
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M6 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  <path d="M10 2h4v4M14 2L8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        )}
 
         {/* Animated step content */}
         <AnimatePresence mode="wait" custom={directionRef.current}>
@@ -1171,104 +1204,6 @@ export function FormBuilderScreen() {
         </AnimatePresence>
       </main>
 
-      {/* Apps Script API disabled dialog */}
-      {appsScriptApiDisabled && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="apps-script-dialog-title"
-        >
-          <div
-            className="w-full max-w-md rounded-2xl p-6 flex flex-col gap-4 shadow-2xl"
-            style={{
-              background: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-            }}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div
-                  className="flex items-center justify-center w-9 h-9 rounded-full shrink-0"
-                  style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)' }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-error)' }} aria-hidden="true">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                  </svg>
-                </div>
-                <h2 id="apps-script-dialog-title" className="text-base font-semibold" style={{ color: 'var(--color-text)' }}>
-                  One-time setup required
-                </h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => dispatch({ type: 'CLEAR_ERROR' })}
-                className="shrink-0 opacity-50 hover:opacity-100 transition-opacity mt-0.5"
-                aria-label="Close"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-text)' }} aria-hidden="true">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            </div>
-
-            <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-              To use RG Forms, you need to enable the <strong style={{ color: 'var(--color-text)' }}>Apps Script API</strong> in your Google account. This is a one-time step.
-            </p>
-
-            <ol className="flex flex-col gap-2 text-sm" style={{ color: 'var(--color-muted)' }}>
-              {[
-                <>Click <strong style={{ color: 'var(--color-text)' }}>Enable the Apps Script API</strong> below.</>,
-                <>On the settings page, toggle <strong style={{ color: 'var(--color-text)' }}>Google Apps Script API</strong> to <strong style={{ color: 'var(--color-text)' }}>On</strong>.</>,
-                <>Come back here and click <strong style={{ color: 'var(--color-text)' }}>Create form</strong> again.</>,
-              ].map((step, i) => (
-                <li key={i} className="flex items-start gap-2.5">
-                  <span
-                    className="flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold shrink-0 mt-0.5"
-                    style={{ background: 'var(--color-surface-2)', color: 'var(--color-accent)', border: '1px solid var(--color-border)' }}
-                    aria-hidden="true"
-                  >
-                    {i + 1}
-                  </span>
-                  <span>{step}</span>
-                </li>
-              ))}
-            </ol>
-
-            <div className="flex gap-3 pt-1">
-              <a
-                href="https://script.google.com/home/usersettings"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-                style={{ background: 'var(--color-accent)', color: '#fff' }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = 'var(--color-accent-hover)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = 'var(--color-accent)'; }}
-              >
-                Enable the Apps Script API
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M6 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  <path d="M10 2h4v4M14 2L8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </a>
-              <button
-                type="button"
-                onClick={() => dispatch({ type: 'CLEAR_ERROR' })}
-                className="px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[var(--color-border)]"
-                style={{ background: 'var(--color-surface-2)', color: 'var(--color-muted)', border: '1px solid var(--color-border)' }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-text)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-muted)'; }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

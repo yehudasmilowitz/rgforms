@@ -69,6 +69,7 @@ export interface AppState {
   result: ProvisioningResult | null;
   provisionError: string | null;
   appsScriptApiDisabled: boolean;
+  builderInitialStep: 1 | 2 | 3;
 }
 
 export type AppAction =
@@ -80,6 +81,6 @@ export type AppAction =
   | { type: 'UPDATE_STEP'; payload: { id: string; status: StepStatus; error?: string } }
   | { type: 'SET_RESULT'; payload: ProvisioningResult }
   | { type: 'PROVISION_ERROR'; payload: string }
-  | { type: 'APPS_SCRIPT_API_DISABLED' }
+  | { type: 'PROVISION_FAILED_API_DISABLED' }
   | { type: 'CLEAR_ERROR' }
   | { type: 'RESET' };

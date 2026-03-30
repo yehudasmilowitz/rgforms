@@ -10,7 +10,7 @@ import Dashboard from '@/components/Dashboard'
 import FormBuilderScreen from '@/components/FormBuilder'
 import ProvisioningSteps from '@/components/ProvisioningSteps'
 import ResultPanel from '@/components/ResultPanel'
-import { GoogleSheetsIcon, GoogleAppsScriptIcon, GoogleDriveIcon } from '@/components/google-icons'
+import { GoogleSheetsIcon, GoogleAppsScriptIcon, GoogleDriveIcon, GoogleProfileIcon } from '@/components/google-icons'
 
 export default function Page() {
   const { state } = useApp()
@@ -122,13 +122,25 @@ export default function Page() {
           </p>
 
           <div className="flex items-start gap-3">
-            <span className="shrink-0 mt-0.5"><GoogleSheetsIcon /></span>
+            <span className="shrink-0 mt-0.5"><GoogleProfileIcon /></span>
             <div>
               <p className="font-medium text-sm" style={{ color: 'var(--color-text)' }}>
-                Create a Google Sheet
+                See your Google profile and email
               </p>
               <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>
-                Stores your form submissions as rows — one sheet per form, owned by you.
+                Displays your name and avatar in the app, and pre-fills the notification email field.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <span className="shrink-0 mt-0.5"><GoogleDriveIcon /></span>
+            <div>
+              <p className="font-medium text-sm" style={{ color: 'var(--color-text)' }}>
+                See, edit, create, and delete only the specific Drive files you use with this app
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>
+                Used to create the Google Sheet that stores your submissions. Cannot access any other files in your Drive.
               </p>
             </div>
           </div>
@@ -136,11 +148,14 @@ export default function Page() {
           <div className="flex items-start gap-3">
             <span className="shrink-0 mt-0.5"><GoogleAppsScriptIcon /></span>
             <div>
-              <p className="font-medium text-sm" style={{ color: 'var(--color-text)' }}>
-                Create an Apps Script
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="font-medium text-sm" style={{ color: 'var(--color-text)' }}>
+                  Create and update Google Apps Script projects
+                </p>
+                <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ background: 'rgba(234,179,8,0.12)', color: 'rgb(161,120,0)' }}>Sensitive</span>
+              </div>
               <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>
-                Deploys a serverless{' '}
+                Creates the script project and uploads the{' '}
                 <code className="font-mono text-xs px-1 rounded" style={{ background: 'var(--color-surface-2)', fontFamily: 'var(--font-mono)' }}>
                   doPost()
                 </code>{' '}
@@ -150,13 +165,16 @@ export default function Page() {
           </div>
 
           <div className="flex items-start gap-3">
-            <span className="shrink-0 mt-0.5"><GoogleDriveIcon /></span>
+            <span className="shrink-0 mt-0.5"><GoogleAppsScriptIcon /></span>
             <div>
-              <p className="font-medium text-sm" style={{ color: 'var(--color-text)' }}>
-                Access Drive files we create
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="font-medium text-sm" style={{ color: 'var(--color-text)' }}>
+                  Create and update Google Apps Script deployments
+                </p>
+                <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ background: 'rgba(234,179,8,0.12)', color: 'rgb(161,120,0)' }}>Sensitive</span>
+              </div>
               <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>
-                Reads and organizes only the Sheet and Script files RG Forms creates — nothing else in your Drive.
+                Deploys the script as a public web app to produce the unique HTTPS endpoint your form POSTs to.
               </p>
             </div>
           </div>
