@@ -438,7 +438,7 @@ export default function Dashboard() {
     setDeletingIds((prev) => new Set(prev).add(form.sheetId));
 
     try {
-      await deleteForm(accessToken, form.sheetId, form.scriptId);
+      await deleteForm(accessToken, form.sheetId);
       setForms((prev) => prev.filter((f) => f.sheetId !== form.sheetId));
     } catch {
       // If delete fails, just remove from deleting set so it re-appears

@@ -1,7 +1,6 @@
 import type { FormField, FormSummary } from '@/types';
 
 const DRIVE_API = 'https://www.googleapis.com/drive/v3/files';
-const SCRIPT_API = 'https://script.googleapis.com/v1/projects';
 const SHEETS_VALUES_API = 'https://sheets.googleapis.com/v4/spreadsheets';
 
 function authHeaders(accessToken: string): HeadersInit {
@@ -75,42 +74,19 @@ export async function listMyForms(accessToken: string): Promise<FormSummary[]> {
   return forms.filter((f): f is FormSummary => f !== null);
 }
 
-// Delete a form's Sheet and deactivate its deployments.
-// The Apps Script project file is not deleted — users can remove it manually
-// from their Google Drive (script.google.com or drive.google.com).
+// Delete a form's Sheet. Because the Apps Script is container-bound to the sheet,
+// deleting the sheet also permanently removes the script and all its deployments.
 export async function deleteForm(
   accessToken: string,
   sheetId: string,
-  scriptId?: string,
 ): Promise<void> {
   const headers = authHeaders(accessToken);
 
-  // Delete the sheet — this is the primary resource and must succeed.
   const sheetRes = await fetch(`${DRIVE_API}/${sheetId}`, {
     method: 'DELETE',
     headers,
   });
   if (!sheetRes.ok && sheetRes.status !== 404) {
     throw new Error(`Failed to delete sheet (${sheetRes.status})`);
-  }
-
-  if (!scriptId) return;
-
-  // Delete all deployments to deactivate the web app endpoint.
-  try {
-    const listRes = await fetch(`${SCRIPT_API}/${scriptId}/deployments`, { headers });
-    if (listRes.ok) {
-      const data = await listRes.json() as { deployments?: Array<{ deploymentId: string }> };
-      await Promise.all(
-        (data.deployments ?? []).map((d) =>
-          fetch(`${SCRIPT_API}/${scriptId}/deployments/${d.deploymentId}`, {
-            method: 'DELETE',
-            headers,
-          })
-        )
-      );
-    }
-  } catch {
-    // Best-effort.
   }
 }

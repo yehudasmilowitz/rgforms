@@ -1,8 +1,7 @@
 import type { GoogleUser } from '@/types';
 
 const SCOPES = [
-  // drive.file covers the Sheets API for app-created files — more restrictive than
-  // spreadsheets (which would grant access to all the user's spreadsheets)
+  'openid',
   'https://www.googleapis.com/auth/drive.file',
   'https://www.googleapis.com/auth/script.projects',
   'https://www.googleapis.com/auth/script.deployments',
