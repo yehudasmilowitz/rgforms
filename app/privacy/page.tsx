@@ -163,7 +163,7 @@ export default function PrivacyPage() {
               {
                 icon: <GoogleAppsScriptIcon />,
                 label: 'Apps Script (projects)',
-                use: 'Create the Apps Script project that handles incoming form submissions, and delete its deployments when you remove a form from the dashboard. The script is created as a container-bound project attached to its spreadsheet, so when Google asks you to authorize the script it only requests access to that one file — not all your spreadsheets.',
+                use: 'Create the Apps Script project that handles incoming form submissions. The script is created as a container-bound project attached to its spreadsheet — when you delete a form, the sheet and its bound script are deleted together. When Google asks you to authorize the script, it only requests access to that one file — not all your spreadsheets.',
               },
               {
                 icon: <GoogleAppsScriptIcon />,
@@ -194,29 +194,9 @@ export default function PrivacyPage() {
             ))}
           </div>
           <P>
-            RG Forms never requests full Drive access. When you delete a form, the Google Sheet is
-            permanently deleted and all deployments are deactivated, but the Apps Script project
-            file remains in your Drive. You can delete it yourself at{' '}
-            <a
-              href="https://script.google.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline"
-              style={{ color: 'var(--color-accent)' }}
-            >
-              script.google.com
-            </a>{' '}
-            or via{' '}
-            <a
-              href="https://drive.google.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline"
-              style={{ color: 'var(--color-accent)' }}
-            >
-              Google Drive
-            </a>
-            .
+            RG Forms never requests full Drive access. When you delete a form, the Google Sheet
+            and its bound Apps Script are permanently deleted together — the script is embedded
+            in the spreadsheet, so removing the sheet removes everything.
           </P>
           <P>
             The Apps Script deployed to your Google Drive declares its own scopes separately from

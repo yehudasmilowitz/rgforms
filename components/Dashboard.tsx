@@ -339,17 +339,7 @@ function DeleteConfirmDialog({ form, onConfirm, onCancel }: DeleteConfirmProps) 
             Delete &ldquo;{form.formName}&rdquo;?
           </h2>
           <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            This will permanently delete the Google Sheet and deactivate all form deployments. The Apps Script file will remain in your Google Drive — you can delete it yourself at{' '}
-            <a
-              href="https://script.google.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline"
-              style={{ color: 'var(--color-accent)' }}
-            >
-              script.google.com
-            </a>
-            .
+            This will permanently delete the Google Sheet and its bound Apps Script — including all form deployments. This cannot be undone.
           </p>
         </div>
 
