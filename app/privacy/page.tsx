@@ -172,8 +172,8 @@ export default function PrivacyPage() {
               },
               {
                 icon: <GoogleProfileIcon />,
-                label: 'Your Google profile',
-                use: 'Display your name and avatar in the app, and pre-fill the notification email field with your address.',
+                label: 'Your Google profile and email (including openid)',
+                use: 'Display your name and avatar in the app, and pre-fill the notification email field with your address. The openid scope is required by Google\'s OpenID Connect protocol to verify your identity during sign-in — it does not grant access to any additional data.',
               },
             ].map(({ icon, label, use }) => (
               <div

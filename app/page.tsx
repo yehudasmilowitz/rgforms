@@ -128,7 +128,7 @@ export default function Page() {
                 See your Google profile and email
               </p>
               <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>
-                Displays your name and avatar in the app, and pre-fills the notification email field.
+                Displays your name and avatar in the app, and pre-fills the notification email field. Includes the <code className="font-mono px-1 rounded" style={{ background: 'var(--color-surface-2)' }}>openid</code> scope required by Google&apos;s sign-in protocol.
               </p>
             </div>
           </div>
