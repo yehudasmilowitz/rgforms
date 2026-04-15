@@ -1057,6 +1057,7 @@ export default function Dashboard() {
   const accessToken = state.auth.accessToken!;
 
   const [activeTab, setActiveTab] = useState<'forms' | 'content' | 'assets' | 'config' | 'calendar' | 'gallery'>('forms');
+  const [betaDropdownOpen, setBetaDropdownOpen] = useState(false);
   const [skillExportOpen, setSkillExportOpen] = useState(false);
 
   const [forms, setForms] = useState<FormSummary[]>([]);
@@ -1424,34 +1425,79 @@ export default function Dashboard() {
           className="flex items-center gap-1 p-1 rounded-xl overflow-x-auto"
           style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', scrollbarWidth: 'none' }}
         >
-          {([
-            { id: 'forms', icon: <GoogleSheetsIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Forms', count: forms.length },
-            { id: 'content', icon: <DatabaseIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Content', count: modules.length },
-            { id: 'assets', icon: <FolderIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Assets', count: assets.length },
-            { id: 'config', icon: <SettingsIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Config', count: configs.length },
-            { id: 'calendar', icon: <CalendarIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Calendar', count: calendars.length },
-            { id: 'gallery', icon: <GalleryIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Gallery', count: galleries.length },
-          ] as const).map((tab) => (
+          {/* Forms tab */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('forms')}
+            className="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+            style={{
+              background: activeTab === 'forms' ? 'var(--color-surface-2)' : 'transparent',
+              color: activeTab === 'forms' ? 'var(--color-text)' : 'var(--color-muted)',
+              border: activeTab === 'forms' ? '1px solid var(--color-border)' : '1px solid transparent',
+            }}
+          >
+            <GoogleSheetsIcon className="w-3.5 h-3.5 shrink-0" />
+            Forms
+            {forms.length > 0 && (
+              <span className="text-xs px-1.5 py-0.5 rounded-full font-mono" style={{ background: 'var(--color-border)', color: 'var(--color-muted)' }}>
+                {forms.length}
+              </span>
+            )}
+          </button>
+
+          {/* Beta Features dropdown */}
+          <div className="relative">
             <button
-              key={tab.id}
               type="button"
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => setBetaDropdownOpen((o) => !o)}
               className="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
               style={{
-                background: activeTab === tab.id ? 'var(--color-surface-2)' : 'transparent',
-                color: activeTab === tab.id ? 'var(--color-text)' : 'var(--color-muted)',
-                border: activeTab === tab.id ? '1px solid var(--color-border)' : '1px solid transparent',
+                background: ['content', 'assets', 'config', 'calendar', 'gallery'].includes(activeTab) ? 'var(--color-surface-2)' : 'transparent',
+                color: ['content', 'assets', 'config', 'calendar', 'gallery'].includes(activeTab) ? 'var(--color-text)' : 'var(--color-muted)',
+                border: ['content', 'assets', 'config', 'calendar', 'gallery'].includes(activeTab) ? '1px solid var(--color-border)' : '1px solid transparent',
               }}
             >
-              {tab.icon}
-              {tab.label}
-              {tab.count > 0 && (
-                <span className="text-xs px-1.5 py-0.5 rounded-full font-mono" style={{ background: 'var(--color-border)', color: 'var(--color-muted)' }}>
-                  {tab.count}
-                </span>
-              )}
+              <span className="text-xs px-1 py-0 rounded font-semibold tracking-wide" style={{ background: 'oklch(0.65 0.18 270 / 0.15)', color: 'oklch(0.55 0.18 270)' }}>β</span>
+              Beta Features
+              <svg className="w-3 h-3 shrink-0" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
-          ))}
+            {betaDropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setBetaDropdownOpen(false)} />
+                <div
+                  className="absolute left-0 top-full mt-1 z-20 flex flex-col rounded-xl p-1 min-w-[140px]"
+                  style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: '0 4px 16px rgba(0,0,0,0.12)' }}
+                >
+                  {([
+                    { id: 'content', icon: <DatabaseIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Content', count: modules.length },
+                    { id: 'assets', icon: <FolderIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Assets', count: assets.length },
+                    { id: 'config', icon: <SettingsIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Config', count: configs.length },
+                    { id: 'calendar', icon: <CalendarIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Calendar', count: calendars.length },
+                    { id: 'gallery', icon: <GalleryIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Gallery', count: galleries.length },
+                  ] as const).map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => { setActiveTab(item.id); setBetaDropdownOpen(false); }}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] text-left"
+                      style={{
+                        background: activeTab === item.id ? 'var(--color-surface-2)' : 'transparent',
+                        color: activeTab === item.id ? 'var(--color-text)' : 'var(--color-muted)',
+                      }}
+                    >
+                      {item.icon}
+                      {item.label}
+                      {item.count > 0 && (
+                        <span className="ml-auto text-xs px-1.5 py-0.5 rounded-full font-mono" style={{ background: 'var(--color-border)', color: 'var(--color-muted)' }}>
+                          {item.count}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* ── Forms tab ── */}
