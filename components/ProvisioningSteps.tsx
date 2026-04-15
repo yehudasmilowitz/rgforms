@@ -147,9 +147,16 @@ function StepRow({ step }: { step: ProvisioningStep }) {
   );
 }
 
+function headingForScreen(screen: string) {
+  if (screen === 'asset-provisioning')   return { title: 'Setting up your asset module…', done: 'All done! Loading your module…' };
+  if (screen === 'content-provisioning') return { title: 'Setting up your content module…', done: 'All done! Building your module…' };
+  return { title: 'Setting up your form…', done: 'All done! Building your embed…' };
+}
+
 export default function ProvisioningSteps() {
   const { state, dispatch } = useApp();
   const { steps } = state;
+  const { title, done } = headingForScreen(state.screen);
 
   const hasError = steps.some((s) => s.status === 'error');
   const allComplete = steps.length > 0 && steps.every((s) => s.status === 'complete');
@@ -168,7 +175,7 @@ export default function ProvisioningSteps() {
         {/* Header */}
         <div className="flex flex-col items-center text-center gap-2">
           <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
-            Setting up your form...
+            {title}
           </h1>
           <p className="text-sm" style={{ color: 'var(--color-muted)' }}>
             Usually takes about 10 seconds
@@ -214,7 +221,7 @@ export default function ProvisioningSteps() {
               />
             </svg>
             <span className="text-sm font-medium" style={{ color: 'var(--color-success)' }}>
-              All done! Building your embed...
+              {done}
             </span>
           </div>
         )}

@@ -133,6 +133,27 @@ export default function ContentModuleDetailModal({ module, onClose }: ContentMod
                   API endpoint
                 </h3>
                 <CopyBlock label="endpoint" content={result.deploymentUrl} language="text" />
+                <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                  <svg className="w-3.5 h-3.5 shrink-0 opacity-60" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M8 1.5L1.5 14h13L8 1.5z" stroke="#eab308" strokeWidth="1.3" strokeLinejoin="round" />
+                    <path d="M8 6.5v3M8 11.5v.5" stroke="#eab308" strokeWidth="1.3" strokeLinecap="round" />
+                  </svg>
+                  <span className="text-xs" style={{ color: 'var(--color-muted)' }}>
+                    Script may need a one-time authorization —
+                  </span>
+                  <a
+                    href={result.deploymentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-medium hover:opacity-80"
+                    style={{ color: '#eab308' }}
+                  >
+                    Authorize script
+                    <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                      <path d="M3.5 8.5l5-5M5 3.5h3.5v3.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </a>
+                </div>
               </section>
 
               {/* Code snippets */}
