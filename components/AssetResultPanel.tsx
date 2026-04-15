@@ -40,7 +40,7 @@ class RGAssets {
 
   async _fetch(_retry) {
     if (this._cache) return this._cache;
-    const res = await fetch(this._url);
+    const res = await fetch(this._url + '?json=1');
     if (res.status === 503 && !_retry) {
       await new Promise(r => setTimeout(r, 2000));
       return this._fetch(true);
@@ -186,7 +186,7 @@ export default function AssetResultPanel() {
             </div>
           </div>
           <a
-            href={result.deploymentUrl + '?_auth=1'}
+            href={result.deploymentUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"

@@ -34,7 +34,7 @@ function useModuleImages(deploymentUrl: string) {
     setLoading(true);
     setError(null);
 
-    fetch(deploymentUrl)
+    fetch(deploymentUrl + '?json=1')
       .then(async (res) => {
         const text = await res.text();
         let json: { data?: AssetFile[]; error?: string };

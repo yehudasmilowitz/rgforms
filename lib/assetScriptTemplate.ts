@@ -37,7 +37,9 @@ function htmlConfirmation(name) {
 
 function doGet(e) {
   var p = (e && e.parameter) ? e.parameter : {};
-  if (p._auth) return htmlConfirmation(CONFIG.moduleName);
+  // Bare URL (no ?json=1) — shown after Google's auth redirect which strips params.
+  // Also handles the "Authorize script" link click for already-authorized users.
+  if (!p.json) return htmlConfirmation(CONFIG.moduleName);
   try {
     var folder = DriveApp.getFolderById(CONFIG.folderId);
     var iter = folder.getFiles();

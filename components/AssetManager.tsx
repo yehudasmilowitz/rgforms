@@ -281,7 +281,7 @@ export default function AssetManager({ module, accessToken, onClose }: AssetMana
     setIsAuthError(false);
 
     try {
-      const res = await fetch(module.deploymentUrl);
+      const res = await fetch(module.deploymentUrl + '?json=1');
       const text = await res.text();
       let json: { data?: AssetFile[]; error?: string };
       try {
