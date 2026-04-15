@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '@/context/AppContext';
 import { provisionContentModule, AppsScriptApiDisabledError } from '@/lib/contentProvision';
 import ProvisioningSteps from '@/components/ProvisioningSteps';
+import ProvisionErrorBanner from '@/components/ProvisionErrorBanner';
 import type { ContentField, ContentFieldType, ContentModuleConfig } from '@/types';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -483,7 +484,7 @@ export default function ContentBuilder() {
       dispatch({ type: 'SET_CONTENT_RESULT', payload: result });
     } catch (err) {
       if (err instanceof AppsScriptApiDisabledError) {
-        dispatch({ type: 'CONTENT_PROVISION_ERROR', payload: 'The Apps Script API is not enabled on your Google account. Enable it at script.google.com and try again.' });
+        dispatch({ type: 'CONTENT_PROVISION_ERROR', payload: 'apps-script-disabled' });
       } else {
         dispatch({ type: 'CONTENT_PROVISION_ERROR', payload: (err as Error).message });
       }
@@ -546,15 +547,7 @@ export default function ContentBuilder() {
           </span>
         </div>
 
-        {/* Error banner */}
-        {state.contentProvisionError && (
-          <div
-            className="rounded-xl border px-4 py-3 text-sm"
-            style={{ background: 'oklch(0.62 0.22 25 / 0.08)', borderColor: 'oklch(0.62 0.22 25 / 0.30)', color: 'oklch(0.72 0.16 25)' }}
-          >
-            {state.contentProvisionError}
-          </div>
-        )}
+        <ProvisionErrorBanner error={state.contentProvisionError} />
 
         <AnimatePresence mode="wait">
           {/* ── Step 1: Name & options ─────────────────────────────────────── */}

@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { useApp } from '@/context/AppContext';
 import { provisionAssetModule, AppsScriptApiDisabledError } from '@/lib/assetProvision';
 import ProvisioningSteps from '@/components/ProvisioningSteps';
+import ProvisionErrorBanner from '@/components/ProvisionErrorBanner';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -50,7 +51,7 @@ export default function AssetBuilder() {
       dispatch({ type: 'SET_ASSET_RESULT', payload: result });
     } catch (err) {
       if (err instanceof AppsScriptApiDisabledError) {
-        dispatch({ type: 'ASSET_PROVISION_ERROR', payload: 'The Apps Script API is not enabled for your Google account. Please enable it at script.google.com and try again.' });
+        dispatch({ type: 'ASSET_PROVISION_ERROR', payload: 'apps-script-disabled' });
       } else {
         dispatch({ type: 'ASSET_PROVISION_ERROR', payload: (err as Error).message });
       }
@@ -104,15 +105,7 @@ export default function AssetBuilder() {
           </p>
         </div>
 
-        {/* Error banner */}
-        {state.assetProvisionError && (
-          <div
-            className="rounded-xl border px-4 py-3 text-sm"
-            style={{ background: 'oklch(0.62 0.22 25 / 0.08)', borderColor: 'oklch(0.62 0.22 25 / 0.30)', color: 'oklch(0.72 0.16 25)' }}
-          >
-            {state.assetProvisionError}
-          </div>
-        )}
+        <ProvisionErrorBanner error={state.assetProvisionError} />
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">

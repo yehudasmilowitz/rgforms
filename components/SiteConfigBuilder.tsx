@@ -4,13 +4,13 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { useApp } from '@/context/AppContext';
 import ProvisioningSteps from '@/components/ProvisioningSteps';
+import ProvisionErrorBanner from '@/components/ProvisionErrorBanner';
 import { provisionSiteConfig, AppsScriptApiDisabledError } from '@/lib/siteConfigProvision';
 
 export default function SiteConfigBuilder() {
   const { state, dispatch } = useApp();
   const [name, setName] = useState('');
   const [provisioning, setProvisioning] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   if (state.screen === 'siteconfig-provisioning') return <ProvisioningSteps />;
 
@@ -18,7 +18,6 @@ export default function SiteConfigBuilder() {
     const trimmed = name.trim();
     if (!trimmed || !state.auth.accessToken) return;
     setProvisioning(true);
-    setError(null);
     dispatch({ type: 'SET_SITECONFIG_BUILDER_NAME', payload: trimmed });
     dispatch({ type: 'START_SITECONFIG_PROVISIONING' });
     try {
@@ -108,11 +107,7 @@ export default function SiteConfigBuilder() {
           </p>
         </div>
 
-        {error && (
-          <p className="text-sm rounded-xl px-4 py-3 border" style={{ color: 'var(--color-error)', background: 'oklch(0.4 0.15 25 / 0.08)', borderColor: 'oklch(0.4 0.15 25 / 0.25)' }}>
-            {error}
-          </p>
-        )}
+        <ProvisionErrorBanner error={state.siteConfigProvisionError} />
 
         {/* Actions */}
         <div className="flex gap-3">
