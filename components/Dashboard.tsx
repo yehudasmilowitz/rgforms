@@ -504,7 +504,7 @@ function ContentModuleCard({ module, onDelete, onEdit, onView, deleting }: Conte
           onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-text)'; }}
         >
           <BookIcon className="w-3 h-3 shrink-0" />
-          Instructions
+          Details
         </button>
 
         <a
