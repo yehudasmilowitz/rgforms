@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { clsx } from 'clsx';
 import { useApp } from '@/context/AppContext';
-import { listMyForms, deleteForm, listMyModules, listMyAssets, listMyConfigs } from '@/lib/myForms';
+import { listMyForms, deleteForm, listMyModules, listMyAssets, listMyConfigs, listMyCalendars, listMyGalleries } from '@/lib/myForms';
 import { revokeToken } from '@/lib/auth';
 import FormDetailModal from '@/components/FormDetailModal';
 import ContentModuleDetailModal from '@/components/ContentModuleDetailModal';
@@ -12,8 +12,10 @@ import ContentEditor from '@/components/ContentEditor';
 import AssetManager from '@/components/AssetManager';
 import AssetDetailModal from '@/components/AssetDetailModal';
 import SiteConfigDetailModal from '@/components/SiteConfigDetailModal';
+import CalendarDetailModal from '@/components/CalendarDetailModal';
+import GalleryDetailModal from '@/components/GalleryDetailModal';
 import SkillExportModal from '@/components/SkillExportModal';
-import type { FormSummary, ContentModuleSummary, AssetModuleSummary, SiteConfigModuleSummary } from '@/types';
+import type { FormSummary, ContentModuleSummary, AssetModuleSummary, SiteConfigModuleSummary, CalendarModuleSummary, GalleryModuleSummary } from '@/types';
 import UserAvatar from '@/components/UserAvatar';
 import { GoogleSheetsIcon, GoogleAppsScriptIcon } from '@/components/google-icons';
 
@@ -95,6 +97,30 @@ function SparklesIcon({ className, style }: { className?: string; style?: React.
     <svg className={className} style={style} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path d="M8 1l1.5 4.5L14 7l-4.5 1.5L8 13l-1.5-4.5L2 7l4.5-1.5L8 1z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
       <path d="M13 1l.75 2.25L16 4l-2.25.75L13 7l-.75-2.25L10 4l2.25-.75L13 1z" stroke="currentColor" strokeWidth="1" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function CalendarIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg className={className} style={style} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="1.5" y="3" width="13" height="11.5" rx="1.5" stroke="currentColor" strokeWidth="1.4"/>
+      <path d="M1.5 6.5h13" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+      <path d="M5 1.5v3M11 1.5v3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+      <circle cx="5.5" cy="10" r="0.9" fill="currentColor"/>
+      <circle cx="8" cy="10" r="0.9" fill="currentColor"/>
+      <circle cx="10.5" cy="10" r="0.9" fill="currentColor"/>
+    </svg>
+  );
+}
+
+function GalleryIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg className={className} style={style} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="1" y="1" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.3"/>
+      <rect x="9" y="1" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.3"/>
+      <rect x="1" y="9" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.3"/>
+      <rect x="9" y="9" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.3"/>
     </svg>
   );
 }
@@ -827,6 +853,188 @@ function SiteConfigModuleCard({ module, onDelete, onView, deleting }: SiteConfig
 }
 
 // ---------------------------------------------------------------------------
+// CalendarModuleCard
+// ---------------------------------------------------------------------------
+
+interface CalendarModuleCardProps {
+  module: CalendarModuleSummary;
+  onDelete: (m: CalendarModuleSummary) => void;
+  onView: (m: CalendarModuleSummary) => void;
+  deleting: boolean;
+}
+
+function CalendarModuleCard({ module, onDelete, onView, deleting }: CalendarModuleCardProps) {
+  return (
+    <div
+      className="rounded-xl border p-5 flex flex-col gap-4"
+      style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', opacity: deleting ? 0.5 : 1, transition: 'opacity 0.2s' }}
+    >
+      <div className="flex items-start justify-between gap-3 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.55 0.20 270 / 0.10)', border: '1px solid oklch(0.55 0.20 270 / 0.25)' }}>
+            <CalendarIcon className="w-4 h-4" style={{ color: 'oklch(0.65 0.18 270)' }} />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text)' }}>{module.moduleName}</p>
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-semibold shrink-0" style={{ background: 'oklch(0.55 0.20 270 / 0.12)', color: 'oklch(0.65 0.18 270)', border: '1px solid oklch(0.55 0.20 270 / 0.25)' }}>
+                Calendar
+              </span>
+            </div>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>Created {formatDate(module.createdAt)}</p>
+          </div>
+        </div>
+        <button
+          onClick={() => onDelete(module)}
+          disabled={deleting}
+          className="shrink-0 p-1.5 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+          style={{ background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}
+          onMouseEnter={(e) => { if (!deleting) { (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(239,68,68,0.5)'; (e.currentTarget as HTMLButtonElement).style.color = '#ef4444'; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)'; } }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-muted)'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+          aria-label={`Delete ${module.moduleName}`}
+        >
+          <TrashIcon className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <button type="button" onClick={() => onView(module)} disabled={deleting}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-50"
+          style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-accent)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-text)'; }}
+        >
+          <BookIcon className="w-3 h-3 shrink-0" />
+          Details
+        </button>
+        <a href={module.sheetUrl} target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+          style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text)'; }}
+        >
+          <GoogleSheetsIcon className="w-3 h-3 shrink-0" />
+          Events Sheet
+        </a>
+        {module.deploymentUrl && (
+          <a href={module.deploymentUrl} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+            style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text)'; }}
+          >
+            <CodeIcon className="w-3 h-3 shrink-0" />
+            API endpoint
+          </a>
+        )}
+        {module.scriptUrl && (
+          <a href={module.scriptUrl} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+            style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text)'; }}
+          >
+            <GoogleAppsScriptIcon className="w-3 h-3 shrink-0" />
+            Apps Script
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// GalleryModuleCard
+// ---------------------------------------------------------------------------
+
+interface GalleryModuleCardProps {
+  module: GalleryModuleSummary;
+  onDelete: (m: GalleryModuleSummary) => void;
+  onView: (m: GalleryModuleSummary) => void;
+  deleting: boolean;
+}
+
+function GalleryModuleCard({ module, onDelete, onView, deleting }: GalleryModuleCardProps) {
+  return (
+    <div
+      className="rounded-xl border p-5 flex flex-col gap-4"
+      style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', opacity: deleting ? 0.5 : 1, transition: 'opacity 0.2s' }}
+    >
+      <div className="flex items-start justify-between gap-3 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'oklch(0.55 0.20 150 / 0.10)', border: '1px solid oklch(0.55 0.20 150 / 0.25)' }}>
+            <GalleryIcon className="w-4 h-4" style={{ color: 'oklch(0.65 0.18 150)' }} />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text)' }}>{module.moduleName}</p>
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-semibold shrink-0" style={{ background: 'oklch(0.55 0.20 150 / 0.12)', color: 'oklch(0.65 0.18 150)', border: '1px solid oklch(0.55 0.20 150 / 0.25)' }}>
+                Gallery
+              </span>
+            </div>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>Created {formatDate(module.createdAt)}</p>
+          </div>
+        </div>
+        <button
+          onClick={() => onDelete(module)}
+          disabled={deleting}
+          className="shrink-0 p-1.5 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+          style={{ background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}
+          onMouseEnter={(e) => { if (!deleting) { (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(239,68,68,0.5)'; (e.currentTarget as HTMLButtonElement).style.color = '#ef4444'; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)'; } }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-muted)'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+          aria-label={`Delete ${module.moduleName}`}
+        >
+          <TrashIcon className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <button type="button" onClick={() => onView(module)} disabled={deleting}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-50"
+          style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-accent)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-text)'; }}
+        >
+          <BookIcon className="w-3 h-3 shrink-0" />
+          Details
+        </button>
+        <a href={module.sheetUrl} target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+          style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text)'; }}
+        >
+          <GoogleSheetsIcon className="w-3 h-3 shrink-0" />
+          Gallery Sheet
+        </a>
+        {module.deploymentUrl && (
+          <a href={module.deploymentUrl} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+            style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text)'; }}
+          >
+            <CodeIcon className="w-3 h-3 shrink-0" />
+            API endpoint
+          </a>
+        )}
+        {module.scriptUrl && (
+          <a href={module.scriptUrl} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+            style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text)'; }}
+          >
+            <GoogleAppsScriptIcon className="w-3 h-3 shrink-0" />
+            Apps Script
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Dashboard
 // ---------------------------------------------------------------------------
 
@@ -835,7 +1043,7 @@ export default function Dashboard() {
   const user = state.auth.user!;
   const accessToken = state.auth.accessToken!;
 
-  const [activeTab, setActiveTab] = useState<'forms' | 'content' | 'assets' | 'config'>('forms');
+  const [activeTab, setActiveTab] = useState<'forms' | 'content' | 'assets' | 'config' | 'calendar' | 'gallery'>('forms');
   const [skillExportOpen, setSkillExportOpen] = useState(false);
 
   const [forms, setForms] = useState<FormSummary[]>([]);
@@ -859,6 +1067,18 @@ export default function Dashboard() {
   const [configsError, setConfigsError] = useState<string | null>(null);
   const [selectedConfig, setSelectedConfig] = useState<SiteConfigModuleSummary | null>(null);
   const [pendingDeleteConfig, setPendingDeleteConfig] = useState<SiteConfigModuleSummary | null>(null);
+
+  const [calendars, setCalendars] = useState<CalendarModuleSummary[]>([]);
+  const [calendarsLoading, setCalendarsLoading] = useState(true);
+  const [calendarsError, setCalendarsError] = useState<string | null>(null);
+  const [selectedCalendar, setSelectedCalendar] = useState<CalendarModuleSummary | null>(null);
+  const [pendingDeleteCalendar, setPendingDeleteCalendar] = useState<CalendarModuleSummary | null>(null);
+
+  const [galleries, setGalleries] = useState<GalleryModuleSummary[]>([]);
+  const [galleriesLoading, setGalleriesLoading] = useState(true);
+  const [galleriesError, setGalleriesError] = useState<string | null>(null);
+  const [selectedGallery, setSelectedGallery] = useState<GalleryModuleSummary | null>(null);
+  const [pendingDeleteGallery, setPendingDeleteGallery] = useState<GalleryModuleSummary | null>(null);
 
   // Keep legacy name for forms section
   const loading = formsLoading;
@@ -943,6 +1163,38 @@ export default function Dashboard() {
     return () => { cancelled = true; };
   }, [accessToken]);
 
+  useEffect(() => {
+    let cancelled = false;
+    setCalendarsLoading(true);
+    setCalendarsError(null);
+
+    listMyCalendars(accessToken)
+      .then((result) => {
+        if (!cancelled) { setCalendars(result); setCalendarsLoading(false); }
+      })
+      .catch(() => {
+        if (!cancelled) { setCalendarsError('Could not load calendars. Please try again.'); setCalendarsLoading(false); }
+      });
+
+    return () => { cancelled = true; };
+  }, [accessToken]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setGalleriesLoading(true);
+    setGalleriesError(null);
+
+    listMyGalleries(accessToken)
+      .then((result) => {
+        if (!cancelled) { setGalleries(result); setGalleriesLoading(false); }
+      })
+      .catch(() => {
+        if (!cancelled) { setGalleriesError('Could not load galleries. Please try again.'); setGalleriesLoading(false); }
+      });
+
+    return () => { cancelled = true; };
+  }, [accessToken]);
+
   async function handleConfirmDeleteAsset() {
     if (!pendingDeleteAsset) return;
     const mod = pendingDeleteAsset;
@@ -952,6 +1204,42 @@ export default function Dashboard() {
     try {
       await deleteForm(accessToken, mod.sheetId);
       setAssets((prev) => prev.filter((a) => a.sheetId !== mod.sheetId));
+    } catch { /* silent */ } finally {
+      setDeletingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(mod.sheetId);
+        return next;
+      });
+    }
+  }
+
+  async function handleConfirmDeleteCalendar() {
+    if (!pendingDeleteCalendar) return;
+    const mod = pendingDeleteCalendar;
+    setPendingDeleteCalendar(null);
+    setDeletingIds((prev) => new Set(prev).add(mod.sheetId));
+
+    try {
+      await deleteForm(accessToken, mod.sheetId);
+      setCalendars((prev) => prev.filter((c) => c.sheetId !== mod.sheetId));
+    } catch { /* silent */ } finally {
+      setDeletingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(mod.sheetId);
+        return next;
+      });
+    }
+  }
+
+  async function handleConfirmDeleteGallery() {
+    if (!pendingDeleteGallery) return;
+    const mod = pendingDeleteGallery;
+    setPendingDeleteGallery(null);
+    setDeletingIds((prev) => new Set(prev).add(mod.sheetId));
+
+    try {
+      await deleteForm(accessToken, mod.sheetId);
+      setGalleries((prev) => prev.filter((g) => g.sheetId !== mod.sheetId));
     } catch { /* silent */ } finally {
       setDeletingIds((prev) => {
         const next = new Set(prev);
@@ -1119,61 +1407,34 @@ export default function Dashboard() {
 
         {/* Tabs */}
         <div
-          className="flex items-center gap-1 p-1 rounded-xl"
-          style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
+          className="flex items-center gap-1 p-1 rounded-xl overflow-x-auto"
+          style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', scrollbarWidth: 'none' }}
         >
-          {(['forms', 'content', 'assets', 'config'] as const).map((tab) => (
+          {([
+            { id: 'forms', icon: <GoogleSheetsIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Forms', count: forms.length },
+            { id: 'content', icon: <DatabaseIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Content', count: modules.length },
+            { id: 'assets', icon: <FolderIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Assets', count: assets.length },
+            { id: 'config', icon: <SettingsIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Config', count: configs.length },
+            { id: 'calendar', icon: <CalendarIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Calendar', count: calendars.length },
+            { id: 'gallery', icon: <GalleryIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Gallery', count: galleries.length },
+          ] as const).map((tab) => (
             <button
-              key={tab}
+              key={tab.id}
               type="button"
-              onClick={() => setActiveTab(tab)}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+              onClick={() => setActiveTab(tab.id)}
+              className="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
               style={{
-                background: activeTab === tab ? 'var(--color-surface-2)' : 'transparent',
-                color: activeTab === tab ? 'var(--color-text)' : 'var(--color-muted)',
-                border: activeTab === tab ? '1px solid var(--color-border)' : '1px solid transparent',
+                background: activeTab === tab.id ? 'var(--color-surface-2)' : 'transparent',
+                color: activeTab === tab.id ? 'var(--color-text)' : 'var(--color-muted)',
+                border: activeTab === tab.id ? '1px solid var(--color-border)' : '1px solid transparent',
               }}
             >
-              {tab === 'forms' ? (
-                <>
-                  <GoogleSheetsIcon className="w-3.5 h-3.5" />
-                  Forms
-                  {forms.length > 0 && (
-                    <span className="text-xs px-1.5 py-0.5 rounded-full font-mono" style={{ background: 'var(--color-border)', color: 'var(--color-muted)' }}>
-                      {forms.length}
-                    </span>
-                  )}
-                </>
-              ) : tab === 'content' ? (
-                <>
-                  <DatabaseIcon className="w-3.5 h-3.5" />
-                  Content
-                  {modules.length > 0 && (
-                    <span className="text-xs px-1.5 py-0.5 rounded-full font-mono" style={{ background: 'var(--color-border)', color: 'var(--color-muted)' }}>
-                      {modules.length}
-                    </span>
-                  )}
-                </>
-              ) : tab === 'assets' ? (
-                <>
-                  <FolderIcon className="w-3.5 h-3.5" />
-                  Assets
-                  {assets.length > 0 && (
-                    <span className="text-xs px-1.5 py-0.5 rounded-full font-mono" style={{ background: 'var(--color-border)', color: 'var(--color-muted)' }}>
-                      {assets.length}
-                    </span>
-                  )}
-                </>
-              ) : (
-                <>
-                  <SettingsIcon className="w-3.5 h-3.5" />
-                  Config
-                  {configs.length > 0 && (
-                    <span className="text-xs px-1.5 py-0.5 rounded-full font-mono" style={{ background: 'var(--color-border)', color: 'var(--color-muted)' }}>
-                      {configs.length}
-                    </span>
-                  )}
-                </>
+              {tab.icon}
+              {tab.label}
+              {tab.count > 0 && (
+                <span className="text-xs px-1.5 py-0.5 rounded-full font-mono" style={{ background: 'var(--color-border)', color: 'var(--color-muted)' }}>
+                  {tab.count}
+                </span>
               )}
             </button>
           ))}
@@ -1415,6 +1676,124 @@ export default function Dashboard() {
             )}
           </>
         )}
+
+        {/* ── Calendar tab ── */}
+        {activeTab === 'calendar' && (
+          <>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-base font-bold" style={{ color: 'var(--color-text)' }}>Calendars</h2>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>Google Sheets as event APIs with date filtering</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'GO_TO_CALENDAR_BUILDER' })}
+                className="flex items-center gap-1.5 shrink-0 px-4 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                style={{ background: 'var(--color-accent)', color: '#fff' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent-hover)'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent)'; }}
+              >
+                <PlusIcon className="w-3.5 h-3.5" />
+                New calendar
+              </button>
+            </div>
+
+            {calendarsLoading ? (
+              <div className="flex flex-col gap-3">
+                {[0, 1].map((i) => (
+                  <div key={i} className="rounded-xl border p-5 h-24 animate-pulse" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }} />
+                ))}
+              </div>
+            ) : calendarsError ? (
+              <div className="rounded-xl border p-6 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                <p className="text-sm" style={{ color: 'var(--color-error)' }}>{calendarsError}</p>
+                <button onClick={() => { setCalendarsLoading(true); setCalendarsError(null); listMyCalendars(accessToken).then(setCalendars).catch(() => setCalendarsError('Could not load calendars.')).finally(() => setCalendarsLoading(false)); }} className="mt-3 text-xs underline" style={{ color: 'var(--color-muted)' }}>Try again</button>
+              </div>
+            ) : calendars.length === 0 ? (
+              <div className="rounded-xl border p-10 flex flex-col items-center gap-4 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.55 0.20 270 / 0.10)', border: '1px solid oklch(0.55 0.20 270 / 0.25)' }}>
+                  <CalendarIcon className="w-6 h-6" style={{ color: 'oklch(0.65 0.18 270)' }} />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>No calendars yet</p>
+                  <p className="text-xs mt-1 max-w-xs" style={{ color: 'var(--color-muted)' }}>
+                    Create a calendar module to manage events in a Google Sheet with a JSON API for upcoming, past, and filtered events.
+                  </p>
+                </div>
+                <button type="button" onClick={() => dispatch({ type: 'GO_TO_CALENDAR_BUILDER' })} className="mt-1 px-5 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]" style={{ background: 'var(--color-accent)', color: '#fff' }}>
+                  Create your first calendar
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {calendars.map((cal, index) => (
+                  <motion.div key={cal.sheetId} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.06, duration: 0.35 }}>
+                    <CalendarModuleCard module={cal} onDelete={setPendingDeleteCalendar} onView={setSelectedCalendar} deleting={deletingIds.has(cal.sheetId)} />
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ── Gallery tab ── */}
+        {activeTab === 'gallery' && (
+          <>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-base font-bold" style={{ color: 'var(--color-text)' }}>Galleries</h2>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>Google Sheets as image gallery APIs</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'GO_TO_GALLERY_BUILDER' })}
+                className="flex items-center gap-1.5 shrink-0 px-4 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                style={{ background: 'var(--color-accent)', color: '#fff' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent-hover)'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent)'; }}
+              >
+                <PlusIcon className="w-3.5 h-3.5" />
+                New gallery
+              </button>
+            </div>
+
+            {galleriesLoading ? (
+              <div className="flex flex-col gap-3">
+                {[0, 1].map((i) => (
+                  <div key={i} className="rounded-xl border p-5 h-24 animate-pulse" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }} />
+                ))}
+              </div>
+            ) : galleriesError ? (
+              <div className="rounded-xl border p-6 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                <p className="text-sm" style={{ color: 'var(--color-error)' }}>{galleriesError}</p>
+                <button onClick={() => { setGalleriesLoading(true); setGalleriesError(null); listMyGalleries(accessToken).then(setGalleries).catch(() => setGalleriesError('Could not load galleries.')).finally(() => setGalleriesLoading(false)); }} className="mt-3 text-xs underline" style={{ color: 'var(--color-muted)' }}>Try again</button>
+              </div>
+            ) : galleries.length === 0 ? (
+              <div className="rounded-xl border p-10 flex flex-col items-center gap-4 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.55 0.20 150 / 0.10)', border: '1px solid oklch(0.55 0.20 150 / 0.25)' }}>
+                  <GalleryIcon className="w-6 h-6" style={{ color: 'oklch(0.65 0.18 150)' }} />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>No galleries yet</p>
+                  <p className="text-xs mt-1 max-w-xs" style={{ color: 'var(--color-muted)' }}>
+                    Create a gallery module to manage images in a Google Sheet with a JSON API supporting search, categories, and featured images.
+                  </p>
+                </div>
+                <button type="button" onClick={() => dispatch({ type: 'GO_TO_GALLERY_BUILDER' })} className="mt-1 px-5 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]" style={{ background: 'var(--color-accent)', color: '#fff' }}>
+                  Create your first gallery
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {galleries.map((gallery, index) => (
+                  <motion.div key={gallery.sheetId} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.06, duration: 0.35 }}>
+                    <GalleryModuleCard module={gallery} onDelete={setPendingDeleteGallery} onView={setSelectedGallery} deleting={deletingIds.has(gallery.sheetId)} />
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Form detail modal */}
@@ -1437,6 +1816,16 @@ export default function Dashboard() {
         <SiteConfigDetailModal module={selectedConfig} onClose={() => setSelectedConfig(null)} />
       )}
 
+      {/* Calendar detail modal */}
+      {selectedCalendar && (
+        <CalendarDetailModal module={selectedCalendar} onClose={() => setSelectedCalendar(null)} />
+      )}
+
+      {/* Gallery detail modal */}
+      {selectedGallery && (
+        <GalleryDetailModal module={selectedGallery} onClose={() => setSelectedGallery(null)} />
+      )}
+
       {/* AI Skill Export modal */}
       {skillExportOpen && (
         <SkillExportModal
@@ -1444,6 +1833,8 @@ export default function Dashboard() {
           contentModules={modules}
           assetModules={assets}
           siteConfigs={configs}
+          calendars={calendars}
+          galleries={galleries}
           onClose={() => setSkillExportOpen(false)}
         />
       )}
@@ -1502,6 +1893,46 @@ export default function Dashboard() {
             <div className="flex gap-3">
               <button onClick={handleConfirmDeleteConfig} className="flex-1 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-400" style={{ background: '#ef4444', color: '#fff' }}>Delete</button>
               <button onClick={() => setPendingDeleteConfig(null)} className="flex-1 py-2 rounded-lg border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]" style={{ background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete calendar confirmation dialog */}
+      {pendingDeleteCalendar && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
+          <div className="w-full max-w-sm rounded-2xl border p-6 flex flex-col gap-5" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+            <div className="flex flex-col gap-2">
+              <h2 className="text-base font-semibold" style={{ color: 'var(--color-text)' }}>
+                Delete &ldquo;{pendingDeleteCalendar.moduleName}&rdquo;?
+              </h2>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                This will permanently delete the Events Sheet and its bound Apps Script. The calendar endpoint will stop working. This cannot be undone.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={handleConfirmDeleteCalendar} className="flex-1 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-400" style={{ background: '#ef4444', color: '#fff' }}>Delete</button>
+              <button onClick={() => setPendingDeleteCalendar(null)} className="flex-1 py-2 rounded-lg border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]" style={{ background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete gallery confirmation dialog */}
+      {pendingDeleteGallery && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
+          <div className="w-full max-w-sm rounded-2xl border p-6 flex flex-col gap-5" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+            <div className="flex flex-col gap-2">
+              <h2 className="text-base font-semibold" style={{ color: 'var(--color-text)' }}>
+                Delete &ldquo;{pendingDeleteGallery.moduleName}&rdquo;?
+              </h2>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                This will permanently delete the Gallery Sheet and its bound Apps Script. The gallery endpoint will stop working. This cannot be undone.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={handleConfirmDeleteGallery} className="flex-1 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-400" style={{ background: '#ef4444', color: '#fff' }}>Delete</button>
+              <button onClick={() => setPendingDeleteGallery(null)} className="flex-1 py-2 rounded-lg border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]" style={{ background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}>Cancel</button>
             </div>
           </div>
         </div>

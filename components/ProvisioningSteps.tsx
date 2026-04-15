@@ -151,6 +151,8 @@ function headingForScreen(screen: string) {
   if (screen === 'asset-provisioning')      return { title: 'Setting up your asset module…',  done: 'All done! Loading your module…' };
   if (screen === 'content-provisioning')    return { title: 'Setting up your content module…', done: 'All done! Building your module…' };
   if (screen === 'siteconfig-provisioning') return { title: 'Setting up your site config…',    done: 'All done! Your config is live…' };
+  if (screen === 'calendar-provisioning')   return { title: 'Setting up your calendar…',         done: 'All done! Your calendar is live…' };
+  if (screen === 'gallery-provisioning')    return { title: 'Setting up your gallery…',           done: 'All done! Your gallery is live…' };
   return { title: 'Setting up your form…', done: 'All done! Building your embed…' };
 }
 

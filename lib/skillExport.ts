@@ -3,7 +3,11 @@ import type {
   ContentModuleSummary,
   AssetModuleSummary,
   SiteConfigModuleSummary,
+  CalendarModuleSummary,
+  GalleryModuleSummary,
 } from '@/types';
+import { calendarSkillSection } from './calendarSnippet';
+import { gallerySkillSection } from './gallerySnippet';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -447,21 +451,80 @@ If a user sees \`{"error": "Authorization required"}\` it means the script owner
 
 // ─── Main export ─────────────────────────────────────────────────────────────
 
+const RGCALENDAR_PREAMBLE = `## RGCalendar — shared client class
+
+\`\`\`javascript
+export class RGCalendar {
+  constructor(url, ttl = 300_000) { this._url = url; this._cache = new Map(); this._ttl = ttl; }
+  async _fetch(params, _retry) {
+    const entries = Object.entries({ json: 1, ...(params || {}) }).filter(([, v]) => v != null);
+    const key = JSON.stringify(entries);
+    const cached = this._cache.get(key);
+    if (cached && Date.now() - cached.ts < this._ttl) return cached.data;
+    const qs = '?' + new URLSearchParams(Object.fromEntries(entries));
+    const res = await fetch(this._url + qs);
+    if (res.status === 503 && !_retry) { await new Promise(r => setTimeout(r, 2000)); return this._fetch(params, true); }
+    if (!res.ok) throw new Error('RGCalendar fetch failed (' + res.status + ')');
+    const json = await res.json();
+    if (json.error) throw new Error(json.error);
+    this._cache.set(key, { data: json, ts: Date.now() });
+    return json;
+  }
+  async upcoming(params) { return this._fetch(params); }
+  async past(params) { return this._fetch({ ...params, past: 1 }); }
+  async all(params) { return this._fetch({ ...params, all: 1 }); }
+  async range(from, to, params) { return this._fetch({ ...params, from, to }); }
+  async byCategory(category, params) { return this._fetch({ ...params, category }); }
+  invalidate() { this._cache.clear(); }
+}
+\`\`\``;
+
+const RGGALLERY_PREAMBLE = `## RGGallery — shared client class
+
+\`\`\`javascript
+export class RGGallery {
+  constructor(url, ttl = 300_000) { this._url = url; this._cache = new Map(); this._ttl = ttl; }
+  async _fetch(params, _retry) {
+    const entries = Object.entries({ json: 1, ...(params || {}) }).filter(([, v]) => v != null);
+    const key = JSON.stringify(entries);
+    const cached = this._cache.get(key);
+    if (cached && Date.now() - cached.ts < this._ttl) return cached.data;
+    const qs = '?' + new URLSearchParams(Object.fromEntries(entries));
+    const res = await fetch(this._url + qs);
+    if (res.status === 503 && !_retry) { await new Promise(r => setTimeout(r, 2000)); return this._fetch(params, true); }
+    if (!res.ok) throw new Error('RGGallery fetch failed (' + res.status + ')');
+    const json = await res.json();
+    if (json.error) throw new Error(json.error);
+    this._cache.set(key, { data: json, ts: Date.now() });
+    return json;
+  }
+  async all(params) { return this._fetch(params); }
+  async featured() { return this._fetch({ featured: 1 }); }
+  async byCategory(category, params) { return this._fetch({ ...params, category }); }
+  async search(query) { return this._fetch({ search: query }); }
+  invalidate() { this._cache.clear(); }
+}
+\`\`\``;
+
 export interface SkillExportOptions {
   forms: FormSummary[];
   contentModules: ContentModuleSummary[];
   assetModules: AssetModuleSummary[];
   siteConfigs: SiteConfigModuleSummary[];
+  calendars: CalendarModuleSummary[];
+  galleries: GalleryModuleSummary[];
   format: 'claude' | 'cursor' | 'generic';
 }
 
 export function generateSkillExport(opts: SkillExportOptions): string {
-  const { forms, contentModules, assetModules, siteConfigs, format } = opts;
+  const { forms, contentModules, assetModules, siteConfigs, calendars, galleries, format } = opts;
 
   const hasContent   = contentModules.length > 0;
   const hasAssets    = assetModules.length > 0;
   const hasConfigs   = siteConfigs.length > 0;
   const hasForms     = forms.length > 0;
+  const hasCalendars = calendars.length > 0;
+  const hasGalleries = galleries.length > 0;
 
   const header = format === 'claude'
     ? `# RG Forms — AI Skill File
@@ -500,6 +563,8 @@ All data lives in the owner's Google Drive. No server, no database, no API keys 
 | Content modules | ${contentModules.length} | Structured content APIs (blog posts, team, FAQs, etc.) |
 | Asset modules | ${assetModules.length} | File/image galleries from Google Drive folders |
 | Site configs | ${siteConfigs.length} | Global key-value settings editable from a Google Sheet |
+| Calendars | ${calendars.length} | Event/schedule APIs with date range + category filtering |
+| Galleries | ${galleries.length} | Image gallery APIs with category/featured/search filtering |
 
 ### How endpoints work
 - All endpoints are Google Apps Script web app URLs (e.g. \`https://script.google.com/macros/s/.../exec\`)
@@ -510,7 +575,7 @@ All data lives in the owner's Google Drive. No server, no database, no API keys 
 
   const sections: string[] = [header, overview];
 
-  if (hasConfigs || hasContent || hasAssets) {
+  if (hasConfigs || hasContent || hasAssets || hasCalendars || hasGalleries) {
     sections.push(CACHING_GUIDE);
     sections.push(AUTH_GUIDE);
   }
@@ -536,6 +601,18 @@ All data lives in the owner's Google Drive. No server, no database, no API keys 
     sections.push(heading(2, 'Asset Modules'));
     sections.push(RGASSETS_PREAMBLE);
     sections.push(...assetModules.map(assetSection));
+  }
+
+  if (hasCalendars) {
+    sections.push(heading(2, 'Calendar Modules'));
+    sections.push(RGCALENDAR_PREAMBLE);
+    sections.push(...calendars.map(calendarSkillSection));
+  }
+
+  if (hasGalleries) {
+    sections.push(heading(2, 'Gallery Modules'));
+    sections.push(RGGALLERY_PREAMBLE);
+    sections.push(...galleries.map(gallerySkillSection));
   }
 
   if (format === 'claude') {

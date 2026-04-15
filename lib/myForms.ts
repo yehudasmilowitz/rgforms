@@ -1,4 +1,4 @@
-import type { FormField, FormSummary, ContentField, ContentModuleSummary, AssetModuleSummary, SiteConfigModuleSummary } from '@/types';
+import type { FormField, FormSummary, ContentField, ContentModuleSummary, AssetModuleSummary, SiteConfigModuleSummary, CalendarModuleSummary, GalleryModuleSummary } from '@/types';
 
 const DRIVE_API = 'https://www.googleapis.com/drive/v3/files';
 const SHEETS_VALUES_API = 'https://sheets.googleapis.com/v4/spreadsheets';
@@ -179,6 +179,66 @@ export async function listMyConfigs(accessToken: string): Promise<SiteConfigModu
     })
   );
   return configs.filter((c): c is SiteConfigModuleSummary => c !== null);
+}
+
+// List all calendar modules created by rgforms for this user.
+export async function listMyCalendars(accessToken: string): Promise<CalendarModuleSummary[]> {
+  const query = encodeURIComponent("mimeType='application/vnd.google-apps.spreadsheet' and trashed=false");
+  const fields = encodeURIComponent('files(id,name,createdTime,webViewLink)');
+  const res = await fetch(
+    `${DRIVE_API}?q=${query}&fields=${fields}&orderBy=createdTime desc`,
+    { headers: authHeaders(accessToken) }
+  );
+  if (!res.ok) return [];
+  const data = await res.json() as { files?: Array<{ id: string; name: string; createdTime: string; webViewLink: string }> };
+  const calendars = await Promise.all(
+    (data.files ?? []).map(async (file) => {
+      const config = await readConfigTab(accessToken, file.id);
+      if (config.moduleType !== 'calendar') return null;
+      const scriptId = config.scriptId || undefined;
+      const summary: CalendarModuleSummary = {
+        sheetId: file.id,
+        sheetUrl: file.webViewLink,
+        moduleName: config.moduleName ?? file.name,
+        createdAt: config.createdAt ?? file.createdTime,
+        scriptId,
+        scriptUrl: scriptId ? `https://script.google.com/d/${scriptId}/edit` : undefined,
+        deploymentUrl: config.deploymentUrl || undefined,
+      };
+      return summary;
+    })
+  );
+  return calendars.filter((c): c is CalendarModuleSummary => c !== null);
+}
+
+// List all gallery modules created by rgforms for this user.
+export async function listMyGalleries(accessToken: string): Promise<GalleryModuleSummary[]> {
+  const query = encodeURIComponent("mimeType='application/vnd.google-apps.spreadsheet' and trashed=false");
+  const fields = encodeURIComponent('files(id,name,createdTime,webViewLink)');
+  const res = await fetch(
+    `${DRIVE_API}?q=${query}&fields=${fields}&orderBy=createdTime desc`,
+    { headers: authHeaders(accessToken) }
+  );
+  if (!res.ok) return [];
+  const data = await res.json() as { files?: Array<{ id: string; name: string; createdTime: string; webViewLink: string }> };
+  const galleries = await Promise.all(
+    (data.files ?? []).map(async (file) => {
+      const config = await readConfigTab(accessToken, file.id);
+      if (config.moduleType !== 'gallery') return null;
+      const scriptId = config.scriptId || undefined;
+      const summary: GalleryModuleSummary = {
+        sheetId: file.id,
+        sheetUrl: file.webViewLink,
+        moduleName: config.moduleName ?? file.name,
+        createdAt: config.createdAt ?? file.createdTime,
+        scriptId,
+        scriptUrl: scriptId ? `https://script.google.com/d/${scriptId}/edit` : undefined,
+        deploymentUrl: config.deploymentUrl || undefined,
+      };
+      return summary;
+    })
+  );
+  return galleries.filter((g): g is GalleryModuleSummary => g !== null);
 }
 
 // Delete a form's Sheet. Because the Apps Script is container-bound to the sheet,

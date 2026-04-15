@@ -73,7 +73,53 @@ export type AppScreen =
   | 'asset-result'
   | 'siteconfig-builder'
   | 'siteconfig-provisioning'
-  | 'siteconfig-result';
+  | 'siteconfig-result'
+  | 'calendar-builder'
+  | 'calendar-provisioning'
+  | 'calendar-result'
+  | 'gallery-builder'
+  | 'gallery-provisioning'
+  | 'gallery-result';
+
+// ─── Calendar Module Types ────────────────────────────────────────────────────
+
+export interface CalendarResult {
+  sheetId: string;
+  sheetUrl: string;
+  scriptId: string;
+  scriptUrl: string;
+  deploymentUrl: string;
+}
+
+export interface CalendarModuleSummary {
+  sheetId: string;
+  sheetUrl: string;
+  moduleName: string;
+  createdAt: string;
+  scriptId?: string;
+  scriptUrl?: string;
+  deploymentUrl?: string;
+}
+
+// ─── Gallery Module Types ─────────────────────────────────────────────────────
+
+export interface GalleryResult {
+  sheetId: string;
+  sheetUrl: string;
+  scriptId: string;
+  scriptUrl: string;
+  deploymentUrl: string;
+}
+
+export interface GalleryModuleSummary {
+  sheetId: string;
+  sheetUrl: string;
+  moduleName: string;
+  createdAt: string;
+  scriptId?: string;
+  scriptUrl?: string;
+  deploymentUrl?: string;
+}
 
 // ─── Site Config Module Types ─────────────────────────────────────────────────
 
@@ -204,6 +250,14 @@ export interface AppState {
   siteConfigBuilderName: string;
   siteConfigResult: SiteConfigResult | null;
   siteConfigProvisionError: string | null;
+  // Calendar module state
+  calendarBuilderName: string;
+  calendarResult: CalendarResult | null;
+  calendarProvisionError: string | null;
+  // Gallery module state
+  galleryBuilderName: string;
+  galleryResult: GalleryResult | null;
+  galleryProvisionError: string | null;
 }
 
 export type AppAction =
@@ -238,4 +292,18 @@ export type AppAction =
   | { type: 'START_SITECONFIG_PROVISIONING' }
   | { type: 'SET_SITECONFIG_RESULT'; payload: SiteConfigResult }
   | { type: 'SITECONFIG_PROVISION_ERROR'; payload: string }
-  | { type: 'RESET_SITECONFIG' };
+  | { type: 'RESET_SITECONFIG' }
+  // Calendar module actions
+  | { type: 'GO_TO_CALENDAR_BUILDER' }
+  | { type: 'SET_CALENDAR_BUILDER_NAME'; payload: string }
+  | { type: 'START_CALENDAR_PROVISIONING' }
+  | { type: 'SET_CALENDAR_RESULT'; payload: CalendarResult }
+  | { type: 'CALENDAR_PROVISION_ERROR'; payload: string }
+  | { type: 'RESET_CALENDAR' }
+  // Gallery module actions
+  | { type: 'GO_TO_GALLERY_BUILDER' }
+  | { type: 'SET_GALLERY_BUILDER_NAME'; payload: string }
+  | { type: 'START_GALLERY_PROVISIONING' }
+  | { type: 'SET_GALLERY_RESULT'; payload: GalleryResult }
+  | { type: 'GALLERY_PROVISION_ERROR'; payload: string }
+  | { type: 'RESET_GALLERY' };

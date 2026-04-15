@@ -14,6 +14,8 @@ import type {
 import { CONTENT_PROVISIONING_STEPS } from '@/lib/contentProvision';
 import { ASSET_PROVISIONING_STEPS } from '@/lib/assetProvision';
 import { SITE_CONFIG_PROVISIONING_STEPS } from '@/lib/siteConfigProvision';
+import { CALENDAR_PROVISIONING_STEPS } from '@/lib/calendarProvision';
+import { GALLERY_PROVISIONING_STEPS } from '@/lib/galleryProvision';
 
 // ─── Form defaults ────────────────────────────────────────────────────────────
 
@@ -69,6 +71,14 @@ const initialState: AppState = {
   siteConfigBuilderName: '',
   siteConfigResult: null,
   siteConfigProvisionError: null,
+  // Calendar module
+  calendarBuilderName: '',
+  calendarResult: null,
+  calendarProvisionError: null,
+  // Gallery module
+  galleryBuilderName: '',
+  galleryResult: null,
+  galleryProvisionError: null,
 };
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
@@ -194,6 +204,34 @@ function reducer(state: AppState, action: AppAction): AppState {
       return { ...state, screen: 'siteconfig-builder', siteConfigProvisionError: action.payload };
     case 'RESET_SITECONFIG':
       return { ...state, screen: 'dashboard', siteConfigBuilderName: '', siteConfigResult: null, siteConfigProvisionError: null };
+
+    // ── Calendar modules ──────────────────────────────────────────────────────
+    case 'GO_TO_CALENDAR_BUILDER':
+      return { ...state, screen: 'calendar-builder', calendarBuilderName: '', calendarResult: null, calendarProvisionError: null, steps: CALENDAR_PROVISIONING_STEPS };
+    case 'SET_CALENDAR_BUILDER_NAME':
+      return { ...state, calendarBuilderName: action.payload };
+    case 'START_CALENDAR_PROVISIONING':
+      return { ...state, screen: 'calendar-provisioning', steps: CALENDAR_PROVISIONING_STEPS, calendarProvisionError: null };
+    case 'SET_CALENDAR_RESULT':
+      return { ...state, screen: 'calendar-result', calendarResult: action.payload };
+    case 'CALENDAR_PROVISION_ERROR':
+      return { ...state, screen: 'calendar-builder', calendarProvisionError: action.payload };
+    case 'RESET_CALENDAR':
+      return { ...state, screen: 'dashboard', calendarBuilderName: '', calendarResult: null, calendarProvisionError: null };
+
+    // ── Gallery modules ───────────────────────────────────────────────────────
+    case 'GO_TO_GALLERY_BUILDER':
+      return { ...state, screen: 'gallery-builder', galleryBuilderName: '', galleryResult: null, galleryProvisionError: null, steps: GALLERY_PROVISIONING_STEPS };
+    case 'SET_GALLERY_BUILDER_NAME':
+      return { ...state, galleryBuilderName: action.payload };
+    case 'START_GALLERY_PROVISIONING':
+      return { ...state, screen: 'gallery-provisioning', steps: GALLERY_PROVISIONING_STEPS, galleryProvisionError: null };
+    case 'SET_GALLERY_RESULT':
+      return { ...state, screen: 'gallery-result', galleryResult: action.payload };
+    case 'GALLERY_PROVISION_ERROR':
+      return { ...state, screen: 'gallery-builder', galleryProvisionError: action.payload };
+    case 'RESET_GALLERY':
+      return { ...state, screen: 'dashboard', galleryBuilderName: '', galleryResult: null, galleryProvisionError: null };
 
     default:
       return state;

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { generateSkillExport } from '@/lib/skillExport';
-import type { FormSummary, ContentModuleSummary, AssetModuleSummary, SiteConfigModuleSummary } from '@/types';
+import type { FormSummary, ContentModuleSummary, AssetModuleSummary, SiteConfigModuleSummary, CalendarModuleSummary, GalleryModuleSummary } from '@/types';
 
 type Format = 'claude' | 'cursor' | 'generic';
 
@@ -11,6 +11,8 @@ interface SkillExportModalProps {
   contentModules: ContentModuleSummary[];
   assetModules: AssetModuleSummary[];
   siteConfigs: SiteConfigModuleSummary[];
+  calendars: CalendarModuleSummary[];
+  galleries: GalleryModuleSummary[];
   onClose: () => void;
 }
 
@@ -74,12 +76,14 @@ export default function SkillExportModal({
   contentModules,
   assetModules,
   siteConfigs,
+  calendars,
+  galleries,
   onClose,
 }: SkillExportModalProps) {
   const [format, setFormat] = useState<Format>('claude');
   const [copied, setCopied] = useState(false);
 
-  const content = generateSkillExport({ forms, contentModules, assetModules, siteConfigs, format });
+  const content = generateSkillExport({ forms, contentModules, assetModules, siteConfigs, calendars, galleries, format });
   const selectedFormat = FORMAT_OPTIONS.find((f) => f.value === format)!;
 
   useEffect(() => {
@@ -104,7 +108,7 @@ export default function SkillExportModal({
     URL.revokeObjectURL(url);
   }
 
-  const moduleCount = forms.length + contentModules.length + assetModules.length + siteConfigs.length;
+  const moduleCount = forms.length + contentModules.length + assetModules.length + siteConfigs.length + calendars.length + galleries.length;
 
   return (
     <div
