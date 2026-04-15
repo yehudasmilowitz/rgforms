@@ -42,7 +42,7 @@ async function apiCall<T>(url: string, options: RequestInit): Promise<T> {
 
 // Step 1: Create spreadsheet with Gallery tab + sample placeholder rows
 async function createGallerySheet(token: string, name: string): Promise<{ sheetId: string; sheetUrl: string }> {
-  const result = await apiCall<{ spreadsheetId: string }>(SHEETS_API, {
+  const result = await apiCall<{ spreadsheetId: string; sheets: Array<{ properties: { sheetId: number } }> }>(SHEETS_API, {
     method: 'POST',
     headers: authHeaders(token),
     body: JSON.stringify({
@@ -51,6 +51,7 @@ async function createGallerySheet(token: string, name: string): Promise<{ sheetI
     }),
   });
   const sheetId = result.spreadsheetId;
+  const tabGid = result.sheets[0].properties.sheetId;
 
   // Headers + placeholder rows (users replace image URLs with real ones)
   const rows = [
@@ -74,14 +75,14 @@ async function createGallerySheet(token: string, name: string): Promise<{ sheetI
       requests: [
         {
           repeatCell: {
-            range: { sheetId: 0, startRowIndex: 0, endRowIndex: 1 },
+            range: { sheetId: tabGid, startRowIndex: 0, endRowIndex: 1 },
             cell: { userEnteredFormat: { textFormat: { bold: true } } },
             fields: 'userEnteredFormat.textFormat.bold',
           },
         },
         {
           updateSheetProperties: {
-            properties: { sheetId: 0, gridProperties: { frozenRowCount: 1 } },
+            properties: { sheetId: tabGid, gridProperties: { frozenRowCount: 1 } },
             fields: 'gridProperties.frozenRowCount',
           },
         },
