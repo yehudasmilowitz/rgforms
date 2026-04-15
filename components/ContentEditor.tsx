@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import type { ContentModuleSummary, ContentField, ContentFieldType } from '@/types';
+import type { ContentModuleSummary, ContentField, ContentFieldType, AssetModuleSummary } from '@/types';
 import {
   loadSheetData,
   appendRecord,
@@ -11,6 +11,7 @@ import {
   type SheetRecord,
   type SheetData,
 } from '@/lib/contentEditor';
+import AssetPicker from '@/components/AssetPicker';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -52,9 +53,11 @@ interface FieldInputProps {
   field: ContentField;
   value: unknown;
   onChange: (val: unknown) => void;
+  assetModules?: AssetModuleSummary[];
 }
 
-function FieldInput({ field, value, onChange }: FieldInputProps) {
+function FieldInput({ field, value, onChange, assetModules }: FieldInputProps) {
+  const [pickerOpen, setPickerOpen] = useState(false);
   const inputStyle = {
     background: 'var(--color-surface-2)',
     borderColor: 'var(--color-border)',
@@ -128,14 +131,37 @@ function FieldInput({ field, value, onChange }: FieldInputProps) {
       );
     default: // text, url, image_url
       return (
-        <input
-          type="text"
-          className={cls}
-          style={inputStyle}
-          value={value === null || value === undefined ? '' : String(value)}
-          onChange={(e) => onChange(e.target.value || null)}
-          placeholder={field.type === 'url' || field.type === 'image_url' ? 'https://' : ''}
-        />
+        <div className="flex flex-col gap-1.5">
+          <input
+            type="text"
+            className={cls}
+            style={inputStyle}
+            value={value === null || value === undefined ? '' : String(value)}
+            onChange={(e) => onChange(e.target.value || null)}
+            placeholder={field.type === 'url' || field.type === 'image_url' ? 'https://' : ''}
+          />
+          {field.type === 'image_url' && assetModules && assetModules.length > 0 && (
+            <>
+              <button
+                type="button"
+                onClick={() => setPickerOpen(true)}
+                className="self-start text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] rounded px-2 py-1 border transition-colors"
+                style={{ background: 'var(--color-accent-subtle)', borderColor: 'var(--color-accent-border)', color: 'var(--color-accent)' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent)'; (e.currentTarget as HTMLButtonElement).style.color = '#fff'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent-subtle)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-accent)'; }}
+              >
+                Pick from assets →
+              </button>
+              {pickerOpen && (
+                <AssetPicker
+                  modules={assetModules.filter((m) => !!m.deploymentUrl)}
+                  onSelect={(url) => { onChange(url); setPickerOpen(false); }}
+                  onClose={() => setPickerOpen(false)}
+                />
+              )}
+            </>
+          )}
+        </div>
       );
   }
 }
@@ -147,9 +173,10 @@ interface RecordFormModalProps {
   record: SheetRecord | null;   // null = new record
   onSave: (data: SheetRecord) => Promise<void>;
   onClose: () => void;
+  assetModules?: AssetModuleSummary[];
 }
 
-function RecordFormModal({ module, record, onSave, onClose }: RecordFormModalProps) {
+function RecordFormModal({ module, record, onSave, onClose, assetModules }: RecordFormModalProps) {
   const fields: ContentField[] = module.fields ?? [];
 
   const buildInitial = useCallback((): SheetRecord => {
@@ -241,6 +268,7 @@ function RecordFormModal({ module, record, onSave, onClose }: RecordFormModalPro
                   field={field}
                   value={formData[field.key]}
                   onChange={(v) => setField(field.key, v)}
+                  assetModules={assetModules}
                 />
               </div>
             ))}
@@ -479,9 +507,10 @@ interface ContentEditorProps {
   module: ContentModuleSummary;
   accessToken: string;
   onClose: () => void;
+  assetModules?: AssetModuleSummary[];
 }
 
-export default function ContentEditor({ module, accessToken, onClose }: ContentEditorProps) {
+export default function ContentEditor({ module, accessToken, onClose, assetModules }: ContentEditorProps) {
   const fields: ContentField[] = module.fields ?? [];
 
   const [sheetData, setSheetData] = useState<SheetData | null>(null);
@@ -687,6 +716,7 @@ export default function ContentEditor({ module, accessToken, onClose }: ContentE
           record={editingRecord.record}
           onSave={handleSave}
           onClose={() => setEditingRecord(null)}
+          assetModules={assetModules}
         />
       )}
 

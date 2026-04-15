@@ -12,6 +12,7 @@ import type {
   ContentModuleResult,
 } from '@/types';
 import { CONTENT_PROVISIONING_STEPS } from '@/lib/contentProvision';
+import { ASSET_PROVISIONING_STEPS } from '@/lib/assetProvision';
 
 // ─── Form defaults ────────────────────────────────────────────────────────────
 
@@ -59,6 +60,10 @@ const initialState: AppState = {
   contentModuleConfig: DEFAULT_CONTENT_CONFIG,
   contentResult: null,
   contentProvisionError: null,
+  // Asset module
+  assetBuilderName: '',
+  assetResult: null,
+  assetProvisionError: null,
 };
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
@@ -156,6 +161,20 @@ function reducer(state: AppState, action: AppAction): AppState {
         contentProvisionError: null,
         steps: CONTENT_PROVISIONING_STEPS,
       };
+
+    // ── Asset modules ─────────────────────────────────────────────────────────
+    case 'GO_TO_ASSET_BUILDER':
+      return { ...state, screen: 'asset-builder', assetBuilderName: '', assetResult: null, assetProvisionError: null, steps: ASSET_PROVISIONING_STEPS };
+    case 'SET_ASSET_BUILDER_NAME':
+      return { ...state, assetBuilderName: action.payload };
+    case 'START_ASSET_PROVISIONING':
+      return { ...state, screen: 'asset-provisioning', steps: ASSET_PROVISIONING_STEPS, assetProvisionError: null };
+    case 'SET_ASSET_RESULT':
+      return { ...state, screen: 'asset-result', assetResult: action.payload };
+    case 'ASSET_PROVISION_ERROR':
+      return { ...state, screen: 'asset-builder', assetProvisionError: action.payload };
+    case 'RESET_ASSET':
+      return { ...state, screen: 'dashboard', assetBuilderName: '', assetResult: null, assetProvisionError: null };
 
     default:
       return state;

@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { clsx } from 'clsx';
 import { useApp } from '@/context/AppContext';
-import { listMyForms, deleteForm, listMyModules } from '@/lib/myForms';
+import { listMyForms, deleteForm, listMyModules, listMyAssets } from '@/lib/myForms';
 import { revokeToken } from '@/lib/auth';
 import FormDetailModal from '@/components/FormDetailModal';
+import ContentModuleDetailModal from '@/components/ContentModuleDetailModal';
 import ContentEditor from '@/components/ContentEditor';
-import type { FormSummary, ContentModuleSummary } from '@/types';
+import AssetManager from '@/components/AssetManager';
+import type { FormSummary, ContentModuleSummary, AssetModuleSummary } from '@/types';
 import UserAvatar from '@/components/UserAvatar';
 import { GoogleSheetsIcon, GoogleAppsScriptIcon } from '@/components/google-icons';
 
@@ -49,12 +51,29 @@ function EditIcon({ className }: { className?: string }) {
   );
 }
 
+function BookIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M3 2.5A1.5 1.5 0 014.5 1H13v11H4.5A1.5 1.5 0 003 13.5v-11z" stroke="currentColor" strokeWidth="1.4"/>
+      <path d="M3 13.5A1.5 1.5 0 004.5 15H13v-3H4.5A1.5 1.5 0 003 13.5z" stroke="currentColor" strokeWidth="1.4"/>
+    </svg>
+  );
+}
+
 function DatabaseIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <svg className={className} style={style} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <ellipse cx="8" cy="4" rx="5" ry="2" stroke="currentColor" strokeWidth="1.5"/>
       <path d="M3 4v4c0 1.1 2.24 2 5 2s5-.9 5-2V4" stroke="currentColor" strokeWidth="1.5"/>
       <path d="M3 8v4c0 1.1 2.24 2 5 2s5-.9 5-2V8" stroke="currentColor" strokeWidth="1.5"/>
+    </svg>
+  );
+}
+
+function FolderIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg className={className} style={style} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M1 4.5A1.5 1.5 0 012.5 3h3.086a1.5 1.5 0 011.06.44l.915.914A1.5 1.5 0 008.62 4.9H13.5A1.5 1.5 0 0115 6.4v5.1A1.5 1.5 0 0113.5 13h-11A1.5 1.5 0 011 11.5v-7z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
     </svg>
   );
 }
@@ -395,10 +414,11 @@ interface ContentModuleCardProps {
   module: ContentModuleSummary;
   onDelete: (m: ContentModuleSummary) => void;
   onEdit: (m: ContentModuleSummary) => void;
+  onView: (m: ContentModuleSummary) => void;
   deleting: boolean;
 }
 
-function ContentModuleCard({ module, onDelete, onEdit, deleting }: ContentModuleCardProps) {
+function ContentModuleCard({ module, onDelete, onEdit, onView, deleting }: ContentModuleCardProps) {
   return (
     <div
       className="rounded-xl border p-5 flex flex-col gap-4"
@@ -473,6 +493,19 @@ function ContentModuleCard({ module, onDelete, onEdit, deleting }: ContentModule
           Edit content
         </button>
 
+        <button
+          type="button"
+          onClick={() => onView(module)}
+          disabled={deleting}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-50"
+          style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-accent)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-text)'; }}
+        >
+          <BookIcon className="w-3 h-3 shrink-0" />
+          Instructions
+        </button>
+
         <a
           href={module.sheetUrl}
           target="_blank"
@@ -521,6 +554,127 @@ function ContentModuleCard({ module, onDelete, onEdit, deleting }: ContentModule
 }
 
 // ---------------------------------------------------------------------------
+// AssetModuleCard
+// ---------------------------------------------------------------------------
+
+interface AssetModuleCardProps {
+  module: AssetModuleSummary;
+  onDelete: (m: AssetModuleSummary) => void;
+  onManage: (m: AssetModuleSummary) => void;
+  deleting: boolean;
+}
+
+function AssetModuleCard({ module, onDelete, onManage, deleting }: AssetModuleCardProps) {
+  return (
+    <div
+      className="rounded-xl border p-5 flex flex-col gap-4"
+      style={{
+        background: 'var(--color-surface)',
+        borderColor: 'var(--color-border)',
+        opacity: deleting ? 0.5 : 1,
+        transition: 'opacity 0.2s',
+      }}
+    >
+      <div className="flex items-start justify-between gap-3 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div
+            className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
+            style={{ background: 'oklch(0.78 0.18 75 / 0.10)', border: '1px solid oklch(0.78 0.18 75 / 0.25)' }}
+          >
+            <FolderIcon className="w-4 h-4" style={{ color: 'oklch(0.78 0.18 75)' }} />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text)' }}>
+                {module.moduleName}
+              </p>
+              <span
+                className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-semibold shrink-0"
+                style={{ background: 'oklch(0.78 0.18 75 / 0.12)', color: 'oklch(0.78 0.18 75)', border: '1px solid oklch(0.78 0.18 75 / 0.25)' }}
+              >
+                Beta
+              </span>
+            </div>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>
+              Created {formatDate(module.createdAt)}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => onDelete(module)}
+          disabled={deleting}
+          className="shrink-0 p-1.5 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+          style={{ background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}
+          onMouseEnter={(e) => {
+            if (!deleting) {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(239,68,68,0.5)';
+              (e.currentTarget as HTMLButtonElement).style.color = '#ef4444';
+              (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-border)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-muted)';
+            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+          }}
+          aria-label={`Delete ${module.moduleName}`}
+        >
+          <TrashIcon className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {module.deploymentUrl && (
+          <button
+            type="button"
+            onClick={() => onManage(module)}
+            disabled={deleting}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-50"
+            style={{ background: 'var(--color-accent-subtle)', borderColor: 'var(--color-accent-border)', color: 'var(--color-accent)' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent)'; (e.currentTarget as HTMLButtonElement).style.color = '#fff'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent-subtle)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-accent)'; }}
+          >
+            <FolderIcon className="w-3 h-3 shrink-0" />
+            Manage files
+          </button>
+        )}
+
+        {module.folderUrl && (
+          <a
+            href={module.folderUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+            style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text)'; }}
+          >
+            <FolderIcon className="w-3 h-3 shrink-0" />
+            Drive folder
+          </a>
+        )}
+
+        {module.deploymentUrl && (
+          <a
+            href={module.deploymentUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+            style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text)'; }}
+          >
+            <CodeIcon className="w-3 h-3 shrink-0" />
+            API endpoint
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Dashboard
 // ---------------------------------------------------------------------------
 
@@ -529,7 +683,7 @@ export default function Dashboard() {
   const user = state.auth.user!;
   const accessToken = state.auth.accessToken!;
 
-  const [activeTab, setActiveTab] = useState<'forms' | 'content'>('forms');
+  const [activeTab, setActiveTab] = useState<'forms' | 'content' | 'assets'>('forms');
 
   const [forms, setForms] = useState<FormSummary[]>([]);
   const [formsLoading, setFormsLoading] = useState(true);
@@ -540,12 +694,20 @@ export default function Dashboard() {
   const [editingModule, setEditingModule] = useState<ContentModuleSummary | null>(null);
   const [modulesError, setModulesError] = useState<string | null>(null);
 
+  const [assets, setAssets] = useState<AssetModuleSummary[]>([]);
+  const [assetsLoading, setAssetsLoading] = useState(true);
+  const [assetsError, setAssetsError] = useState<string | null>(null);
+  const [editingAsset, setEditingAsset] = useState<AssetModuleSummary | null>(null);
+  const [pendingDeleteAsset, setPendingDeleteAsset] = useState<AssetModuleSummary | null>(null);
+
   // Keep legacy name for forms section
   const loading = formsLoading;
   const loadError = formsError;
 
   // The form whose details modal is open
   const [selectedForm, setSelectedForm] = useState<FormSummary | null>(null);
+  // The module whose instructions modal is open
+  const [selectedModule, setSelectedModule] = useState<ContentModuleSummary | null>(null);
   // The form pending deletion confirmation
   const [pendingDelete, setPendingDelete] = useState<FormSummary | null>(null);
   // Module pending deletion
@@ -588,6 +750,40 @@ export default function Dashboard() {
 
     return () => { cancelled = true; };
   }, [accessToken]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setAssetsLoading(true);
+    setAssetsError(null);
+
+    listMyAssets(accessToken)
+      .then((result) => {
+        if (!cancelled) { setAssets(result); setAssetsLoading(false); }
+      })
+      .catch(() => {
+        if (!cancelled) { setAssetsError('Could not load asset modules. Please try again.'); setAssetsLoading(false); }
+      });
+
+    return () => { cancelled = true; };
+  }, [accessToken]);
+
+  async function handleConfirmDeleteAsset() {
+    if (!pendingDeleteAsset) return;
+    const mod = pendingDeleteAsset;
+    setPendingDeleteAsset(null);
+    setDeletingIds((prev) => new Set(prev).add(mod.sheetId));
+
+    try {
+      await deleteForm(accessToken, mod.sheetId);
+      setAssets((prev) => prev.filter((a) => a.sheetId !== mod.sheetId));
+    } catch { /* silent */ } finally {
+      setDeletingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(mod.sheetId);
+        return next;
+      });
+    }
+  }
 
   async function handleConfirmRevoke() {
     setRevoking(true);
@@ -720,7 +916,7 @@ export default function Dashboard() {
           className="flex items-center gap-1 p-1 rounded-xl"
           style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
         >
-          {(['forms', 'content'] as const).map((tab) => (
+          {(['forms', 'content', 'assets'] as const).map((tab) => (
             <button
               key={tab}
               type="button"
@@ -742,7 +938,7 @@ export default function Dashboard() {
                     </span>
                   )}
                 </>
-              ) : (
+              ) : tab === 'content' ? (
                 <>
                   <DatabaseIcon className="w-3.5 h-3.5" />
                   Content
@@ -755,6 +951,22 @@ export default function Dashboard() {
                   {modules.length > 0 && (
                     <span className="text-xs px-1.5 py-0.5 rounded-full font-mono" style={{ background: 'var(--color-border)', color: 'var(--color-muted)' }}>
                       {modules.length}
+                    </span>
+                  )}
+                </>
+              ) : (
+                <>
+                  <FolderIcon className="w-3.5 h-3.5" />
+                  Assets
+                  <span
+                    className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold"
+                    style={{ background: 'oklch(0.78 0.18 75 / 0.15)', color: 'oklch(0.78 0.18 75)' }}
+                  >
+                    Beta
+                  </span>
+                  {assets.length > 0 && (
+                    <span className="text-xs px-1.5 py-0.5 rounded-full font-mono" style={{ background: 'var(--color-border)', color: 'var(--color-muted)' }}>
+                      {assets.length}
                     </span>
                   )}
                 </>
@@ -874,7 +1086,66 @@ export default function Dashboard() {
               <div className="flex flex-col gap-3">
                 {modules.map((mod, index) => (
                   <motion.div key={mod.sheetId} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.06, duration: 0.35 }}>
-                    <ContentModuleCard module={mod} onDelete={setPendingDeleteModule} onEdit={setEditingModule} deleting={deletingIds.has(mod.sheetId)} />
+                    <ContentModuleCard module={mod} onDelete={setPendingDeleteModule} onEdit={setEditingModule} onView={setSelectedModule} deleting={deletingIds.has(mod.sheetId)} />
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ── Assets tab ── */}
+        {activeTab === 'assets' && (
+          <>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-base font-bold" style={{ color: 'var(--color-text)' }}>My Assets</h2>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>Public Drive folders with listing API endpoints</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'GO_TO_ASSET_BUILDER' })}
+                className="flex items-center gap-1.5 shrink-0 px-4 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                style={{ background: 'var(--color-accent)', color: '#fff' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent-hover)'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent)'; }}
+              >
+                <PlusIcon className="w-3.5 h-3.5" />
+                New asset module
+              </button>
+            </div>
+
+            {assetsLoading ? (
+              <div className="flex flex-col gap-3">
+                {[0, 1].map((i) => (
+                  <div key={i} className="rounded-xl border p-5 h-24 animate-pulse" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }} />
+                ))}
+              </div>
+            ) : assetsError ? (
+              <div className="rounded-xl border p-6 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                <p className="text-sm" style={{ color: 'var(--color-error)' }}>{assetsError}</p>
+                <button onClick={() => { setAssetsLoading(true); setAssetsError(null); listMyAssets(accessToken).then(setAssets).catch(() => setAssetsError('Could not load asset modules.')).finally(() => setAssetsLoading(false)); }} className="mt-3 text-xs underline" style={{ color: 'var(--color-muted)' }}>Try again</button>
+              </div>
+            ) : assets.length === 0 ? (
+              <div className="rounded-xl border p-10 flex flex-col items-center gap-4 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.78 0.18 75 / 0.10)', border: '1px solid oklch(0.78 0.18 75 / 0.25)' }}>
+                  <FolderIcon className="w-6 h-6" style={{ color: 'oklch(0.78 0.18 75)' }} />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>No asset modules yet</p>
+                  <p className="text-xs mt-1 max-w-xs" style={{ color: 'var(--color-muted)' }}>
+                    Create an asset module to provision a public Drive folder with a listing API endpoint.
+                  </p>
+                </div>
+                <button type="button" onClick={() => dispatch({ type: 'GO_TO_ASSET_BUILDER' })} className="mt-1 px-5 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]" style={{ background: 'var(--color-accent)', color: '#fff' }}>
+                  Create your first asset module
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {assets.map((asset, index) => (
+                  <motion.div key={asset.sheetId} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.06, duration: 0.35 }}>
+                    <AssetModuleCard module={asset} onDelete={setPendingDeleteAsset} onManage={setEditingAsset} deleting={deletingIds.has(asset.sheetId)} />
                   </motion.div>
                 ))}
               </div>
@@ -886,6 +1157,11 @@ export default function Dashboard() {
       {/* Form detail modal */}
       {selectedForm && (
         <FormDetailModal form={selectedForm} onClose={() => setSelectedForm(null)} />
+      )}
+
+      {/* Content module instructions modal */}
+      {selectedModule && (
+        <ContentModuleDetailModal module={selectedModule} onClose={() => setSelectedModule(null)} />
       )}
 
       {/* Delete form confirmation dialog */}
@@ -927,12 +1203,42 @@ export default function Dashboard() {
         />
       )}
 
+      {/* Delete asset module confirmation dialog */}
+      {pendingDeleteAsset && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
+          <div className="w-full max-w-sm rounded-2xl border p-6 flex flex-col gap-5" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+            <div className="flex flex-col gap-2">
+              <h2 className="text-base font-semibold" style={{ color: 'var(--color-text)' }}>
+                Delete &ldquo;{pendingDeleteAsset.moduleName}&rdquo;?
+              </h2>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                This will permanently delete the config spreadsheet and its bound Apps Script. The Drive folder and all files will still exist in your Drive — only the endpoint and config are removed. This cannot be undone.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={handleConfirmDeleteAsset} className="flex-1 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-400" style={{ background: '#ef4444', color: '#fff' }}>Delete</button>
+              <button onClick={() => setPendingDeleteAsset(null)} className="flex-1 py-2 rounded-lg border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]" style={{ background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* In-app content editor overlay */}
       {editingModule && (
         <ContentEditor
           module={editingModule}
           accessToken={accessToken}
           onClose={() => setEditingModule(null)}
+          assetModules={assets}
+        />
+      )}
+
+      {/* Asset manager overlay */}
+      {editingAsset && (
+        <AssetManager
+          module={editingAsset}
+          accessToken={accessToken}
+          onClose={() => setEditingAsset(null)}
         />
       )}
     </motion.main>

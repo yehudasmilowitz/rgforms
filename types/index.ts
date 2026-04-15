@@ -67,7 +67,46 @@ export type AppScreen =
   | 'result'
   | 'content-builder'
   | 'content-provisioning'
-  | 'content-result';
+  | 'content-result'
+  | 'asset-builder'
+  | 'asset-provisioning'
+  | 'asset-result';
+
+// ─── Asset Module Types ───────────────────────────────────────────────────────
+
+export interface AssetModuleResult {
+  sheetId: string;
+  sheetUrl: string;
+  scriptId: string;
+  scriptUrl: string;
+  folderId: string;
+  folderUrl: string;
+  deploymentUrl: string;
+}
+
+export interface AssetModuleSummary {
+  sheetId: string;
+  sheetUrl: string;
+  moduleName: string;
+  createdAt: string;
+  folderId: string;
+  folderUrl: string;
+  scriptId?: string;
+  scriptUrl?: string;
+  deploymentUrl?: string;
+}
+
+export interface AssetFile {
+  id: string;
+  name: string;
+  mimeType: string;
+  isImage: boolean;
+  size: number;
+  url: string;
+  driveUrl: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 // ─── Content Module Types ────────────────────────────────────────────────────
 
@@ -116,6 +155,7 @@ export interface ContentModuleSummary {
   fields?: ContentField[];
   hasSlug: boolean;
   hasPublished: boolean;
+  writeToken?: string;
 }
 
 // ─── App State ───────────────────────────────────────────────────────────────
@@ -133,6 +173,10 @@ export interface AppState {
   contentModuleConfig: ContentModuleConfig;
   contentResult: ContentModuleResult | null;
   contentProvisionError: string | null;
+  // Asset module state
+  assetBuilderName: string;
+  assetResult: AssetModuleResult | null;
+  assetProvisionError: string | null;
 }
 
 export type AppAction =
@@ -153,4 +197,11 @@ export type AppAction =
   | { type: 'START_CONTENT_PROVISIONING' }
   | { type: 'SET_CONTENT_RESULT'; payload: ContentModuleResult }
   | { type: 'CONTENT_PROVISION_ERROR'; payload: string }
-  | { type: 'RESET_CONTENT' };
+  | { type: 'RESET_CONTENT' }
+  // Asset module actions
+  | { type: 'GO_TO_ASSET_BUILDER' }
+  | { type: 'SET_ASSET_BUILDER_NAME'; payload: string }
+  | { type: 'START_ASSET_PROVISIONING' }
+  | { type: 'SET_ASSET_RESULT'; payload: AssetModuleResult }
+  | { type: 'ASSET_PROVISION_ERROR'; payload: string }
+  | { type: 'RESET_ASSET' };

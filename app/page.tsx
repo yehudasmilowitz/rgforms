@@ -12,6 +12,8 @@ import ProvisioningSteps from '@/components/ProvisioningSteps'
 import ResultPanel from '@/components/ResultPanel'
 import ContentBuilder from '@/components/ContentBuilder'
 import ContentResultPanel from '@/components/ContentResultPanel'
+import AssetBuilder from '@/components/AssetBuilder'
+import AssetResultPanel from '@/components/AssetResultPanel'
 import { GoogleSheetsIcon, GoogleAppsScriptIcon, GoogleDriveIcon, GoogleProfileIcon } from '@/components/google-icons'
 
 export default function Page() {
@@ -28,6 +30,9 @@ export default function Page() {
   if (state.screen === 'content-builder') return <ContentBuilder />
   if (state.screen === 'content-provisioning') return <ProvisioningSteps />
   if (state.screen === 'content-result') return <ContentResultPanel />
+  if (state.screen === 'asset-builder') return <AssetBuilder />
+  if (state.screen === 'asset-provisioning') return <ProvisioningSteps />
+  if (state.screen === 'asset-result') return <AssetResultPanel />
 
   // Landing screen
   return (
