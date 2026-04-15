@@ -17,7 +17,7 @@ export const ASSET_PROVISIONING_STEPS: ProvisioningStep[] = [
   { id: 'folder', label: 'Creating Drive folder',       description: 'Creating your public asset storage',          status: 'pending' },
   { id: 'share',  label: 'Making folder public',        description: 'Enabling public access to assets',            status: 'pending' },
   { id: 'script', label: 'Creating Apps Script',        description: 'Initializing the listing API project',        status: 'pending' },
-  { id: 'code',   label: 'Uploading handler code',      description: 'Deploying the doGet() file listing handler',  status: 'pending' },
+  { id: 'code',   label: 'Uploading handler code',      description: 'Writing the doGet() file listing handler',    status: 'pending' },
   { id: 'deploy', label: 'Publishing API endpoint',     description: 'Making your asset endpoint live',             status: 'pending' },
 ];
 
