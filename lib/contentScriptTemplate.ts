@@ -90,6 +90,11 @@ function jsonResponse(payload) {
   return output;
 }
 
+// Apps Script doGet() responses automatically include Access-Control-Allow-Origin: *
+// when deployed as ANYONE_ANONYMOUS. doPost() with form-encoded body (URLSearchParams)
+// is a CORS "simple request" — no preflight OPTIONS check — so it works cross-origin
+// without any extra headers. JSON Content-Type POST would fail; always use URLSearchParams.
+
 // ─── Read API (doGet) ────────────────────────────────────────────────────────
 
 function doGet(e) {

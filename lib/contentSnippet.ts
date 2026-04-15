@@ -11,20 +11,33 @@ export function generateReadSnippet(result: ContentModuleResult, config: Content
 
   return `// RG Content — ${config.name}
 // Read-only client — safe to use in public code
+//
+// Notes:
+// • First request is slow (800ms–2s) — Apps Script cold start + double redirect.
+//   Subsequent calls for the same URL are instant (served from in-memory cache).
+// • If the endpoint returns a 503, Google's quota is temporarily exhausted.
+//   The client retries once after a short delay before throwing.
+// • doGet() is a CORS-safe simple request — no preflight. Works from any origin.
 class RGContent {
   constructor(url) {
     this._url = url;
     this._cache = new Map();
   }
 
-  async _get(params) {
+  async _get(params, _retry) {
     const entries = Object.entries(params || {}).filter(([, v]) => v != null);
     const qs = entries.length ? '?' + new URLSearchParams(Object.fromEntries(entries)) : '';
     const url = this._url + qs;
     if (this._cache.has(url)) return this._cache.get(url);
     const res = await fetch(url);
-    if (!res.ok) throw new Error('RGContent fetch failed: ' + res.status);
+    if (res.status === 503 && !_retry) {
+      // Apps Script quota temporarily exhausted — retry once after 2s
+      await new Promise(r => setTimeout(r, 2000));
+      return this._get(params, true);
+    }
+    if (!res.ok) throw new Error('RGContent fetch failed (' + res.status + '). If this is a 503, the Apps Script quota may be exhausted.');
     const json = await res.json();
+    if (json.error) throw new Error('RGContent API error: ' + json.error);
     this._cache.set(url, json);
     return json;
   }
@@ -32,10 +45,10 @@ class RGContent {
   // Returns { data: [...], total, limit, offset }
   async list(params) { return this._get(params); }
 
-  // Returns a single item by slug field value
+  // Returns a single item by slug field value (null if not found)
   async get(slug) { return (await this._get({ slug })).data; }
 
-  // Returns a single item by _id
+  // Returns a single item by _id (null if not found)
   async getById(id) { return (await this._get({ _id: id })).data; }
 
   // Returns unique values of a field — useful for building filter UIs

@@ -280,6 +280,43 @@ export default function ContentResultPanel() {
           </a>
         </div>
 
+        {/* Limitations */}
+        <div
+          className="rounded-xl border p-5 flex flex-col gap-3"
+          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+        >
+          <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
+            Limitations to know
+          </p>
+          {[
+            {
+              title: 'Cold start latency',
+              body: 'The first request after a period of inactivity takes 800ms–2s due to Apps Script cold start and a mandatory double redirect on every call. Subsequent requests for the same URL are served from the in-memory cache instantly.',
+            },
+            {
+              title: 'CORS — doPost() must use form-encoding',
+              body: 'The generated write snippet uses application/x-www-form-urlencoded (URLSearchParams) intentionally. This is a CORS "simple request" — no preflight OPTIONS check — so it works cross-origin. Do not switch to JSON Content-Type; that triggers a preflight that Apps Script cannot respond to.',
+            },
+            {
+              title: 'Concurrent execution limit: 30',
+              body: 'Apps Script allows a maximum of 30 simultaneous script executions. For most client sites this is fine. If exceeded, Google returns a 503 — the RGContent client retries once automatically.',
+            },
+            {
+              title: 'Daily runtime quota',
+              body: 'Free Google accounts get 90 minutes of total Apps Script runtime per day. Google Workspace accounts get 6 hours. For read-heavy public sites, each doGet() call consumes a small slice of this quota.',
+            },
+            {
+              title: 'No PUT / DELETE HTTP verbs',
+              body: 'Apps Script only handles GET and POST. Update and delete operations are tunnelled through POST using the _action parameter — this is already handled by the generated write API.',
+            },
+          ].map(({ title, body }) => (
+            <div key={title} className="flex flex-col gap-0.5">
+              <p className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>{title}</p>
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{body}</p>
+            </div>
+          ))}
+        </div>
+
         {/* Actions */}
         <div className="flex gap-3 pt-2">
           <button
