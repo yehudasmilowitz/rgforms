@@ -1,4 +1,4 @@
-import type { FormField, FormSummary } from '@/types';
+import type { FormField, FormSummary, ContentField, ContentModuleSummary } from '@/types';
 
 const DRIVE_API = 'https://www.googleapis.com/drive/v3/files';
 const SHEETS_VALUES_API = 'https://sheets.googleapis.com/v4/spreadsheets';
@@ -72,6 +72,50 @@ export async function listMyForms(accessToken: string): Promise<FormSummary[]> {
   );
 
   return forms.filter((f): f is FormSummary => f !== null);
+}
+
+// List all content modules created by rgforms for this user.
+export async function listMyModules(accessToken: string): Promise<ContentModuleSummary[]> {
+  const query = encodeURIComponent("mimeType='application/vnd.google-apps.spreadsheet' and trashed=false");
+  const fields = encodeURIComponent('files(id,name,createdTime,webViewLink)');
+  const res = await fetch(
+    `${DRIVE_API}?q=${query}&fields=${fields}&orderBy=createdTime desc`,
+    { headers: authHeaders(accessToken) }
+  );
+  if (!res.ok) return [];
+
+  const data = await res.json() as {
+    files?: Array<{ id: string; name: string; createdTime: string; webViewLink: string }>;
+  };
+
+  const modules = await Promise.all(
+    (data.files ?? []).map(async (file) => {
+      const config = await readConfigTab(accessToken, file.id);
+      if (config.moduleType !== 'content') return null;
+
+      const scriptId = config.scriptId || undefined;
+      let fields: ContentField[] | undefined;
+      try {
+        if (config.fields) fields = JSON.parse(config.fields) as ContentField[];
+      } catch { /* ignore */ }
+
+      const summary: ContentModuleSummary = {
+        sheetId: file.id,
+        sheetUrl: file.webViewLink,
+        moduleName: config.moduleName ?? file.name,
+        createdAt: config.createdAt ?? file.createdTime,
+        scriptId,
+        scriptUrl: scriptId ? `https://script.google.com/d/${scriptId}/edit` : undefined,
+        deploymentUrl: config.deploymentUrl || undefined,
+        fields,
+        hasSlug: config.hasSlug === 'true',
+        hasPublished: config.hasPublished === 'true',
+      };
+      return summary;
+    })
+  );
+
+  return modules.filter((m): m is ContentModuleSummary => m !== null);
 }
 
 // Delete a form's Sheet. Because the Apps Script is container-bound to the sheet,

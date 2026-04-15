@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { clsx } from 'clsx';
 import { useApp } from '@/context/AppContext';
-import { listMyForms, deleteForm } from '@/lib/myForms';
+import { listMyForms, deleteForm, listMyModules } from '@/lib/myForms';
 import { revokeToken } from '@/lib/auth';
 import FormDetailModal from '@/components/FormDetailModal';
-import type { FormSummary } from '@/types';
+import type { FormSummary, ContentModuleSummary } from '@/types';
 import UserAvatar from '@/components/UserAvatar';
 import { GoogleSheetsIcon, GoogleAppsScriptIcon } from '@/components/google-icons';
 
@@ -36,6 +36,16 @@ function CodeIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path d="M5 4L1 8l4 4M11 4l4 4-4 4M9 2l-2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function DatabaseIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg className={className} style={style} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="8" cy="4" rx="5" ry="2" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M3 4v4c0 1.1 2.24 2 5 2s5-.9 5-2V4" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M3 8v4c0 1.1 2.24 2 5 2s5-.9 5-2V8" stroke="currentColor" strokeWidth="1.5"/>
     </svg>
   );
 }
@@ -369,6 +379,125 @@ function DeleteConfirmDialog({ form, onConfirm, onCancel }: DeleteConfirmProps) 
 }
 
 // ---------------------------------------------------------------------------
+// ContentModuleCard
+// ---------------------------------------------------------------------------
+
+interface ContentModuleCardProps {
+  module: ContentModuleSummary;
+  onDelete: (m: ContentModuleSummary) => void;
+  deleting: boolean;
+}
+
+function ContentModuleCard({ module, onDelete, deleting }: ContentModuleCardProps) {
+  return (
+    <div
+      className="rounded-xl border p-5 flex flex-col gap-4"
+      style={{
+        background: 'var(--color-surface)',
+        borderColor: 'var(--color-border)',
+        opacity: deleting ? 0.5 : 1,
+        transition: 'opacity 0.2s',
+      }}
+    >
+      <div className="flex items-start justify-between gap-3 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div
+            className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
+            style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}
+          >
+            <DatabaseIcon className="w-4 h-4" style={{ color: 'var(--color-accent)' }} />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text)' }}>
+                {module.moduleName}
+              </p>
+              <span
+                className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-semibold shrink-0"
+                style={{ background: 'oklch(0.78 0.18 75 / 0.12)', color: 'oklch(0.78 0.18 75)', border: '1px solid oklch(0.78 0.18 75 / 0.25)' }}
+              >
+                Beta
+              </span>
+            </div>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>
+              Created {formatDate(module.createdAt)}
+              {module.fields && ` · ${module.fields.length} field${module.fields.length !== 1 ? 's' : ''}`}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => onDelete(module)}
+          disabled={deleting}
+          className="shrink-0 p-1.5 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+          style={{ background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}
+          onMouseEnter={(e) => {
+            if (!deleting) {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(239,68,68,0.5)';
+              (e.currentTarget as HTMLButtonElement).style.color = '#ef4444';
+              (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-border)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-muted)';
+            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+          }}
+          aria-label={`Delete ${module.moduleName}`}
+        >
+          <TrashIcon className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <a
+          href={module.sheetUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+          style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text)'; }}
+        >
+          <GoogleSheetsIcon className="w-3 h-3 shrink-0" />
+          Manage content
+        </a>
+
+        {module.deploymentUrl && (
+          <a
+            href={module.deploymentUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+            style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text)'; }}
+          >
+            <CodeIcon className="w-3 h-3 shrink-0" />
+            API endpoint
+          </a>
+        )}
+
+        {module.scriptUrl && (
+          <a
+            href={module.scriptUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+            style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text)'; }}
+          >
+            <GoogleAppsScriptIcon className="w-3 h-3 shrink-0" />
+            Apps Script
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Dashboard
 // ---------------------------------------------------------------------------
 
@@ -377,14 +506,26 @@ export default function Dashboard() {
   const user = state.auth.user!;
   const accessToken = state.auth.accessToken!;
 
+  const [activeTab, setActiveTab] = useState<'forms' | 'content'>('forms');
+
   const [forms, setForms] = useState<FormSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [formsLoading, setFormsLoading] = useState(true);
+  const [formsError, setFormsError] = useState<string | null>(null);
+
+  const [modules, setModules] = useState<ContentModuleSummary[]>([]);
+  const [modulesLoading, setModulesLoading] = useState(true);
+  const [modulesError, setModulesError] = useState<string | null>(null);
+
+  // Keep legacy name for forms section
+  const loading = formsLoading;
+  const loadError = formsError;
 
   // The form whose details modal is open
   const [selectedForm, setSelectedForm] = useState<FormSummary | null>(null);
   // The form pending deletion confirmation
   const [pendingDelete, setPendingDelete] = useState<FormSummary | null>(null);
+  // Module pending deletion
+  const [pendingDeleteModule, setPendingDeleteModule] = useState<ContentModuleSummary | null>(null);
   // IDs currently being deleted (for optimistic UI)
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   // Revoke permissions flow
@@ -394,21 +535,31 @@ export default function Dashboard() {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setLoadError(null);
+    setFormsLoading(true);
+    setFormsError(null);
 
     listMyForms(accessToken)
       .then((result) => {
-        if (!cancelled) {
-          setForms(result);
-          setLoading(false);
-        }
+        if (!cancelled) { setForms(result); setFormsLoading(false); }
       })
       .catch(() => {
-        if (!cancelled) {
-          setLoadError('Could not load your forms. Please try again.');
-          setLoading(false);
-        }
+        if (!cancelled) { setFormsError('Could not load your forms. Please try again.'); setFormsLoading(false); }
+      });
+
+    return () => { cancelled = true; };
+  }, [accessToken]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setModulesLoading(true);
+    setModulesError(null);
+
+    listMyModules(accessToken)
+      .then((result) => {
+        if (!cancelled) { setModules(result); setModulesLoading(false); }
+      })
+      .catch(() => {
+        if (!cancelled) { setModulesError('Could not load content modules. Please try again.'); setModulesLoading(false); }
       });
 
     return () => { cancelled = true; };
@@ -446,6 +597,24 @@ export default function Dashboard() {
       setDeletingIds((prev) => {
         const next = new Set(prev);
         next.delete(form.sheetId);
+        return next;
+      });
+    }
+  }
+
+  async function handleConfirmDeleteModule() {
+    if (!pendingDeleteModule) return;
+    const mod = pendingDeleteModule;
+    setPendingDeleteModule(null);
+    setDeletingIds((prev) => new Set(prev).add(mod.sheetId));
+
+    try {
+      await deleteForm(accessToken, mod.sheetId); // same Drive delete
+      setModules((prev) => prev.filter((m) => m.sheetId !== mod.sheetId));
+    } catch { /* silent */ } finally {
+      setDeletingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(mod.sheetId);
         return next;
       });
     }
@@ -522,112 +691,171 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* Page title + create button */}
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
-              My Forms
-            </h1>
-            <p className="text-sm mt-0.5" style={{ color: 'var(--color-muted)' }}>
-              Forms you&apos;ve created with RG Forms
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => dispatch({ type: 'GO_TO_BUILDER' })}
-            className="flex items-center gap-1.5 shrink-0 px-4 py-2 rounded-lg text-sm font-semibold transition-opacity focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-            style={{ background: 'var(--color-accent)', color: '#fff' }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent-hover)';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent)';
-            }}
-          >
-            <PlusIcon className="w-3.5 h-3.5" />
-            New form
-          </button>
+        {/* Tabs */}
+        <div
+          className="flex items-center gap-1 p-1 rounded-xl"
+          style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
+        >
+          {(['forms', 'content'] as const).map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setActiveTab(tab)}
+              className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+              style={{
+                background: activeTab === tab ? 'var(--color-surface-2)' : 'transparent',
+                color: activeTab === tab ? 'var(--color-text)' : 'var(--color-muted)',
+                border: activeTab === tab ? '1px solid var(--color-border)' : '1px solid transparent',
+              }}
+            >
+              {tab === 'forms' ? (
+                <>
+                  <GoogleSheetsIcon className="w-3.5 h-3.5" />
+                  Forms
+                  {forms.length > 0 && (
+                    <span className="text-xs px-1.5 py-0.5 rounded-full font-mono" style={{ background: 'var(--color-border)', color: 'var(--color-muted)' }}>
+                      {forms.length}
+                    </span>
+                  )}
+                </>
+              ) : (
+                <>
+                  <DatabaseIcon className="w-3.5 h-3.5" />
+                  Content
+                  <span
+                    className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold"
+                    style={{ background: 'oklch(0.78 0.18 75 / 0.15)', color: 'oklch(0.78 0.18 75)' }}
+                  >
+                    Beta
+                  </span>
+                  {modules.length > 0 && (
+                    <span className="text-xs px-1.5 py-0.5 rounded-full font-mono" style={{ background: 'var(--color-border)', color: 'var(--color-muted)' }}>
+                      {modules.length}
+                    </span>
+                  )}
+                </>
+              )}
+            </button>
+          ))}
         </div>
 
-        {/* Forms list */}
-        {loading ? (
-          <div className="flex flex-col gap-3">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="rounded-xl border p-5 h-24 animate-pulse"
-                style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
-              />
-            ))}
-          </div>
-        ) : loadError ? (
-          <div
-            className="rounded-xl border p-6 text-center"
-            style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
-          >
-            <p className="text-sm" style={{ color: 'var(--color-error)' }}>{loadError}</p>
-            <button
-              onClick={() => {
-                setLoading(true);
-                setLoadError(null);
-                listMyForms(accessToken)
-                  .then(setForms)
-                  .catch(() => setLoadError('Could not load your forms. Please try again.'))
-                  .finally(() => setLoading(false));
-              }}
-              className="mt-3 text-xs underline"
-              style={{ color: 'var(--color-muted)' }}
-            >
-              Try again
-            </button>
-          </div>
-        ) : forms.length === 0 ? (
-          <div
-            className="rounded-xl border p-10 flex flex-col items-center gap-4 text-center"
-            style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
-          >
-            <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center"
-              style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}
-            >
-              <GoogleSheetsIcon className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
-                No forms yet
-              </p>
-              <p className="text-xs mt-1 max-w-xs" style={{ color: 'var(--color-muted)' }}>
-                Create your first form to get started. Your Google Sheet and Apps Script will appear here.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => dispatch({ type: 'GO_TO_BUILDER' })}
-              className="mt-1 px-5 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-              style={{ background: 'var(--color-accent)', color: '#fff' }}
-            >
-              Create your first form
-            </button>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {forms.map((form, index) => (
-              <motion.div
-                key={form.sheetId}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.06, duration: 0.35 }}
+        {/* ── Forms tab ── */}
+        {activeTab === 'forms' && (
+          <>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-base font-bold" style={{ color: 'var(--color-text)' }}>My Forms</h2>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>Contact forms backed by your Google Drive</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'GO_TO_BUILDER' })}
+                className="flex items-center gap-1.5 shrink-0 px-4 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                style={{ background: 'var(--color-accent)', color: '#fff' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent-hover)'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent)'; }}
               >
-                <FormCard
-                  form={form}
-                  onDelete={setPendingDelete}
-                  onView={setSelectedForm}
-                  deleting={deletingIds.has(form.sheetId)}
-                />
-              </motion.div>
-            ))}
-          </div>
+                <PlusIcon className="w-3.5 h-3.5" />
+                New form
+              </button>
+            </div>
+
+            {loading ? (
+              <div className="flex flex-col gap-3">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="rounded-xl border p-5 h-24 animate-pulse" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }} />
+                ))}
+              </div>
+            ) : loadError ? (
+              <div className="rounded-xl border p-6 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                <p className="text-sm" style={{ color: 'var(--color-error)' }}>{loadError}</p>
+                <button
+                  onClick={() => { setFormsLoading(true); setFormsError(null); listMyForms(accessToken).then(setForms).catch(() => setFormsError('Could not load your forms. Please try again.')).finally(() => setFormsLoading(false)); }}
+                  className="mt-3 text-xs underline" style={{ color: 'var(--color-muted)' }}
+                >Try again</button>
+              </div>
+            ) : forms.length === 0 ? (
+              <div className="rounded-xl border p-10 flex flex-col items-center gap-4 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
+                  <GoogleSheetsIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>No forms yet</p>
+                  <p className="text-xs mt-1 max-w-xs" style={{ color: 'var(--color-muted)' }}>Create your first form to get started.</p>
+                </div>
+                <button type="button" onClick={() => dispatch({ type: 'GO_TO_BUILDER' })} className="mt-1 px-5 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]" style={{ background: 'var(--color-accent)', color: '#fff' }}>
+                  Create your first form
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {forms.map((form, index) => (
+                  <motion.div key={form.sheetId} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.06, duration: 0.35 }}>
+                    <FormCard form={form} onDelete={setPendingDelete} onView={setSelectedForm} deleting={deletingIds.has(form.sheetId)} />
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ── Content tab ── */}
+        {activeTab === 'content' && (
+          <>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-base font-bold" style={{ color: 'var(--color-text)' }}>Content Modules</h2>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>Google Sheets as live read/write content APIs</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'GO_TO_CONTENT_BUILDER' })}
+                className="flex items-center gap-1.5 shrink-0 px-4 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                style={{ background: 'var(--color-accent)', color: '#fff' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent-hover)'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent)'; }}
+              >
+                <PlusIcon className="w-3.5 h-3.5" />
+                New module
+              </button>
+            </div>
+
+            {modulesLoading ? (
+              <div className="flex flex-col gap-3">
+                {[0, 1].map((i) => (
+                  <div key={i} className="rounded-xl border p-5 h-24 animate-pulse" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }} />
+                ))}
+              </div>
+            ) : modulesError ? (
+              <div className="rounded-xl border p-6 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                <p className="text-sm" style={{ color: 'var(--color-error)' }}>{modulesError}</p>
+                <button onClick={() => { setModulesLoading(true); setModulesError(null); listMyModules(accessToken).then(setModules).catch(() => setModulesError('Could not load content modules.')).finally(() => setModulesLoading(false)); }} className="mt-3 text-xs underline" style={{ color: 'var(--color-muted)' }}>Try again</button>
+              </div>
+            ) : modules.length === 0 ? (
+              <div className="rounded-xl border p-10 flex flex-col items-center gap-4 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
+                  <DatabaseIcon className="w-6 h-6" style={{ color: 'var(--color-accent)' }} />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>No content modules yet</p>
+                  <p className="text-xs mt-1 max-w-xs" style={{ color: 'var(--color-muted)' }}>
+                    Create a content module to turn a Google Sheet into a live read/write API for your website.
+                  </p>
+                </div>
+                <button type="button" onClick={() => dispatch({ type: 'GO_TO_CONTENT_BUILDER' })} className="mt-1 px-5 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]" style={{ background: 'var(--color-accent)', color: '#fff' }}>
+                  Create your first module
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {modules.map((mod, index) => (
+                  <motion.div key={mod.sheetId} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.06, duration: 0.35 }}>
+                    <ContentModuleCard module={mod} onDelete={setPendingDeleteModule} deleting={deletingIds.has(mod.sheetId)} />
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -636,13 +864,33 @@ export default function Dashboard() {
         <FormDetailModal form={selectedForm} onClose={() => setSelectedForm(null)} />
       )}
 
-      {/* Delete confirmation dialog */}
+      {/* Delete form confirmation dialog */}
       {pendingDelete && (
         <DeleteConfirmDialog
           form={pendingDelete}
           onConfirm={handleConfirmDelete}
           onCancel={() => setPendingDelete(null)}
         />
+      )}
+
+      {/* Delete module confirmation dialog */}
+      {pendingDeleteModule && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
+          <div className="w-full max-w-sm rounded-2xl border p-6 flex flex-col gap-5" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+            <div className="flex flex-col gap-2">
+              <h2 className="text-base font-semibold" style={{ color: 'var(--color-text)' }}>
+                Delete &ldquo;{pendingDeleteModule.moduleName}&rdquo;?
+              </h2>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                This will permanently delete the Google Sheet and its bound Apps Script. All content data will be lost. This cannot be undone.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={handleConfirmDeleteModule} className="flex-1 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-400" style={{ background: '#ef4444', color: '#fff' }}>Delete</button>
+              <button onClick={() => setPendingDeleteModule(null)} className="flex-1 py-2 rounded-lg border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]" style={{ background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}>Cancel</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Revoke permissions confirmation dialog */}
