@@ -13,6 +13,7 @@ import type {
 } from '@/types';
 import { CONTENT_PROVISIONING_STEPS } from '@/lib/contentProvision';
 import { ASSET_PROVISIONING_STEPS } from '@/lib/assetProvision';
+import { SITE_CONFIG_PROVISIONING_STEPS } from '@/lib/siteConfigProvision';
 
 // ─── Form defaults ────────────────────────────────────────────────────────────
 
@@ -64,6 +65,10 @@ const initialState: AppState = {
   assetBuilderName: '',
   assetResult: null,
   assetProvisionError: null,
+  // Site Config module
+  siteConfigBuilderName: '',
+  siteConfigResult: null,
+  siteConfigProvisionError: null,
 };
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
@@ -175,6 +180,20 @@ function reducer(state: AppState, action: AppAction): AppState {
       return { ...state, screen: 'asset-builder', assetProvisionError: action.payload };
     case 'RESET_ASSET':
       return { ...state, screen: 'dashboard', assetBuilderName: '', assetResult: null, assetProvisionError: null };
+
+    // ── Site Config modules ───────────────────────────────────────────────────
+    case 'GO_TO_SITECONFIG_BUILDER':
+      return { ...state, screen: 'siteconfig-builder', siteConfigBuilderName: '', siteConfigResult: null, siteConfigProvisionError: null, steps: SITE_CONFIG_PROVISIONING_STEPS };
+    case 'SET_SITECONFIG_BUILDER_NAME':
+      return { ...state, siteConfigBuilderName: action.payload };
+    case 'START_SITECONFIG_PROVISIONING':
+      return { ...state, screen: 'siteconfig-provisioning', steps: SITE_CONFIG_PROVISIONING_STEPS, siteConfigProvisionError: null };
+    case 'SET_SITECONFIG_RESULT':
+      return { ...state, screen: 'siteconfig-result', siteConfigResult: action.payload };
+    case 'SITECONFIG_PROVISION_ERROR':
+      return { ...state, screen: 'siteconfig-builder', siteConfigProvisionError: action.payload };
+    case 'RESET_SITECONFIG':
+      return { ...state, screen: 'dashboard', siteConfigBuilderName: '', siteConfigResult: null, siteConfigProvisionError: null };
 
     default:
       return state;

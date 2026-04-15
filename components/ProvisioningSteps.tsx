@@ -148,8 +148,9 @@ function StepRow({ step }: { step: ProvisioningStep }) {
 }
 
 function headingForScreen(screen: string) {
-  if (screen === 'asset-provisioning')   return { title: 'Setting up your asset module…', done: 'All done! Loading your module…' };
-  if (screen === 'content-provisioning') return { title: 'Setting up your content module…', done: 'All done! Building your module…' };
+  if (screen === 'asset-provisioning')      return { title: 'Setting up your asset module…',  done: 'All done! Loading your module…' };
+  if (screen === 'content-provisioning')    return { title: 'Setting up your content module…', done: 'All done! Building your module…' };
+  if (screen === 'siteconfig-provisioning') return { title: 'Setting up your site config…',    done: 'All done! Your config is live…' };
   return { title: 'Setting up your form…', done: 'All done! Building your embed…' };
 }
 

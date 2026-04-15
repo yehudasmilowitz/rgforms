@@ -70,7 +70,30 @@ export type AppScreen =
   | 'content-result'
   | 'asset-builder'
   | 'asset-provisioning'
-  | 'asset-result';
+  | 'asset-result'
+  | 'siteconfig-builder'
+  | 'siteconfig-provisioning'
+  | 'siteconfig-result';
+
+// ─── Site Config Module Types ─────────────────────────────────────────────────
+
+export interface SiteConfigResult {
+  sheetId: string;
+  sheetUrl: string;
+  scriptId: string;
+  scriptUrl: string;
+  deploymentUrl: string;
+}
+
+export interface SiteConfigModuleSummary {
+  sheetId: string;
+  sheetUrl: string;
+  moduleName: string;
+  createdAt: string;
+  scriptId?: string;
+  scriptUrl?: string;
+  deploymentUrl?: string;
+}
 
 // ─── Asset Module Types ───────────────────────────────────────────────────────
 
@@ -177,6 +200,10 @@ export interface AppState {
   assetBuilderName: string;
   assetResult: AssetModuleResult | null;
   assetProvisionError: string | null;
+  // Site Config module state
+  siteConfigBuilderName: string;
+  siteConfigResult: SiteConfigResult | null;
+  siteConfigProvisionError: string | null;
 }
 
 export type AppAction =
@@ -204,4 +231,11 @@ export type AppAction =
   | { type: 'START_ASSET_PROVISIONING' }
   | { type: 'SET_ASSET_RESULT'; payload: AssetModuleResult }
   | { type: 'ASSET_PROVISION_ERROR'; payload: string }
-  | { type: 'RESET_ASSET' };
+  | { type: 'RESET_ASSET' }
+  // Site Config module actions
+  | { type: 'GO_TO_SITECONFIG_BUILDER' }
+  | { type: 'SET_SITECONFIG_BUILDER_NAME'; payload: string }
+  | { type: 'START_SITECONFIG_PROVISIONING' }
+  | { type: 'SET_SITECONFIG_RESULT'; payload: SiteConfigResult }
+  | { type: 'SITECONFIG_PROVISION_ERROR'; payload: string }
+  | { type: 'RESET_SITECONFIG' };
