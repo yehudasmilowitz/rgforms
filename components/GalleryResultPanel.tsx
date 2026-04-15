@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { useApp } from '@/context/AppContext';
 import CopyBlock from '@/components/CopyBlock';
+import GalleryManager from '@/components/GalleryManager';
 import { GoogleSheetsIcon, GoogleAppsScriptIcon } from '@/components/google-icons';
 import { generateGalleryClientSnippet, generateGalleryServerSnippet, generateGallerySchemaSnippet } from '@/lib/gallerySnippet';
 
@@ -44,12 +45,16 @@ export default function GalleryResultPanel() {
   const result = state.galleryResult!;
   const name = state.galleryBuilderName;
   const [tab, setTab] = useState<Tab>('client');
+  const [managerOpen, setManagerOpen] = useState(false);
 
   const clientSnippet = generateGalleryClientSnippet(result, name);
   const serverSnippet = generateGalleryServerSnippet(result, name);
   const schemaSnippet = generateGallerySchemaSnippet(name);
+  const accessToken = state.auth.accessToken!;
+  const moduleForManager = { sheetId: result.sheetId, sheetUrl: result.sheetUrl, scriptUrl: result.scriptUrl, deploymentUrl: result.deploymentUrl, moduleName: name, createdAt: new Date().toISOString() };
 
   return (
+    <>
     <motion.main
       className="min-h-screen flex flex-col px-4 py-10"
       style={{ background: 'var(--color-bg)', color: 'var(--color-text)' }}
@@ -95,19 +100,25 @@ export default function GalleryResultPanel() {
           </div>
         </div>
 
-        {/* Next step tip */}
+        {/* Next step — manage images */}
         <div
-          className="rounded-xl border p-4 flex items-start gap-3"
-          style={{ background: `${ACCENT_SUBTLE}`, borderColor: ACCENT_BORDER }}
+          className="rounded-xl border p-4 flex items-center justify-between gap-4"
+          style={{ background: ACCENT_SUBTLE, borderColor: ACCENT_BORDER }}
         >
-          <span className="text-base shrink-0 mt-0.5">🖼️</span>
-          <div className="flex flex-col gap-1">
-            <p className="text-sm font-semibold" style={{ color: ACCENT }}>Add your images</p>
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <p className="text-sm font-semibold" style={{ color: ACCENT }}>Add your images now</p>
             <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-              Open the Gallery Sheet and replace the placeholder rows with real image URLs.
-              Works with RG Assets CDN links, Google Drive shareable links, or any public image URL.
+              Upload images directly — they go to Drive and the URL auto-fills into the sheet.
             </p>
           </div>
+          <button
+            type="button"
+            onClick={() => setManagerOpen(true)}
+            className="shrink-0 px-4 py-2 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+            style={{ background: ACCENT, color: '#fff' }}
+          >
+            Manage images
+          </button>
         </div>
 
         {/* Auth */}
@@ -237,5 +248,14 @@ export default function GalleryResultPanel() {
         </div>
       </div>
     </motion.main>
+
+      {managerOpen && (
+        <GalleryManager
+          module={moduleForManager}
+          accessToken={accessToken}
+          onClose={() => setManagerOpen(false)}
+        />
+      )}
+    </>
   );
 }

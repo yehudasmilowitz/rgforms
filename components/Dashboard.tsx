@@ -14,6 +14,7 @@ import AssetDetailModal from '@/components/AssetDetailModal';
 import SiteConfigDetailModal from '@/components/SiteConfigDetailModal';
 import CalendarDetailModal from '@/components/CalendarDetailModal';
 import GalleryDetailModal from '@/components/GalleryDetailModal';
+import GalleryManager from '@/components/GalleryManager';
 import SkillExportModal from '@/components/SkillExportModal';
 import type { FormSummary, ContentModuleSummary, AssetModuleSummary, SiteConfigModuleSummary, CalendarModuleSummary, GalleryModuleSummary } from '@/types';
 import UserAvatar from '@/components/UserAvatar';
@@ -950,11 +951,12 @@ function CalendarModuleCard({ module, onDelete, onView, deleting }: CalendarModu
 interface GalleryModuleCardProps {
   module: GalleryModuleSummary;
   onDelete: (m: GalleryModuleSummary) => void;
+  onManage: (m: GalleryModuleSummary) => void;
   onView: (m: GalleryModuleSummary) => void;
   deleting: boolean;
 }
 
-function GalleryModuleCard({ module, onDelete, onView, deleting }: GalleryModuleCardProps) {
+function GalleryModuleCard({ module, onDelete, onManage, onView, deleting }: GalleryModuleCardProps) {
   return (
     <div
       className="rounded-xl border p-5 flex flex-col gap-4"
@@ -989,6 +991,17 @@ function GalleryModuleCard({ module, onDelete, onView, deleting }: GalleryModule
       </div>
 
       <div className="flex flex-wrap gap-2">
+        {module.deploymentUrl && (
+          <button type="button" onClick={() => onManage(module)} disabled={deleting}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-50"
+            style={{ background: 'var(--color-accent-subtle)', borderColor: 'var(--color-accent-border)', color: 'var(--color-accent)' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent)'; (e.currentTarget as HTMLButtonElement).style.color = '#fff'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent-subtle)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-accent)'; }}
+          >
+            <GalleryIcon className="w-3 h-3 shrink-0" />
+            Manage images
+          </button>
+        )}
         <button type="button" onClick={() => onView(module)} disabled={deleting}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-50"
           style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
@@ -1079,6 +1092,7 @@ export default function Dashboard() {
   const [galleriesError, setGalleriesError] = useState<string | null>(null);
   const [selectedGallery, setSelectedGallery] = useState<GalleryModuleSummary | null>(null);
   const [pendingDeleteGallery, setPendingDeleteGallery] = useState<GalleryModuleSummary | null>(null);
+  const [editingGallery, setEditingGallery] = useState<GalleryModuleSummary | null>(null);
 
   // Keep legacy name for forms section
   const loading = formsLoading;
@@ -1787,7 +1801,7 @@ export default function Dashboard() {
               <div className="flex flex-col gap-3">
                 {galleries.map((gallery, index) => (
                   <motion.div key={gallery.sheetId} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.06, duration: 0.35 }}>
-                    <GalleryModuleCard module={gallery} onDelete={setPendingDeleteGallery} onView={setSelectedGallery} deleting={deletingIds.has(gallery.sheetId)} />
+                    <GalleryModuleCard module={gallery} onDelete={setPendingDeleteGallery} onManage={setEditingGallery} onView={setSelectedGallery} deleting={deletingIds.has(gallery.sheetId)} />
                   </motion.div>
                 ))}
               </div>
@@ -1974,6 +1988,15 @@ export default function Dashboard() {
           module={editingAsset}
           accessToken={accessToken}
           onClose={() => setEditingAsset(null)}
+        />
+      )}
+
+      {/* Gallery manager overlay */}
+      {editingGallery && (
+        <GalleryManager
+          module={editingGallery}
+          accessToken={accessToken}
+          onClose={() => setEditingGallery(null)}
         />
       )}
     </motion.main>
