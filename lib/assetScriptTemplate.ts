@@ -13,6 +13,7 @@ export const ASSET_SCRIPT_MANIFEST = {
   // We do NOT need drive.readonly ("See and download all your Drive files").
   oauthScopes: [
     'https://www.googleapis.com/auth/drive.metadata.readonly',
+    'https://www.googleapis.com/auth/script.external_request',
   ],
 };
 
