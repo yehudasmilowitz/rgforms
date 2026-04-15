@@ -137,7 +137,7 @@ export default function AssetDetailModal({ module, onClose }: AssetDetailModalPr
             </div>
             {hasEndpoint && (
               <a
-                href={module.deploymentUrl}
+                href={module.deploymentUrl + '?_auth=1'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
@@ -165,7 +165,7 @@ export default function AssetDetailModal({ module, onClose }: AssetDetailModalPr
                     Script may need a one-time authorization —
                   </span>
                   <a
-                    href={module.deploymentUrl!}
+                    href={module.deploymentUrl! + '?_auth=1'}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-xs font-medium hover:opacity-80"

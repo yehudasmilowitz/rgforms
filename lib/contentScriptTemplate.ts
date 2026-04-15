@@ -90,6 +90,23 @@ function jsonResponse(payload) {
   return output;
 }
 
+function htmlConfirmation(name) {
+  var html = '<!DOCTYPE html><html><head><meta charset="utf-8">'
+    + '<meta name="viewport" content="width=device-width,initial-scale=1"><title>Authorized</title>'
+    + '<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;align-items:center;'
+    + 'justify-content:center;background:#0a0a0f;font-family:system-ui,sans-serif;color:#e2e8f0}'
+    + '.c{text-align:center;padding:2rem}.ic{width:56px;height:56px;border-radius:50%;background:#14532d;'
+    + 'display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem}'
+    + 'h1{margin:0 0 .5rem;font-size:1.2rem;font-weight:600}p{margin:0;color:#94a3b8;font-size:.875rem;line-height:1.5}'
+    + '</style></head><body><div class="c"><div class="ic">'
+    + '<svg width="28" height="28" viewBox="0 0 24 24" fill="none">'
+    + '<path d="M5 13l4 4L19 7" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'
+    + '</svg></div><h1>' + name + ' is authorized</h1>'
+    + '<p>This endpoint is live and ready to use.<br>You can close this tab.</p>'
+    + '</div></body></html>';
+  return HtmlService.createHtmlOutput(html);
+}
+
 // Apps Script doGet() responses automatically include Access-Control-Allow-Origin: *
 // when deployed as ANYONE_ANONYMOUS. doPost() with form-encoded body (URLSearchParams)
 // is a CORS "simple request" — no preflight OPTIONS check — so it works cross-origin
@@ -98,8 +115,9 @@ function jsonResponse(payload) {
 // ─── Read API (doGet) ────────────────────────────────────────────────────────
 
 function doGet(e) {
+  var p = (e && e.parameter) ? e.parameter : {};
+  if (p._auth) return htmlConfirmation(CONFIG.name);
   try {
-    var p = (e && e.parameter) ? e.parameter : {};
     var sheet = getSheet();
     if (!sheet) return jsonResponse({ error: 'Sheet not found', data: [] });
     var data = sheetToJson(sheet);

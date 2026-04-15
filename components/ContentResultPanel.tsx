@@ -155,7 +155,7 @@ export default function ContentResultPanel() {
             This only needs to be done once.
           </p>
           <a
-            href={result.deploymentUrl}
+            href={result.deploymentUrl + '?_auth=1'}
             target="_blank"
             rel="noopener noreferrer"
             className="self-start text-xs font-medium underline hover:no-underline"

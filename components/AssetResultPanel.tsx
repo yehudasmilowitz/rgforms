@@ -186,7 +186,7 @@ export default function AssetResultPanel() {
             </div>
           </div>
           <a
-            href={result.deploymentUrl}
+            href={result.deploymentUrl + '?_auth=1'}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
