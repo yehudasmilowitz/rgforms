@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { clsx } from 'clsx';
 import { useApp } from '@/context/AppContext';
-import { listMyForms, deleteForm, listMyModules, listMyAssets, listMyConfigs, listMyCalendars, listMyGalleries } from '@/lib/myForms';
+import { listAllResources, deleteForm } from '@/lib/myForms';
 import { revokeToken } from '@/lib/auth';
 import FormDetailModal from '@/components/FormDetailModal';
 import ContentModuleDetailModal from '@/components/ContentModuleDetailModal';
@@ -1141,99 +1141,61 @@ export default function Dashboard() {
 
   useEffect(() => {
     let cancelled = false;
-    setFormsLoading(true);
-    setFormsError(null);
+    setFormsLoading(true); setFormsError(null);
+    setModulesLoading(true); setModulesError(null);
+    setAssetsLoading(true); setAssetsError(null);
+    setConfigsLoading(true); setConfigsError(null);
+    setCalendarsLoading(true); setCalendarsError(null);
+    setGalleriesLoading(true); setGalleriesError(null);
 
-    listMyForms(accessToken)
+    listAllResources(accessToken)
       .then((result) => {
-        if (!cancelled) { setForms(result); setFormsLoading(false); }
+        if (cancelled) return;
+        setForms(result.forms); setFormsLoading(false);
+        setModules(result.modules); setModulesLoading(false);
+        setAssets(result.assets); setAssetsLoading(false);
+        setConfigs(result.configs); setConfigsLoading(false);
+        setCalendars(result.calendars); setCalendarsLoading(false);
+        setGalleries(result.galleries); setGalleriesLoading(false);
       })
       .catch(() => {
-        if (!cancelled) { setFormsError('Could not load your forms. Please try again.'); setFormsLoading(false); }
+        if (cancelled) return;
+        setFormsError('Could not load your resources. Please try again.'); setFormsLoading(false);
+        setModulesError('Could not load content modules. Please try again.'); setModulesLoading(false);
+        setAssetsError('Could not load asset modules. Please try again.'); setAssetsLoading(false);
+        setConfigsError('Could not load site configs. Please try again.'); setConfigsLoading(false);
+        setCalendarsError('Could not load calendars. Please try again.'); setCalendarsLoading(false);
+        setGalleriesError('Could not load galleries. Please try again.'); setGalleriesLoading(false);
       });
 
     return () => { cancelled = true; };
   }, [accessToken]);
 
-  useEffect(() => {
-    let cancelled = false;
-    setModulesLoading(true);
-    setModulesError(null);
-
-    listMyModules(accessToken)
+  function handleRefreshAll() {
+    setFormsLoading(true); setFormsError(null);
+    setModulesLoading(true); setModulesError(null);
+    setAssetsLoading(true); setAssetsError(null);
+    setConfigsLoading(true); setConfigsError(null);
+    setCalendarsLoading(true); setCalendarsError(null);
+    setGalleriesLoading(true); setGalleriesError(null);
+    listAllResources(accessToken)
       .then((result) => {
-        if (!cancelled) { setModules(result); setModulesLoading(false); }
+        setForms(result.forms); setFormsLoading(false);
+        setModules(result.modules); setModulesLoading(false);
+        setAssets(result.assets); setAssetsLoading(false);
+        setConfigs(result.configs); setConfigsLoading(false);
+        setCalendars(result.calendars); setCalendarsLoading(false);
+        setGalleries(result.galleries); setGalleriesLoading(false);
       })
       .catch(() => {
-        if (!cancelled) { setModulesError('Could not load content modules. Please try again.'); setModulesLoading(false); }
+        setFormsError('Could not load your resources. Please try again.'); setFormsLoading(false);
+        setModulesError('Could not load content modules. Please try again.'); setModulesLoading(false);
+        setAssetsError('Could not load asset modules. Please try again.'); setAssetsLoading(false);
+        setConfigsError('Could not load site configs. Please try again.'); setConfigsLoading(false);
+        setCalendarsError('Could not load calendars. Please try again.'); setCalendarsLoading(false);
+        setGalleriesError('Could not load galleries. Please try again.'); setGalleriesLoading(false);
       });
-
-    return () => { cancelled = true; };
-  }, [accessToken]);
-
-  useEffect(() => {
-    let cancelled = false;
-    setAssetsLoading(true);
-    setAssetsError(null);
-
-    listMyAssets(accessToken)
-      .then((result) => {
-        if (!cancelled) { setAssets(result); setAssetsLoading(false); }
-      })
-      .catch(() => {
-        if (!cancelled) { setAssetsError('Could not load asset modules. Please try again.'); setAssetsLoading(false); }
-      });
-
-    return () => { cancelled = true; };
-  }, [accessToken]);
-
-  useEffect(() => {
-    let cancelled = false;
-    setConfigsLoading(true);
-    setConfigsError(null);
-
-    listMyConfigs(accessToken)
-      .then((result) => {
-        if (!cancelled) { setConfigs(result); setConfigsLoading(false); }
-      })
-      .catch(() => {
-        if (!cancelled) { setConfigsError('Could not load site configs. Please try again.'); setConfigsLoading(false); }
-      });
-
-    return () => { cancelled = true; };
-  }, [accessToken]);
-
-  useEffect(() => {
-    let cancelled = false;
-    setCalendarsLoading(true);
-    setCalendarsError(null);
-
-    listMyCalendars(accessToken)
-      .then((result) => {
-        if (!cancelled) { setCalendars(result); setCalendarsLoading(false); }
-      })
-      .catch(() => {
-        if (!cancelled) { setCalendarsError('Could not load calendars. Please try again.'); setCalendarsLoading(false); }
-      });
-
-    return () => { cancelled = true; };
-  }, [accessToken]);
-
-  useEffect(() => {
-    let cancelled = false;
-    setGalleriesLoading(true);
-    setGalleriesError(null);
-
-    listMyGalleries(accessToken)
-      .then((result) => {
-        if (!cancelled) { setGalleries(result); setGalleriesLoading(false); }
-      })
-      .catch(() => {
-        if (!cancelled) { setGalleriesError('Could not load galleries. Please try again.'); setGalleriesLoading(false); }
-      });
-
-    return () => { cancelled = true; };
-  }, [accessToken]);
+  }
 
   async function handleConfirmDeleteAsset() {
     if (!pendingDeleteAsset) return;
@@ -1562,7 +1524,7 @@ export default function Dashboard() {
               <div className="rounded-xl border p-6 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                 <p className="text-sm" style={{ color: 'var(--color-error)' }}>{loadError}</p>
                 <button
-                  onClick={() => { setFormsLoading(true); setFormsError(null); listMyForms(accessToken).then(setForms).catch(() => setFormsError('Could not load your forms. Please try again.')).finally(() => setFormsLoading(false)); }}
+                  onClick={handleRefreshAll}
                   className="mt-3 text-xs underline" style={{ color: 'var(--color-muted)' }}
                 >Try again</button>
               </div>
@@ -1621,7 +1583,7 @@ export default function Dashboard() {
             ) : modulesError ? (
               <div className="rounded-xl border p-6 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                 <p className="text-sm" style={{ color: 'var(--color-error)' }}>{modulesError}</p>
-                <button onClick={() => { setModulesLoading(true); setModulesError(null); listMyModules(accessToken).then(setModules).catch(() => setModulesError('Could not load content modules.')).finally(() => setModulesLoading(false)); }} className="mt-3 text-xs underline" style={{ color: 'var(--color-muted)' }}>Try again</button>
+                <button onClick={handleRefreshAll} className="mt-3 text-xs underline" style={{ color: 'var(--color-muted)' }}>Try again</button>
               </div>
             ) : modules.length === 0 ? (
               <div className="rounded-xl border p-10 flex flex-col items-center gap-4 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
@@ -1680,7 +1642,7 @@ export default function Dashboard() {
             ) : assetsError ? (
               <div className="rounded-xl border p-6 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                 <p className="text-sm" style={{ color: 'var(--color-error)' }}>{assetsError}</p>
-                <button onClick={() => { setAssetsLoading(true); setAssetsError(null); listMyAssets(accessToken).then(setAssets).catch(() => setAssetsError('Could not load asset modules.')).finally(() => setAssetsLoading(false)); }} className="mt-3 text-xs underline" style={{ color: 'var(--color-muted)' }}>Try again</button>
+                <button onClick={handleRefreshAll} className="mt-3 text-xs underline" style={{ color: 'var(--color-muted)' }}>Try again</button>
               </div>
             ) : assets.length === 0 ? (
               <div className="rounded-xl border p-10 flex flex-col items-center gap-4 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
@@ -1739,7 +1701,7 @@ export default function Dashboard() {
             ) : configsError ? (
               <div className="rounded-xl border p-6 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                 <p className="text-sm" style={{ color: 'var(--color-error)' }}>{configsError}</p>
-                <button onClick={() => { setConfigsLoading(true); setConfigsError(null); listMyConfigs(accessToken).then(setConfigs).catch(() => setConfigsError('Could not load site configs.')).finally(() => setConfigsLoading(false)); }} className="mt-3 text-xs underline" style={{ color: 'var(--color-muted)' }}>Try again</button>
+                <button onClick={handleRefreshAll} className="mt-3 text-xs underline" style={{ color: 'var(--color-muted)' }}>Try again</button>
               </div>
             ) : configs.length === 0 ? (
               <div className="rounded-xl border p-10 flex flex-col items-center gap-4 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
@@ -1798,7 +1760,7 @@ export default function Dashboard() {
             ) : calendarsError ? (
               <div className="rounded-xl border p-6 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                 <p className="text-sm" style={{ color: 'var(--color-error)' }}>{calendarsError}</p>
-                <button onClick={() => { setCalendarsLoading(true); setCalendarsError(null); listMyCalendars(accessToken).then(setCalendars).catch(() => setCalendarsError('Could not load calendars.')).finally(() => setCalendarsLoading(false)); }} className="mt-3 text-xs underline" style={{ color: 'var(--color-muted)' }}>Try again</button>
+                <button onClick={handleRefreshAll} className="mt-3 text-xs underline" style={{ color: 'var(--color-muted)' }}>Try again</button>
               </div>
             ) : calendars.length === 0 ? (
               <div className="rounded-xl border p-10 flex flex-col items-center gap-4 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
@@ -1857,7 +1819,7 @@ export default function Dashboard() {
             ) : galleriesError ? (
               <div className="rounded-xl border p-6 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                 <p className="text-sm" style={{ color: 'var(--color-error)' }}>{galleriesError}</p>
-                <button onClick={() => { setGalleriesLoading(true); setGalleriesError(null); listMyGalleries(accessToken).then(setGalleries).catch(() => setGalleriesError('Could not load galleries.')).finally(() => setGalleriesLoading(false)); }} className="mt-3 text-xs underline" style={{ color: 'var(--color-muted)' }}>Try again</button>
+                <button onClick={handleRefreshAll} className="mt-3 text-xs underline" style={{ color: 'var(--color-muted)' }}>Try again</button>
               </div>
             ) : galleries.length === 0 ? (
               <div className="rounded-xl border p-10 flex flex-col items-center gap-4 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>

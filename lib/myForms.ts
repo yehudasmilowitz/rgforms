@@ -241,6 +241,100 @@ export async function listMyGalleries(accessToken: string): Promise<GalleryModul
   return galleries.filter((g): g is GalleryModuleSummary => g !== null);
 }
 
+export interface AllResources {
+  forms: FormSummary[];
+  modules: ContentModuleSummary[];
+  assets: AssetModuleSummary[];
+  configs: SiteConfigModuleSummary[];
+  calendars: CalendarModuleSummary[];
+  galleries: GalleryModuleSummary[];
+}
+
+// Single-pass fetch: one Drive call + one config read per sheet, then sort by type.
+export async function listAllResources(accessToken: string): Promise<AllResources> {
+  const query = encodeURIComponent("mimeType='application/vnd.google-apps.spreadsheet' and trashed=false");
+  const fields = encodeURIComponent('files(id,name,createdTime,webViewLink)');
+  const res = await fetch(
+    `${DRIVE_API}?q=${query}&fields=${fields}&orderBy=createdTime desc`,
+    { headers: authHeaders(accessToken) }
+  );
+
+  const result: AllResources = { forms: [], modules: [], assets: [], configs: [], calendars: [], galleries: [] };
+  if (!res.ok) return result;
+
+  const data = await res.json() as {
+    files?: Array<{ id: string; name: string; createdTime: string; webViewLink: string }>;
+  };
+
+  await Promise.all(
+    (data.files ?? []).map(async (file) => {
+      const config = await readConfigTab(accessToken, file.id);
+      const scriptId = config.scriptId || undefined;
+
+      if (config.moduleType === 'content') {
+        let fields: ContentField[] | undefined;
+        try { if (config.fields) fields = JSON.parse(config.fields) as ContentField[]; } catch { /* ignore */ }
+        result.modules.push({
+          sheetId: file.id, sheetUrl: file.webViewLink,
+          moduleName: config.moduleName ?? file.name,
+          createdAt: config.createdAt ?? file.createdTime,
+          scriptId, scriptUrl: scriptId ? `https://script.google.com/d/${scriptId}/edit` : undefined,
+          deploymentUrl: config.deploymentUrl || undefined, fields,
+          hasSlug: config.hasSlug === 'true', hasPublished: config.hasPublished === 'true',
+          writeToken: config.writeToken || undefined,
+        });
+      } else if (config.moduleType === 'asset') {
+        result.assets.push({
+          sheetId: file.id, sheetUrl: file.webViewLink,
+          moduleName: config.moduleName ?? file.name,
+          createdAt: config.createdAt ?? file.createdTime,
+          folderId: config.folderId ?? '', folderUrl: config.folderUrl ?? '',
+          scriptId, scriptUrl: scriptId ? `https://script.google.com/d/${scriptId}/edit` : undefined,
+          deploymentUrl: config.deploymentUrl || undefined,
+        });
+      } else if (config.moduleType === 'siteconfig') {
+        result.configs.push({
+          sheetId: file.id, sheetUrl: file.webViewLink,
+          moduleName: config.moduleName ?? file.name,
+          createdAt: config.createdAt ?? file.createdTime,
+          scriptId, scriptUrl: scriptId ? `https://script.google.com/d/${scriptId}/edit` : undefined,
+          deploymentUrl: config.deploymentUrl || undefined,
+        });
+      } else if (config.moduleType === 'calendar') {
+        result.calendars.push({
+          sheetId: file.id, sheetUrl: file.webViewLink,
+          moduleName: config.moduleName ?? file.name,
+          createdAt: config.createdAt ?? file.createdTime,
+          scriptId, scriptUrl: scriptId ? `https://script.google.com/d/${scriptId}/edit` : undefined,
+          deploymentUrl: config.deploymentUrl || undefined,
+        });
+      } else if (config.moduleType === 'gallery') {
+        result.galleries.push({
+          sheetId: file.id, sheetUrl: file.webViewLink,
+          moduleName: config.moduleName ?? file.name,
+          createdAt: config.createdAt ?? file.createdTime,
+          scriptId, scriptUrl: scriptId ? `https://script.google.com/d/${scriptId}/edit` : undefined,
+          deploymentUrl: config.deploymentUrl || undefined,
+        });
+      } else if (config.formName) {
+        let formFields: FormField[] | undefined;
+        try { if (config.fields) formFields = JSON.parse(config.fields) as FormField[]; } catch { /* ignore */ }
+        result.forms.push({
+          sheetId: file.id, sheetUrl: file.webViewLink,
+          formName: config.formName,
+          createdAt: config.createdAt ?? file.createdTime,
+          scriptId, scriptUrl: scriptId ? `https://script.google.com/d/${scriptId}/edit` : undefined,
+          deploymentUrl: config.deploymentUrl || undefined,
+          fields: formFields,
+          enableHoneypot: config.enableHoneypot === 'true' ? true : undefined,
+        });
+      }
+    })
+  );
+
+  return result;
+}
+
 // Delete a form's Sheet. Because the Apps Script is container-bound to the sheet,
 // deleting the sheet also permanently removes the script and all its deployments.
 export async function deleteForm(
