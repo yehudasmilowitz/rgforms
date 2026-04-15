@@ -15,6 +15,8 @@ import SiteConfigDetailModal from '@/components/SiteConfigDetailModal';
 import CalendarDetailModal from '@/components/CalendarDetailModal';
 import GalleryDetailModal from '@/components/GalleryDetailModal';
 import GalleryManager from '@/components/GalleryManager';
+import CalendarManager from '@/components/CalendarManager';
+import SiteConfigManager from '@/components/SiteConfigManager';
 import SkillExportModal from '@/components/SkillExportModal';
 import type { FormSummary, ContentModuleSummary, AssetModuleSummary, SiteConfigModuleSummary, CalendarModuleSummary, GalleryModuleSummary } from '@/types';
 import UserAvatar from '@/components/UserAvatar';
@@ -743,11 +745,12 @@ function AssetModuleCard({ module, onDelete, onManage, onView, deleting }: Asset
 interface SiteConfigModuleCardProps {
   module: SiteConfigModuleSummary;
   onDelete: (m: SiteConfigModuleSummary) => void;
+  onManage: (m: SiteConfigModuleSummary) => void;
   onView: (m: SiteConfigModuleSummary) => void;
   deleting: boolean;
 }
 
-function SiteConfigModuleCard({ module, onDelete, onView, deleting }: SiteConfigModuleCardProps) {
+function SiteConfigModuleCard({ module, onDelete, onManage, onView, deleting }: SiteConfigModuleCardProps) {
   return (
     <div
       className="rounded-xl border p-5 flex flex-col gap-4"
@@ -810,6 +813,17 @@ function SiteConfigModuleCard({ module, onDelete, onView, deleting }: SiteConfig
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
+          onClick={() => onManage(module)}
+          disabled={deleting}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-50"
+          style={{ background: 'oklch(0.65 0.22 290 / 0.10)', borderColor: 'oklch(0.65 0.22 290 / 0.30)', color: 'oklch(0.72 0.18 290)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'oklch(0.65 0.22 290)'; (e.currentTarget as HTMLButtonElement).style.color = '#fff'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'oklch(0.65 0.22 290 / 0.10)'; (e.currentTarget as HTMLButtonElement).style.color = 'oklch(0.72 0.18 290)'; }}
+        >
+          Edit config
+        </button>
+        <button
+          type="button"
           onClick={() => onView(module)}
           disabled={deleting}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-50"
@@ -860,11 +874,12 @@ function SiteConfigModuleCard({ module, onDelete, onView, deleting }: SiteConfig
 interface CalendarModuleCardProps {
   module: CalendarModuleSummary;
   onDelete: (m: CalendarModuleSummary) => void;
+  onManage: (m: CalendarModuleSummary) => void;
   onView: (m: CalendarModuleSummary) => void;
   deleting: boolean;
 }
 
-function CalendarModuleCard({ module, onDelete, onView, deleting }: CalendarModuleCardProps) {
+function CalendarModuleCard({ module, onDelete, onManage, onView, deleting }: CalendarModuleCardProps) {
   return (
     <div
       className="rounded-xl border p-5 flex flex-col gap-4"
@@ -899,6 +914,14 @@ function CalendarModuleCard({ module, onDelete, onView, deleting }: CalendarModu
       </div>
 
       <div className="flex flex-wrap gap-2">
+        <button type="button" onClick={() => onManage(module)} disabled={deleting}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-50"
+          style={{ background: 'oklch(0.55 0.20 270 / 0.10)', borderColor: 'oklch(0.55 0.20 270 / 0.30)', color: 'oklch(0.65 0.18 270)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'oklch(0.55 0.20 270)'; (e.currentTarget as HTMLButtonElement).style.color = '#fff'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'oklch(0.55 0.20 270 / 0.10)'; (e.currentTarget as HTMLButtonElement).style.color = 'oklch(0.65 0.18 270)'; }}
+        >
+          Manage events
+        </button>
         <button type="button" onClick={() => onView(module)} disabled={deleting}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-50"
           style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
@@ -1081,12 +1104,14 @@ export default function Dashboard() {
   const [configsError, setConfigsError] = useState<string | null>(null);
   const [selectedConfig, setSelectedConfig] = useState<SiteConfigModuleSummary | null>(null);
   const [pendingDeleteConfig, setPendingDeleteConfig] = useState<SiteConfigModuleSummary | null>(null);
+  const [editingConfig, setEditingConfig] = useState<SiteConfigModuleSummary | null>(null);
 
   const [calendars, setCalendars] = useState<CalendarModuleSummary[]>([]);
   const [calendarsLoading, setCalendarsLoading] = useState(true);
   const [calendarsError, setCalendarsError] = useState<string | null>(null);
   const [selectedCalendar, setSelectedCalendar] = useState<CalendarModuleSummary | null>(null);
   const [pendingDeleteCalendar, setPendingDeleteCalendar] = useState<CalendarModuleSummary | null>(null);
+  const [editingCalendar, setEditingCalendar] = useState<CalendarModuleSummary | null>(null);
 
   const [galleries, setGalleries] = useState<GalleryModuleSummary[]>([]);
   const [galleriesLoading, setGalleriesLoading] = useState(true);
@@ -1735,7 +1760,7 @@ export default function Dashboard() {
               <div className="flex flex-col gap-3">
                 {configs.map((config, index) => (
                   <motion.div key={config.sheetId} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.06, duration: 0.35 }}>
-                    <SiteConfigModuleCard module={config} onDelete={setPendingDeleteConfig} onView={setSelectedConfig} deleting={deletingIds.has(config.sheetId)} />
+                    <SiteConfigModuleCard module={config} onDelete={setPendingDeleteConfig} onManage={setEditingConfig} onView={setSelectedConfig} deleting={deletingIds.has(config.sheetId)} />
                   </motion.div>
                 ))}
               </div>
@@ -1794,7 +1819,7 @@ export default function Dashboard() {
               <div className="flex flex-col gap-3">
                 {calendars.map((cal, index) => (
                   <motion.div key={cal.sheetId} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.06, duration: 0.35 }}>
-                    <CalendarModuleCard module={cal} onDelete={setPendingDeleteCalendar} onView={setSelectedCalendar} deleting={deletingIds.has(cal.sheetId)} />
+                    <CalendarModuleCard module={cal} onDelete={setPendingDeleteCalendar} onManage={setEditingCalendar} onView={setSelectedCalendar} deleting={deletingIds.has(cal.sheetId)} />
                   </motion.div>
                 ))}
               </div>
@@ -2049,6 +2074,24 @@ export default function Dashboard() {
           module={editingGallery}
           accessToken={accessToken}
           onClose={() => setEditingGallery(null)}
+        />
+      )}
+
+      {/* Calendar manager overlay */}
+      {editingCalendar && (
+        <CalendarManager
+          module={editingCalendar}
+          accessToken={accessToken}
+          onClose={() => setEditingCalendar(null)}
+        />
+      )}
+
+      {/* Site config manager overlay */}
+      {editingConfig && (
+        <SiteConfigManager
+          module={editingConfig}
+          accessToken={accessToken}
+          onClose={() => setEditingConfig(null)}
         />
       )}
     </motion.main>

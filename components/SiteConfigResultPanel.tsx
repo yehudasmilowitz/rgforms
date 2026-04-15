@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { useApp } from '@/context/AppContext';
 import CopyBlock from '@/components/CopyBlock';
+import SiteConfigManager from '@/components/SiteConfigManager';
 import { GoogleSheetsIcon, GoogleAppsScriptIcon } from '@/components/google-icons';
 import { generateConfigClientSnippet, generateConfigServerSnippet, generateConfigSchemaSnippet } from '@/lib/siteConfigSnippet';
 
@@ -35,17 +36,25 @@ function CheckIcon() {
   );
 }
 
+const ACCENT = 'oklch(0.65 0.22 290)';
+const ACCENT_SUBTLE = 'oklch(0.65 0.22 290 / 0.12)';
+const ACCENT_BORDER = 'oklch(0.65 0.22 290 / 0.30)';
+
 export default function SiteConfigResultPanel() {
   const { state, dispatch } = useApp();
   const result = state.siteConfigResult!;
   const name = state.siteConfigBuilderName;
   const [tab, setTab] = useState<Tab>('client');
+  const [managerOpen, setManagerOpen] = useState(false);
 
   const clientSnippet = generateConfigClientSnippet(result, name);
   const serverSnippet = generateConfigServerSnippet(result, name);
   const schemaSnippet = generateConfigSchemaSnippet(name);
+  const accessToken = state.auth.accessToken!;
+  const moduleForManager = { sheetId: result.sheetId, sheetUrl: result.sheetUrl, moduleName: name };
 
   return (
+    <>
     <motion.main
       className="min-h-screen flex flex-col px-4 py-10"
       style={{ background: 'var(--color-bg)', color: 'var(--color-text)' }}
@@ -89,6 +98,27 @@ export default function SiteConfigResultPanel() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Next step — edit config */}
+        <div
+          className="rounded-xl border p-4 flex items-center justify-between gap-4"
+          style={{ background: ACCENT_SUBTLE, borderColor: ACCENT_BORDER }}
+        >
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <p className="text-sm font-semibold" style={{ color: ACCENT }}>Edit your config values</p>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+              Set values for all keys directly — no need to open the Google Sheet.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setManagerOpen(true)}
+            className="shrink-0 px-4 py-2 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+            style={{ background: ACCENT, color: '#fff' }}
+          >
+            Edit config
+          </button>
         </div>
 
         {/* Auth */}
@@ -217,5 +247,14 @@ export default function SiteConfigResultPanel() {
         </div>
       </div>
     </motion.main>
+
+      {managerOpen && (
+        <SiteConfigManager
+          module={moduleForManager}
+          accessToken={accessToken}
+          onClose={() => setManagerOpen(false)}
+        />
+      )}
+    </>
   );
 }

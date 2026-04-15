@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { useApp } from '@/context/AppContext';
 import CopyBlock from '@/components/CopyBlock';
+import CalendarManager from '@/components/CalendarManager';
 import { GoogleSheetsIcon, GoogleAppsScriptIcon } from '@/components/google-icons';
 import { generateCalendarClientSnippet, generateCalendarServerSnippet, generateCalendarSchemaSnippet } from '@/lib/calendarSnippet';
 
@@ -44,12 +45,16 @@ export default function CalendarResultPanel() {
   const result = state.calendarResult!;
   const name = state.calendarBuilderName;
   const [tab, setTab] = useState<Tab>('client');
+  const [managerOpen, setManagerOpen] = useState(false);
 
   const clientSnippet = generateCalendarClientSnippet(result, name);
   const serverSnippet = generateCalendarServerSnippet(result, name);
   const schemaSnippet = generateCalendarSchemaSnippet(name);
+  const accessToken = state.auth.accessToken!;
+  const moduleForManager = { sheetId: result.sheetId, sheetUrl: result.sheetUrl, moduleName: name };
 
   return (
+    <>
     <motion.main
       className="min-h-screen flex flex-col px-4 py-10"
       style={{ background: 'var(--color-bg)', color: 'var(--color-text)' }}
@@ -93,6 +98,27 @@ export default function CalendarResultPanel() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Next step — manage events */}
+        <div
+          className="rounded-xl border p-4 flex items-center justify-between gap-4"
+          style={{ background: ACCENT_SUBTLE, borderColor: ACCENT_BORDER }}
+        >
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <p className="text-sm font-semibold" style={{ color: ACCENT }}>Manage your events</p>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+              Add, view, and delete events directly — no need to open the Google Sheet.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setManagerOpen(true)}
+            className="shrink-0 px-4 py-2 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+            style={{ background: ACCENT, color: '#fff' }}
+          >
+            Manage events
+          </button>
         </div>
 
         {/* Auth */}
@@ -222,5 +248,14 @@ export default function CalendarResultPanel() {
         </div>
       </div>
     </motion.main>
+
+      {managerOpen && (
+        <CalendarManager
+          module={moduleForManager}
+          accessToken={accessToken}
+          onClose={() => setManagerOpen(false)}
+        />
+      )}
+    </>
   );
 }
