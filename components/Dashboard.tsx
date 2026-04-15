@@ -7,6 +7,7 @@ import { useApp } from '@/context/AppContext';
 import { listMyForms, deleteForm, listMyModules } from '@/lib/myForms';
 import { revokeToken } from '@/lib/auth';
 import FormDetailModal from '@/components/FormDetailModal';
+import ContentEditor from '@/components/ContentEditor';
 import type { FormSummary, ContentModuleSummary } from '@/types';
 import UserAvatar from '@/components/UserAvatar';
 import { GoogleSheetsIcon, GoogleAppsScriptIcon } from '@/components/google-icons';
@@ -36,6 +37,14 @@ function CodeIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path d="M5 4L1 8l4 4M11 4l4 4-4 4M9 2l-2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function EditIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M11 2l3 3-8 8H3v-3L11 2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
     </svg>
   );
 }
@@ -385,10 +394,11 @@ function DeleteConfirmDialog({ form, onConfirm, onCancel }: DeleteConfirmProps) 
 interface ContentModuleCardProps {
   module: ContentModuleSummary;
   onDelete: (m: ContentModuleSummary) => void;
+  onEdit: (m: ContentModuleSummary) => void;
   deleting: boolean;
 }
 
-function ContentModuleCard({ module, onDelete, deleting }: ContentModuleCardProps) {
+function ContentModuleCard({ module, onDelete, onEdit, deleting }: ContentModuleCardProps) {
   return (
     <div
       className="rounded-xl border p-5 flex flex-col gap-4"
@@ -450,6 +460,19 @@ function ContentModuleCard({ module, onDelete, deleting }: ContentModuleCardProp
       </div>
 
       <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => onEdit(module)}
+          disabled={deleting || !module.fields}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-50"
+          style={{ background: 'var(--color-accent-subtle)', borderColor: 'var(--color-accent-border)', color: 'var(--color-accent)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent)'; (e.currentTarget as HTMLButtonElement).style.color = '#fff'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent-subtle)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-accent)'; }}
+        >
+          <EditIcon className="w-3 h-3 shrink-0" />
+          Edit content
+        </button>
+
         <a
           href={module.sheetUrl}
           target="_blank"
@@ -460,7 +483,7 @@ function ContentModuleCard({ module, onDelete, deleting }: ContentModuleCardProp
           onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text)'; }}
         >
           <GoogleSheetsIcon className="w-3 h-3 shrink-0" />
-          Manage content
+          Google Sheet
         </a>
 
         {module.deploymentUrl && (
@@ -514,6 +537,7 @@ export default function Dashboard() {
 
   const [modules, setModules] = useState<ContentModuleSummary[]>([]);
   const [modulesLoading, setModulesLoading] = useState(true);
+  const [editingModule, setEditingModule] = useState<ContentModuleSummary | null>(null);
   const [modulesError, setModulesError] = useState<string | null>(null);
 
   // Keep legacy name for forms section
@@ -850,7 +874,7 @@ export default function Dashboard() {
               <div className="flex flex-col gap-3">
                 {modules.map((mod, index) => (
                   <motion.div key={mod.sheetId} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.06, duration: 0.35 }}>
-                    <ContentModuleCard module={mod} onDelete={setPendingDeleteModule} deleting={deletingIds.has(mod.sheetId)} />
+                    <ContentModuleCard module={mod} onDelete={setPendingDeleteModule} onEdit={setEditingModule} deleting={deletingIds.has(mod.sheetId)} />
                   </motion.div>
                 ))}
               </div>
@@ -900,6 +924,15 @@ export default function Dashboard() {
           onCancel={handleCloseRevokeDialog}
           revoking={revoking}
           result={revokeResult}
+        />
+      )}
+
+      {/* In-app content editor overlay */}
+      {editingModule && (
+        <ContentEditor
+          module={editingModule}
+          accessToken={accessToken}
+          onClose={() => setEditingModule(null)}
         />
       )}
     </motion.main>

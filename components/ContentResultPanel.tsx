@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { useApp } from '@/context/AppContext';
-import { generateReadSnippet, generateWriteSnippet, generateSchemaReference } from '@/lib/contentSnippet';
+import { generateReadSnippet, generateWriteSnippet, generateSchemaReference, generateAgentInstructions } from '@/lib/contentSnippet';
 import { GoogleSheetsIcon, GoogleAppsScriptIcon } from '@/components/google-icons';
 import CopyBlock from '@/components/CopyBlock';
 
@@ -60,7 +60,7 @@ function TabButton({
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-type Tab = 'read' | 'write' | 'schema';
+type Tab = 'read' | 'write' | 'schema' | 'agent';
 
 export default function ContentResultPanel() {
   const { state, dispatch } = useApp();
@@ -70,9 +70,10 @@ export default function ContentResultPanel() {
   const [tab, setTab] = useState<Tab>('read');
   const [tokenRevealed, setTokenRevealed] = useState(false);
 
-  const readSnippet   = generateReadSnippet(result, config);
-  const writeSnippet  = generateWriteSnippet(result, config);
-  const schemaRef     = generateSchemaReference(config);
+  const readSnippet       = generateReadSnippet(result, config);
+  const writeSnippet      = generateWriteSnippet(result, config);
+  const schemaRef         = generateSchemaReference(config);
+  const agentInstructions = generateAgentInstructions(result, config);
 
   return (
     <motion.main
@@ -174,6 +175,7 @@ export default function ContentResultPanel() {
               <TabButton active={tab === 'read'}   onClick={() => setTab('read')}>Read API</TabButton>
               <TabButton active={tab === 'write'}  onClick={() => setTab('write')} warning>Write API</TabButton>
               <TabButton active={tab === 'schema'} onClick={() => setTab('schema')}>Schema</TabButton>
+              <TabButton active={tab === 'agent'}  onClick={() => setTab('agent')}>Agent</TabButton>
             </div>
           </div>
 
@@ -235,6 +237,18 @@ export default function ContentResultPanel() {
               <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
                 Field keys are the normalized column names used in the API. The Sheet uses the original
                 labels as column headers — the script normalizes them automatically.
+              </p>
+            </div>
+          )}
+
+          {tab === 'agent' && (
+            <div className="flex flex-col gap-3">
+              <CopyBlock label="Agent instructions" content={agentInstructions} language="text" />
+              <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
+                Paste this into your AI agent context, a{' '}
+                <code className="font-mono text-xs px-1 rounded" style={{ background: 'var(--color-surface-2)' }}>CLAUDE.md</code>,{' '}
+                or any system prompt to give an AI assistant full knowledge of the read API.
+                Read-only — safe to commit or share.
               </p>
             </div>
           )}

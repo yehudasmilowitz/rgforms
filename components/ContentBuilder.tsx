@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '@/context/AppContext';
 import { provisionContentModule, AppsScriptApiDisabledError } from '@/lib/contentProvision';
 import ProvisioningSteps from '@/components/ProvisioningSteps';
-import type { ContentField, ContentFieldType } from '@/types';
+import type { ContentField, ContentFieldType, ContentModuleConfig } from '@/types';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -33,6 +33,147 @@ const FIELD_TYPE_OPTIONS: { value: ContentFieldType; label: string; hint: string
   { value: 'image_url', label: 'Image URL', hint: 'URL to an image'    },
   { value: 'url',       label: 'URL',       hint: 'Any web URL'        },
 ];
+
+// ─── Column templates ─────────────────────────────────────────────────────────
+
+interface ColumnTemplate {
+  id: string;
+  emoji: string;
+  name: string;
+  fields: Pick<ContentField, 'label' | 'key' | 'type' | 'required'>[];
+  hasSlug: boolean;
+  hasPublished: boolean;
+}
+
+const COLUMN_TEMPLATES: ColumnTemplate[] = [
+  {
+    id: 'blog',
+    emoji: '✍️',
+    name: 'Blog Post',
+    hasSlug: true,
+    hasPublished: true,
+    fields: [
+      { label: 'Title',       key: 'title',       type: 'text',     required: true  },
+      { label: 'Summary',     key: 'summary',     type: 'text',     required: false },
+      { label: 'Body',        key: 'body',        type: 'markdown', required: false },
+      { label: 'Cover image', key: 'cover_image', type: 'image_url',required: false },
+      { label: 'Author',      key: 'author',      type: 'text',     required: false },
+      { label: 'Tags',        key: 'tags',        type: 'tags',     required: false },
+      { label: 'Date',        key: 'date',        type: 'date',     required: false },
+    ],
+  },
+  {
+    id: 'testimonial',
+    emoji: '⭐',
+    name: 'Testimonial',
+    hasSlug: false,
+    hasPublished: true,
+    fields: [
+      { label: 'Quote',       key: 'quote',       type: 'markdown', required: true  },
+      { label: 'Author',      key: 'author',      type: 'text',     required: true  },
+      { label: 'Role',        key: 'role',        type: 'text',     required: false },
+      { label: 'Company',     key: 'company',     type: 'text',     required: false },
+      { label: 'Avatar',      key: 'avatar',      type: 'image_url',required: false },
+      { label: 'Rating',      key: 'rating',      type: 'number',   required: false },
+    ],
+  },
+  {
+    id: 'team',
+    emoji: '👥',
+    name: 'Team Member',
+    hasSlug: true,
+    hasPublished: true,
+    fields: [
+      { label: 'Name',        key: 'name',        type: 'text',     required: true  },
+      { label: 'Role',        key: 'role',        type: 'text',     required: false },
+      { label: 'Bio',         key: 'bio',         type: 'markdown', required: false },
+      { label: 'Photo',       key: 'photo',       type: 'image_url',required: false },
+      { label: 'LinkedIn',    key: 'linkedin',    type: 'url',      required: false },
+      { label: 'Order',       key: 'order',       type: 'number',   required: false },
+    ],
+  },
+  {
+    id: 'faq',
+    emoji: '❓',
+    name: 'FAQ',
+    hasSlug: false,
+    hasPublished: true,
+    fields: [
+      { label: 'Question',    key: 'question',    type: 'text',     required: true  },
+      { label: 'Answer',      key: 'answer',      type: 'markdown', required: true  },
+      { label: 'Category',    key: 'category',    type: 'text',     required: false },
+      { label: 'Order',       key: 'order',       type: 'number',   required: false },
+    ],
+  },
+  {
+    id: 'gallery',
+    emoji: '🖼️',
+    name: 'Gallery Image',
+    hasSlug: false,
+    hasPublished: true,
+    fields: [
+      { label: 'Image URL',   key: 'image_url',   type: 'image_url',required: true  },
+      { label: 'Caption',     key: 'caption',     type: 'text',     required: false },
+      { label: 'Alt text',    key: 'alt_text',    type: 'text',     required: false },
+      { label: 'Tags',        key: 'tags',        type: 'tags',     required: false },
+      { label: 'Order',       key: 'order',       type: 'number',   required: false },
+    ],
+  },
+  {
+    id: 'event',
+    emoji: '📅',
+    name: 'Event',
+    hasSlug: true,
+    hasPublished: true,
+    fields: [
+      { label: 'Title',       key: 'title',       type: 'text',     required: true  },
+      { label: 'Description', key: 'description', type: 'markdown', required: false },
+      { label: 'Start date',  key: 'start_date',  type: 'date',     required: true  },
+      { label: 'End date',    key: 'end_date',    type: 'date',     required: false },
+      { label: 'Location',    key: 'location',    type: 'text',     required: false },
+      { label: 'URL',         key: 'url',         type: 'url',      required: false },
+      { label: 'Tags',        key: 'tags',        type: 'tags',     required: false },
+    ],
+  },
+  {
+    id: 'product',
+    emoji: '📦',
+    name: 'Product',
+    hasSlug: true,
+    hasPublished: true,
+    fields: [
+      { label: 'Name',        key: 'name',        type: 'text',     required: true  },
+      { label: 'Description', key: 'description', type: 'markdown', required: false },
+      { label: 'Price',       key: 'price',       type: 'number',   required: false },
+      { label: 'Image',       key: 'image',       type: 'image_url',required: false },
+      { label: 'Category',    key: 'category',    type: 'text',     required: false },
+      { label: 'Tags',        key: 'tags',        type: 'tags',     required: false },
+      { label: 'In stock',    key: 'in_stock',    type: 'boolean',  required: false },
+    ],
+  },
+  {
+    id: 'announcement',
+    emoji: '📣',
+    name: 'Announcement',
+    hasSlug: false,
+    hasPublished: true,
+    fields: [
+      { label: 'Title',       key: 'title',       type: 'text',     required: true  },
+      { label: 'Body',        key: 'body',        type: 'markdown', required: false },
+      { label: 'Date',        key: 'date',        type: 'date',     required: false },
+      { label: 'Link',        key: 'link',        type: 'url',      required: false },
+      { label: 'Type',        key: 'type',        type: 'text',     required: false },
+    ],
+  },
+];
+
+function applyTemplate(tpl: ColumnTemplate, currentFields: ContentField[]): Partial<ContentModuleConfig> {
+  return {
+    fields: tpl.fields.map((f) => ({ ...f, id: generateId() })),
+    hasSlug: tpl.hasSlug,
+    hasPublished: tpl.hasPublished,
+  };
+}
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -230,6 +371,7 @@ export default function ContentBuilder() {
   const [nameError, setNameError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<string[]>([]);
   const [isProvisioning, setIsProvisioning] = useState(false);
+  const [pendingTemplate, setPendingTemplate] = useState<ColumnTemplate | null>(null);
 
   // Drag-and-drop state
   const dragIndex = useRef<number | null>(null);
@@ -542,6 +684,68 @@ export default function ContentBuilder() {
               exit={{ opacity: 0, x: 16 }}
               transition={{ duration: 0.25 }}
             >
+              {/* Template picker */}
+              <div className="flex flex-col gap-2">
+                <p className="text-xs font-medium" style={{ color: 'var(--color-muted)' }}>
+                  Start from a template — or define your own below
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {COLUMN_TEMPLATES.map((tpl) => (
+                    <button
+                      key={tpl.id}
+                      type="button"
+                      onClick={() => {
+                        const hasCustom = config.fields.some((f) => f.label.trim());
+                        if (hasCustom) { setPendingTemplate(tpl); }
+                        else {
+                          dispatch({ type: 'SET_CONTENT_CONFIG', payload: applyTemplate(tpl, config.fields) });
+                        }
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                      style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-accent)'; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-text)'; }}
+                    >
+                      <span role="img" aria-hidden="true">{tpl.emoji}</span>
+                      {tpl.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Overwrite confirm */}
+              {pendingTemplate && (
+                <div
+                  className="rounded-xl border p-4 flex flex-col gap-3"
+                  style={{ background: 'oklch(0.78 0.18 75 / 0.06)', borderColor: 'oklch(0.78 0.18 75 / 0.25)' }}
+                >
+                  <p className="text-sm" style={{ color: 'var(--color-text)' }}>
+                    Replace your current fields with the <strong>{pendingTemplate.name}</strong> template?
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        dispatch({ type: 'SET_CONTENT_CONFIG', payload: applyTemplate(pendingTemplate, config.fields) });
+                        setPendingTemplate(null);
+                      }}
+                      className="px-4 py-1.5 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                      style={{ background: 'var(--color-accent)', color: '#fff' }}
+                    >
+                      Yes, apply template
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPendingTemplate(null)}
+                      className="px-4 py-1.5 rounded-lg border text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                      style={{ background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>

@@ -123,6 +123,94 @@ const deleted = await rgPost('delete', created.data._id, null);
 // → { data: { deleted: true, _id: '...' } }`;
 }
 
+// ─── Agent instructions ───────────────────────────────────────────────────────
+
+export function generateAgentInstructions(result: ContentModuleResult, config: ContentModuleConfig): string {
+  const fieldTable = [
+    ...config.fields.map((f) => `| ${f.key.padEnd(20)} | ${f.type.padEnd(10)} | ${f.required ? 'required' : 'optional'} |`),
+    ...(config.hasSlug      ? [`| ${'slug'.padEnd(20)} | ${'text'.padEnd(10)} | optional |`] : []),
+    ...(config.hasPublished ? [`| ${'published'.padEnd(20)} | ${'boolean'.padEnd(10)} | only TRUE rows returned |`] : []),
+    `| ${'_id'.padEnd(20)} | ${'text'.padEnd(10)} | auto-generated UUID |`,
+    `| ${'_created_at'.padEnd(20)} | ${'text'.padEnd(10)} | auto-set ISO date string |`,
+    `| ${'_updated_at'.padEnd(20)} | ${'text'.padEnd(10)} | auto-updated ISO date string |`,
+  ].join('\n');
+
+  const firstField = config.fields[0]?.key ?? 'field';
+  const tagsField = config.fields.find((f) => f.type === 'tags')?.key ?? firstField;
+
+  return `# RG Content Read API — ${config.name}
+
+## Endpoint
+${result.deploymentUrl}
+
+Public HTTPS endpoint — no API key required. Safe to use in client-side code.
+
+## Field Schema
+| Field                 | Type       | Notes |
+|-----------------------|------------|-------|
+${fieldTable}
+
+## Read API (GET)
+
+### List all records
+GET ${result.deploymentUrl}
+Returns: { data: [...], total: number, limit: number, offset: number }
+Default limit: 100. Max: 500.
+
+### Pagination & sorting
+GET ${result.deploymentUrl}?limit=10&offset=0&sort=${firstField}&order=desc
+
+### Filter by field value
+GET ${result.deploymentUrl}?${firstField}=value
+Multiple filters: GET ${result.deploymentUrl}?${firstField}=value&${tagsField}=tag1
+${config.hasSlug ? `
+### Get single record by slug
+GET ${result.deploymentUrl}?slug=my-slug
+Returns: { data: { ...record } | null }
+` : ''}
+### Get single record by ID
+GET ${result.deploymentUrl}?_id=<uuid>
+Returns: { data: { ...record } | null }
+
+### Get unique field values (for filter dropdowns)
+Fetch all records, then:
+[...new Set(data.flatMap(r => Array.isArray(r.${tagsField}) ? r.${tagsField} : [r.${tagsField}]).filter(Boolean))]
+
+## JavaScript client (copy-paste ready)
+
+class RGContent {
+  constructor(url) { this._url = url; this._cache = new Map(); }
+  async _get(params, _retry) {
+    const entries = Object.entries(params || {}).filter(([, v]) => v != null);
+    const qs = entries.length ? '?' + new URLSearchParams(Object.fromEntries(entries)) : '';
+    const url = this._url + qs;
+    if (this._cache.has(url)) return this._cache.get(url);
+    const res = await fetch(url);
+    if (res.status === 503 && !_retry) {
+      await new Promise(r => setTimeout(r, 2000));
+      return this._get(params, true);
+    }
+    if (!res.ok) throw new Error('RGContent fetch failed (' + res.status + ')');
+    const json = await res.json();
+    if (json.error) throw new Error('RGContent API error: ' + json.error);
+    this._cache.set(url, json);
+    return json;
+  }
+  async list(params) { return this._get(params); }
+  async get(slug) { return (await this._get({ slug })).data; }
+  async getById(id) { return (await this._get({ _id: id })).data; }
+  clearCache() { this._cache.clear(); }
+}
+
+const ${config.name.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '') || 'content'} = new RGContent('${result.deploymentUrl}');
+
+## Notes
+- First request is slow (800ms–2s) — Apps Script cold start + mandatory double redirect
+- Subsequent requests for the same URL are served from in-memory cache instantly
+- A 503 means Apps Script quota is temporarily exhausted — the client retries once after 2s
+- Only published records are returned${config.hasPublished ? ' (published = TRUE)' : ''}`;
+}
+
 // ─── Column schema reference ─────────────────────────────────────────────────
 
 export function generateSchemaReference(config: ContentModuleConfig): string {
