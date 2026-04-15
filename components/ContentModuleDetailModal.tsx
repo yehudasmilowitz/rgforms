@@ -137,7 +137,7 @@ export default function ContentModuleDetailModal({ module, onClose }: ContentMod
                   Script may need a one-time authorization —
                 </span>
                 <a
-                  href={result.deploymentUrl + '?_auth=1'}
+                  href={result.deploymentUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs font-medium hover:opacity-80"

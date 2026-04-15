@@ -17,6 +17,7 @@ export const CONTENT_SCRIPT_MANIFEST = {
 
 export function generateContentScript(config: ContentModuleConfig, writeToken: string): string {
   const configJson = JSON.stringify({
+    moduleName: config.name,
     sheetName: 'Content',
     slugField:      config.hasSlug      ? 'slug'      : '',
     publishedField: config.hasPublished ? 'published' : '',
@@ -116,7 +117,7 @@ function htmlConfirmation(name) {
 
 function doGet(e) {
   var p = (e && e.parameter) ? e.parameter : {};
-  if (p._auth) return htmlConfirmation(CONFIG.name);
+  if (!p.json) return htmlConfirmation(CONFIG.moduleName);
   try {
     var sheet = getSheet();
     if (!sheet) return jsonResponse({ error: 'Sheet not found', data: [] });

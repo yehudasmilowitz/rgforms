@@ -25,8 +25,8 @@ class RGContent {
   }
 
   async _get(params, _retry) {
-    const entries = Object.entries(params || {}).filter(([, v]) => v != null);
-    const qs = entries.length ? '?' + new URLSearchParams(Object.fromEntries(entries)) : '';
+    const entries = Object.entries({ json: 1, ...(params || {}) }).filter(([, v]) => v != null);
+    const qs = '?' + new URLSearchParams(Object.fromEntries(entries));
     const url = this._url + qs;
     if (this._cache.has(url)) return this._cache.get(url);
     const res = await fetch(url);
@@ -181,8 +181,8 @@ Fetch all records, then:
 class RGContent {
   constructor(url) { this._url = url; this._cache = new Map(); }
   async _get(params, _retry) {
-    const entries = Object.entries(params || {}).filter(([, v]) => v != null);
-    const qs = entries.length ? '?' + new URLSearchParams(Object.fromEntries(entries)) : '';
+    const entries = Object.entries({ json: 1, ...(params || {}) }).filter(([, v]) => v != null);
+    const qs = '?' + new URLSearchParams(Object.fromEntries(entries));
     const url = this._url + qs;
     if (this._cache.has(url)) return this._cache.get(url);
     const res = await fetch(url);
