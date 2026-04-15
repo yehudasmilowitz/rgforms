@@ -10,6 +10,7 @@ import FormDetailModal from '@/components/FormDetailModal';
 import ContentModuleDetailModal from '@/components/ContentModuleDetailModal';
 import ContentEditor from '@/components/ContentEditor';
 import AssetManager from '@/components/AssetManager';
+import AssetDetailModal from '@/components/AssetDetailModal';
 import type { FormSummary, ContentModuleSummary, AssetModuleSummary } from '@/types';
 import UserAvatar from '@/components/UserAvatar';
 import { GoogleSheetsIcon, GoogleAppsScriptIcon } from '@/components/google-icons';
@@ -561,10 +562,11 @@ interface AssetModuleCardProps {
   module: AssetModuleSummary;
   onDelete: (m: AssetModuleSummary) => void;
   onManage: (m: AssetModuleSummary) => void;
+  onView: (m: AssetModuleSummary) => void;
   deleting: boolean;
 }
 
-function AssetModuleCard({ module, onDelete, onManage, deleting }: AssetModuleCardProps) {
+function AssetModuleCard({ module, onDelete, onManage, onView, deleting }: AssetModuleCardProps) {
   return (
     <div
       className="rounded-xl border p-5 flex flex-col gap-4"
@@ -625,6 +627,19 @@ function AssetModuleCard({ module, onDelete, onManage, deleting }: AssetModuleCa
       </div>
 
       <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => onView(module)}
+          disabled={deleting}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-50"
+          style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-accent)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-text)'; }}
+        >
+          <CodeIcon className="w-3 h-3 shrink-0" />
+          Details
+        </button>
+
         {module.deploymentUrl && (
           <button
             type="button"
@@ -698,6 +713,7 @@ export default function Dashboard() {
   const [assetsLoading, setAssetsLoading] = useState(true);
   const [assetsError, setAssetsError] = useState<string | null>(null);
   const [editingAsset, setEditingAsset] = useState<AssetModuleSummary | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<AssetModuleSummary | null>(null);
   const [pendingDeleteAsset, setPendingDeleteAsset] = useState<AssetModuleSummary | null>(null);
 
   // Keep legacy name for forms section
@@ -1145,7 +1161,7 @@ export default function Dashboard() {
               <div className="flex flex-col gap-3">
                 {assets.map((asset, index) => (
                   <motion.div key={asset.sheetId} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.06, duration: 0.35 }}>
-                    <AssetModuleCard module={asset} onDelete={setPendingDeleteAsset} onManage={setEditingAsset} deleting={deletingIds.has(asset.sheetId)} />
+                    <AssetModuleCard module={asset} onDelete={setPendingDeleteAsset} onManage={setEditingAsset} onView={setSelectedAsset} deleting={deletingIds.has(asset.sheetId)} />
                   </motion.div>
                 ))}
               </div>
@@ -1162,6 +1178,11 @@ export default function Dashboard() {
       {/* Content module instructions modal */}
       {selectedModule && (
         <ContentModuleDetailModal module={selectedModule} onClose={() => setSelectedModule(null)} />
+      )}
+
+      {/* Asset module instructions modal */}
+      {selectedAsset && (
+        <AssetDetailModal module={selectedAsset} onClose={() => setSelectedAsset(null)} />
       )}
 
       {/* Delete form confirmation dialog */}
