@@ -18,7 +18,7 @@ import GalleryManager from '@/components/GalleryManager';
 import CalendarManager from '@/components/CalendarManager';
 import SiteConfigManager from '@/components/SiteConfigManager';
 import SkillExportModal from '@/components/SkillExportModal';
-import type { FormSummary, ContentModuleSummary, AssetModuleSummary, SiteConfigModuleSummary, CalendarModuleSummary, GalleryModuleSummary } from '@/types';
+import type { FormSummary, ContentModuleSummary, AssetModuleSummary, SiteConfigModuleSummary, CalendarModuleSummary, GalleryModuleSummary, ModuleSummary } from '@/types';
 import UserAvatar from '@/components/UserAvatar';
 import { GoogleSheetsIcon, GoogleAppsScriptIcon } from '@/components/google-icons';
 
@@ -1071,6 +1071,122 @@ function GalleryModuleCard({ module, onDelete, onManage, onView, deleting }: Gal
 }
 
 // ---------------------------------------------------------------------------
+// SimpleModuleCard
+// ---------------------------------------------------------------------------
+
+interface SimpleModuleCardProps {
+  name: string;
+  createdAt: string;
+  deploymentUrl?: string;
+  sheetUrl: string;
+  scriptUrl?: string;
+  typeLabel: string;
+  typeBgColor: string;
+  typeTextColor: string;
+  onDelete: () => void;
+  deleting: boolean;
+}
+
+function SimpleModuleCard({ name, createdAt, deploymentUrl, sheetUrl, scriptUrl, typeLabel, typeBgColor, typeTextColor, onDelete, deleting }: SimpleModuleCardProps) {
+  return (
+    <div
+      className="rounded-xl border p-5 flex flex-col gap-4"
+      style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', opacity: deleting ? 0.5 : 1, transition: 'opacity 0.2s' }}
+    >
+      <div className="flex items-start justify-between gap-3 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: typeBgColor, border: `1px solid ${typeTextColor}40` }}>
+            <DatabaseIcon className="w-4 h-4" style={{ color: typeTextColor }} />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text)' }}>{name}</p>
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-semibold shrink-0" style={{ background: typeBgColor, color: typeTextColor, border: `1px solid ${typeTextColor}40` }}>
+                {typeLabel}
+              </span>
+            </div>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>Created {formatDate(createdAt)}</p>
+          </div>
+        </div>
+        <button
+          onClick={onDelete}
+          disabled={deleting}
+          className="shrink-0 p-1.5 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+          style={{ background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}
+          onMouseEnter={(e) => { if (!deleting) { (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(239,68,68,0.5)'; (e.currentTarget as HTMLButtonElement).style.color = '#ef4444'; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)'; } }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-muted)'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+          aria-label={`Delete ${name}`}
+        >
+          <TrashIcon className="w-3.5 h-3.5" />
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <a href={sheetUrl} target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+          style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text)'; }}
+        >
+          <GoogleSheetsIcon className="w-3 h-3 shrink-0" />
+          Google Sheet
+        </a>
+        {deploymentUrl && (
+          <a href={deploymentUrl} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+            style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text)'; }}
+          >
+            <CodeIcon className="w-3 h-3 shrink-0" />
+            API endpoint
+          </a>
+        )}
+        {scriptUrl && (
+          <a href={scriptUrl} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+            style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text)'; }}
+          >
+            <GoogleAppsScriptIcon className="w-3 h-3 shrink-0" />
+            Apps Script
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// GenericDeleteDialog
+// ---------------------------------------------------------------------------
+
+interface GenericDeleteDialogProps {
+  name: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+function GenericDeleteDialog({ name, onConfirm, onCancel }: GenericDeleteDialogProps) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
+      <div className="w-full max-w-sm rounded-2xl border p-6 flex flex-col gap-5" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+        <div className="flex flex-col gap-2">
+          <h2 className="text-base font-semibold" style={{ color: 'var(--color-text)' }}>Delete &ldquo;{name}&rdquo;?</h2>
+          <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+            This will permanently delete the Google Sheet and its bound Apps Script. The endpoint will stop working. This cannot be undone.
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <button onClick={onConfirm} className="flex-1 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-400" style={{ background: '#ef4444', color: '#fff' }}>Delete</button>
+          <button onClick={onCancel} className="flex-1 py-2 rounded-lg border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]" style={{ background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Dashboard
 // ---------------------------------------------------------------------------
 
@@ -1079,7 +1195,7 @@ export default function Dashboard() {
   const user = state.auth.user!;
   const accessToken = state.auth.accessToken!;
 
-  const [activeTab, setActiveTab] = useState<'forms' | 'content' | 'assets' | 'config' | 'calendar' | 'gallery'>('forms');
+  const [activeTab, setActiveTab] = useState<'forms' | 'content' | 'assets' | 'config' | 'calendar' | 'gallery' | 'testimonials' | 'faqs' | 'menus' | 'newsletters' | 'announcements' | 'redirects'>('forms');
   const [betaDropdownOpen, setBetaDropdownOpen] = useState(false);
   const [skillExportOpen, setSkillExportOpen] = useState(false);
 
@@ -1120,6 +1236,30 @@ export default function Dashboard() {
   const [pendingDeleteGallery, setPendingDeleteGallery] = useState<GalleryModuleSummary | null>(null);
   const [editingGallery, setEditingGallery] = useState<GalleryModuleSummary | null>(null);
 
+  const [testimonials, setTestimonials] = useState<ModuleSummary[]>([]);
+  const [testimonialsLoading, setTestimonialsLoading] = useState(true);
+  const [pendingDeleteTestimonial, setPendingDeleteTestimonial] = useState<ModuleSummary | null>(null);
+
+  const [faqs, setFaqs] = useState<ModuleSummary[]>([]);
+  const [faqsLoading, setFaqsLoading] = useState(true);
+  const [pendingDeleteFaq, setPendingDeleteFaq] = useState<ModuleSummary | null>(null);
+
+  const [menus, setMenus] = useState<ModuleSummary[]>([]);
+  const [menusLoading, setMenusLoading] = useState(true);
+  const [pendingDeleteMenu, setPendingDeleteMenu] = useState<ModuleSummary | null>(null);
+
+  const [newsletters, setNewsletters] = useState<ModuleSummary[]>([]);
+  const [newslettersLoading, setNewslettersLoading] = useState(true);
+  const [pendingDeleteNewsletter, setPendingDeleteNewsletter] = useState<ModuleSummary | null>(null);
+
+  const [announcements, setAnnouncements] = useState<ModuleSummary[]>([]);
+  const [announcementsLoading, setAnnouncementsLoading] = useState(true);
+  const [pendingDeleteAnnouncement, setPendingDeleteAnnouncement] = useState<ModuleSummary | null>(null);
+
+  const [redirectsList, setRedirectsList] = useState<ModuleSummary[]>([]);
+  const [redirectsLoading, setRedirectsLoading] = useState(true);
+  const [pendingDeleteRedirects, setPendingDeleteRedirects] = useState<ModuleSummary | null>(null);
+
   // Keep legacy name for forms section
   const loading = formsLoading;
   const loadError = formsError;
@@ -1147,6 +1287,12 @@ export default function Dashboard() {
     setConfigsLoading(true); setConfigsError(null);
     setCalendarsLoading(true); setCalendarsError(null);
     setGalleriesLoading(true); setGalleriesError(null);
+    setTestimonialsLoading(true);
+    setFaqsLoading(true);
+    setMenusLoading(true);
+    setNewslettersLoading(true);
+    setAnnouncementsLoading(true);
+    setRedirectsLoading(true);
 
     listAllResources(accessToken)
       .then((result) => {
@@ -1157,6 +1303,12 @@ export default function Dashboard() {
         setConfigs(result.configs); setConfigsLoading(false);
         setCalendars(result.calendars); setCalendarsLoading(false);
         setGalleries(result.galleries); setGalleriesLoading(false);
+        setTestimonials(result.testimonials); setTestimonialsLoading(false);
+        setFaqs(result.faqs); setFaqsLoading(false);
+        setMenus(result.menus); setMenusLoading(false);
+        setNewsletters(result.newsletters); setNewslettersLoading(false);
+        setAnnouncements(result.announcements); setAnnouncementsLoading(false);
+        setRedirectsList(result.redirects); setRedirectsLoading(false);
       })
       .catch(() => {
         if (cancelled) return;
@@ -1166,6 +1318,12 @@ export default function Dashboard() {
         setConfigsError('Could not load site configs. Please try again.'); setConfigsLoading(false);
         setCalendarsError('Could not load calendars. Please try again.'); setCalendarsLoading(false);
         setGalleriesError('Could not load galleries. Please try again.'); setGalleriesLoading(false);
+        setTestimonialsLoading(false);
+        setFaqsLoading(false);
+        setMenusLoading(false);
+        setNewslettersLoading(false);
+        setAnnouncementsLoading(false);
+        setRedirectsLoading(false);
       });
 
     return () => { cancelled = true; };
@@ -1178,6 +1336,12 @@ export default function Dashboard() {
     setConfigsLoading(true); setConfigsError(null);
     setCalendarsLoading(true); setCalendarsError(null);
     setGalleriesLoading(true); setGalleriesError(null);
+    setTestimonialsLoading(true);
+    setFaqsLoading(true);
+    setMenusLoading(true);
+    setNewslettersLoading(true);
+    setAnnouncementsLoading(true);
+    setRedirectsLoading(true);
     listAllResources(accessToken)
       .then((result) => {
         setForms(result.forms); setFormsLoading(false);
@@ -1186,6 +1350,12 @@ export default function Dashboard() {
         setConfigs(result.configs); setConfigsLoading(false);
         setCalendars(result.calendars); setCalendarsLoading(false);
         setGalleries(result.galleries); setGalleriesLoading(false);
+        setTestimonials(result.testimonials); setTestimonialsLoading(false);
+        setFaqs(result.faqs); setFaqsLoading(false);
+        setMenus(result.menus); setMenusLoading(false);
+        setNewsletters(result.newsletters); setNewslettersLoading(false);
+        setAnnouncements(result.announcements); setAnnouncementsLoading(false);
+        setRedirectsList(result.redirects); setRedirectsLoading(false);
       })
       .catch(() => {
         setFormsError('Could not load your resources. Please try again.'); setFormsLoading(false);
@@ -1194,6 +1364,12 @@ export default function Dashboard() {
         setConfigsError('Could not load site configs. Please try again.'); setConfigsLoading(false);
         setCalendarsError('Could not load calendars. Please try again.'); setCalendarsLoading(false);
         setGalleriesError('Could not load galleries. Please try again.'); setGalleriesLoading(false);
+        setTestimonialsLoading(false);
+        setFaqsLoading(false);
+        setMenusLoading(false);
+        setNewslettersLoading(false);
+        setAnnouncementsLoading(false);
+        setRedirectsLoading(false);
       });
   }
 
@@ -1248,6 +1424,84 @@ export default function Dashboard() {
         next.delete(mod.sheetId);
         return next;
       });
+    }
+  }
+
+  async function handleConfirmDeleteTestimonial() {
+    if (!pendingDeleteTestimonial) return;
+    const mod = pendingDeleteTestimonial;
+    setPendingDeleteTestimonial(null);
+    setDeletingIds((prev) => new Set(prev).add(mod.sheetId));
+    try {
+      await deleteForm(accessToken, mod.sheetId);
+      setTestimonials((prev) => prev.filter((t) => t.sheetId !== mod.sheetId));
+    } catch { /* silent */ } finally {
+      setDeletingIds((prev) => { const next = new Set(prev); next.delete(mod.sheetId); return next; });
+    }
+  }
+
+  async function handleConfirmDeleteFaq() {
+    if (!pendingDeleteFaq) return;
+    const mod = pendingDeleteFaq;
+    setPendingDeleteFaq(null);
+    setDeletingIds((prev) => new Set(prev).add(mod.sheetId));
+    try {
+      await deleteForm(accessToken, mod.sheetId);
+      setFaqs((prev) => prev.filter((f) => f.sheetId !== mod.sheetId));
+    } catch { /* silent */ } finally {
+      setDeletingIds((prev) => { const next = new Set(prev); next.delete(mod.sheetId); return next; });
+    }
+  }
+
+  async function handleConfirmDeleteMenu() {
+    if (!pendingDeleteMenu) return;
+    const mod = pendingDeleteMenu;
+    setPendingDeleteMenu(null);
+    setDeletingIds((prev) => new Set(prev).add(mod.sheetId));
+    try {
+      await deleteForm(accessToken, mod.sheetId);
+      setMenus((prev) => prev.filter((m) => m.sheetId !== mod.sheetId));
+    } catch { /* silent */ } finally {
+      setDeletingIds((prev) => { const next = new Set(prev); next.delete(mod.sheetId); return next; });
+    }
+  }
+
+  async function handleConfirmDeleteNewsletter() {
+    if (!pendingDeleteNewsletter) return;
+    const mod = pendingDeleteNewsletter;
+    setPendingDeleteNewsletter(null);
+    setDeletingIds((prev) => new Set(prev).add(mod.sheetId));
+    try {
+      await deleteForm(accessToken, mod.sheetId);
+      setNewsletters((prev) => prev.filter((n) => n.sheetId !== mod.sheetId));
+    } catch { /* silent */ } finally {
+      setDeletingIds((prev) => { const next = new Set(prev); next.delete(mod.sheetId); return next; });
+    }
+  }
+
+  async function handleConfirmDeleteAnnouncement() {
+    if (!pendingDeleteAnnouncement) return;
+    const mod = pendingDeleteAnnouncement;
+    setPendingDeleteAnnouncement(null);
+    setDeletingIds((prev) => new Set(prev).add(mod.sheetId));
+    try {
+      await deleteForm(accessToken, mod.sheetId);
+      setAnnouncements((prev) => prev.filter((a) => a.sheetId !== mod.sheetId));
+    } catch { /* silent */ } finally {
+      setDeletingIds((prev) => { const next = new Set(prev); next.delete(mod.sheetId); return next; });
+    }
+  }
+
+  async function handleConfirmDeleteRedirects() {
+    if (!pendingDeleteRedirects) return;
+    const mod = pendingDeleteRedirects;
+    setPendingDeleteRedirects(null);
+    setDeletingIds((prev) => new Set(prev).add(mod.sheetId));
+    try {
+      await deleteForm(accessToken, mod.sheetId);
+      setRedirectsList((prev) => prev.filter((r) => r.sheetId !== mod.sheetId));
+    } catch { /* silent */ } finally {
+      setDeletingIds((prev) => { const next = new Set(prev); next.delete(mod.sheetId); return next; });
     }
   }
 
@@ -1407,6 +1661,20 @@ export default function Dashboard() {
           </div>
         </header>
 
+        {/* Site Starter CTA */}
+        <div className="rounded-xl border p-4 flex items-center justify-between gap-4"
+          style={{ background: 'var(--color-accent-subtle)', borderColor: 'var(--color-accent-border)' }}>
+          <div>
+            <p className="text-sm font-semibold" style={{ color: 'var(--color-accent)' }}>Launch a complete site backend</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>Pick a template and spin up all your APIs in 60 seconds</p>
+          </div>
+          <button onClick={() => dispatch({ type: 'GO_TO_SITE_STARTER' })}
+            className="shrink-0 px-4 py-2 rounded-lg text-sm font-semibold"
+            style={{ background: 'var(--color-accent)', color: '#000' }}>
+            Site Starter
+          </button>
+        </div>
+
         {/* Tabs */}
         <div
           className="flex items-center gap-1 p-1 rounded-xl"
@@ -1439,9 +1707,9 @@ export default function Dashboard() {
               onClick={() => setBetaDropdownOpen((o) => !o)}
               className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
               style={{
-                background: ['content', 'assets', 'config', 'calendar', 'gallery'].includes(activeTab) ? 'var(--color-surface-2)' : 'transparent',
-                color: ['content', 'assets', 'config', 'calendar', 'gallery'].includes(activeTab) ? 'var(--color-text)' : 'var(--color-muted)',
-                border: ['content', 'assets', 'config', 'calendar', 'gallery'].includes(activeTab) ? '1px solid var(--color-border)' : '1px solid transparent',
+                background: ['content', 'assets', 'config', 'calendar', 'gallery', 'testimonials', 'faqs', 'menus', 'newsletters', 'announcements', 'redirects'].includes(activeTab) ? 'var(--color-surface-2)' : 'transparent',
+                color: ['content', 'assets', 'config', 'calendar', 'gallery', 'testimonials', 'faqs', 'menus', 'newsletters', 'announcements', 'redirects'].includes(activeTab) ? 'var(--color-text)' : 'var(--color-muted)',
+                border: ['content', 'assets', 'config', 'calendar', 'gallery', 'testimonials', 'faqs', 'menus', 'newsletters', 'announcements', 'redirects'].includes(activeTab) ? '1px solid var(--color-border)' : '1px solid transparent',
               }}
             >
               <span className="text-xs px-1 py-0 rounded font-semibold tracking-wide" style={{ background: 'oklch(0.65 0.18 270 / 0.15)', color: 'oklch(0.55 0.18 270)' }}>β</span>
@@ -1462,11 +1730,17 @@ export default function Dashboard() {
                   style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}
                 >
                   {([
-                    { id: 'content',  icon: <DatabaseIcon  className="w-3.5 h-3.5 shrink-0" />, label: 'Content',  count: modules.length },
-                    { id: 'assets',   icon: <FolderIcon    className="w-3.5 h-3.5 shrink-0" />, label: 'Assets',   count: assets.length },
-                    { id: 'config',   icon: <SettingsIcon  className="w-3.5 h-3.5 shrink-0" />, label: 'Config',   count: configs.length },
-                    { id: 'calendar', icon: <CalendarIcon  className="w-3.5 h-3.5 shrink-0" />, label: 'Calendar', count: calendars.length },
-                    { id: 'gallery',  icon: <GalleryIcon   className="w-3.5 h-3.5 shrink-0" />, label: 'Gallery',  count: galleries.length },
+                    { id: 'content',       icon: <DatabaseIcon  className="w-3.5 h-3.5 shrink-0" />, label: 'Content',       count: modules.length },
+                    { id: 'assets',        icon: <FolderIcon    className="w-3.5 h-3.5 shrink-0" />, label: 'Assets',        count: assets.length },
+                    { id: 'config',        icon: <SettingsIcon  className="w-3.5 h-3.5 shrink-0" />, label: 'Config',        count: configs.length },
+                    { id: 'calendar',      icon: <CalendarIcon  className="w-3.5 h-3.5 shrink-0" />, label: 'Calendar',      count: calendars.length },
+                    { id: 'gallery',       icon: <GalleryIcon   className="w-3.5 h-3.5 shrink-0" />, label: 'Gallery',       count: galleries.length },
+                    { id: 'testimonials',  icon: <SparklesIcon  className="w-3.5 h-3.5 shrink-0" />, label: 'Testimonials',  count: testimonials.length },
+                    { id: 'faqs',          icon: <BookIcon      className="w-3.5 h-3.5 shrink-0" />, label: 'FAQs',          count: faqs.length },
+                    { id: 'menus',         icon: <DatabaseIcon  className="w-3.5 h-3.5 shrink-0" />, label: 'Menu',          count: menus.length },
+                    { id: 'newsletters',   icon: <EditIcon      className="w-3.5 h-3.5 shrink-0" />, label: 'Newsletter',    count: newsletters.length },
+                    { id: 'announcements', icon: <CodeIcon      className="w-3.5 h-3.5 shrink-0" />, label: 'Announcements', count: announcements.length },
+                    { id: 'redirects',     icon: <SettingsIcon  className="w-3.5 h-3.5 shrink-0" />, label: 'Redirects',     count: redirectsList.length },
                   ] as const).map((item) => (
                     <button
                       key={item.id}
@@ -1847,6 +2121,210 @@ export default function Dashboard() {
             )}
           </>
         )}
+        {/* ── Testimonials tab ── */}
+        {activeTab === 'testimonials' && (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>Testimonials</h2>
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'GO_TO_MODULE_BUILDER', moduleType: 'testimonial' })}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                style={{ background: 'var(--color-accent)', color: '#fff' }}
+              >
+                <PlusIcon className="w-3 h-3" /> New
+              </button>
+            </div>
+            {testimonialsLoading ? (
+              <div className="flex flex-col gap-3">{[0, 1].map((i) => <div key={i} className="rounded-xl border p-5 h-24 animate-pulse" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }} />)}</div>
+            ) : testimonials.length === 0 ? (
+              <div className="rounded-xl border p-10 flex flex-col items-center gap-4 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>No testimonial modules yet</p>
+                <button type="button" onClick={() => dispatch({ type: 'GO_TO_MODULE_BUILDER', moduleType: 'testimonial' })} className="px-5 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]" style={{ background: 'var(--color-accent)', color: '#fff' }}>Create your first testimonials module</button>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {testimonials.map((t) => (
+                  <SimpleModuleCard key={t.sheetId} name={t.moduleName} createdAt={t.createdAt} deploymentUrl={t.deploymentUrl} sheetUrl={t.sheetUrl} scriptUrl={t.scriptUrl} typeLabel="Testimonials" typeBgColor="oklch(0.72 0.17 15 / 0.10)" typeTextColor="oklch(0.72 0.17 15)" onDelete={() => setPendingDeleteTestimonial(t)} deleting={deletingIds.has(t.sheetId)} />
+                ))}
+              </div>
+            )}
+            {pendingDeleteTestimonial && (
+              <GenericDeleteDialog name={pendingDeleteTestimonial.moduleName} onConfirm={handleConfirmDeleteTestimonial} onCancel={() => setPendingDeleteTestimonial(null)} />
+            )}
+          </div>
+        )}
+
+        {/* ── FAQs tab ── */}
+        {activeTab === 'faqs' && (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>FAQs</h2>
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'GO_TO_MODULE_BUILDER', moduleType: 'faq' })}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                style={{ background: 'var(--color-accent)', color: '#fff' }}
+              >
+                <PlusIcon className="w-3 h-3" /> New
+              </button>
+            </div>
+            {faqsLoading ? (
+              <div className="flex flex-col gap-3">{[0, 1].map((i) => <div key={i} className="rounded-xl border p-5 h-24 animate-pulse" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }} />)}</div>
+            ) : faqs.length === 0 ? (
+              <div className="rounded-xl border p-10 flex flex-col items-center gap-4 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>No FAQ modules yet</p>
+                <button type="button" onClick={() => dispatch({ type: 'GO_TO_MODULE_BUILDER', moduleType: 'faq' })} className="px-5 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]" style={{ background: 'var(--color-accent)', color: '#fff' }}>Create your first FAQ module</button>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {faqs.map((f) => (
+                  <SimpleModuleCard key={f.sheetId} name={f.moduleName} createdAt={f.createdAt} deploymentUrl={f.deploymentUrl} sheetUrl={f.sheetUrl} scriptUrl={f.scriptUrl} typeLabel="FAQ" typeBgColor="oklch(0.75 0.18 55 / 0.10)" typeTextColor="oklch(0.75 0.18 55)" onDelete={() => setPendingDeleteFaq(f)} deleting={deletingIds.has(f.sheetId)} />
+                ))}
+              </div>
+            )}
+            {pendingDeleteFaq && (
+              <GenericDeleteDialog name={pendingDeleteFaq.moduleName} onConfirm={handleConfirmDeleteFaq} onCancel={() => setPendingDeleteFaq(null)} />
+            )}
+          </div>
+        )}
+
+        {/* ── Menus tab ── */}
+        {activeTab === 'menus' && (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>Menu / Catalog</h2>
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'GO_TO_MODULE_BUILDER', moduleType: 'menu' })}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                style={{ background: 'var(--color-accent)', color: '#fff' }}
+              >
+                <PlusIcon className="w-3 h-3" /> New
+              </button>
+            </div>
+            {menusLoading ? (
+              <div className="flex flex-col gap-3">{[0, 1].map((i) => <div key={i} className="rounded-xl border p-5 h-24 animate-pulse" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }} />)}</div>
+            ) : menus.length === 0 ? (
+              <div className="rounded-xl border p-10 flex flex-col items-center gap-4 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>No menu modules yet</p>
+                <button type="button" onClick={() => dispatch({ type: 'GO_TO_MODULE_BUILDER', moduleType: 'menu' })} className="px-5 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]" style={{ background: 'var(--color-accent)', color: '#fff' }}>Create your first menu module</button>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {menus.map((m) => (
+                  <SimpleModuleCard key={m.sheetId} name={m.moduleName} createdAt={m.createdAt} deploymentUrl={m.deploymentUrl} sheetUrl={m.sheetUrl} scriptUrl={m.scriptUrl} typeLabel="Menu" typeBgColor="oklch(0.70 0.18 140 / 0.10)" typeTextColor="oklch(0.70 0.18 140)" onDelete={() => setPendingDeleteMenu(m)} deleting={deletingIds.has(m.sheetId)} />
+                ))}
+              </div>
+            )}
+            {pendingDeleteMenu && (
+              <GenericDeleteDialog name={pendingDeleteMenu.moduleName} onConfirm={handleConfirmDeleteMenu} onCancel={() => setPendingDeleteMenu(null)} />
+            )}
+          </div>
+        )}
+
+        {/* ── Newsletters tab ── */}
+        {activeTab === 'newsletters' && (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>Newsletter / Waitlist</h2>
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'GO_TO_MODULE_BUILDER', moduleType: 'newsletter' })}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                style={{ background: 'var(--color-accent)', color: '#fff' }}
+              >
+                <PlusIcon className="w-3 h-3" /> New
+              </button>
+            </div>
+            {newslettersLoading ? (
+              <div className="flex flex-col gap-3">{[0, 1].map((i) => <div key={i} className="rounded-xl border p-5 h-24 animate-pulse" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }} />)}</div>
+            ) : newsletters.length === 0 ? (
+              <div className="rounded-xl border p-10 flex flex-col items-center gap-4 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>No newsletter modules yet</p>
+                <button type="button" onClick={() => dispatch({ type: 'GO_TO_MODULE_BUILDER', moduleType: 'newsletter' })} className="px-5 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]" style={{ background: 'var(--color-accent)', color: '#fff' }}>Create your first newsletter module</button>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {newsletters.map((n) => (
+                  <SimpleModuleCard key={n.sheetId} name={n.moduleName} createdAt={n.createdAt} deploymentUrl={n.deploymentUrl} sheetUrl={n.sheetUrl} scriptUrl={n.scriptUrl} typeLabel="Newsletter" typeBgColor="oklch(0.68 0.20 220 / 0.10)" typeTextColor="oklch(0.68 0.20 220)" onDelete={() => setPendingDeleteNewsletter(n)} deleting={deletingIds.has(n.sheetId)} />
+                ))}
+              </div>
+            )}
+            {pendingDeleteNewsletter && (
+              <GenericDeleteDialog name={pendingDeleteNewsletter.moduleName} onConfirm={handleConfirmDeleteNewsletter} onCancel={() => setPendingDeleteNewsletter(null)} />
+            )}
+          </div>
+        )}
+
+        {/* ── Announcements tab ── */}
+        {activeTab === 'announcements' && (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>Announcements / Banners</h2>
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'GO_TO_MODULE_BUILDER', moduleType: 'announcement' })}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                style={{ background: 'var(--color-accent)', color: '#fff' }}
+              >
+                <PlusIcon className="w-3 h-3" /> New
+              </button>
+            </div>
+            {announcementsLoading ? (
+              <div className="flex flex-col gap-3">{[0, 1].map((i) => <div key={i} className="rounded-xl border p-5 h-24 animate-pulse" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }} />)}</div>
+            ) : announcements.length === 0 ? (
+              <div className="rounded-xl border p-10 flex flex-col items-center gap-4 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>No announcement modules yet</p>
+                <button type="button" onClick={() => dispatch({ type: 'GO_TO_MODULE_BUILDER', moduleType: 'announcement' })} className="px-5 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]" style={{ background: 'var(--color-accent)', color: '#fff' }}>Create your first announcement module</button>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {announcements.map((a) => (
+                  <SimpleModuleCard key={a.sheetId} name={a.moduleName} createdAt={a.createdAt} deploymentUrl={a.deploymentUrl} sheetUrl={a.sheetUrl} scriptUrl={a.scriptUrl} typeLabel="Announcement" typeBgColor="oklch(0.78 0.18 40 / 0.10)" typeTextColor="oklch(0.78 0.18 40)" onDelete={() => setPendingDeleteAnnouncement(a)} deleting={deletingIds.has(a.sheetId)} />
+                ))}
+              </div>
+            )}
+            {pendingDeleteAnnouncement && (
+              <GenericDeleteDialog name={pendingDeleteAnnouncement.moduleName} onConfirm={handleConfirmDeleteAnnouncement} onCancel={() => setPendingDeleteAnnouncement(null)} />
+            )}
+          </div>
+        )}
+
+        {/* ── Redirects tab ── */}
+        {activeTab === 'redirects' && (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>Redirects</h2>
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'GO_TO_MODULE_BUILDER', moduleType: 'redirects' })}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                style={{ background: 'var(--color-accent)', color: '#fff' }}
+              >
+                <PlusIcon className="w-3 h-3" /> New
+              </button>
+            </div>
+            {redirectsLoading ? (
+              <div className="flex flex-col gap-3">{[0, 1].map((i) => <div key={i} className="rounded-xl border p-5 h-24 animate-pulse" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }} />)}</div>
+            ) : redirectsList.length === 0 ? (
+              <div className="rounded-xl border p-10 flex flex-col items-center gap-4 text-center" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>No redirects modules yet</p>
+                <button type="button" onClick={() => dispatch({ type: 'GO_TO_MODULE_BUILDER', moduleType: 'redirects' })} className="px-5 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]" style={{ background: 'var(--color-accent)', color: '#fff' }}>Create your first redirects module</button>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {redirectsList.map((r) => (
+                  <SimpleModuleCard key={r.sheetId} name={r.moduleName} createdAt={r.createdAt} deploymentUrl={r.deploymentUrl} sheetUrl={r.sheetUrl} scriptUrl={r.scriptUrl} typeLabel="Redirects" typeBgColor="oklch(0.65 0.15 320 / 0.10)" typeTextColor="oklch(0.65 0.15 320)" onDelete={() => setPendingDeleteRedirects(r)} deleting={deletingIds.has(r.sheetId)} />
+                ))}
+              </div>
+            )}
+            {pendingDeleteRedirects && (
+              <GenericDeleteDialog name={pendingDeleteRedirects.moduleName} onConfirm={handleConfirmDeleteRedirects} onCancel={() => setPendingDeleteRedirects(null)} />
+            )}
+          </div>
+        )}
+
       </div>
 
       {/* Form detail modal */}

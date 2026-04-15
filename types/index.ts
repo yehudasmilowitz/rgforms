@@ -14,8 +14,8 @@ export interface FormConfig {
   bccEmails?: string[];
   emailSubject?: string;
   senderName?: string;
-  replyToFieldId?: string; // ID of the email-type field whose value becomes the reply-to address
-  enableHoneypot?: boolean; // Add a hidden website field; submissions that fill it are silently discarded
+  replyToFieldId?: string;
+  enableHoneypot?: boolean;
 }
 
 export interface ProvisioningResult {
@@ -57,6 +57,7 @@ export interface FormSummary {
   deploymentUrl?: string;
   fields?: FormField[];
   enableHoneypot?: boolean;
+  projectId?: string;
 }
 
 export type AppScreen =
@@ -79,7 +80,15 @@ export type AppScreen =
   | 'calendar-result'
   | 'gallery-builder'
   | 'gallery-provisioning'
-  | 'gallery-result';
+  | 'gallery-result'
+  // Generic module screens (replaces per-module screens)
+  | 'module-builder'
+  | 'module-provisioning'
+  | 'module-result'
+  // Site Starter / Projects screens
+  | 'site-starter'
+  | 'site-starter-provisioning'
+  | 'site-kit';
 
 // ─── Calendar Module Types ────────────────────────────────────────────────────
 
@@ -99,6 +108,7 @@ export interface CalendarModuleSummary {
   scriptId?: string;
   scriptUrl?: string;
   deploymentUrl?: string;
+  projectId?: string;
 }
 
 // ─── Gallery Module Types ─────────────────────────────────────────────────────
@@ -119,6 +129,7 @@ export interface GalleryModuleSummary {
   scriptId?: string;
   scriptUrl?: string;
   deploymentUrl?: string;
+  projectId?: string;
 }
 
 // ─── Site Config Module Types ─────────────────────────────────────────────────
@@ -139,6 +150,7 @@ export interface SiteConfigModuleSummary {
   scriptId?: string;
   scriptUrl?: string;
   deploymentUrl?: string;
+  projectId?: string;
 }
 
 // ─── Asset Module Types ───────────────────────────────────────────────────────
@@ -163,6 +175,7 @@ export interface AssetModuleSummary {
   scriptId?: string;
   scriptUrl?: string;
   deploymentUrl?: string;
+  projectId?: string;
 }
 
 export interface AssetFile {
@@ -192,7 +205,7 @@ export type ContentFieldType =
 export interface ContentField {
   id: string;
   label: string;
-  key: string;          // auto-normalized from label: lowercase + underscores
+  key: string;
   type: ContentFieldType;
   required: boolean;
 }
@@ -200,8 +213,8 @@ export interface ContentField {
 export interface ContentModuleConfig {
   name: string;
   fields: ContentField[];
-  hasSlug: boolean;     // auto-adds a 'slug' column
-  hasPublished: boolean; // auto-adds a 'published' boolean column
+  hasSlug: boolean;
+  hasPublished: boolean;
 }
 
 export interface ContentModuleResult {
@@ -225,6 +238,96 @@ export interface ContentModuleSummary {
   hasSlug: boolean;
   hasPublished: boolean;
   writeToken?: string;
+  projectId?: string;
+}
+
+// ─── Generic Module Types ─────────────────────────────────────────────────────
+
+/** Generic result for any simple module provisioned via runProvisionPipeline */
+export interface ModuleResult {
+  sheetId: string;
+  sheetUrl: string;
+  scriptId: string;
+  scriptUrl: string;
+  deploymentUrl: string;
+}
+
+/** Generic summary for any simple module returned by listAllResources */
+export interface ModuleSummary {
+  sheetId: string;
+  sheetUrl: string;
+  moduleName: string;
+  createdAt: string;
+  moduleType: string;
+  scriptId?: string;
+  scriptUrl?: string;
+  deploymentUrl?: string;
+  projectId?: string;
+}
+
+// Backward-compatible aliases — existing result panels still import these
+export type TestimonialResult = ModuleResult;
+export type FaqResult = ModuleResult;
+export type MenuResult = ModuleResult;
+export type NewsletterResult = ModuleResult;
+export type AnnouncementResult = ModuleResult;
+export type RedirectsResult = ModuleResult;
+
+// ─── Project / Site Starter Types ────────────────────────────────────────────
+
+export type ProjectTemplate = 'portfolio' | 'restaurant' | 'saas' | 'nonprofit' | 'agency';
+
+export interface ProjectModuleEntry {
+  moduleType: string;
+  moduleName: string;
+  sheetId: string;
+  deploymentUrl?: string;
+  // endpoint health tracking
+  authorized?: boolean;
+  lastChecked?: string;
+  healthMs?: number;
+}
+
+export interface Project {
+  projectId: string;
+  projectName: string;
+  template: ProjectTemplate;
+  createdAt: string;
+  modules: ProjectModuleEntry[];
+}
+
+export interface SiteStarterConfig {
+  template: ProjectTemplate | null;
+  siteName: string;
+  notifyEmail: string;
+}
+
+export interface SiteStarterModuleProgress {
+  moduleType: string;
+  moduleName: string;
+  status: 'pending' | 'running' | 'complete' | 'error';
+  deploymentUrl?: string;
+  sheetId?: string;
+  sheetUrl?: string;
+  error?: string;
+}
+
+export interface SiteStarterResult {
+  projectId: string;
+  projectName: string;
+  template: ProjectTemplate;
+  modules: SiteStarterModuleProgress[];
+}
+
+// ─── Developer UX Types ───────────────────────────────────────────────────────
+
+export interface HealthCheckResult {
+  sheetId: string;
+  deploymentUrl: string;
+  status: 'ok' | 'error' | 'unauthorized' | 'checking';
+  latencyMs?: number;
+  checkedAt: string;
+  error?: string;
 }
 
 // ─── App State ───────────────────────────────────────────────────────────────
@@ -258,6 +361,15 @@ export interface AppState {
   galleryBuilderName: string;
   galleryResult: GalleryResult | null;
   galleryProvisionError: string | null;
+  /** Generic module state keyed by module type (e.g. 'testimonial', 'faq') */
+  modules: Record<string, { builderName: string; result: ModuleResult | null; provisionError: string | null }>;
+  /** The module type currently being shown in builder/provisioning/result screens */
+  activeModuleType: string | null;
+  // Site Starter state
+  siteStarterConfig: SiteStarterConfig;
+  siteStarterProgress: SiteStarterModuleProgress[];
+  siteStarterResult: SiteStarterResult | null;
+  siteStarterError: string | null;
 }
 
 export type AppAction =
@@ -306,4 +418,19 @@ export type AppAction =
   | { type: 'START_GALLERY_PROVISIONING' }
   | { type: 'SET_GALLERY_RESULT'; payload: GalleryResult }
   | { type: 'GALLERY_PROVISION_ERROR'; payload: string }
-  | { type: 'RESET_GALLERY' };
+  | { type: 'RESET_GALLERY' }
+  // Generic module actions
+  | { type: 'GO_TO_MODULE_BUILDER'; moduleType: string }
+  | { type: 'SET_MODULE_BUILDER_NAME'; moduleType: string; name: string }
+  | { type: 'START_MODULE_PROVISIONING'; moduleType: string }
+  | { type: 'SET_MODULE_RESULT'; moduleType: string; result: ModuleResult }
+  | { type: 'MODULE_PROVISION_ERROR'; moduleType: string; error: string }
+  | { type: 'RESET_MODULE'; moduleType: string }
+  // Site Starter actions
+  | { type: 'GO_TO_SITE_STARTER' }
+  | { type: 'SET_SITE_STARTER_CONFIG'; payload: Partial<SiteStarterConfig> }
+  | { type: 'START_SITE_STARTER_PROVISIONING'; payload: SiteStarterModuleProgress[] }
+  | { type: 'UPDATE_SITE_STARTER_MODULE'; payload: Partial<SiteStarterModuleProgress> & { moduleType: string; moduleName: string } }
+  | { type: 'SET_SITE_STARTER_RESULT'; payload: SiteStarterResult }
+  | { type: 'SITE_STARTER_ERROR'; payload: string }
+  | { type: 'RESET_SITE_STARTER' };

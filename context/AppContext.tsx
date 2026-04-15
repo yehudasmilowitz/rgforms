@@ -10,12 +10,14 @@ import type {
   GoogleUser,
   ProvisioningResult,
   ContentModuleResult,
+  SiteStarterConfig,
 } from '@/types';
 import { CONTENT_PROVISIONING_STEPS } from '@/lib/contentProvision';
 import { ASSET_PROVISIONING_STEPS } from '@/lib/assetProvision';
 import { SITE_CONFIG_PROVISIONING_STEPS } from '@/lib/siteConfigProvision';
 import { CALENDAR_PROVISIONING_STEPS } from '@/lib/calendarProvision';
 import { GALLERY_PROVISIONING_STEPS } from '@/lib/galleryProvision';
+import { MODULE_REGISTRY } from '@/lib/modules/registry';
 
 // ─── Form defaults ────────────────────────────────────────────────────────────
 
@@ -46,6 +48,12 @@ const DEFAULT_CONTENT_CONFIG: ContentModuleConfig = {
   ],
   hasSlug: true,
   hasPublished: true,
+};
+
+const DEFAULT_SITE_STARTER_CONFIG: SiteStarterConfig = {
+  template: null,
+  siteName: '',
+  notifyEmail: '',
 };
 
 // ─── Initial state ────────────────────────────────────────────────────────────
@@ -79,6 +87,14 @@ const initialState: AppState = {
   galleryBuilderName: '',
   galleryResult: null,
   galleryProvisionError: null,
+  // Generic modules
+  modules: {},
+  activeModuleType: null,
+  // Site Starter
+  siteStarterConfig: DEFAULT_SITE_STARTER_CONFIG,
+  siteStarterProgress: [],
+  siteStarterResult: null,
+  siteStarterError: null,
 };
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
@@ -92,6 +108,7 @@ function reducer(state: AppState, action: AppAction): AppState {
         screen: 'dashboard',
         auth: { user: action.payload.user, accessToken: action.payload.accessToken },
         formConfig: { ...state.formConfig, notifyEmail: action.payload.user.email },
+        siteStarterConfig: { ...state.siteStarterConfig, notifyEmail: action.payload.user.email },
       };
     case 'SIGN_OUT':
       return { ...initialState };
@@ -105,8 +122,6 @@ function reducer(state: AppState, action: AppAction): AppState {
         screen: 'builder',
         auth: state.auth,
         formConfig: { ...DEFAULT_FORM_CONFIG, notifyEmail: state.auth.user?.email ?? '' },
-        contentModuleConfig: state.contentModuleConfig,
-        contentResult: state.contentResult,
       };
     case 'START_PROVISIONING':
       return { ...state, screen: 'provisioning', steps: PROVISIONING_STEPS, provisionError: null };
@@ -133,8 +148,7 @@ function reducer(state: AppState, action: AppAction): AppState {
         screen: 'dashboard',
         auth: state.auth,
         formConfig: { ...DEFAULT_FORM_CONFIG, notifyEmail: state.auth.user?.email ?? '' },
-        contentModuleConfig: state.contentModuleConfig,
-        contentResult: state.contentResult,
+        siteStarterConfig: { ...DEFAULT_SITE_STARTER_CONFIG, notifyEmail: state.auth.user?.email ?? '' },
       };
 
     // ── Content modules ───────────────────────────────────────────────────────
@@ -232,6 +246,126 @@ function reducer(state: AppState, action: AppAction): AppState {
       return { ...state, screen: 'gallery-builder', galleryProvisionError: action.payload };
     case 'RESET_GALLERY':
       return { ...state, screen: 'dashboard', galleryBuilderName: '', galleryResult: null, galleryProvisionError: null };
+
+    // ── Generic module actions ────────────────────────────────────────────────
+    case 'GO_TO_MODULE_BUILDER':
+      return {
+        ...state,
+        screen: 'module-builder',
+        activeModuleType: action.moduleType,
+        modules: {
+          ...state.modules,
+          [action.moduleType]: {
+            builderName: '',
+            result: null,
+            provisionError: null,
+          },
+        },
+      };
+    case 'SET_MODULE_BUILDER_NAME':
+      return {
+        ...state,
+        modules: {
+          ...state.modules,
+          [action.moduleType]: {
+            ...state.modules[action.moduleType],
+            builderName: action.name,
+          },
+        },
+      };
+    case 'START_MODULE_PROVISIONING':
+      return {
+        ...state,
+        screen: 'module-provisioning',
+        steps: MODULE_REGISTRY[action.moduleType]?.steps.map(s => ({ ...s, status: 'pending' as const })) ?? state.steps,
+        modules: {
+          ...state.modules,
+          [action.moduleType]: {
+            ...state.modules[action.moduleType],
+            provisionError: null,
+          },
+        },
+      };
+    case 'SET_MODULE_RESULT':
+      return {
+        ...state,
+        screen: 'module-result',
+        modules: {
+          ...state.modules,
+          [action.moduleType]: {
+            ...state.modules[action.moduleType],
+            result: action.result,
+          },
+        },
+      };
+    case 'MODULE_PROVISION_ERROR':
+      return {
+        ...state,
+        screen: 'module-builder',
+        modules: {
+          ...state.modules,
+          [action.moduleType]: {
+            ...state.modules[action.moduleType],
+            provisionError: action.error,
+          },
+        },
+      };
+    case 'RESET_MODULE':
+      return {
+        ...state,
+        screen: 'dashboard',
+        activeModuleType: null,
+        modules: {
+          ...state.modules,
+          [action.moduleType]: {
+            builderName: '',
+            result: null,
+            provisionError: null,
+          },
+        },
+      };
+
+    // ── Site Starter ──────────────────────────────────────────────────────────
+    case 'GO_TO_SITE_STARTER':
+      return {
+        ...state,
+        screen: 'site-starter',
+        siteStarterConfig: { ...DEFAULT_SITE_STARTER_CONFIG, notifyEmail: state.auth.user?.email ?? '' },
+        siteStarterProgress: [],
+        siteStarterResult: null,
+        siteStarterError: null,
+      };
+    case 'SET_SITE_STARTER_CONFIG':
+      return { ...state, siteStarterConfig: { ...state.siteStarterConfig, ...action.payload } };
+    case 'START_SITE_STARTER_PROVISIONING':
+      return {
+        ...state,
+        screen: 'site-starter-provisioning',
+        siteStarterProgress: action.payload,
+        siteStarterError: null,
+      };
+    case 'UPDATE_SITE_STARTER_MODULE':
+      return {
+        ...state,
+        siteStarterProgress: state.siteStarterProgress.map((m) =>
+          m.moduleType === action.payload.moduleType && m.moduleName === action.payload.moduleName
+            ? { ...m, ...action.payload }
+            : m,
+        ),
+      };
+    case 'SET_SITE_STARTER_RESULT':
+      return { ...state, screen: 'site-kit', siteStarterResult: action.payload };
+    case 'SITE_STARTER_ERROR':
+      return { ...state, screen: 'site-starter', siteStarterError: action.payload };
+    case 'RESET_SITE_STARTER':
+      return {
+        ...state,
+        screen: 'dashboard',
+        siteStarterConfig: { ...DEFAULT_SITE_STARTER_CONFIG, notifyEmail: state.auth.user?.email ?? '' },
+        siteStarterProgress: [],
+        siteStarterResult: null,
+        siteStarterError: null,
+      };
 
     default:
       return state;

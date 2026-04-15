@@ -1,0 +1,247 @@
+'use client';
+
+import { motion } from 'motion/react';
+import { useApp } from '@/context/AppContext';
+import type { SiteStarterModuleProgress, ProjectTemplate } from '@/types';
+
+// ─── Module type → human label map ───────────────────────────────────────────
+
+const MODULE_TYPE_LABELS: Record<string, string> = {
+  siteconfig:  'Site Config',
+  gallery:     'Gallery',
+  content:     'Content',
+  calendar:    'Calendar',
+  testimonial: 'Testimonials',
+  faq:         'FAQ',
+  menu:        'Menu',
+  newsletter:  'Newsletter',
+  form:        'Form',
+};
+
+const TEMPLATE_LABELS: Record<ProjectTemplate, string> = {
+  portfolio: 'Portfolio',
+  restaurant: 'Restaurant',
+  saas: 'SaaS / Landing',
+  nonprofit: 'Non-profit / Church',
+  agency: 'Agency',
+};
+
+// ─── Status icons ─────────────────────────────────────────────────────────────
+
+function SpinnerIcon() {
+  return (
+    <div className="relative w-6 h-6 shrink-0" aria-label="Running">
+      <svg className="absolute inset-0 w-6 h-6 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" stroke="var(--color-border)" strokeWidth="2" />
+        <path d="M12 2 A10 10 0 0 1 22 12" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    </div>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <div
+      className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
+      style={{ background: 'var(--color-success)' }}
+      aria-label="Complete"
+    >
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+        <path d="M2 6.5l2.5 2.5 5.5-5.5" stroke="white" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </div>
+  );
+}
+
+function ErrorIcon() {
+  return (
+    <div
+      className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
+      style={{ background: 'var(--color-error)' }}
+      aria-label="Error"
+    >
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+        <path d="M3 3l6 6M9 3l-6 6" stroke="white" strokeWidth="1.75" strokeLinecap="round"/>
+      </svg>
+    </div>
+  );
+}
+
+function PendingDot() {
+  return (
+    <div
+      className="w-6 h-6 flex items-center justify-center shrink-0"
+      aria-label="Pending"
+    >
+      <div
+        className="w-2.5 h-2.5 rounded-full"
+        style={{ background: 'var(--color-border)' }}
+      />
+    </div>
+  );
+}
+
+function StatusIcon({ status }: { status: SiteStarterModuleProgress['status'] }) {
+  if (status === 'running')  return <SpinnerIcon />;
+  if (status === 'complete') return <CheckIcon />;
+  if (status === 'error')    return <ErrorIcon />;
+  return <PendingDot />;
+}
+
+// ─── Module row ───────────────────────────────────────────────────────────────
+
+function ModuleRow({ mod, index }: { mod: SiteStarterModuleProgress; index: number }) {
+  const isRunning = mod.status === 'running';
+  const typeLabel = MODULE_TYPE_LABELS[mod.moduleType] ?? mod.moduleType;
+  const truncUrl  = mod.deploymentUrl
+    ? mod.deploymentUrl.replace('https://script.google.com/macros/s/', '…/s/').slice(0, 60) + (mod.deploymentUrl.length > 60 ? '…' : '')
+    : null;
+
+  return (
+    <motion.div
+      className="flex items-start gap-3 p-4 rounded-xl border transition-all duration-200"
+      style={{
+        background:    isRunning ? 'var(--color-surface-2)' : 'var(--color-surface)',
+        borderColor:   isRunning ? 'var(--color-accent)'    : 'var(--color-border)',
+        borderLeftWidth: isRunning ? '2px' : '1px',
+      }}
+      initial={{ opacity: 0, x: -12 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.06, duration: 0.35 }}
+    >
+      <StatusIcon status={mod.status} />
+
+      <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span
+            className="text-sm font-semibold leading-snug"
+            style={{ color: mod.status === 'pending' ? 'var(--color-muted)' : 'var(--color-text)' }}
+          >
+            {mod.moduleName}
+          </span>
+          <span
+            className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide"
+            style={{
+              background: 'var(--color-surface-2)',
+              color:      'var(--color-muted)',
+              border:     '1px solid var(--color-border)',
+            }}
+          >
+            {typeLabel}
+          </span>
+        </div>
+
+        {mod.status === 'complete' && truncUrl && (
+          <span className="text-xs font-mono truncate" style={{ color: 'var(--color-muted)' }}>
+            {truncUrl}
+          </span>
+        )}
+
+        {mod.status === 'error' && mod.error && (
+          <span className="text-xs leading-relaxed" style={{ color: 'var(--color-error)' }} role="alert">
+            {mod.error}
+          </span>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
+export default function SiteStarterProgress() {
+  const { state } = useApp();
+  const { siteStarterProgress, siteStarterConfig } = state;
+
+  const total    = siteStarterProgress.length;
+  const complete = siteStarterProgress.filter((m) => m.status === 'complete').length;
+  const hasError = siteStarterProgress.some((m) => m.status === 'error');
+  const allDone  = total > 0 && siteStarterProgress.every((m) => m.status === 'complete' || m.status === 'error');
+
+  const templateLabel = siteStarterConfig.template
+    ? TEMPLATE_LABELS[siteStarterConfig.template] ?? siteStarterConfig.template
+    : '';
+
+  return (
+    <main
+      className="min-h-screen flex flex-col items-center justify-center px-4 py-16"
+      style={{ background: 'var(--color-bg)', color: 'var(--color-text)' }}
+    >
+      <motion.div
+        className="w-full max-w-lg flex flex-col gap-8"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.21, 1.02, 0.73, 0.99] }}
+      >
+        {/* Header */}
+        <div className="flex flex-col items-center text-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
+            Spinning up your site kit…
+          </h1>
+          <p className="text-sm" style={{ color: 'var(--color-muted)' }}>
+            {siteStarterConfig.siteName && templateLabel
+              ? `${siteStarterConfig.siteName} · ${templateLabel}`
+              : 'Provisioning modules in parallel'}
+          </p>
+          <div
+            className="mt-1 px-3 py-1 rounded-full text-xs font-semibold"
+            style={{
+              background: 'var(--color-surface)',
+              color:      complete === total && total > 0 ? 'var(--color-success)' : 'var(--color-accent)',
+              border:     '1px solid var(--color-border)',
+            }}
+          >
+            {complete} of {total} complete
+          </div>
+        </div>
+
+        {/* Module list */}
+        <div className="flex flex-col gap-2" role="list" aria-label="Module provisioning status">
+          {siteStarterProgress.map((mod, i) => (
+            <div key={`${mod.moduleType}-${mod.moduleName}`} role="listitem">
+              <ModuleRow mod={mod} index={i} />
+            </div>
+          ))}
+        </div>
+
+        {/* All done — success */}
+        {allDone && !hasError && (
+          <motion.div
+            className="flex items-center justify-center gap-2 py-3 rounded-xl"
+            style={{ background: 'oklch(0.25 0.05 150 / 0.6)', border: '1px solid oklch(0.55 0.20 150 / 0.30)' }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            role="status"
+            aria-live="polite"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3 8.5l3.5 3.5 6.5-7" stroke="var(--color-success)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span className="text-sm font-medium" style={{ color: 'var(--color-success)' }}>
+              All done! Loading your site kit…
+            </span>
+          </motion.div>
+        )}
+
+        {/* Partial success / error */}
+        {allDone && hasError && (
+          <motion.div
+            className="flex flex-col gap-1 py-3 px-4 rounded-xl"
+            style={{ background: 'oklch(0.40 0.18 25 / 0.10)', border: '1px solid oklch(0.55 0.20 25 / 0.30)' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            role="alert"
+          >
+            <p className="text-sm font-medium" style={{ color: 'var(--color-error)' }}>
+              Some modules failed to provision
+            </p>
+            <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
+              {complete} of {total} modules succeeded. The result screen will show what&apos;s available.
+            </p>
+          </motion.div>
+        )}
+      </motion.div>
+    </main>
+  );
+}

@@ -20,6 +20,11 @@ import CalendarBuilder from '@/components/CalendarBuilder'
 import CalendarResultPanel from '@/components/CalendarResultPanel'
 import GalleryBuilder from '@/components/GalleryBuilder'
 import GalleryResultPanel from '@/components/GalleryResultPanel'
+import DynamicModuleBuilder from '@/components/DynamicModuleBuilder'
+import DynamicResultPanel from '@/components/DynamicResultPanel'
+import SiteStarter from '@/components/SiteStarter'
+import SiteStarterProgress from '@/components/SiteStarterProgress'
+import SiteKit from '@/components/SiteKit'
 import { GoogleSheetsIcon, GoogleAppsScriptIcon, GoogleDriveIcon, GoogleProfileIcon } from '@/components/google-icons'
 
 export default function Page() {
@@ -48,6 +53,12 @@ export default function Page() {
   if (state.screen === 'gallery-builder') return <GalleryBuilder />
   if (state.screen === 'gallery-provisioning') return <ProvisioningSteps />
   if (state.screen === 'gallery-result') return <GalleryResultPanel />
+  if (state.screen === 'module-builder') return <DynamicModuleBuilder />
+  if (state.screen === 'module-provisioning') return <ProvisioningSteps />
+  if (state.screen === 'module-result') return <DynamicResultPanel />
+  if (state.screen === 'site-starter') return <SiteStarter />
+  if (state.screen === 'site-starter-provisioning') return <SiteStarterProgress />
+  if (state.screen === 'site-kit') return <SiteKit />
 
   // Landing screen
   return (
