@@ -158,6 +158,26 @@ export default function AssetDetailModal({ module, onClose }: AssetDetailModalPr
                 <CopyBlock label="endpoint" content={module.deploymentUrl!} language="text" />
               </section>
 
+              {module.scriptUrl && (
+                <section className="flex flex-col gap-2">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--color-muted)' }}>
+                    Apps Script
+                  </h3>
+                  <a
+                    href={module.scriptUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                    style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text)'; }}
+                  >
+                    <GoogleAppsScriptIcon className="w-4 h-4 shrink-0" />
+                    View Apps Script
+                  </a>
+                </section>
+              )}
+
               <section className="flex flex-col gap-2">
                 <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--color-muted)' }}>
                   Integration snippet
