@@ -7,13 +7,11 @@ export const ASSET_SCRIPT_MANIFEST = {
     executeAs: 'USER_DEPLOYING',
     access: 'ANYONE_ANONYMOUS',
   },
-  // drive.metadata.readonly: "View metadata for files in your Google Drive"
-  // This is the minimum scope needed — we only read file IDs/names/mimeTypes
-  // and build public lh3.googleusercontent.com URLs from the IDs.
-  // We do NOT need drive.readonly ("See and download all your Drive files").
+  // DriveApp is a built-in Apps Script service — no Drive API enablement needed.
+  // drive.readonly shows "See and download all your Google Drive files" on consent,
+  // but is the minimum scope DriveApp requires and cannot be narrowed further.
   oauthScopes: [
-    'https://www.googleapis.com/auth/drive.metadata.readonly',
-    'https://www.googleapis.com/auth/script.external_request',
+    'https://www.googleapis.com/auth/drive.readonly',
   ],
 };
 
@@ -22,41 +20,28 @@ export function generateAssetScript(folderId: string, moduleName: string): strin
 
 function doGet(e) {
   try {
-    // Use Drive REST API with the script's own token (drive.metadata.readonly scope).
-    // DriveApp would require the broader drive.readonly scope — avoided intentionally.
-    var token = ScriptApp.getOAuthToken();
-    var q = encodeURIComponent("'" + CONFIG.folderId + "' in parents and trashed = false");
-    var fields = encodeURIComponent('files(id,name,mimeType,size,modifiedTime)');
-    var url = 'https://www.googleapis.com/drive/v3/files'
-      + '?q=' + q
-      + '&fields=' + fields
-      + '&orderBy=modifiedTime+desc'
-      + '&pageSize=1000';
-
-    var res = UrlFetchApp.fetch(url, {
-      headers: { Authorization: 'Bearer ' + token },
-      muteHttpExceptions: true,
-    });
-
-    var json = JSON.parse(res.getContentText());
-    if (json.error) throw new Error(json.error.message || JSON.stringify(json.error));
-
-    var files = (json.files || []).map(function(f) {
-      var img = f.mimeType && f.mimeType.indexOf('image/') === 0;
-      return {
-        id: f.id,
-        name: f.name,
-        mimeType: f.mimeType,
-        size: f.size ? parseInt(f.size, 10) : 0,
-        modifiedTime: f.modifiedTime,
-        isImage: img,
-        url: img
-          ? 'https://lh3.googleusercontent.com/d/' + f.id
-          : 'https://drive.google.com/uc?export=download&id=' + f.id,
-        driveUrl: 'https://drive.google.com/file/d/' + f.id + '/view',
-      };
-    });
-
+    var folder = DriveApp.getFolderById(CONFIG.folderId);
+    var iter = folder.getFiles();
+    var files = [];
+    while (iter.hasNext()) {
+      var f = iter.next();
+      var mime = f.getMimeType();
+      var isImage = mime.indexOf('image/') === 0;
+      files.push({
+        id: f.getId(),
+        name: f.getName(),
+        mimeType: mime,
+        size: f.getSize(),
+        isImage: isImage,
+        url: isImage
+          ? 'https://lh3.googleusercontent.com/d/' + f.getId()
+          : 'https://drive.google.com/uc?export=download&id=' + f.getId(),
+        driveUrl: f.getUrl(),
+        createdAt: f.getDateCreated().toISOString(),
+        updatedAt: f.getLastUpdated().toISOString(),
+      });
+    }
+    files.sort(function(a, b) { return a.createdAt > b.createdAt ? -1 : 1; });
     return jsonResponse({ data: files, total: files.length });
   } catch (err) {
     return jsonResponse({ error: err.message, data: [] });
