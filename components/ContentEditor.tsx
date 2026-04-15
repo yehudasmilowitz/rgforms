@@ -186,7 +186,7 @@ function RecordFormModal({ module, record, onSave, onClose }: RecordFormModalPro
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[70] flex items-center justify-center p-4"
       style={{ background: 'rgba(0,0,0,0.7)' }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
@@ -330,7 +330,7 @@ function DeleteConfirmDialog({
   deleting: boolean;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
       <motion.div
         className="w-full max-w-sm rounded-2xl border p-6 flex flex-col gap-5"
         style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
@@ -566,7 +566,7 @@ export default function ContentEditor({ module, accessToken, onClose }: ContentE
 
   return (
     <div
-      className="fixed inset-0 z-40 flex flex-col"
+      className="fixed inset-0 z-[60] flex flex-col"
       style={{ background: 'var(--color-bg)', color: 'var(--color-text)' }}
     >
       {/* Header */}
