@@ -1422,14 +1422,14 @@ export default function Dashboard() {
 
         {/* Tabs */}
         <div
-          className="flex items-center gap-1 p-1 rounded-xl overflow-x-auto"
-          style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', scrollbarWidth: 'none' }}
+          className="flex items-center gap-1 p-1 rounded-xl"
+          style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
         >
           {/* Forms tab */}
           <button
             type="button"
             onClick={() => setActiveTab('forms')}
-            className="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
             style={{
               background: activeTab === 'forms' ? 'var(--color-surface-2)' : 'transparent',
               color: activeTab === 'forms' ? 'var(--color-text)' : 'var(--color-muted)',
@@ -1445,12 +1445,12 @@ export default function Dashboard() {
             )}
           </button>
 
-          {/* Beta Features dropdown */}
-          <div className="relative">
+          {/* Beta Features dropdown — uses a portal-style fixed dropdown to avoid overflow clipping */}
+          <div className="flex-1 relative">
             <button
               type="button"
               onClick={() => setBetaDropdownOpen((o) => !o)}
-              className="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
               style={{
                 background: ['content', 'assets', 'config', 'calendar', 'gallery'].includes(activeTab) ? 'var(--color-surface-2)' : 'transparent',
                 color: ['content', 'assets', 'config', 'calendar', 'gallery'].includes(activeTab) ? 'var(--color-text)' : 'var(--color-muted)',
@@ -1459,30 +1459,36 @@ export default function Dashboard() {
             >
               <span className="text-xs px-1 py-0 rounded font-semibold tracking-wide" style={{ background: 'oklch(0.65 0.18 270 / 0.15)', color: 'oklch(0.55 0.18 270)' }}>β</span>
               Beta Features
-              <svg className="w-3 h-3 shrink-0" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <svg
+                className="w-3 h-3 shrink-0 transition-transform"
+                style={{ transform: betaDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                viewBox="0 0 12 12" fill="none"
+              >
+                <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </button>
             {betaDropdownOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setBetaDropdownOpen(false)} />
                 <div
-                  className="absolute left-0 top-full mt-1 z-20 flex flex-col rounded-xl p-1 min-w-[140px]"
-                  style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: '0 4px 16px rgba(0,0,0,0.12)' }}
+                  className="absolute left-0 top-full mt-1 z-20 flex flex-col rounded-xl p-1 w-full min-w-[160px]"
+                  style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}
                 >
                   {([
-                    { id: 'content', icon: <DatabaseIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Content', count: modules.length },
-                    { id: 'assets', icon: <FolderIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Assets', count: assets.length },
-                    { id: 'config', icon: <SettingsIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Config', count: configs.length },
-                    { id: 'calendar', icon: <CalendarIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Calendar', count: calendars.length },
-                    { id: 'gallery', icon: <GalleryIcon className="w-3.5 h-3.5 shrink-0" />, label: 'Gallery', count: galleries.length },
+                    { id: 'content',  icon: <DatabaseIcon  className="w-3.5 h-3.5 shrink-0" />, label: 'Content',  count: modules.length },
+                    { id: 'assets',   icon: <FolderIcon    className="w-3.5 h-3.5 shrink-0" />, label: 'Assets',   count: assets.length },
+                    { id: 'config',   icon: <SettingsIcon  className="w-3.5 h-3.5 shrink-0" />, label: 'Config',   count: configs.length },
+                    { id: 'calendar', icon: <CalendarIcon  className="w-3.5 h-3.5 shrink-0" />, label: 'Calendar', count: calendars.length },
+                    { id: 'gallery',  icon: <GalleryIcon   className="w-3.5 h-3.5 shrink-0" />, label: 'Gallery',  count: galleries.length },
                   ] as const).map((item) => (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => { setActiveTab(item.id); setBetaDropdownOpen(false); }}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] text-left"
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] text-left w-full"
                       style={{
-                        background: activeTab === item.id ? 'var(--color-surface-2)' : 'transparent',
-                        color: activeTab === item.id ? 'var(--color-text)' : 'var(--color-muted)',
+                        background: activeTab === item.id ? 'var(--color-accent-subtle)' : 'transparent',
+                        color: activeTab === item.id ? 'var(--color-accent)' : 'var(--color-muted)',
                       }}
                     >
                       {item.icon}
