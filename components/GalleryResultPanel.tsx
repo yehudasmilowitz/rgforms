@@ -51,7 +51,7 @@ export default function GalleryResultPanel() {
   const serverSnippet = generateGalleryServerSnippet(result, name);
   const schemaSnippet = generateGallerySchemaSnippet(name);
   const accessToken = state.auth.accessToken!;
-  const moduleForManager = { sheetId: result.sheetId, sheetUrl: result.sheetUrl, scriptUrl: result.scriptUrl, deploymentUrl: result.deploymentUrl, moduleName: name, createdAt: new Date().toISOString() };
+  const moduleForManager = { sheetId: result.sheetId, sheetUrl: result.sheetUrl, scriptUrl: result.scriptUrl, deploymentUrl: result.deploymentUrl, moduleName: name, createdAt: new Date().toISOString(), projectId: state.selectedProject!.sheetId };
 
   return (
     <>

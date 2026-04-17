@@ -8,6 +8,7 @@ export async function provisionModule(
   token: string,
   moduleName: string,
   onStepUpdate: StepCallback,
+  projectId: string,
 ): Promise<BaseModuleResult> {
   const manifest = def.script.mode === 'custom' ? def.script.manifest : DEFAULT_MANIFEST;
 
@@ -35,5 +36,6 @@ export async function provisionModule(
     generateScript,
     manifest,
     moduleType: def.type,
+    projectId,
   });
 }

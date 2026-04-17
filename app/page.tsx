@@ -25,6 +25,7 @@ import DynamicResultPanel from '@/components/DynamicResultPanel'
 import SiteStarter from '@/components/SiteStarter'
 import SiteStarterProgress from '@/components/SiteStarterProgress'
 import SiteKit from '@/components/SiteKit'
+import ProjectSelect from '@/components/ProjectSelect'
 import { GoogleSheetsIcon, GoogleAppsScriptIcon, GoogleDriveIcon, GoogleProfileIcon } from '@/components/google-icons'
 
 export default function Page() {
@@ -34,6 +35,8 @@ export default function Page() {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }, [state.screen])
 
+  if (state.screen === 'project-select') return <ProjectSelect />
+  if (state.screen === 'project-provisioning') return <ProvisioningSteps />
   if (state.screen === 'dashboard') return <Dashboard />
   if (state.screen === 'builder') return <FormBuilderScreen />
   if (state.screen === 'provisioning') return <ProvisioningSteps />

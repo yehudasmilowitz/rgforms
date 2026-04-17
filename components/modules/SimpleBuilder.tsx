@@ -37,7 +37,12 @@ export interface SimpleBuilderProps {
     token: string,
     name: string,
     onStepUpdate: StepCallback,
+    projectId: string,
   ) => Promise<unknown>;
+  /** Project name prefix — module names are prefixed with "[projectName] — " */
+  projectName: string;
+  /** Project ID to associate new module with */
+  projectId: string;
   /** Called with the module name just before provisioning starts (set name in state) */
   onSetName: (name: string) => void;
   /** Dispatches the START_X_PROVISIONING action */
@@ -64,6 +69,8 @@ export default function SimpleBuilder({
   provisionError,
   isProvisioning,
   provision,
+  projectName,
+  projectId,
   onSetName,
   onStart,
   onSuccess,
@@ -81,10 +88,11 @@ export default function SimpleBuilder({
     const trimmed = name.trim();
     if (!trimmed || !accessToken) return;
     setProvisioning(true);
-    onSetName(trimmed);
+    const fullName = projectName ? `${projectName} — ${trimmed}` : trimmed;
+    onSetName(fullName);
     onStart();
     try {
-      const result = await provision(accessToken, trimmed, onStepUpdate);
+      const result = await provision(accessToken, fullName, onStepUpdate, projectId);
       onSuccess(result);
     } catch (err) {
       if (err instanceof AppsScriptApiDisabledError) {

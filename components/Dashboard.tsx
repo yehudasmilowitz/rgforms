@@ -1280,7 +1280,7 @@ export default function Dashboard() {
   const [revokeResult, setRevokeResult] = useState<'idle' | 'success' | 'error'>('idle');
 
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
     setFormsLoading(true); setFormsError(null);
     setModulesLoading(true); setModulesError(null);
     setAssetsLoading(true); setAssetsError(null);
@@ -1294,9 +1294,9 @@ export default function Dashboard() {
     setAnnouncementsLoading(true);
     setRedirectsLoading(true);
 
-    listAllResources(accessToken)
+    listAllResources(accessToken, state.selectedProject!.sheetId, controller.signal)
       .then((result) => {
-        if (cancelled) return;
+        if (controller.signal.aborted) return;
         setForms(result.forms); setFormsLoading(false);
         setModules(result.modules); setModulesLoading(false);
         setAssets(result.assets); setAssetsLoading(false);
@@ -1310,8 +1310,9 @@ export default function Dashboard() {
         setAnnouncements(result.announcements); setAnnouncementsLoading(false);
         setRedirectsList(result.redirects); setRedirectsLoading(false);
       })
-      .catch(() => {
-        if (cancelled) return;
+      .catch((err) => {
+        if (controller.signal.aborted) return;
+        void err;
         setFormsError('Could not load your resources. Please try again.'); setFormsLoading(false);
         setModulesError('Could not load content modules. Please try again.'); setModulesLoading(false);
         setAssetsError('Could not load asset modules. Please try again.'); setAssetsLoading(false);
@@ -1326,8 +1327,8 @@ export default function Dashboard() {
         setRedirectsLoading(false);
       });
 
-    return () => { cancelled = true; };
-  }, [accessToken]);
+    return () => { controller.abort(); };
+  }, [accessToken, state.selectedProject]);
 
   function handleRefreshAll() {
     setFormsLoading(true); setFormsError(null);
@@ -1342,7 +1343,7 @@ export default function Dashboard() {
     setNewslettersLoading(true);
     setAnnouncementsLoading(true);
     setRedirectsLoading(true);
-    listAllResources(accessToken)
+    listAllResources(accessToken, state.selectedProject!.sheetId)
       .then((result) => {
         setForms(result.forms); setFormsLoading(false);
         setModules(result.modules); setModulesLoading(false);
@@ -1660,6 +1661,47 @@ export default function Dashboard() {
             </button>
           </div>
         </header>
+
+        {/* Project context bar */}
+        {state.selectedProject && (
+          <div
+            className="rounded-xl border px-4 py-3 flex items-center justify-between gap-3"
+            style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <svg className="w-4 h-4 shrink-0" style={{ color: 'var(--color-muted)' }} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M1 4.5A1.5 1.5 0 012.5 3h3.086a1.5 1.5 0 011.06.44l.915.914A1.5 1.5 0 008.62 4.9H13.5A1.5 1.5 0 0115 6.4v5.1A1.5 1.5 0 0113.5 13h-11A1.5 1.5 0 011 11.5v-7z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
+              </svg>
+              <span className="text-sm font-semibold truncate" style={{ color: 'var(--color-text)' }}>
+                {state.selectedProject.projectName}
+              </span>
+              {state.selectedProject.deploymentUrl && (
+                <a
+                  href={state.selectedProject.deploymentUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="shrink-0 text-xs px-2 py-0.5 rounded-full border transition-colors"
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}
+                  title="Open project API"
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-accent-border)'; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-muted)'; (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; }}
+                >
+                  API ↗
+                </a>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => dispatch({ type: 'BACK_TO_PROJECTS' })}
+              className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+              style={{ background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-text)'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-text)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-muted)'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-border)'; }}
+            >
+              ← All projects
+            </button>
+          </div>
+        )}
 
         {/* Site Starter CTA */}
         <div className="rounded-xl border p-4 flex items-center justify-between gap-4"

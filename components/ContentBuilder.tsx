@@ -471,15 +471,18 @@ export default function ContentBuilder() {
     dispatch({ type: 'START_CONTENT_PROVISIONING' });
 
     const writeToken = generateWriteToken();
+    const fullName = state.selectedProject ? `${state.selectedProject.projectName} — ${config.name}` : config.name;
+    const provisionConfig = state.selectedProject ? { ...config, name: fullName } : config;
 
     try {
       const result = await provisionContentModule(
         accessToken,
-        config,
+        provisionConfig,
         writeToken,
         (stepId, status, error) => {
           dispatch({ type: 'UPDATE_STEP', payload: { id: stepId, status, error } });
         },
+        state.selectedProject!.sheetId,
       );
       dispatch({ type: 'SET_CONTENT_RESULT', payload: result });
     } catch (err) {

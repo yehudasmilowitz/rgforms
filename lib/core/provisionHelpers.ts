@@ -174,6 +174,8 @@ export interface ProvisionPipelineOptions {
   moduleType: string;
   /** Extra key-value rows to write to _config (e.g. writeToken, folderId) */
   extraConfigRows?: string[][];
+  /** Project ID — always required; scopes the module to its project */
+  projectId: string;
 }
 
 /**
@@ -186,7 +188,11 @@ export async function runProvisionPipeline<T extends BaseModuleResult>(
   onStepUpdate: StepCallback,
   options: ProvisionPipelineOptions,
 ): Promise<T> {
-  const { createSheet, scriptTitle, generateScript, manifest, moduleType, extraConfigRows } = options;
+  const { createSheet, scriptTitle, generateScript, manifest, moduleType, extraConfigRows, projectId } = options;
+  const allExtraRows: string[][] = [
+    ...(extraConfigRows ?? []),
+    ['projectId', projectId],
+  ];
 
   let sheetId = '', sheetUrl = '';
   let scriptId = '', scriptUrl = '';
@@ -236,7 +242,18 @@ export async function runProvisionPipeline<T extends BaseModuleResult>(
     throw err;
   }
 
-  await saveConfigTab(token, sheetId, moduleType, moduleName, scriptId, deploymentUrl, extraConfigRows);
+  await saveConfigTab(token, sheetId, moduleType, moduleName, scriptId, deploymentUrl, allExtraRows);
+
+  // Register this module in the project's Modules tab so that listAllResources
+  // can use it as an index instead of scanning all Drive sheets.
+  await fetch(
+    `${SHEETS_API}/${projectId}/values/${encodeURIComponent('Modules!A:E')}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify({ values: [[moduleType, moduleName, sheetId, deploymentUrl, new Date().toISOString()]] }),
+    },
+  ).catch(() => {}); // best-effort
 
   return { sheetId, sheetUrl, scriptId, scriptUrl, deploymentUrl } as T;
 }

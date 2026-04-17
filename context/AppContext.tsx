@@ -12,12 +12,14 @@ import type {
   ContentModuleResult,
   SiteStarterConfig,
 } from '@/types';
+import { FORM_PROVISIONING_STEPS } from '@/lib/provision';
 import { CONTENT_PROVISIONING_STEPS } from '@/lib/contentProvision';
 import { ASSET_PROVISIONING_STEPS } from '@/lib/assetProvision';
 import { SITE_CONFIG_PROVISIONING_STEPS } from '@/lib/siteConfigProvision';
 import { CALENDAR_PROVISIONING_STEPS } from '@/lib/calendarProvision';
 import { GALLERY_PROVISIONING_STEPS } from '@/lib/galleryProvision';
 import { MODULE_REGISTRY } from '@/lib/modules/registry';
+import { PROJECT_PROVISIONING_STEPS } from '@/lib/projectProvision';
 
 // ─── Form defaults ────────────────────────────────────────────────────────────
 
@@ -31,13 +33,6 @@ const DEFAULT_FORM_CONFIG: FormConfig = {
   ],
 };
 
-const PROVISIONING_STEPS: ProvisioningStep[] = [
-  { id: 'sheet',  label: 'Creating Google Sheet',       description: 'Setting up your submission spreadsheet',    status: 'pending' },
-  { id: 'script', label: 'Creating Apps Script',        description: 'Initializing your form handler project',    status: 'pending' },
-  { id: 'config', label: 'Adding configuration',        description: 'Writing field schema and notification settings', status: 'pending' },
-  { id: 'code',   label: 'Uploading handler code',      description: 'Deploying the doPost() email handler',      status: 'pending' },
-  { id: 'deploy', label: 'Publishing web app',          description: 'Making your form endpoint live',            status: 'pending' },
-];
 
 // ─── Content module defaults ──────────────────────────────────────────────────
 
@@ -54,6 +49,7 @@ const DEFAULT_SITE_STARTER_CONFIG: SiteStarterConfig = {
   template: null,
   siteName: '',
   notifyEmail: '',
+  projectId: '',
 };
 
 // ─── Initial state ────────────────────────────────────────────────────────────
@@ -62,7 +58,7 @@ const initialState: AppState = {
   screen: 'landing',
   auth: { user: null, accessToken: null },
   formConfig: DEFAULT_FORM_CONFIG,
-  steps: PROVISIONING_STEPS,
+  steps: FORM_PROVISIONING_STEPS,
   result: null,
   provisionError: null,
   appsScriptApiDisabled: false,
@@ -95,6 +91,10 @@ const initialState: AppState = {
   siteStarterProgress: [],
   siteStarterResult: null,
   siteStarterError: null,
+  // Project
+  selectedProject: null,
+  projectCreateName: '',
+  projectProvisionError: null,
 };
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
@@ -105,7 +105,7 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'SIGN_IN':
       return {
         ...state,
-        screen: 'dashboard',
+        screen: 'project-select',
         auth: { user: action.payload.user, accessToken: action.payload.accessToken },
         formConfig: { ...state.formConfig, notifyEmail: action.payload.user.email },
         siteStarterConfig: { ...state.siteStarterConfig, notifyEmail: action.payload.user.email },
@@ -121,10 +121,11 @@ function reducer(state: AppState, action: AppAction): AppState {
         ...initialState,
         screen: 'builder',
         auth: state.auth,
+        selectedProject: state.selectedProject,
         formConfig: { ...DEFAULT_FORM_CONFIG, notifyEmail: state.auth.user?.email ?? '' },
       };
     case 'START_PROVISIONING':
-      return { ...state, screen: 'provisioning', steps: PROVISIONING_STEPS, provisionError: null };
+      return { ...state, screen: 'provisioning', steps: FORM_PROVISIONING_STEPS, provisionError: null };
     case 'UPDATE_STEP':
       return {
         ...state,
@@ -149,6 +150,7 @@ function reducer(state: AppState, action: AppAction): AppState {
         auth: state.auth,
         formConfig: { ...DEFAULT_FORM_CONFIG, notifyEmail: state.auth.user?.email ?? '' },
         siteStarterConfig: { ...DEFAULT_SITE_STARTER_CONFIG, notifyEmail: state.auth.user?.email ?? '' },
+        selectedProject: state.selectedProject,
       };
 
     // ── Content modules ───────────────────────────────────────────────────────
@@ -366,6 +368,37 @@ function reducer(state: AppState, action: AppAction): AppState {
         siteStarterResult: null,
         siteStarterError: null,
       };
+
+    // ── Project ───────────────────────────────────────────────────────────────
+    case 'SELECT_PROJECT':
+      return {
+        ...state,
+        screen: 'dashboard',
+        selectedProject: action.payload,
+        projectCreateName: '',
+        projectProvisionError: null,
+      };
+    case 'BACK_TO_PROJECTS':
+      return { ...state, screen: 'project-select', selectedProject: null };
+    case 'SET_PROJECT_CREATE_NAME':
+      return { ...state, projectCreateName: action.payload };
+    case 'START_PROJECT_PROVISIONING':
+      return {
+        ...state,
+        screen: 'project-provisioning',
+        steps: PROJECT_PROVISIONING_STEPS.map(s => ({ ...s, status: 'pending' as const })),
+        projectProvisionError: null,
+      };
+    case 'SET_PROJECT_RESULT':
+      return {
+        ...state,
+        screen: 'dashboard',
+        selectedProject: action.payload,
+        projectCreateName: '',
+        projectProvisionError: null,
+      };
+    case 'PROJECT_PROVISION_ERROR':
+      return { ...state, screen: 'project-select', projectProvisionError: action.payload };
 
     default:
       return state;

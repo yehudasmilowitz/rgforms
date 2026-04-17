@@ -24,7 +24,9 @@ export default function DynamicModuleBuilder() {
       buttonLabel={def.builderButtonLabel}
       provisionError={moduleState.provisionError}
       isProvisioning={state.screen === 'module-provisioning'}
-      provision={(token, name, onStepUpdate) => provisionModule(def, token, name, onStepUpdate)}
+      provision={(token, name, onStepUpdate, projectId) => provisionModule(def, token, name, onStepUpdate, projectId)}
+      projectName={state.selectedProject!.projectName}
+      projectId={state.selectedProject!.sheetId}
       onSetName={(name) => dispatch({ type: 'SET_MODULE_BUILDER_NAME', moduleType: def.type, name })}
       onStart={() => dispatch({ type: 'START_MODULE_PROVISIONING', moduleType: def.type })}
       onSuccess={(result) => dispatch({ type: 'SET_MODULE_RESULT', moduleType: def.type, result: result as ModuleResult })}

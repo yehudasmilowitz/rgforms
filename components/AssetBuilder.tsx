@@ -36,17 +36,19 @@ export default function AssetBuilder() {
       return;
     }
 
-    dispatch({ type: 'SET_ASSET_BUILDER_NAME', payload: trimmed });
+    const fullName = state.selectedProject ? `${state.selectedProject.projectName} — ${trimmed}` : trimmed;
+    dispatch({ type: 'SET_ASSET_BUILDER_NAME', payload: fullName });
     dispatch({ type: 'START_ASSET_PROVISIONING' });
     setSubmitting(true);
 
     try {
       const result = await provisionAssetModule(
         accessToken,
-        trimmed,
+        fullName,
         (stepId, status, error) => {
           dispatch({ type: 'UPDATE_STEP', payload: { id: stepId, status, error } });
         },
+        state.selectedProject!.sheetId,
       );
       dispatch({ type: 'SET_ASSET_RESULT', payload: result });
     } catch (err) {

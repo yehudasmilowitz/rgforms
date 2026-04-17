@@ -22,43 +22,72 @@ function heading(level: number, text: string) {
 // ─── Per-module sections ──────────────────────────────────────────────────────
 
 function formSection(form: FormSummary): string {
-  const fields = form.fields?.map((f) => `  - ${f.label} (${f.type}${f.required ? ', required' : ''})`).join('\n') ?? '  (field list unavailable)';
+  const endpoint = form.deploymentUrl ?? 'ENDPOINT';
+
+  const fieldDocs = form.fields?.map((f) => {
+    const name = f.label.toLowerCase().replace(/\s+/g, '_');
+    return `  - ${f.label}  [name="${name}", type=${f.type === 'textarea' ? 'multi-line text' : f.type}${f.required ? ', required' : ''}]`;
+  }).join('\n') ?? '  (field list unavailable)';
+
+  const honeypotBlock = form.enableHoneypot ? `
+
+#### Honeypot (spam protection)
+Include this hidden field exactly as written. **Never display it to the user.**
+\`\`\`html
+<input type="text" name="website" tabindex="-1" autocomplete="off"
+       aria-hidden="true" style="position:absolute;left:-9999px;
+       width:1px;height:1px;opacity:0;pointer-events:none;" />
+\`\`\`` : '';
 
   return `${heading(3, `Form: ${form.formName}`)}
-**Endpoint:** \`${form.deploymentUrl ?? 'not yet deployed'}\`
+**Endpoint:** \`${endpoint}\`
 **Sheet:** ${form.sheetUrl}
-**Method:** POST with \`application/x-www-form-urlencoded\` or \`application/json\`
+**Method:** POST · \`Content-Type: application/x-www-form-urlencoded\`
 **Purpose:** Receives form submissions, stores them in the Google Sheet, and sends email notifications.
 
 #### Fields
-${fields}
+${fieldDocs}
+${honeypotBlock}
 
-#### HTML integration
-\`\`\`html
-<form action="${form.deploymentUrl ?? 'ENDPOINT'}" method="POST">
-${form.fields?.map((f) => `  <input type="${f.type === 'textarea' ? 'text' : f.type}" name="${f.label.toLowerCase().replace(/\s+/g, '_')}" placeholder="${f.label}"${f.required ? ' required' : ''} />`).join('\n') ?? '  <!-- form fields here -->'}
-  <button type="submit">Submit</button>
-</form>
-\`\`\`
+#### Component integration
+- Use the project's existing input, textarea, label, and button components — do **not** add new CSS files, UI libraries, or external dependencies.
+- If the project has a shared form-field wrapper or validation helper, use it.
+- Do **not** add hardcoded CSS or inline styles; rely entirely on the project's design system.
+- Place the component wherever similar form components live in the project.
 
-#### JavaScript (fetch)
+#### Submission (fetch + URLSearchParams)
 \`\`\`javascript
-async function submitForm(data) {
-  const res = await fetch('${form.deploymentUrl ?? 'ENDPOINT'}', {
+async function submitForm(formElement) {
+  const body = new URLSearchParams(new FormData(formElement));
+  const res = await fetch('${endpoint}', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
   });
   const json = await res.json();
-  if (!json.result === 'success') throw new Error(json.error ?? 'Submission failed');
+  if (json.result !== 'success') throw new Error(json.error ?? 'Submission failed');
   return json;
 }
 \`\`\`
 
+#### UI states
+Manage three states — never leave the form in an ambiguous state:
+
+| State | Submit button | Form fields | Message region |
+|-------|--------------|-------------|----------------|
+| \`idle\` | Enabled · label "Send" (match project copy style) | Enabled | Hidden |
+| \`submitting\` | Disabled · show loading indicator if project provides one | Disabled | Hidden |
+| \`result\` | On success: reset form; on error: re-enable | On success: cleared | Inline success or error message |
+
+#### Accessibility
+- Associate every input with a visible \`<label>\` (or use the project's labelled field components).
+- Add \`aria-live="polite"\` to the success/error message container.
+- Ensure full keyboard navigation (no click-only interactions).
+
 #### Notes
-- Submissions are written to the Google Sheet immediately
-- Email notifications go to the address configured at form creation
-- Responses: \`{ result: 'success' }\` on success, \`{ error: '...' }\` on failure${form.enableHoneypot ? '\n- Honeypot field enabled: include a hidden `website` field; submissions that fill it are discarded' : ''}`;
+- Submissions are written to the Google Sheet immediately.
+- Email notifications go to the address configured at form creation.
+- Responses: \`{ "result": "success" }\` on success · \`{ "result": "error", "error": "..." }\` on failure.${form.enableHoneypot ? '\n- Honeypot enabled: include the hidden `website` field shown above; submissions that fill it in are silently discarded.' : ''}`;
 }
 
 function contentSection(mod: ContentModuleSummary): string {
@@ -616,6 +645,15 @@ All data lives in the owner's Google Drive. No server, no database, no API keys 
   }
 
   if (format === 'claude') {
+    const formInstructions = hasForms ? `
+
+### Contact forms
+7. Submit forms with \`Content-Type: application/x-www-form-urlencoded\` and \`URLSearchParams\` — do **not** use JSON.
+8. Use the project's existing UI components and design system — do **not** add new CSS files, UI libraries, or external dependencies.
+9. Manage three UI states: \`idle\` (form enabled), \`submitting\` (button disabled, show loading indicator if available), \`result\` (inline success/error message; reset form on success).
+10. Add \`aria-live="polite"\` to the success/error message region; associate every input with a visible \`<label>\`.
+11. If the form lists a honeypot field, include the exact hidden \`<input name="website" ...>\` shown in the form section — never display it to the user.` : '';
+
     sections.push(`## Instructions for Claude
 
 When the user asks you to build UI that uses data from any of the modules above:
@@ -624,7 +662,7 @@ When the user asks you to build UI that uses data from any of the modules above:
 3. For server-rendered frameworks (Next.js, Astro, SvelteKit, Nuxt), fetch on the server with appropriate caching.
 4. For client-side-only sites, use TTL-cached classes to avoid repeated cold starts.
 5. Never hardcode content — always fetch from the appropriate module endpoint.
-6. If the user wants to add new content types or fields, direct them to edit the Google Sheet — no code changes needed for content, only for schema-changing content modules.`);
+6. If the user wants to add new content types or fields, direct them to edit the Google Sheet — no code changes needed for content, only for schema-changing content modules.${formInstructions}`);
   }
 
   return sections.join('\n\n---\n\n');

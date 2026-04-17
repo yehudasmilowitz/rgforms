@@ -118,26 +118,27 @@ async function provisionModule(
   nameSuffix: string,
   siteName: string,
   notifyEmail: string,
+  projectId: string,
 ): Promise<{ sheetId: string; sheetUrl?: string; deploymentUrl: string }> {
   const noop = () => {};
 
   switch (moduleType) {
     case 'siteconfig': {
-      const r = await provisionSiteConfig(token, moduleName, noop);
+      const r = await provisionSiteConfig(token, moduleName, noop, projectId);
       return { sheetId: r.sheetId, sheetUrl: r.sheetUrl, deploymentUrl: r.deploymentUrl };
     }
     case 'gallery': {
-      const r = await provisionGallery(token, moduleName, noop);
+      const r = await provisionGallery(token, moduleName, noop, projectId);
       return { sheetId: r.sheetId, sheetUrl: r.sheetUrl, deploymentUrl: r.deploymentUrl };
     }
     case 'content': {
       const writeToken = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
       const config     = buildContentConfig(siteName, nameSuffix);
-      const r          = await provisionContentModule(token, config, writeToken, noop);
+      const r          = await provisionContentModule(token, config, writeToken, noop, projectId);
       return { sheetId: r.sheetId, sheetUrl: r.sheetUrl, deploymentUrl: r.deploymentUrl };
     }
     case 'calendar': {
-      const r = await provisionCalendar(token, moduleName, noop);
+      const r = await provisionCalendar(token, moduleName, noop, projectId);
       return { sheetId: r.sheetId, sheetUrl: r.sheetUrl, deploymentUrl: r.deploymentUrl };
     }
     case 'form': {
@@ -151,13 +152,13 @@ async function provisionModule(
         ],
         enableHoneypot: false,
       };
-      const r = await provision(token, formConfig, noop);
+      const r = await provision(token, formConfig, noop, projectId);
       return { sheetId: r.sheetId, sheetUrl: r.sheetUrl, deploymentUrl: r.deploymentUrl };
     }
     default: {
       const def = MODULE_REGISTRY[moduleType];
       if (def) {
-        const r = await provisionRegistryModule(def, token, moduleName, noop);
+        const r = await provisionRegistryModule(def, token, moduleName, noop, projectId);
         return { sheetId: r.sheetId, sheetUrl: r.sheetUrl, deploymentUrl: r.deploymentUrl };
       }
       throw new Error(`Unknown module type: ${moduleType}`);
@@ -177,7 +178,7 @@ export async function runSiteStarter(
   if (!config.template) throw new Error('No template selected');
 
   const defs      = TEMPLATE_DEFINITIONS[config.template];
-  const projectId = `proj_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  const projectId = config.projectId;
   const createdAt = new Date().toISOString();
 
   // Run all modules in parallel
@@ -196,6 +197,7 @@ export async function runSiteStarter(
           nameSuffix,
           config.siteName,
           config.notifyEmail,
+          config.projectId,
         );
 
         onModuleUpdate({

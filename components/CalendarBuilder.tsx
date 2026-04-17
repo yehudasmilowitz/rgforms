@@ -18,13 +18,15 @@ export default function CalendarBuilder() {
     const trimmed = name.trim();
     if (!trimmed || !state.auth.accessToken) return;
     setProvisioning(true);
-    dispatch({ type: 'SET_CALENDAR_BUILDER_NAME', payload: trimmed });
+    const fullName = state.selectedProject ? `${state.selectedProject.projectName} — ${trimmed}` : trimmed;
+    dispatch({ type: 'SET_CALENDAR_BUILDER_NAME', payload: fullName });
     dispatch({ type: 'START_CALENDAR_PROVISIONING' });
     try {
       const result = await provisionCalendar(
         state.auth.accessToken,
-        trimmed,
+        fullName,
         (stepId, status, err) => dispatch({ type: 'UPDATE_STEP', payload: { id: stepId, status, error: err } }),
+        state.selectedProject!.sheetId,
       );
       dispatch({ type: 'SET_CALENDAR_RESULT', payload: result });
     } catch (err) {

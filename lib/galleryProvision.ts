@@ -1,5 +1,6 @@
 import type { GalleryResult, ProvisioningStep } from '@/types';
 import { generateGalleryScript, GALLERY_SCRIPT_MANIFEST } from './galleryScriptTemplate';
+import { registerModuleInProject } from './myForms';
 
 type StepStatus = 'running' | 'complete' | 'error';
 type StepCallback = (stepId: string, status: StepStatus, error?: string) => void;
@@ -145,7 +146,7 @@ async function deployWebApp(token: string, scriptId: string): Promise<string> {
 }
 
 async function saveConfig(token: string, sheetId: string, config: {
-  moduleName: string; scriptId: string; deploymentUrl: string;
+  moduleName: string; scriptId: string; deploymentUrl: string; projectId: string;
 }): Promise<void> {
   await fetch(`${SHEETS_API}/${sheetId}:batchUpdate`, {
     method: 'POST',
@@ -153,18 +154,19 @@ async function saveConfig(token: string, sheetId: string, config: {
     body: JSON.stringify({ requests: [{ addSheet: { properties: { title: '_config', hidden: true } } }] }),
   }).catch(() => {});
 
-  const rows = [
+  const rows: string[][] = [
     ['moduleType',    'gallery'],
     ['moduleName',    config.moduleName],
     ['createdAt',     new Date().toISOString()],
     ['scriptId',      config.scriptId],
     ['deploymentUrl', config.deploymentUrl],
+    ['projectId',     config.projectId],
   ];
 
   await fetch(`${SHEETS_API}/${sheetId}/values:batchUpdate`, {
     method: 'POST',
     headers: authHeaders(token),
-    body: JSON.stringify({ valueInputOption: 'RAW', data: [{ range: '_config!A1:B5', values: rows }] }),
+    body: JSON.stringify({ valueInputOption: 'RAW', data: [{ range: `_config!A1:B${rows.length}`, values: rows }] }),
   });
 }
 
@@ -172,6 +174,7 @@ export async function provisionGallery(
   token: string,
   moduleName: string,
   onStepUpdate: StepCallback,
+  projectId: string,
 ): Promise<GalleryResult> {
   let sheetId = '', sheetUrl = '';
   let scriptId = '', scriptUrl = '';
@@ -208,7 +211,8 @@ export async function provisionGallery(
     onStepUpdate('deploy', 'complete');
   } catch (err) { onStepUpdate('deploy', 'error', (err as Error).message); throw err; }
 
-  await saveConfig(token, sheetId, { moduleName, scriptId, deploymentUrl });
+  await saveConfig(token, sheetId, { moduleName, scriptId, deploymentUrl, projectId });
+  await registerModuleInProject(token, projectId, 'gallery', moduleName, sheetId, deploymentUrl);
 
   return { sheetId, sheetUrl, scriptId, scriptUrl, deploymentUrl };
 }

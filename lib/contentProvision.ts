@@ -1,5 +1,6 @@
 import type { ContentModuleConfig, ContentModuleResult, ProvisioningStep } from '@/types';
 import { generateContentScript, CONTENT_SCRIPT_MANIFEST } from './contentScriptTemplate';
+import { registerModuleInProject } from './myForms';
 
 type StepStatus = 'running' | 'complete' | 'error';
 type StepCallback = (stepId: string, status: StepStatus, error?: string) => void;
@@ -147,6 +148,7 @@ async function addContentConfigTab(
   config: ContentModuleConfig,
   scriptId: string,
   writeToken: string,
+  projectId: string,
 ): Promise<void> {
   // Add a hidden _config sheet
   await apiCall<unknown>(`${SHEETS_API}/${sheetId}:batchUpdate`, {
@@ -160,16 +162,17 @@ async function addContentConfigTab(
   });
 
   const now = new Date().toISOString();
-  const rows = [
-    ['moduleType',   'content'],
-    ['moduleName',   config.name],
-    ['fields',       JSON.stringify(config.fields)],
-    ['hasSlug',      String(config.hasSlug)],
-    ['hasPublished', String(config.hasPublished)],
-    ['createdAt',    now],
-    ['scriptId',     scriptId],
-    ['writeToken',   writeToken],
+  const rows: string[][] = [
+    ['moduleType',    'content'],
+    ['moduleName',    config.name],
+    ['fields',        JSON.stringify(config.fields)],
+    ['hasSlug',       String(config.hasSlug)],
+    ['hasPublished',  String(config.hasPublished)],
+    ['createdAt',     now],
+    ['scriptId',      scriptId],
+    ['writeToken',    writeToken],
     ['deploymentUrl', ''],  // filled in after deploy
+    ['projectId', projectId],
   ];
 
   await fetch(`${SHEETS_API}/${sheetId}/values:batchUpdate`, {
@@ -177,7 +180,7 @@ async function addContentConfigTab(
     headers: authHeaders(accessToken),
     body: JSON.stringify({
       valueInputOption: 'RAW',
-      data: [{ range: '_config!A1:B9', values: rows }],
+      data: [{ range: `_config!A1:B${rows.length}`, values: rows }],
     }),
   });
 }
@@ -252,6 +255,7 @@ export async function provisionContentModule(
   config: ContentModuleConfig,
   writeToken: string,
   onStepUpdate: StepCallback,
+  projectId: string,
 ): Promise<ContentModuleResult> {
   let sheetId = '';
   let sheetUrl = '';
@@ -285,7 +289,7 @@ export async function provisionContentModule(
 
   onStepUpdate('config', 'running');
   try {
-    await addContentConfigTab(accessToken, sheetId, config, scriptId, writeToken);
+    await addContentConfigTab(accessToken, sheetId, config, scriptId, writeToken, projectId);
     onStepUpdate('config', 'complete');
   } catch (err) {
     onStepUpdate('config', 'error', (err as Error).message);
@@ -312,6 +316,7 @@ export async function provisionContentModule(
   }
 
   await saveDeploymentUrl(accessToken, sheetId, deploymentUrl);
+  await registerModuleInProject(accessToken, projectId, 'content', config.name, sheetId, deploymentUrl);
 
   return { sheetId, sheetUrl, scriptId, scriptUrl, deploymentUrl, writeToken };
 }

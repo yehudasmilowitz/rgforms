@@ -57,11 +57,14 @@ export interface FormSummary {
   deploymentUrl?: string;
   fields?: FormField[];
   enableHoneypot?: boolean;
-  projectId?: string;
+  projectId: string;
 }
 
 export type AppScreen =
   | 'landing'
+  // Project layer — shown after sign-in before the dashboard
+  | 'project-select'
+  | 'project-provisioning'
   | 'dashboard'
   | 'builder'
   | 'provisioning'
@@ -108,7 +111,7 @@ export interface CalendarModuleSummary {
   scriptId?: string;
   scriptUrl?: string;
   deploymentUrl?: string;
-  projectId?: string;
+  projectId: string;
 }
 
 // ─── Gallery Module Types ─────────────────────────────────────────────────────
@@ -129,7 +132,7 @@ export interface GalleryModuleSummary {
   scriptId?: string;
   scriptUrl?: string;
   deploymentUrl?: string;
-  projectId?: string;
+  projectId: string;
 }
 
 // ─── Site Config Module Types ─────────────────────────────────────────────────
@@ -150,7 +153,7 @@ export interface SiteConfigModuleSummary {
   scriptId?: string;
   scriptUrl?: string;
   deploymentUrl?: string;
-  projectId?: string;
+  projectId: string;
 }
 
 // ─── Asset Module Types ───────────────────────────────────────────────────────
@@ -175,7 +178,7 @@ export interface AssetModuleSummary {
   scriptId?: string;
   scriptUrl?: string;
   deploymentUrl?: string;
-  projectId?: string;
+  projectId: string;
 }
 
 export interface AssetFile {
@@ -238,7 +241,7 @@ export interface ContentModuleSummary {
   hasSlug: boolean;
   hasPublished: boolean;
   writeToken?: string;
-  projectId?: string;
+  projectId: string;
 }
 
 // ─── Generic Module Types ─────────────────────────────────────────────────────
@@ -262,7 +265,7 @@ export interface ModuleSummary {
   scriptId?: string;
   scriptUrl?: string;
   deploymentUrl?: string;
-  projectId?: string;
+  projectId: string;
 }
 
 // Backward-compatible aliases — existing result panels still import these
@@ -274,6 +277,17 @@ export type AnnouncementResult = ModuleResult;
 export type RedirectsResult = ModuleResult;
 
 // ─── Project / Site Starter Types ────────────────────────────────────────────
+
+/** Lightweight summary for the project-select screen — one row per Drive sheet with moduleType=project */
+export interface ProjectSummary {
+  sheetId: string;
+  sheetUrl: string;
+  projectName: string;
+  createdAt: string;
+  scriptId?: string;
+  scriptUrl?: string;
+  deploymentUrl?: string;
+}
 
 export type ProjectTemplate = 'portfolio' | 'restaurant' | 'saas' | 'nonprofit' | 'agency';
 
@@ -300,6 +314,7 @@ export interface SiteStarterConfig {
   template: ProjectTemplate | null;
   siteName: string;
   notifyEmail: string;
+  projectId: string;
 }
 
 export interface SiteStarterModuleProgress {
@@ -370,6 +385,10 @@ export interface AppState {
   siteStarterProgress: SiteStarterModuleProgress[];
   siteStarterResult: SiteStarterResult | null;
   siteStarterError: string | null;
+  // Project state
+  selectedProject: ProjectSummary | null;
+  projectCreateName: string;
+  projectProvisionError: string | null;
 }
 
 export type AppAction =
@@ -433,4 +452,11 @@ export type AppAction =
   | { type: 'UPDATE_SITE_STARTER_MODULE'; payload: Partial<SiteStarterModuleProgress> & { moduleType: string; moduleName: string } }
   | { type: 'SET_SITE_STARTER_RESULT'; payload: SiteStarterResult }
   | { type: 'SITE_STARTER_ERROR'; payload: string }
-  | { type: 'RESET_SITE_STARTER' };
+  | { type: 'RESET_SITE_STARTER' }
+  // Project actions
+  | { type: 'SELECT_PROJECT'; payload: ProjectSummary }
+  | { type: 'BACK_TO_PROJECTS' }
+  | { type: 'SET_PROJECT_CREATE_NAME'; payload: string }
+  | { type: 'START_PROJECT_PROVISIONING' }
+  | { type: 'SET_PROJECT_RESULT'; payload: ProjectSummary }
+  | { type: 'PROJECT_PROVISION_ERROR'; payload: string };

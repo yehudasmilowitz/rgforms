@@ -432,8 +432,10 @@ export function FormBuilderScreen() {
     dispatch({ type: 'CLEAR_ERROR' });
     setIsSubmitting(true);
 
+    const trimmedName = formName.trim();
+    const fullName = state.selectedProject ? `${state.selectedProject.projectName} — ${trimmedName}` : trimmedName;
     const config = {
-      name: formName.trim(),
+      name: fullName,
       notifyEmail: notifyEmail.trim(),
       fields,
       ccEmails: ccEmails.length > 0 ? ccEmails : undefined,
@@ -453,6 +455,7 @@ export function FormBuilderScreen() {
         config,
         (id, status, error) =>
           dispatch({ type: 'UPDATE_STEP', payload: { id, status, error } }),
+        state.selectedProject!.sheetId,
       );
       dispatch({ type: 'SET_RESULT', payload: result });
     } catch (err) {

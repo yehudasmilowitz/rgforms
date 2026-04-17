@@ -1,5 +1,6 @@
 import type { AssetModuleResult, ProvisioningStep } from '@/types';
 import { generateAssetScript, ASSET_SCRIPT_MANIFEST } from './assetScriptTemplate';
+import { registerModuleInProject } from './myForms';
 
 type StepStatus = 'running' | 'complete' | 'error';
 type StepCallback = (stepId: string, status: StepStatus, error?: string) => void;
@@ -123,7 +124,7 @@ async function deployWebApp(token: string, scriptId: string): Promise<string> {
 
 // Save config to anchor sheet
 async function saveConfig(token: string, sheetId: string, config: {
-  moduleName: string; scriptId: string; folderId: string; folderUrl: string; deploymentUrl: string;
+  moduleName: string; scriptId: string; folderId: string; folderUrl: string; deploymentUrl: string; projectId: string;
 }): Promise<void> {
   // Add hidden _config tab
   await fetch(`${SHEETS_API}/${sheetId}:batchUpdate`, {
@@ -132,7 +133,7 @@ async function saveConfig(token: string, sheetId: string, config: {
     body: JSON.stringify({ requests: [{ addSheet: { properties: { title: '_config', hidden: true } } }] }),
   }).catch(() => {});
 
-  const rows = [
+  const rows: string[][] = [
     ['moduleType',    'asset'],
     ['moduleName',    config.moduleName],
     ['createdAt',     new Date().toISOString()],
@@ -140,12 +141,13 @@ async function saveConfig(token: string, sheetId: string, config: {
     ['folderId',      config.folderId],
     ['folderUrl',     config.folderUrl],
     ['deploymentUrl', config.deploymentUrl],
+    ['projectId', config.projectId],
   ];
 
   await fetch(`${SHEETS_API}/${sheetId}/values:batchUpdate`, {
     method: 'POST',
     headers: authHeaders(token),
-    body: JSON.stringify({ valueInputOption: 'RAW', data: [{ range: '_config!A1:B7', values: rows }] }),
+    body: JSON.stringify({ valueInputOption: 'RAW', data: [{ range: `_config!A1:B${rows.length}`, values: rows }] }),
   });
 }
 
@@ -154,6 +156,7 @@ export async function provisionAssetModule(
   token: string,
   moduleName: string,
   onStepUpdate: StepCallback,
+  projectId: string,
 ): Promise<AssetModuleResult> {
   let sheetId = '', sheetUrl = '';
   let folderId = '', folderUrl = '';
@@ -204,7 +207,8 @@ export async function provisionAssetModule(
     onStepUpdate('deploy', 'complete');
   } catch (err) { onStepUpdate('deploy', 'error', (err as Error).message); throw err; }
 
-  await saveConfig(token, sheetId, { moduleName, scriptId, folderId, folderUrl, deploymentUrl });
+  await saveConfig(token, sheetId, { moduleName, scriptId, folderId, folderUrl, deploymentUrl, projectId });
+  await registerModuleInProject(token, projectId, 'asset', moduleName, sheetId, deploymentUrl);
 
   return { sheetId, sheetUrl, scriptId, scriptUrl, folderId, folderUrl, deploymentUrl };
 }

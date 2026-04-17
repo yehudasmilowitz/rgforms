@@ -112,22 +112,21 @@ const TEMPLATES: TemplateCard[] = [
 export default function SiteStarter() {
   const { state, dispatch } = useApp();
   const [selectedTemplate, setSelectedTemplate] = useState<ProjectTemplate | null>(null);
-  const [siteName, setSiteName]                 = useState('');
   const [launching, setLaunching]               = useState(false);
 
-  const canLaunch = selectedTemplate !== null && siteName.trim().length >= 2 && !launching;
+  const canLaunch = selectedTemplate !== null && !launching;
 
   async function handleLaunch() {
     if (!canLaunch || !state.auth.accessToken) return;
 
     const token      = state.auth.accessToken;
-    const trimmed    = siteName.trim();
     const notifyEmail = state.auth.user?.email ?? '';
 
     const config = {
       template:    selectedTemplate,
-      siteName:    trimmed,
+      siteName:    state.selectedProject!.projectName,
       notifyEmail,
+      projectId:   state.selectedProject!.sheetId,
     };
 
     setLaunching(true);
@@ -238,36 +237,6 @@ export default function SiteStarter() {
           </div>
         </div>
 
-        {/* Name input — shown when template is selected */}
-        {selectedTemplate && (
-          <motion.div
-            className="flex flex-col gap-3"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <label className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
-              What&apos;s your site called?
-            </label>
-            <input
-              type="text"
-              value={siteName}
-              onChange={(e) => setSiteName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter' && canLaunch) handleLaunch(); }}
-              placeholder="e.g. Artisan Bakery"
-              autoFocus
-              className="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-              style={{
-                background:  'var(--color-surface)',
-                borderColor: 'var(--color-border)',
-                color:       'var(--color-text)',
-              }}
-            />
-            <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
-              Used as a prefix for all module names — e.g. &ldquo;Artisan Bakery Gallery&rdquo;, &ldquo;Artisan Bakery Config&rdquo;.
-            </p>
-          </motion.div>
-        )}
 
         {/* What gets created info box */}
         {selectedTemplate && (
@@ -288,7 +257,7 @@ export default function SiteStarter() {
                   style={{ background: 'var(--color-accent)' }}
                 />
                 <span className="text-sm" style={{ color: 'var(--color-text)' }}>
-                  {siteName.trim() ? `${siteName.trim()} ${mod}` : mod}
+                  {state.selectedProject ? `${state.selectedProject.projectName} ${mod}` : mod}
                 </span>
               </div>
             ))}

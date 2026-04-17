@@ -12,6 +12,7 @@ export interface DuplicateModuleOptions {
   originalName: string;
   newName: string;
   token: string;
+  projectId: string;
   /** For forms: include formConfig */
   formConfig?: FormConfig;
 }
@@ -34,26 +35,25 @@ export async function duplicateModule(
   options: DuplicateModuleOptions,
   onStepUpdate: StepCallback,
 ): Promise<{ deploymentUrl: string; sheetId: string; sheetUrl: string }> {
-  const { moduleType, newName, token, formConfig } = options;
+  const { moduleType, newName, token, projectId, formConfig } = options;
 
   switch (moduleType) {
     case 'gallery': {
-      const result = await provisionGallery(token, newName, onStepUpdate);
+      const result = await provisionGallery(token, newName, onStepUpdate, projectId);
       return { deploymentUrl: result.deploymentUrl, sheetId: result.sheetId, sheetUrl: result.sheetUrl };
     }
 
     case 'calendar': {
-      const result = await provisionCalendar(token, newName, onStepUpdate);
+      const result = await provisionCalendar(token, newName, onStepUpdate, projectId);
       return { deploymentUrl: result.deploymentUrl, sheetId: result.sheetId, sheetUrl: result.sheetUrl };
     }
 
     case 'siteconfig': {
-      const result = await provisionSiteConfig(token, newName, onStepUpdate);
+      const result = await provisionSiteConfig(token, newName, onStepUpdate, projectId);
       return { deploymentUrl: result.deploymentUrl, sheetId: result.sheetId, sheetUrl: result.sheetUrl };
     }
 
     case 'content': {
-      // Generate a random write token for the new module
       const writeToken = crypto.randomUUID().replace(/-/g, '');
       const config = {
         name: newName,
@@ -61,7 +61,7 @@ export async function duplicateModule(
         hasSlug: true,
         hasPublished: true,
       };
-      const result = await provisionContentModule(token, config, writeToken, onStepUpdate);
+      const result = await provisionContentModule(token, config, writeToken, onStepUpdate, projectId);
       return { deploymentUrl: result.deploymentUrl, sheetId: result.sheetId, sheetUrl: result.sheetUrl };
     }
 
@@ -69,13 +69,13 @@ export async function duplicateModule(
     default: {
       const def = MODULE_REGISTRY[moduleType];
       if (def) {
-        const result = await provisionModule(def, token, newName, onStepUpdate);
+        const result = await provisionModule(def, token, newName, onStepUpdate, projectId);
         return { deploymentUrl: result.deploymentUrl, sheetId: result.sheetId, sheetUrl: result.sheetUrl };
       }
       const config: FormConfig = formConfig
         ? { ...formConfig, name: newName }
         : { ...defaultFormConfig, name: newName };
-      const result = await provision(token, config, onStepUpdate);
+      const result = await provision(token, config, onStepUpdate, projectId);
       return { deploymentUrl: result.deploymentUrl, sheetId: result.sheetId, sheetUrl: result.sheetUrl };
     }
   }
