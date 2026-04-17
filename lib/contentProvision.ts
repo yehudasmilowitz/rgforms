@@ -41,11 +41,11 @@ async function apiCall<T>(url: string, options: RequestInit): Promise<T> {
 // ─── Provisioning steps ──────────────────────────────────────────────────────
 
 export const CONTENT_PROVISIONING_STEPS: ProvisioningStep[] = [
-  { id: 'sheet',  label: 'Creating Google Sheet',     description: 'Setting up your content spreadsheet',       status: 'pending' },
-  { id: 'script', label: 'Creating Apps Script',      description: 'Initializing your content API project',     status: 'pending' },
-  { id: 'config', label: 'Adding configuration',      description: 'Writing field schema and module settings',  status: 'pending' },
-  { id: 'code',   label: 'Uploading handler code',    description: 'Deploying the doGet / doPost handlers',     status: 'pending' },
-  { id: 'deploy', label: 'Publishing API endpoint',   description: 'Making your content endpoint live',         status: 'pending' },
+  { id: 'sheet',  label: 'Creating Google Sheet',     description: 'Setting up your content spreadsheet',       status: 'pending', scopes: [{ label: 'drive.file' }] },
+  { id: 'script', label: 'Creating Apps Script',      description: 'Initializing your content API project',     status: 'pending', scopes: [{ label: 'script.projects', sensitive: true }] },
+  { id: 'config', label: 'Adding configuration',      description: 'Writing field schema and module settings',  status: 'pending', scopes: [{ label: 'drive.file' }] },
+  { id: 'code',   label: 'Uploading handler code',    description: 'Deploying the doGet / doPost handlers',     status: 'pending', scopes: [{ label: 'script.projects', sensitive: true }] },
+  { id: 'deploy', label: 'Publishing API endpoint',   description: 'Making your content endpoint live',         status: 'pending', scopes: [{ label: 'script.deployments', sensitive: true }] },
 ];
 
 // Step 1: Create the Sheet with user-defined columns + system columns

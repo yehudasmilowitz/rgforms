@@ -14,10 +14,10 @@ export class AppsScriptApiDisabledError extends Error {
 }
 
 export const CALENDAR_PROVISIONING_STEPS: ProvisioningStep[] = [
-  { id: 'sheet',  label: 'Creating Events spreadsheet', description: 'Setting up your calendar with sample events', status: 'pending' },
-  { id: 'script', label: 'Creating Apps Script',        description: 'Initializing the calendar API project',      status: 'pending' },
-  { id: 'code',   label: 'Uploading handler code',      description: 'Writing the doGet() calendar handler',       status: 'pending' },
-  { id: 'deploy', label: 'Publishing API endpoint',     description: 'Making your calendar endpoint live',         status: 'pending' },
+  { id: 'sheet',  label: 'Creating Events spreadsheet', description: 'Setting up your calendar with sample events', status: 'pending', scopes: [{ label: 'drive.file' }] },
+  { id: 'script', label: 'Creating Apps Script',        description: 'Initializing the calendar API project',      status: 'pending', scopes: [{ label: 'script.projects', sensitive: true }] },
+  { id: 'code',   label: 'Uploading handler code',      description: 'Writing the doGet() calendar handler',       status: 'pending', scopes: [{ label: 'script.projects', sensitive: true }] },
+  { id: 'deploy', label: 'Publishing API endpoint',     description: 'Making your calendar endpoint live',         status: 'pending', scopes: [{ label: 'script.deployments', sensitive: true }] },
 ];
 
 function authHeaders(token: string): HeadersInit {

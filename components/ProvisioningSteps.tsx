@@ -106,6 +106,26 @@ function StatusIcon({ status }: { status: ProvisioningStep['status'] }) {
   );
 }
 
+function ScopeBadge({ label, sensitive }: { label: string; sensitive?: boolean }) {
+  return (
+    <span
+      className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded font-mono"
+      style={
+        sensitive
+          ? { background: 'rgba(234,179,8,0.12)', color: 'rgb(161,120,0)', border: '1px solid rgba(234,179,8,0.25)' }
+          : { background: 'var(--color-surface-2)', color: 'var(--color-muted)', border: '1px solid var(--color-border)' }
+      }
+    >
+      {sensitive && (
+        <svg className="w-2.5 h-2.5 shrink-0" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+          <path d="M5 1L9 9H1L5 1Z" fill="currentColor" opacity="0.7" />
+        </svg>
+      )}
+      {label}
+    </span>
+  );
+}
+
 function StepRow({ step }: { step: ProvisioningStep }) {
   const isRunning = step.status === 'running';
 
@@ -123,13 +143,18 @@ function StepRow({ step }: { step: ProvisioningStep }) {
       }}
     >
       <StatusIcon status={step.status} />
-      <div className="flex flex-col gap-0.5 min-w-0">
-        <span
-          className="text-sm font-semibold leading-snug"
-          style={{ color: step.status === 'pending' ? 'var(--color-muted)' : 'var(--color-text)' }}
-        >
-          {step.label}
-        </span>
+      <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span
+            className="text-sm font-semibold leading-snug"
+            style={{ color: step.status === 'pending' ? 'var(--color-muted)' : 'var(--color-text)' }}
+          >
+            {step.label}
+          </span>
+          {step.scopes && step.scopes.map((s) => (
+            <ScopeBadge key={s.label} label={s.label} sensitive={s.sensitive} />
+          ))}
+        </div>
         <span className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
           {step.description}
         </span>

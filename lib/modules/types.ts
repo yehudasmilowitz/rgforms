@@ -1,4 +1,5 @@
 import type { BaseModuleResult } from '@/lib/core/provisionHelpers';
+import type { ScopeTag } from '@/types';
 
 export type { BaseModuleResult };
 
@@ -6,6 +7,7 @@ export interface ModuleStepDef {
   id: string;
   label: string;
   description: string;
+  scopes?: ScopeTag[];
 }
 
 export type ScriptConfig =

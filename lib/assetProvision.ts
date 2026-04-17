@@ -14,12 +14,12 @@ export class AppsScriptApiDisabledError extends Error {
 }
 
 export const ASSET_PROVISIONING_STEPS: ProvisioningStep[] = [
-  { id: 'sheet',  label: 'Creating config spreadsheet', description: 'Setting up module registry',                  status: 'pending' },
-  { id: 'folder', label: 'Creating Drive folder',       description: 'Creating your public asset storage',          status: 'pending' },
-  { id: 'share',  label: 'Making folder public',        description: 'Enabling public access to assets',            status: 'pending' },
-  { id: 'script', label: 'Creating Apps Script',        description: 'Initializing the listing API project',        status: 'pending' },
-  { id: 'code',   label: 'Uploading handler code',      description: 'Writing the doGet() file listing handler',    status: 'pending' },
-  { id: 'deploy', label: 'Publishing API endpoint',     description: 'Making your asset endpoint live',             status: 'pending' },
+  { id: 'sheet',  label: 'Creating config spreadsheet', description: 'Setting up module registry',                  status: 'pending', scopes: [{ label: 'drive.file' }] },
+  { id: 'folder', label: 'Creating Drive folder',       description: 'Creating your public asset storage',          status: 'pending', scopes: [{ label: 'drive.file' }] },
+  { id: 'share',  label: 'Making folder public',        description: 'Enabling public access to assets',            status: 'pending', scopes: [{ label: 'drive.file' }] },
+  { id: 'script', label: 'Creating Apps Script',        description: 'Initializing the listing API project',        status: 'pending', scopes: [{ label: 'script.projects', sensitive: true }] },
+  { id: 'code',   label: 'Uploading handler code',      description: 'Writing the doGet() file listing handler',    status: 'pending', scopes: [{ label: 'script.projects', sensitive: true }] },
+  { id: 'deploy', label: 'Publishing API endpoint',     description: 'Making your asset endpoint live',             status: 'pending', scopes: [{ label: 'script.deployments', sensitive: true }] },
 ];
 
 function authHeaders(token: string): HeadersInit {

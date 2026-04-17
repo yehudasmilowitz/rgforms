@@ -219,6 +219,46 @@ export default function Page() {
           </div>
         </motion.div>
 
+        {/* Apps Script one-time authorization notice */}
+        <motion.div
+          className="w-full rounded-xl border p-5 flex flex-col gap-3 text-left"
+          style={{
+            background: 'var(--color-surface)',
+            borderColor: 'var(--color-border)',
+          }}
+          variants={fadeUp}
+        >
+          <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--color-muted)' }}>
+            One-time script authorization
+          </p>
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-text)' }}>
+            After setup, Google will ask you to <strong>authorize the deployed Apps Script</strong> before it can run. This is a <em>separate</em> Google consent screen — independent of the permissions you grant above.
+          </p>
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+            The script runs inside <strong>your own Google account</strong>, so Google requires you to approve it directly. You&apos;ll see this prompt the first time you open the script&apos;s URL. It happens once and is not shown to your end users.
+          </p>
+          <div className="flex flex-col gap-2 pt-1">
+            <p className="text-xs font-medium" style={{ color: 'var(--color-text)' }}>Scopes the script will request at that moment:</p>
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-start gap-2">
+                <span className="text-xs font-mono px-1.5 py-0.5 rounded mt-0.5 shrink-0" style={{ background: 'var(--color-surface-2)', color: 'var(--color-muted)', border: '1px solid var(--color-border)' }}>spreadsheets.currentonly</span>
+                <span className="text-xs" style={{ color: 'var(--color-muted)' }}>Read/write the specific Google Sheet this module is bound to. Used by most module types.</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-xs font-mono px-1.5 py-0.5 rounded mt-0.5 shrink-0" style={{ background: 'var(--color-surface-2)', color: 'var(--color-muted)', border: '1px solid var(--color-border)' }}>script.send_mail</span>
+                <span className="text-xs" style={{ color: 'var(--color-muted)' }}>Send email notifications on new form submissions. Used by form modules only.</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-xs font-mono px-1.5 py-0.5 rounded mt-0.5 shrink-0" style={{ background: 'var(--color-surface-2)', color: 'var(--color-muted)', border: '1px solid var(--color-border)' }}>drive.readonly</span>
+                <span className="text-xs" style={{ color: 'var(--color-muted)' }}>List files in the Drive folder for the asset browser. Used by asset modules only.</span>
+              </div>
+            </div>
+          </div>
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+            These scopes are written into the <code className="font-mono text-xs px-1 rounded" style={{ background: 'var(--color-surface-2)' }}>appsscript.json</code> manifest that gets uploaded to your script project — you can inspect them in the Google Apps Script editor after setup.
+          </p>
+        </motion.div>
+
         {/* Trust note */}
         <motion.p
           className="text-xs leading-relaxed max-w-sm"

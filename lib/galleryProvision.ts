@@ -14,10 +14,10 @@ export class AppsScriptApiDisabledError extends Error {
 }
 
 export const GALLERY_PROVISIONING_STEPS: ProvisioningStep[] = [
-  { id: 'sheet',  label: 'Creating Gallery spreadsheet', description: 'Setting up your image registry',     status: 'pending' },
-  { id: 'script', label: 'Creating Apps Script',         description: 'Initializing the gallery API',       status: 'pending' },
-  { id: 'code',   label: 'Uploading handler code',       description: 'Writing the doGet() gallery handler', status: 'pending' },
-  { id: 'deploy', label: 'Publishing API endpoint',      description: 'Making your gallery endpoint live',  status: 'pending' },
+  { id: 'sheet',  label: 'Creating Gallery spreadsheet', description: 'Setting up your image registry',     status: 'pending', scopes: [{ label: 'drive.file' }] },
+  { id: 'script', label: 'Creating Apps Script',         description: 'Initializing the gallery API',       status: 'pending', scopes: [{ label: 'script.projects', sensitive: true }] },
+  { id: 'code',   label: 'Uploading handler code',       description: 'Writing the doGet() gallery handler', status: 'pending', scopes: [{ label: 'script.projects', sensitive: true }] },
+  { id: 'deploy', label: 'Publishing API endpoint',      description: 'Making your gallery endpoint live',  status: 'pending', scopes: [{ label: 'script.deployments', sensitive: true }] },
 ];
 
 function authHeaders(token: string): HeadersInit {

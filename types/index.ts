@@ -28,12 +28,18 @@ export interface ProvisioningResult {
 
 export type StepStatus = 'pending' | 'running' | 'complete' | 'error';
 
+export interface ScopeTag {
+  label: string;
+  sensitive?: boolean;
+}
+
 export interface ProvisioningStep {
   id: string;
   label: string;
   description: string;
   status: StepStatus;
   error?: string;
+  scopes?: ScopeTag[];
 }
 
 export interface GoogleUser {

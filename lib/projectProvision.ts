@@ -2,11 +2,11 @@ import type { ProjectSummary, ProvisioningStep } from '@/types';
 import { generateProjectScript, PROJECT_SCRIPT_MANIFEST } from './projectScriptTemplate';
 
 export const PROJECT_PROVISIONING_STEPS: ProvisioningStep[] = [
-  { id: 'sheet',  label: 'Creating project sheet',  description: 'Setting up your project workspace',    status: 'pending' },
-  { id: 'script', label: 'Creating Apps Script',    description: 'Building your project API',             status: 'pending' },
-  { id: 'config', label: 'Writing project config',  description: 'Saving project metadata to the sheet', status: 'pending' },
-  { id: 'code',   label: 'Uploading API handler',   description: 'Deploying the project endpoint code',  status: 'pending' },
-  { id: 'deploy', label: 'Publishing project API',  description: 'Making your project endpoint live',    status: 'pending' },
+  { id: 'sheet',  label: 'Creating project sheet',  description: 'Setting up your project workspace',    status: 'pending', scopes: [{ label: 'drive.file' }] },
+  { id: 'script', label: 'Creating Apps Script',    description: 'Building your project API',             status: 'pending', scopes: [{ label: 'script.projects', sensitive: true }] },
+  { id: 'config', label: 'Writing project config',  description: 'Saving project metadata to the sheet', status: 'pending', scopes: [{ label: 'drive.file' }] },
+  { id: 'code',   label: 'Uploading API handler',   description: 'Deploying the project endpoint code',  status: 'pending', scopes: [{ label: 'script.projects', sensitive: true }] },
+  { id: 'deploy', label: 'Publishing project API',  description: 'Making your project endpoint live',    status: 'pending', scopes: [{ label: 'script.deployments', sensitive: true }] },
 ];
 
 const SHEETS_API = 'https://sheets.googleapis.com/v4/spreadsheets';

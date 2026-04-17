@@ -29,10 +29,10 @@ export const MODULE_REGISTRY: ModuleRegistry = {
     builderButtonLabel: 'Create testimonials module',
 
     steps: [
-      { id: 'sheet',  label: 'Creating Testimonials spreadsheet', description: 'Setting up your testimonials registry' },
-      { id: 'script', label: 'Creating Apps Script',              description: 'Initializing the testimonials API' },
-      { id: 'code',   label: 'Uploading handler code',            description: 'Writing the doGet() testimonials handler' },
-      { id: 'deploy', label: 'Publishing API endpoint',           description: 'Making your testimonials endpoint live' },
+      { id: 'sheet',  label: 'Creating Testimonials spreadsheet', description: 'Setting up your testimonials registry',      scopes: [{ label: 'drive.file' }] },
+      { id: 'script', label: 'Creating Apps Script',              description: 'Initializing the testimonials API',          scopes: [{ label: 'script.projects', sensitive: true }] },
+      { id: 'code',   label: 'Uploading handler code',            description: 'Writing the doGet() testimonials handler',   scopes: [{ label: 'script.projects', sensitive: true }] },
+      { id: 'deploy', label: 'Publishing API endpoint',           description: 'Making your testimonials endpoint live',     scopes: [{ label: 'script.deployments', sensitive: true }] },
     ],
 
     sheetSuffix: 'RG Testimonials',
@@ -129,10 +129,10 @@ const limited = await fetch('${deploymentUrl}?json=1&limit=5');`,
     builderButtonLabel: 'Create FAQ module',
 
     steps: [
-      { id: 'sheet',  label: 'Creating FAQ spreadsheet', description: 'Setting up your FAQ registry' },
-      { id: 'script', label: 'Creating Apps Script',     description: 'Initializing the FAQ API' },
-      { id: 'code',   label: 'Uploading handler code',   description: 'Writing the doGet() FAQ handler' },
-      { id: 'deploy', label: 'Publishing API endpoint',  description: 'Making your FAQ endpoint live' },
+      { id: 'sheet',  label: 'Creating FAQ spreadsheet', description: 'Setting up your FAQ registry',      scopes: [{ label: 'drive.file' }] },
+      { id: 'script', label: 'Creating Apps Script',     description: 'Initializing the FAQ API',          scopes: [{ label: 'script.projects', sensitive: true }] },
+      { id: 'code',   label: 'Uploading handler code',   description: 'Writing the doGet() FAQ handler',   scopes: [{ label: 'script.projects', sensitive: true }] },
+      { id: 'deploy', label: 'Publishing API endpoint',  description: 'Making your FAQ endpoint live',     scopes: [{ label: 'script.deployments', sensitive: true }] },
     ],
 
     sheetSuffix: 'RG FAQ',
@@ -226,10 +226,10 @@ const all = await fetch('${deploymentUrl}?json=1&active=false');`,
     builderButtonLabel: 'Create menu',
 
     steps: [
-      { id: 'sheet',  label: 'Creating Menu spreadsheet', description: 'Setting up your menu registry' },
-      { id: 'script', label: 'Creating Apps Script',       description: 'Initializing the menu API' },
-      { id: 'code',   label: 'Uploading handler code',     description: 'Writing the doGet() menu handler' },
-      { id: 'deploy', label: 'Publishing API endpoint',    description: 'Making your menu endpoint live' },
+      { id: 'sheet',  label: 'Creating Menu spreadsheet', description: 'Setting up your menu registry',     scopes: [{ label: 'drive.file' }] },
+      { id: 'script', label: 'Creating Apps Script',       description: 'Initializing the menu API',        scopes: [{ label: 'script.projects', sensitive: true }] },
+      { id: 'code',   label: 'Uploading handler code',     description: 'Writing the doGet() menu handler', scopes: [{ label: 'script.projects', sensitive: true }] },
+      { id: 'deploy', label: 'Publishing API endpoint',    description: 'Making your menu endpoint live',   scopes: [{ label: 'script.deployments', sensitive: true }] },
     ],
 
     sheetSuffix: 'RG Menu',
@@ -298,10 +298,10 @@ const available = await fetch('${deploymentUrl}?available=true')
     builderButtonLabel: 'Create newsletter',
 
     steps: [
-      { id: 'sheet',  label: 'Creating Newsletter spreadsheet', description: 'Setting up your subscriber list' },
-      { id: 'script', label: 'Creating Apps Script',            description: 'Initializing the newsletter API' },
-      { id: 'code',   label: 'Uploading handler code',          description: 'Writing the doPost() subscriber handler' },
-      { id: 'deploy', label: 'Publishing API endpoint',         description: 'Making your newsletter endpoint live' },
+      { id: 'sheet',  label: 'Creating Newsletter spreadsheet', description: 'Setting up your subscriber list',             scopes: [{ label: 'drive.file' }] },
+      { id: 'script', label: 'Creating Apps Script',            description: 'Initializing the newsletter API',             scopes: [{ label: 'script.projects', sensitive: true }] },
+      { id: 'code',   label: 'Uploading handler code',          description: 'Writing the doPost() subscriber handler',     scopes: [{ label: 'script.projects', sensitive: true }] },
+      { id: 'deploy', label: 'Publishing API endpoint',         description: 'Making your newsletter endpoint live',        scopes: [{ label: 'script.deployments', sensitive: true }] },
     ],
 
     sheetSuffix: 'RG Newsletter',
@@ -385,10 +385,10 @@ const { count } = await fetch('${deploymentUrl}?action=count')
     builderButtonLabel: 'Create announcements module',
 
     steps: [
-      { id: 'sheet',  label: 'Creating Announcements spreadsheet', description: 'Setting up your announcements registry' },
-      { id: 'script', label: 'Creating Apps Script',               description: 'Initializing the announcements API' },
-      { id: 'code',   label: 'Uploading handler code',             description: 'Writing the doGet() announcements handler' },
-      { id: 'deploy', label: 'Publishing API endpoint',            description: 'Making your announcements endpoint live' },
+      { id: 'sheet',  label: 'Creating Announcements spreadsheet', description: 'Setting up your announcements registry',       scopes: [{ label: 'drive.file' }] },
+      { id: 'script', label: 'Creating Apps Script',               description: 'Initializing the announcements API',           scopes: [{ label: 'script.projects', sensitive: true }] },
+      { id: 'code',   label: 'Uploading handler code',             description: 'Writing the doGet() announcements handler',    scopes: [{ label: 'script.projects', sensitive: true }] },
+      { id: 'deploy', label: 'Publishing API endpoint',            description: 'Making your announcements endpoint live',      scopes: [{ label: 'script.deployments', sensitive: true }] },
     ],
 
     sheetSuffix: 'RG Announcements',
@@ -485,10 +485,10 @@ const { announcements } = await res.json();`,
     builderButtonLabel: 'Create redirects module',
 
     steps: [
-      { id: 'sheet',  label: 'Creating Redirects spreadsheet', description: 'Setting up your redirects registry' },
-      { id: 'script', label: 'Creating Apps Script',           description: 'Initializing the redirects API' },
-      { id: 'code',   label: 'Uploading handler code',         description: 'Writing the doGet() redirects handler' },
-      { id: 'deploy', label: 'Publishing API endpoint',        description: 'Making your redirects endpoint live' },
+      { id: 'sheet',  label: 'Creating Redirects spreadsheet', description: 'Setting up your redirects registry',     scopes: [{ label: 'drive.file' }] },
+      { id: 'script', label: 'Creating Apps Script',           description: 'Initializing the redirects API',         scopes: [{ label: 'script.projects', sensitive: true }] },
+      { id: 'code',   label: 'Uploading handler code',         description: 'Writing the doGet() redirects handler',  scopes: [{ label: 'script.projects', sensitive: true }] },
+      { id: 'deploy', label: 'Publishing API endpoint',        description: 'Making your redirects endpoint live',    scopes: [{ label: 'script.deployments', sensitive: true }] },
     ],
 
     sheetSuffix: 'RG Redirects',
