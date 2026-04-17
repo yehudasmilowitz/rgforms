@@ -248,15 +248,16 @@ export default function BusinessPage() {
           </h1>
 
           <p className="text-base leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            The path from zero-backend form tool to a profitable, hosted REST API platform — with
-            outsized margins, a short-URL growth engine, and Firestore-backed analytics on top of
-            Google&apos;s free infrastructure.
+            A two-tier product built on a structural advantage: the free tier runs entirely on
+            Google&apos;s infrastructure with zero data ever touching our servers, and the paid tiers
+            layer a managed gateway on top — short URLs, analytics, webhooks, and access control —
+            while preserving the same near-zero cost base.
           </p>
 
           <CalloutBox accent>
             <Strong>The one-sentence pitch:</Strong> rgforms turns Google Sheets into a professional
-            REST API in 2 minutes — your data stays in your Drive, but you get a managed API with
-            short URLs, analytics, webhooks, and access control.
+            REST API in 2 minutes — free tier keeps your data entirely in your own Drive (HIPAA-compatible,
+            zero vendor lock-in), paid tiers add the professional API layer on top.
           </CalloutBox>
         </header>
 
@@ -265,15 +266,17 @@ export default function BusinessPage() {
           <SectionHeader
             emoji="💡"
             title="The Core Thesis"
-            subtitle="Why this business has structurally better margins than any competitor."
+            subtitle="Why this business has structurally better margins than any competitor — and a free tier that's a genuine product, not a loss leader."
           />
 
           <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
             Every competing tool — Formspree, SheetDB, Contentful, Airtable — pays real infrastructure
             costs for every user&apos;s data: compute, storage, bandwidth, redundancy. rgforms pays
-            almost none of that. Google runs the Apps Script, stores the submissions, and serves the
-            API — all from the user&apos;s own Drive, for free. Our infrastructure cost is near-fixed
-            regardless of how many users we add.
+            almost none of that. On the free tier, Google runs the Apps Script, stores the submissions,
+            and serves the API — all from the user&apos;s own Drive. Our infrastructure cost is near-fixed
+            regardless of how many free users we add. On paid tiers, we introduce a gateway layer that
+            adds the professional features — but the underlying data still lives in Google&apos;s
+            infrastructure, keeping our COGS far below any competitor.
           </p>
 
           <div
@@ -326,7 +329,137 @@ export default function BusinessPage() {
           </p>
         </section>
 
-        {/* ── 2. Short URLs ────────────────────────────────────────────── */}
+        {/* ── 2. Two Architectures ────────────────────────────────────── */}
+        <section className="flex flex-col gap-5">
+          <SectionHeader
+            emoji="🏛"
+            title="Two Architectures, One Product"
+            subtitle="The free tier and paid tiers are not the same product with features removed — they are architecturally different, and that difference is a selling point."
+          />
+
+          <div className="flex flex-col gap-3">
+            <div
+              className="rounded-xl border p-5 flex flex-col gap-4"
+              style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+            >
+              <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>Free tier — no gateway</p>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                Form submissions flow directly from the user&apos;s site → Google&apos;s Apps Script
+                server → their Google Sheet. rgforms is never in that path. We provision the
+                infrastructure once (creating the Sheet and deploying the script using their OAuth
+                token during setup), then step entirely out of the way.
+              </p>
+              <div
+                className="rounded-lg p-3 text-xs font-mono leading-loose"
+                style={{ background: 'var(--color-surface-2)', color: 'var(--color-muted)' }}
+              >
+                {`Browser → script.google.com/macros/…/exec → Google Sheet\n         (rgforms is not in this path)`}
+              </div>
+              <div className="flex flex-col gap-1.5">
+                {[
+                  'Scripts deployed as "Anyone can access, Execute as: Me" — standard public web app',
+                  'OAuth token used only during provisioning, never stored long-term',
+                  'rgforms has zero access to submissions after setup completes',
+                  'One-time browser authorization still required after provisioning (Google platform limitation)',
+                  'Raw script.google.com URLs in every embed',
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-2 text-xs" style={{ color: 'var(--color-muted)' }}>
+                    <span className="shrink-0 mt-0.5" style={{ color: 'var(--color-subtle)' }}>·</span>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div
+              className="rounded-xl border p-5 flex flex-col gap-4"
+              style={{ background: 'oklch(0.65 0.22 285 / 0.04)', borderColor: 'oklch(0.65 0.22 285 / 0.25)' }}
+            >
+              <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>Paid tiers — gateway architecture</p>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                All traffic flows through our gateway. Scripts are deployed privately ("Only myself")
+                and called via the Apps Script <Mono>scripts.run</Mono> API using the user&apos;s stored
+                OAuth refresh token — never via a public URL. The one-time authorization is handled
+                programmatically during provisioning.
+              </p>
+              <div
+                className="rounded-lg p-3 text-xs font-mono leading-loose"
+                style={{ background: 'var(--color-surface-2)', color: 'var(--color-muted)' }}
+              >
+                {`Browser → rg.fm/slug → our gateway → scripts.run API → Google Sheet\n                       (analytics, rate limiting, webhooks happen here)`}
+              </div>
+              <div className="flex flex-col gap-1.5">
+                {[
+                  'Scripts private — never reachable via public URL',
+                  'Gateway calls scripts/{scriptId}:run authenticated by stored refresh token',
+                  'Refresh token encrypted at rest in Firestore, minted fresh on each outbound call',
+                  'No manual browser authorization — consent handled inline during provisioning',
+                  'Short URLs, analytics, webhooks, CORS enforcement all enabled',
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-2 text-xs" style={{ color: 'var(--color-muted)' }}>
+                    <span className="shrink-0 mt-0.5" style={{ color: 'oklch(0.65 0.22 285)' }}>·</span>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* HIPAA comparison */}
+          <div
+            className="rounded-xl border overflow-hidden"
+            style={{ borderColor: 'var(--color-border)' }}
+          >
+            <div
+              className="px-5 py-3 text-xs font-semibold uppercase tracking-wider"
+              style={{ background: 'var(--color-surface-2)', color: 'var(--color-subtle)', borderBottom: '1px solid var(--color-border)' }}
+            >
+              HIPAA Posture Comparison
+            </div>
+            <div style={{ background: 'var(--color-surface)' }}>
+              <div
+                className="grid px-5 py-2.5 text-xs font-semibold uppercase tracking-wider"
+                style={{ gridTemplateColumns: '1.5fr 1fr 1fr', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}
+              >
+                <span>Dimension</span>
+                <span>Free (no gateway)</span>
+                <span>Paid (gateway)</span>
+              </div>
+              {[
+                { dim: 'PHI touches our servers', free: 'Never', paid: 'In transit (gateway)' },
+                { dim: 'PHI stored by us', free: 'Never', paid: 'Metadata only (payloads = Sheets)' },
+                { dim: 'Google Workspace BAA covers data', free: 'Yes — fully', paid: 'Yes — for Sheets/Firestore' },
+                { dim: 'rgforms BAA required', free: 'Debatable — provisioning-only access', paid: 'Yes — we become a Business Associate' },
+                { dim: 'User data sovereignty', free: 'Complete — their Drive, their keys', paid: 'Partial — data in Drive, metadata in our Firestore' },
+                { dim: 'Breach exposure', free: 'None — we hold no PHI', paid: 'Transit-only if payloads not stored' },
+              ].map(({ dim, free, paid }, i) => (
+                <div
+                  key={dim}
+                  className="grid px-5 py-3 text-xs gap-4"
+                  style={{
+                    gridTemplateColumns: '1.5fr 1fr 1fr',
+                    borderBottom: '1px solid var(--color-border)',
+                    background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)',
+                  }}
+                >
+                  <span style={{ color: 'var(--color-text)' }}>{dim}</span>
+                  <span style={{ color: 'oklch(0.72 0.18 145)' }}>{free}</span>
+                  <span style={{ color: 'var(--color-muted)' }}>{paid}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <CalloutBox>
+            <Strong>The pitch for free-tier HIPAA users:</Strong> &ldquo;The free tier is architecturally
+            incapable of accessing your data. Submissions go directly from your site to your Google Sheet —
+            rgforms is not in that path. If your Google Workspace account has a signed BAA with Google
+            (covering Sheets and Apps Script), you&apos;re HIPAA-compatible with zero additional
+            compliance overhead on our side.&rdquo; No competing form tool can say this.
+          </CalloutBox>
+        </section>
+
+        {/* ── 3. Short URLs ────────────────────────────────────────────── */}
         <section className="flex flex-col gap-5">
           <SectionHeader
             emoji="🔗"
@@ -413,12 +546,12 @@ export default function BusinessPage() {
           </CalloutBox>
         </section>
 
-        {/* ── 3. Pricing Tiers ─────────────────────────────────────────── */}
+        {/* ── 4. Pricing Tiers ─────────────────────────────────────────── */}
         <section className="flex flex-col gap-5">
           <SectionHeader
             emoji="💳"
             title="Pricing Tiers"
-            subtitle="Designed so every feature has one clear tier it belongs to — and one obvious reason to upgrade."
+            subtitle="Free tier is a real product with a real data sovereignty advantage. Paid tiers add the managed API layer."
           />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -426,21 +559,24 @@ export default function BusinessPage() {
               name="Starter"
               price="Free"
               features={[
-                '1 project, 3 modules',
+                '1 project, 3 module provisions included',
+                'Data goes directly to your Google Drive — we never see it',
+                'HIPAA-compatible with Google Workspace BAA',
+                'Submission counts visible in dashboard (via ping)',
                 'Raw script.google.com URLs',
-                '500 submissions / month',
-                '"Built with rgforms" badge',
-                'No analytics, no webhooks',
+                '"Built with rgforms" badge on forms',
+                'Extra provisions: $5 per 10-pack',
               ]}
-              target="Indie developers, personal projects, first-time users."
-              upgradeHook="Hits the 500/mo cap or needs to remove the badge."
+              target="Indie developers, healthcare/compliance-sensitive projects, first-time users."
+              upgradeHook="Wants short URLs, submission inbox, or no manual browser auth step."
             />
             <TierCard
               name="Builder"
               price="$9"
               features={[
                 '3 projects, 10 modules',
-                'Short URLs (rg.fm/your-form)',
+                'Gateway architecture — short URLs (rg.fm/your-form)',
+                'No manual script authorization',
                 '5,000 submissions / month',
                 'Submission inbox (last 500)',
                 'Basic analytics — volume over time',
@@ -476,20 +612,111 @@ export default function BusinessPage() {
                 'Team seats (5 included, +$8/seat)',
                 'Custom domain (api.yourco.com)',
                 '500,000 submissions / month',
-                'Priority support',
-                'SLA',
+                'We sign a BAA — full HIPAA Business Associate coverage',
+                'Priority support + SLA',
               ]}
-              target="Established agencies, small businesses with real API traffic."
-              upgradeHook="Needs enterprise volume or more team seats."
+              target="Established agencies, healthcare SaaS, businesses with compliance requirements."
+              upgradeHook="Needs enterprise volume, team seats, or a signed BAA."
             />
           </div>
 
           <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            <Strong>The upgrade logic is deliberate.</Strong> Free users hit the submission cap and want short
-            URLs. Builder users want webhooks. Pro users want a team seat. Every tier has one
-            feature just out of reach. The most important transition is <Accent>Builder → Pro</Accent> —
-            that&apos;s where the best unit economics live and where most developers land after 30–60 days.
+            <Strong>The upgrade logic is deliberate.</Strong> Free users eventually want short URLs and
+            to ditch the manual auth step. Builder users want webhooks. Pro users want a team seat.
+            The most important transition is <Accent>Builder → Pro</Accent> — that&apos;s where the
+            best unit economics live. The free tier is not a loss leader: it monetizes through
+            provisioning credit packs and drives upgrades through the submission count dashboard.
           </p>
+        </section>
+
+        {/* ── 5. Free Tier Monetization ────────────────────────────────── */}
+        <section className="flex flex-col gap-5">
+          <SectionHeader
+            emoji="🪙"
+            title="Free Tier Monetization"
+            subtitle="The free tier generates revenue and upgrade pressure without a gateway or any server-side data access."
+          />
+
+          <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+            Without the gateway, submission limits are unenforceable — we have zero visibility into
+            what goes through the script. But we control two things: the provisioning event, and
+            the code we deploy inside the script. Both can be monetized.
+          </p>
+
+          <div className="flex flex-col gap-3">
+            <div
+              className="rounded-xl border p-5 flex flex-col gap-3"
+              style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+            >
+              <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>Provisioning credit packs</p>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                Each provisioning creates a real Google Sheet + Apps Script + deploys handler code —
+                concrete value delivered. Free tier includes 3 provisions. Additional provisions
+                are sold in packs via Stripe Checkout.
+              </p>
+              <div
+                className="rounded-lg p-3 text-xs font-mono leading-loose"
+                style={{ background: 'var(--color-surface-2)', color: 'var(--color-muted)' }}
+              >
+                {`Free: 3 provisions included\n$5  → 10 provisions  (~$0.50 each)\n$15 → 40 provisions  (~$0.37 each)\n$40 → 150 provisions (~$0.26 each)`}
+              </div>
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
+                Packs avoid Stripe&apos;s per-transaction fee problem on micro-payments. A $0.50
+                single charge loses ~$0.33 to fees. A $5 pack loses ~$0.45 total across all 10
+                uses — much better unit economics.
+              </p>
+            </div>
+
+            <div
+              className="rounded-xl border p-5 flex flex-col gap-3"
+              style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+            >
+              <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>Analytics ping — submission counting without payload access</p>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                We control the script code we deploy. Every script includes a lightweight
+                fire-and-forget <Mono>fetch</Mono> call at the top of <Mono>doPost()</Mono> that
+                sends only a counter ping — no submission payload, no PHI.
+              </p>
+              <div
+                className="rounded-lg p-3 text-xs font-mono leading-loose"
+                style={{ background: 'var(--color-surface-2)', color: 'var(--color-muted)' }}
+              >
+                {`// Deployed inside every free-tier script\nfunction doPost(e) {\n  // Fire-and-forget counter ping — no payload\n  UrlFetchApp.fetch('https://rgforms.app/api/ping', {\n    method: 'post',\n    payload: JSON.stringify({ moduleId: MODULE_ID }),\n    muteHttpExceptions: true,\n  });\n  // ... rest of handler\n}`}
+              </div>
+              <div className="flex flex-col gap-1.5 mt-1">
+                {[
+                  { label: 'What we receive', detail: 'moduleId + timestamp. That\'s it. No form fields, no email addresses, no PHI.' },
+                  { label: 'What users see', detail: '"Your contact form received 312 submissions this month" — visible in the dashboard. Drives engagement and return visits.' },
+                  { label: 'The upgrade hook', detail: '"See who submitted and what they said — upgrade to Builder." The count creates desire for the inbox.' },
+                  { label: 'Transparency', detail: 'Disclosed in onboarding and visible in the deployed script code. Users can inspect it. No hidden tracking.' },
+                ].map(({ label, detail }) => (
+                  <div key={label} className="flex flex-col gap-0.5 rounded-lg p-2.5" style={{ background: 'var(--color-surface-2)' }}>
+                    <p className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>{label}</p>
+                    <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{detail}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div
+              className="rounded-xl border p-5 flex flex-col gap-3"
+              style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+            >
+              <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>&ldquo;Powered by rgforms&rdquo; badge</p>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                Free tier confirmation pages include a small badge linking to rgforms. Every site
+                using the free tier embeds this in their public-facing pages. If 1,000 free forms
+                each receive 50 unique visitors/month, that&apos;s 50,000 monthly brand impressions
+                at $0 CAC. Removed on any paid tier.
+              </p>
+            </div>
+          </div>
+
+          <CalloutBox accent>
+            <Strong>The free tier revenue model:</Strong> provisioning packs are the direct revenue.
+            The analytics ping is the retention and upgrade mechanism. The badge is the acquisition
+            channel. None of these require a gateway, a stored token, or any access to submission data.
+          </CalloutBox>
         </section>
 
         {/* ── 4. Storage: Firestore ─────────────────────────────────────── */}
