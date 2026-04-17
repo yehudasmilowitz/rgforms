@@ -734,6 +734,50 @@ shortUrls/{slug}              ← { destination, projectId, userId }`}
             </div>
           </div>
 
+          {/* No manual auth */}
+          <div
+            className="rounded-xl border p-5 flex flex-col gap-4"
+            style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>Eliminating manual script authorization</p>
+            </div>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+              Today, every provisioned Apps Script must be visited once in a browser to consent to its
+              OAuth scopes (SpreadsheetApp, MailApp, etc.) before it serves data publicly. This is a
+              Google platform requirement for anonymous web app deployments. The gateway eliminates it entirely.
+            </p>
+            <div className="flex flex-col gap-2">
+              {[
+                {
+                  label: 'Scripts become private',
+                  detail: 'Instead of deploying as "Anyone can access," scripts are deployed as "Only myself." They are never reachable via a public URL — the gateway is the only caller.',
+                },
+                {
+                  label: 'Gateway calls scripts.run, not exec',
+                  detail: 'The Apps Script API exposes a scripts/{scriptId}:run endpoint that invokes a named function directly, authenticated by the project owner\'s OAuth token. No public deployment, no browser visit required.',
+                },
+                {
+                  label: 'Consent happens during provisioning',
+                  detail: 'You already hold the user\'s access token at provision time. A single scripts.run call to a lightweight init() function during the provisioning flow triggers OAuth scope consent inline — before the user ever leaves the app. The warning banner disappears permanently.',
+                },
+                {
+                  label: 'Refresh token stored in Firestore',
+                  detail: 'The gateway exchanges the access token for a long-lived refresh token, stores it encrypted in Firestore against the project, and mints a fresh access token on each outbound call. Token rotation is invisible to the user.',
+                },
+              ].map(({ label, detail }) => (
+                <div key={label} className="flex flex-col gap-1 rounded-lg p-3" style={{ background: 'var(--color-surface-2)' }}>
+                  <p className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>{label}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{detail}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
+              Requires <Mono>https://www.googleapis.com/auth/script.projects</Mono> added to the sign-in
+              OAuth scope list — already needed for provisioning, so no additional consent screen is shown.
+            </p>
+          </div>
+
           <CalloutBox accent>
             <Strong>Security as a monetization lever:</Strong> None of these features — CORS enforcement,
             rate limiting, IP allowlisting, Turnstile — are possible on raw <Mono>script.google.com</Mono>{' '}
