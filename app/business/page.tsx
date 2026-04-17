@@ -286,18 +286,16 @@ export default function BusinessPage() {
             >
               Unit Economics at Scale
             </div>
-            <div className="px-5" style={{ background: 'var(--color-surface)' }}>
+            <div style={{ background: 'var(--color-surface)' }}>
               <div
-                className="flex items-center justify-between gap-4 py-2.5 text-xs font-semibold uppercase tracking-wider"
-                style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}
+                className="grid px-5 py-2.5 text-xs font-semibold uppercase tracking-wider"
+                style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}
               >
                 <span>Paying Users</span>
-                <div className="flex items-center gap-8">
-                  <span className="hidden sm:block">Avg MRR/user</span>
-                  <span>Monthly Rev</span>
-                  <span>Infra Cost</span>
-                  <span style={{ color: 'oklch(0.72 0.18 145)' }}>Gross Margin</span>
-                </div>
+                <span>Avg MRR/user</span>
+                <span>Monthly Rev</span>
+                <span>Infra Cost</span>
+                <span style={{ color: 'oklch(0.72 0.18 145)' }}>Gross Margin</span>
               </div>
               {[
                 { users: '100', avg: '$18', rev: '$1,800', cost: '~$80', margin: '96%' },
@@ -307,16 +305,14 @@ export default function BusinessPage() {
               ].map(({ users, avg, rev, cost, margin }) => (
                 <div
                   key={users}
-                  className="flex items-center justify-between gap-4 py-3 text-sm"
-                  style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-muted)' }}
+                  className="grid px-5 py-3 text-sm"
+                  style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', borderBottom: '1px solid var(--color-border)', color: 'var(--color-muted)' }}
                 >
                   <span>{users}</span>
-                  <div className="flex items-center gap-8">
-                    <span className="hidden sm:block">{avg}</span>
-                    <span>{rev}</span>
-                    <span>{cost}</span>
-                    <span className="font-bold" style={{ color: 'oklch(0.72 0.18 145)', fontFamily: 'var(--font-display)' }}>{margin}</span>
-                  </div>
+                  <span>{avg}</span>
+                  <span>{rev}</span>
+                  <span>{cost}</span>
+                  <span className="font-bold" style={{ color: 'oklch(0.72 0.18 145)', fontFamily: 'var(--font-display)' }}>{margin}</span>
                 </div>
               ))}
             </div>
