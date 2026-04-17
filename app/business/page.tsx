@@ -325,7 +325,7 @@ export default function BusinessPage() {
           <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
             After Stripe fees (~3%), you still run at margins most SaaS companies never reach.
             This is the structural advantage: <Strong>Google subsidizes your cost of goods.</Strong> The
-            infra column above covers Vercel hosting, Firestore (metadata only — not submission payloads),
+            infra column above covers Firebase App Hosting, Firestore (metadata only — not submission payloads),
             and a short-URL domain. That&apos;s it.
           </p>
         </section>
@@ -1041,9 +1041,9 @@ shortUrls/{slug}              ← { destination, projectId, userId }`}
               { layer: 'Database', choice: 'Firestore (Firebase)', why: 'Schema-flexible, Google ecosystem, generous free tier, real-time.' },
               { layer: 'Auth', choice: 'Google OAuth → backend JWT', why: 'httpOnly cookie session, refresh token stored in Firestore.' },
               { layer: 'Payments', choice: 'Stripe Billing', why: 'Subscriptions, Checkout, webhooks to update Firestore plan field.' },
-              { layer: 'Hosting', choice: 'Vercel', why: 'Already deployed here. Edge middleware for short URL redirects.' },
-              { layer: 'Short URLs', choice: 'Next.js middleware', why: 'Reads slug from Firestore, redirects in <10ms at edge.' },
-              { layer: 'Webhooks', choice: 'Background fetch queue', why: 'Fire-and-forget via Vercel background functions or a simple queue doc in Firestore.' },
+              { layer: 'Hosting', choice: 'Firebase App Hosting', why: 'Full Next.js SSR support (via Cloud Run). One billing account, one console — same ecosystem as Firestore and Google OAuth.' },
+              { layer: 'Short URLs', choice: 'Next.js middleware', why: 'Reads slug from Firestore, redirects at the edge via Firebase CDN.' },
+              { layer: 'Webhooks', choice: 'Background fetch queue', why: 'Fire-and-forget via Cloud Tasks or a simple queue doc in Firestore.' },
             ].map(({ layer, choice, why }, i, arr) => (
               <div
                 key={layer}
@@ -1071,7 +1071,7 @@ shortUrls/{slug}              ← { destination, projectId, userId }`}
           <ol className="flex flex-col gap-2">
             {[
               { n: '1', s: "Acquire the short URL domain (rg.fm or similar) — this is time-sensitive and costs ~$15." },
-              { n: '2', s: "Remove output: 'export' from next.config.ts and deploy to Vercel in server mode — unblocks all API routes." },
+              { n: '2', s: "Remove output: 'export' from next.config.ts, connect the repo to Firebase App Hosting — full Next.js SSR, API routes, and git-push deploys in one step." },
               { n: '3', s: "Add Firestore + backend session + one gateway proxy route that logs calls — this is the proof-of-concept for the entire business model." },
             ].map(({ n, s }) => (
               <li key={n} className="flex items-start gap-3">
