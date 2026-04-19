@@ -694,28 +694,880 @@ function SitesTab() {
       {/* Concept */}
       <div className="flex flex-col gap-4">
         <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>The concept</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Zero-infrastructure websites. Google Sheets as CMS. Apps Script as web server. Google hosts everything.</p>
+          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>The product</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>A complete website builder for non-technical users. Beautiful templates. Forms that work. Data you own. Your domain.</p>
         </div>
         <CalloutBox accent>
-          <Strong>The pitch:</Strong> &ldquo;Squarespace gives you a rigid template. Webflow charges $23/mo and
-          takes your data hostage. rgforms Sites works like Lego: pick the modules your business actually needs —
-          blog, menu, services, gallery, events, team, FAQ, testimonials — in any combination, any order.
-          Every piece of content lives in a Google Sheet you own. Edit a row, the site updates instantly.
-          And because Google hosts everything, this costs us nothing to run — so it&apos;s free for you to start.&rdquo;
+          <Strong>The pitch:</Strong> &ldquo;Tell us about your business in one sentence. Our AI designs the entire
+          site — picks your modules, writes real seed content, configures your forms — and provisions everything in
+          90 seconds. Your site runs on your domain, beautiful out of the box. Your data lives in a Google Sheet
+          you own and can edit like a spreadsheet. When you outgrow us: download a full Next.js project and
+          self-host it anywhere. No vendor lock-in. No designer needed. No technical knowledge required.&rdquo;
         </CalloutBox>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[
+            { title: 'Non-technical business owner', body: 'Describe your business. AI builds the site. Edit content by typing in a spreadsheet. Live on your domain in under 2 minutes — no designer, no developer, no CMS to learn.' },
+            { title: 'Freelancer / developer', body: 'Build client sites 10× faster. Client gets a Google Sheet as their CMS — they can update their own content without ever calling you. Export clean Next.js code if they want to self-host later.' },
+            { title: 'Agency', body: 'White-label the builder. Provision client sites in minutes. They manage content in Sheets. You earn recurring revenue. Unlimited sites on one plan.' },
+          ].map(({ title, body }) => (
+            <div key={title} className="rounded-lg p-3 flex flex-col gap-1.5"
+              style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+              <p className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>{title}</p>
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* System architecture */}
+      <div className="flex flex-col gap-4">
+        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
+          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>System architecture</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>rgforms hosts the website. Apps Script is a JSON API. Google holds all the data. Two completely separated concerns.</p>
+        </div>
         <Card>
-          <SectionLabel>The core modularity principle</SectionLabel>
+          <SectionLabel>Runtime data flow — how a page visit works</SectionLabel>
+          <CodeBlock>{`Visitor → yourdomain.com (or username.rgforms.app)
+        → Cloudflare CDN: cache hit → serve HTML instantly (~15ms)
+        → Cloudflare CDN: cache miss → invoke Cloudflare Worker
+
+Cloudflare Worker (multi-tenant — one deployment serves ALL sites):
+  1. Read Host header → look up { userId, siteConfig, scriptUrl } from KV
+  2. Parse path: /blog/my-post → { module: 'blog', slug: 'my-post' }
+  3. Fetch data: GET scriptUrl?action=data&module=blog (Apps Script JSON API)
+     → Apps Script reads Sheet, returns JSON array (CacheService, 5-min TTL)
+  4. Render HTML: inject data into the chosen template component
+  5. Set Cache-Control: s-maxage=300 → Cloudflare caches for 5 min
+  6. Return full SSR HTML with <title>, meta, JSON-LD, GA4 tag
+
+Form submission (stays directly in Google — no rgforms proxy on free tier):
+  Browser → POST scriptUrl (Apps Script doPost)
+          → appends row to Sheet tab → sends email (MailApp) → returns JSON
+
+Cache invalidation (near real-time updates):
+  User edits Sheet → Apps Script onEdit trigger
+  → POST https://workers.rgforms.app/api/purge?siteId=xxx
+  → Cloudflare Worker purges all cached pages for that site
+  → next visitor gets fresh HTML within ~1 second of the Sheet edit`}
+          </CodeBlock>
+        </Card>
+        <Card>
+          <SectionLabel>Why Cloudflare Workers — the key architectural decision</SectionLabel>
           <BulletList items={[
-            'Modules are independent units — each one is a Sheet tab + a rendered page section + an optional form handler',
-            'Templates are just curated starting sets — preset module selections with a visual style, not a cage',
-            'Any module can be added to any template at any time (1 credit each) — the site grows with the business',
-            'Section order is controlled by the nav Sheet tab — drag rows to reorder without re-provisioning',
-            'A module can appear as a full page AND as a section on the home page simultaneously (one tab, two views)',
-            'Google Apps Script compiles all active modules into one deployed script — zero runtime dependencies on rgforms',
+            'One Next.js-like Worker deployment serves every user\'s site — no per-user deployment cost',
+            'Cloudflare\'s edge network (300+ PoPs globally) — pages load in <50ms from cache, worldwide',
+            'Custom domains: Cloudflare handles SSL, HTTPS, certificate renewal automatically per domain',
+            'Workers KV: ultra-fast key-value store for site configs and cached Apps Script responses',
+            'No egress fees — Cloudflare does not charge for outbound bandwidth (unlike AWS/GCP)',
+            'At 50,000 sites: ~$30/mo total hosting cost. This is the entire business\'s web infrastructure.',
+          ]} />
+        </Card>
+        <Card>
+          <SectionLabel>Apps Script role — JSON API only, not a web server</SectionLabel>
+          <CodeBlock>{`// Apps Script doGet — returns data as JSON (not HTML)
+function doGet(e) {
+  const action = e.parameter.action;
+  const module = e.parameter.module || '';
+
+  if (action !== 'data') {
+    return jsonResponse({ error: 'invalid_action' });
+  }
+
+  const rows = getCachedRows(module); // CacheService, 5-min TTL
+  return ContentService
+    .createTextOutput(JSON.stringify(rows))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// Apps Script doPost — form submissions go straight to Sheet
+function doPost(e) {
+  const { module, fields } = JSON.parse(e.postData.contents);
+  const sheet = SpreadsheetApp.getActive()
+    .getSheetByName(module + '_submissions');
+  sheet.appendRow([new Date(), ...Object.values(fields)]);
+  MailApp.sendEmail(NOTIFICATION_EMAIL, 'New ' + module, formatEmail(fields));
+  return jsonResponse({ ok: true });
+}
+
+// onEdit — busts Cloudflare cache when Sheet is edited
+function onEdit(e) {
+  CacheService.getScriptCache().remove(e.range.getSheet().getName());
+  UrlFetchApp.fetch(PURGE_URL + '?siteId=' + SITE_ID, { method: 'post' });
+}`}
+          </CodeBlock>
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
+            Apps Script never serves HTML. It is purely a data layer — read JSON, write rows.
+            The Cloudflare Worker owns the rendering. This separation is what makes the export feature possible.
+          </p>
+        </Card>
+      </div>
+
+      {/* AI provisioning */}
+      <div className="flex flex-col gap-4">
+        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
+          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>AI provisioning — the star feature</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>One sentence about your business. AI designs the whole site. User confirms. 90-second provision.</p>
+        </div>
+        <Card>
+          <SectionLabel>The full flow</SectionLabel>
+          <CodeBlock>{`Step 1 — User types a description (no form to fill):
+  "I run a yoga studio in Brooklyn. Morning classes, private sessions,
+   4 instructors. I want to take class bookings and sell retreat packages."
+
+Step 2 — Claude Haiku processes the prompt (cost: ~$0.008/call):
+  Input:  system prompt + user description   (~800 tokens)
+  Output: structured site spec JSON          (~2,500 tokens)
+  Time:   ~1.5 seconds
+
+Step 3 — rgforms shows a confirmation screen (user can edit before committing):
+  ┌─────────────────────────────────────────────────┐
+  │ Site name:     Brooklyn Yoga Studio              │
+  │ Style:         Warm   Font: Lato   Color: #7c9e8f│
+  │                                                  │
+  │ Sections (8):  hero · services · team · events   │
+  │                gallery · testimonials · faq · loc │
+  │                                                  │
+  │ Forms (3):     booking · contact · newsletter    │
+  │                                                  │
+  │ Seed data:     3 services, 2 team members,       │
+  │                2 FAQ items, 1 testimonial         │
+  │                (edit anything in your Sheet after)│
+  │                                                  │
+  │ Credits used:  4 (3 bundle + 1 extra module)     │
+  │                                                  │
+  │         [Edit]              [Build my site →]    │
+  └─────────────────────────────────────────────────┘
+
+Step 4 — User clicks "Build my site":
+  → Create Google Sheet with all tabs + seed data pre-filled
+  → Compile Apps Script (JSON API + form handlers + onEdit trigger)
+  → Deploy script as web app
+  → Register site in Cloudflare KV: { siteId → scriptUrl, config }
+  → Provision subdomain: username.rgforms.app → live
+
+Total time: ~60–90 seconds. Site is live with real content.`}
+          </CodeBlock>
+        </Card>
+        <Card>
+          <SectionLabel>What the AI generates — the site spec JSON</SectionLabel>
+          <CodeBlock>{`{
+  "siteConfig": {
+    "site_name": "Brooklyn Yoga Studio",
+    "tagline": "Mind. Body. Community.",
+    "style": "warm",
+    "font": "Lato",
+    "primary_color": "#7c9e8f",
+    "meta_description": "Yoga classes in Brooklyn — morning flow, private sessions, and retreat experiences for all levels.",
+    "ga_placeholder": true    // user adds GA4 ID later in _config Sheet
+  },
+  "modules": ["hero","services","team","events","gallery","testimonials","faq","locations"],
+  "formModules": ["booking","contact","newsletter"],
+  "seedData": {
+    "services": [
+      { "name": "Morning Flow", "price": "$22 / class", "featured": "TRUE",
+        "description": "60-minute vinyasa to start your day grounded.", "order": "1" },
+      { "name": "Private Session", "price": "From $120",
+        "description": "One-on-one instruction tailored to your goals.", "order": "2" },
+      { "name": "Weekend Retreat", "price": "$450",
+        "description": "2-day immersive retreat upstate. Meals included.", "order": "3" }
+    ],
+    "team": [
+      { "name": "Sarah Chen", "title": "Founder & Lead Instructor",
+        "bio": "RYT-500 certified, 12 years teaching experience.", "order": "1" },
+      { "name": "Marcus Rivera", "title": "Meditation Teacher",
+        "bio": "Specializes in mindfulness and restorative practice.", "order": "2" }
+    ],
+    "faq": [
+      { "question": "Do I need experience?",
+        "answer": "All levels welcome. Morning Flow suits beginners.", "order": "1" },
+      { "question": "What should I bring?",
+        "answer": "Mat, water bottle, comfortable clothing. Blocks provided.", "order": "2" }
+    ]
+  },
+  "bookingConfig": {
+    "services_list": "Morning Flow|Private Session|Weekend Retreat",
+    "confirmation_message": "Thank you! We'll confirm your booking within 24 hours."
+  }
+}`}
+          </CodeBlock>
+        </Card>
+        <Card>
+          <SectionLabel>AI cost — negligible at any scale</SectionLabel>
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
+            <div className="grid px-4 py-2 text-xs font-semibold uppercase tracking-wider"
+              style={{ gridTemplateColumns: '2fr 1fr 1fr', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>
+              <span>Item</span><span>Rate</span><span>Cost</span>
+            </div>
+            {[
+              { item: 'Claude Haiku input (~800 tokens)', rate: '$0.80 / 1M tokens', cost: '$0.00064' },
+              { item: 'Claude Haiku output (~2,500 tokens)', rate: '$4.00 / 1M tokens', cost: '$0.01000' },
+              { item: 'Total per AI provision', rate: '—', cost: '$0.01064' },
+              { item: '1,000 provisions / month', rate: '$0.01064 each', cost: '$10.64 / mo' },
+              { item: '10,000 provisions / month', rate: '$0.01064 each', cost: '$106 / mo' },
+            ].map(({ item, rate, cost }, i) => (
+              <div key={item} className="grid px-4 py-2.5 text-xs"
+                style={{ gridTemplateColumns: '2fr 1fr 1fr', borderBottom: '1px solid var(--color-border)', background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)' }}>
+                <span style={{ color: 'var(--color-text)' }}>{item}</span>
+                <span style={{ color: 'var(--color-muted)' }}>{rate}</span>
+                <span style={{ color: cost.includes('mo') ? 'oklch(0.72 0.18 145)' : 'var(--color-muted)', fontWeight: cost.includes('mo') ? 700 : 400 }}>{cost}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
+            At 10,000 AI provisions/month the cost is $106 — easily absorbed by credit pack revenue from those same provisions.
+            AI provisioning is included on Launch tier and above; free tier users get a manual module-picker instead.
+          </p>
+        </Card>
+      </div>
+
+      {/* Module library */}
+      <div className="flex flex-col gap-4">
+        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
+          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Module library — the full catalog</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Every module is a Sheet tab + a rendered section + optional form handler. AI picks the right set; users add more at any time.</p>
+        </div>
+        <Card>
+          <SectionLabel>Content modules — read from Sheet, rendered on site</SectionLabel>
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
+            <div className="grid px-4 py-2 text-xs font-semibold uppercase tracking-wider"
+              style={{ gridTemplateColumns: '1fr 2fr', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>
+              <span>Module</span><span>Sheet tab = CMS for</span>
+            </div>
+            {[
+              { m: 'hero',         s: 'Headline, subheadline, CTA button text + link, background image — single row' },
+              { m: 'blog',         s: 'Posts: title, slug, body (Markdown), author, date, tags, og_image. Index + post pages.' },
+              { m: 'services',     s: 'Offerings: name, description, price, icon, featured flag, order' },
+              { m: 'team',         s: 'Staff: name, title, bio, photo_url, linkedin, twitter, order' },
+              { m: 'testimonials', s: 'Reviews: name, company, quote, rating (1–5), photo_url, order' },
+              { m: 'faq',          s: 'Q&A pairs: question, answer, category. Collapsible accordion, grouped.' },
+              { m: 'gallery',      s: 'Portfolio / photos: title, image_url (Drive link), description, tag, link' },
+              { m: 'events',       s: 'Schedule: title, date, time, location, description, ticket_url' },
+              { m: 'menu',         s: 'Food/drink: name, description, price, category, dietary_flags, image_url' },
+              { m: 'products',     s: 'Catalog: name, price, image, description, variants, buy_link (external checkout)' },
+              { m: 'jobs',         s: 'Open roles: title, department, location, type (full/part), description, apply_url' },
+              { m: 'press',        s: 'Media coverage: publication, headline, date, link, logo_url' },
+              { m: 'partners',     s: 'Logos + names: company, logo_url, website, tier (gold/silver/bronze)' },
+              { m: 'stats',        s: 'Key numbers: label, value, suffix — e.g. "Clients served", "500", "+"' },
+              { m: 'timeline',     s: 'History / roadmap: year, title, description. Renders as vertical timeline.' },
+              { m: 'resources',    s: 'Downloads / links: title, type (PDF/video/link), url, description, date' },
+              { m: 'locations',    s: 'Multi-location: name, address, phone, hours, map_embed_url' },
+              { m: 'pricing',      s: 'Plans: name, price, period, features (pipe-delimited), highlight, cta_label' },
+            ].map(({ m, s }, i) => (
+              <div key={m} className="grid px-4 py-2.5 text-xs items-start"
+                style={{ gridTemplateColumns: '1fr 2fr', borderBottom: '1px solid var(--color-border)', background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)' }}>
+                <Mono>{m}</Mono>
+                <span style={{ color: 'var(--color-muted)' }}>{s}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+        <Card>
+          <SectionLabel>Form modules — write to Sheet tab, trigger notification email</SectionLabel>
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
+            <div className="grid px-4 py-2 text-xs font-semibold uppercase tracking-wider"
+              style={{ gridTemplateColumns: '1fr 2fr', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>
+              <span>Module</span><span>Collects → Sheet tab</span>
+            </div>
+            {[
+              { m: 'contact',    s: 'Name, email, message, subject. Universal — on every site.' },
+              { m: 'newsletter', s: 'Email, first name, opt-in timestamp. Subscribers accumulate.' },
+              { m: 'booking',    s: 'Name, email, date, time, service, notes. Appointment request.' },
+              { m: 'quote',      s: 'Name, email, company, project type, budget range, description. RFQ.' },
+              { m: 'apply',      s: 'Name, email, role, resume_url (Drive link), cover letter.' },
+              { m: 'rsvp',       s: 'Name, email, event_id, headcount, dietary notes.' },
+              { m: 'intake',     s: 'Custom fields defined in _config. Any intake form or survey.' },
+            ].map(({ m, s }, i) => (
+              <div key={m} className="grid px-4 py-2.5 text-xs items-start"
+                style={{ gridTemplateColumns: '1fr 2fr', borderBottom: '1px solid var(--color-border)', background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)' }}>
+                <Mono>{m}</Mono>
+                <span style={{ color: 'var(--color-muted)' }}>{s}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* Business type presets */}
+      <div className="flex flex-col gap-4">
+        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
+          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Any business type — AI-generated or manual preset</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>These are the module combinations the AI picks by default. Every combination is fully editable — add or remove modules at any time.</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {[
+            { biz: 'Digital Agency',         mods: 'hero · services · team · testimonials · blog · stats · contact', form: 'contact + quote' },
+            { biz: 'Freelance Portfolio',     mods: 'hero · gallery · services · testimonials · blog · contact', form: 'contact' },
+            { biz: 'Restaurant / Cafe',       mods: 'hero · menu · gallery · events · testimonials · locations', form: 'contact + booking + rsvp' },
+            { biz: 'Law Firm',               mods: 'hero · services · team · testimonials · faq · blog · locations', form: 'contact + intake' },
+            { biz: 'Medical Practice',        mods: 'hero · services · team · faq · testimonials · locations', form: 'contact + booking + intake' },
+            { biz: 'SaaS / App Landing',      mods: 'hero · stats · services · pricing · faq · testimonials · blog', form: 'contact + newsletter' },
+            { biz: 'E-commerce (light)',      mods: 'hero · products · gallery · testimonials · faq · blog', form: 'contact + newsletter' },
+            { biz: 'Non-profit',             mods: 'hero · stats · events · team · partners · press · timeline', form: 'contact + newsletter + rsvp' },
+            { biz: 'Real Estate Agent',       mods: 'hero · gallery · services · testimonials · stats · locations', form: 'contact + booking + quote' },
+            { biz: 'Personal Brand / Speaker',mods: 'hero · blog · events · press · testimonials · resources', form: 'contact + newsletter + booking' },
+            { biz: 'Fitness / Wellness',      mods: 'hero · services · team · events · gallery · testimonials', form: 'contact + booking + newsletter' },
+            { biz: 'Tech Startup',           mods: 'hero · stats · services · team · press · jobs · blog · faq', form: 'contact + newsletter + apply' },
+            { biz: 'Consulting Firm',         mods: 'hero · services · team · blog · partners · stats', form: 'contact + quote' },
+            { biz: 'Event / Conference',      mods: 'hero · events · team (speakers) · partners (sponsors) · faq · gallery', form: 'contact + rsvp + newsletter' },
+            { biz: 'Photography Studio',      mods: 'hero · gallery · services · pricing · testimonials · blog', form: 'contact + booking + quote' },
+            { biz: 'Contractor / Trades',     mods: 'hero · services · gallery · testimonials · stats · locations', form: 'contact + quote + booking' },
+            { biz: 'School / Tutoring',       mods: 'hero · services · team · events · faq · testimonials', form: 'contact + booking + newsletter' },
+            { biz: 'Accounting / Finance',    mods: 'hero · services · team · faq · resources · testimonials · blog', form: 'contact + intake + quote' },
+          ].map(({ biz, mods, form }) => (
+            <div key={biz} className="rounded-lg p-3 flex flex-col gap-1.5"
+              style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+              <p className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>{biz}</p>
+              <p className="text-[10px] font-mono leading-relaxed" style={{ color: 'var(--color-accent)' }}>{mods}</p>
+              <p className="text-[10px]" style={{ color: 'var(--color-subtle)' }}>Forms: {form}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Visual styles */}
+      <div className="flex flex-col gap-4">
+        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
+          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Visual styles — independent of modules</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>The AI picks a style based on your business type. Users swap styles any time — same data, new look, no re-provisioning.</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {[
+            { name: 'Clean',      desc: 'White background, generous whitespace, Inter. Safe, professional, universal.', tag: 'Default' },
+            { name: 'Bold',       desc: 'Large type, high contrast, accent color blocks. Agencies and creative studios.', tag: '' },
+            { name: 'Minimal',    desc: 'Near-monochrome, tight grid. Portfolio, personal brand, architects.', tag: '' },
+            { name: 'Warm',       desc: 'Cream background, serif headings, earthy tones. Restaurants, wellness, artisans.', tag: '' },
+            { name: 'Corporate',  desc: 'Navy/gray palette, formal type, structured grid. Law, finance, consulting.', tag: '' },
+            { name: 'Playful',    desc: 'Rounded cards, bright accents, relaxed layout. Schools, studios, consumer apps.', tag: '' },
+            { name: 'Dark',       desc: 'Dark background, neon accent, code aesthetic. Tech, SaaS, developer tools.', tag: '' },
+            { name: 'Magazine',   desc: 'Multi-column editorial grid, image-forward. Media, blogs, news outlets.', tag: '' },
+            { name: 'Storefront', desc: 'Product-card grid, price badges, CTA-heavy. Catalogs, e-commerce light.', tag: '' },
+          ].map(({ name, desc, tag }) => (
+            <div key={name} className="rounded-lg p-3 flex flex-col gap-1"
+              style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>{name}</p>
+                {tag && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold"
+                  style={{ color: 'oklch(0.65 0.22 285)', background: 'oklch(0.65 0.22 285 / 0.10)', border: '1px solid oklch(0.65 0.22 285 / 0.30)' }}>{tag}</span>}
+              </div>
+              <p className="text-[10px] leading-relaxed" style={{ color: 'var(--color-subtle)' }}>{desc}</p>
+            </div>
+          ))}
+        </div>
+        <Card>
+          <SectionLabel>Style × module independence — how it works technically</SectionLabel>
+          <CodeBlock>{`// A "style" is a CSS variable set + layout config. Modules don't know about style.
+
+// _config Sheet (user can edit color, font, style directly):
+  primary_color | #7c9e8f
+  style         | warm          ← Cloudflare Worker reads this, applies CSS vars
+  font          | Lato
+
+// Cloudflare Worker selects the CSS file at render time:
+  const styles = await KV.get('style:warm:css'); // pre-built CSS string per style
+  const html = renderTemplate(moduleData, { styles, config });
+
+// Changing style = editing _config Sheet → Worker reads new value on next cache miss.
+// No re-provisioning. No script recompile. No credits spent.`}
+          </CodeBlock>
+        </Card>
+      </div>
+
+      {/* Custom domains */}
+      <div className="flex flex-col gap-4">
+        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
+          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Custom domains + DNS — simplified for non-technical users</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Three paths. The easiest is fully automated — no DNS knowledge required.</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Card accent>
+            <SectionLabel>Path 1 — Buy through rgforms (recommended)</SectionLabel>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+              User types a domain name → rgforms checks availability via Namecheap API → user pays in Stripe
+              Checkout → rgforms registers the domain, sets nameservers to Cloudflare, provisions SSL, adds
+              the Cloudflare DNS record. Done. Zero user interaction with DNS.
+            </p>
+            <CodeBlock>{`User flow:
+  1. Type "acmeyoga.com"
+  2. See: "Available — $12.99/yr"
+  3. Click Buy (Stripe Checkout)
+  4. Done — acmeyoga.com is live
+
+rgforms backend:
+  → Namecheap API: register domain
+  → Set nameservers: ns1.cloudflare.com
+  → Cloudflare API: add zone, CNAME record
+  → Cloudflare API: add custom hostname
+  → SSL: auto-provisioned by Cloudflare
+  → KV: map acmeyoga.com → userId`}
+            </CodeBlock>
+            <p className="text-xs" style={{ color: 'var(--color-subtle)' }}>
+              Revenue: $2–4 markup per domain/year. At 2,000 domains: ~$6,000/yr passive.
+            </p>
+          </Card>
+          <Card>
+            <SectionLabel>Path 2 — Bring your own domain (guided)</SectionLabel>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+              User enters their existing domain. rgforms shows step-by-step DNS instructions with
+              copy-paste values and a live propagation checker that turns green when complete.
+            </p>
+            <CodeBlock>{`rgforms dashboard shows:
+
+  Step 1: Log into your registrar
+  Step 2: Add these DNS records:
+
+  Type  Name   Value
+  CNAME www  → sites.rgforms.app
+  A     @    → 104.21.x.x (Cloudflare)
+
+  [Copy CNAME]  [Copy A record]
+
+  Step 3: Waiting for DNS...
+    ○ www.acmeyoga.com — propagating
+    ✓ www.acmeyoga.com — live! (~15 min avg)`}
+            </CodeBlock>
+          </Card>
+          <Card>
+            <SectionLabel>Path 3 — Transfer DNS to rgforms</SectionLabel>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+              Power users change their nameservers to rgforms-managed Cloudflare.
+              Full DNS control from the rgforms dashboard — add subdomains, MX records for email,
+              TXT records for verification, all in one place.
+            </p>
+            <BulletList items={[
+              'Nameservers: ns1.rgforms-dns.app / ns2.rgforms-dns.app',
+              'Dashboard DNS editor: add A, CNAME, MX, TXT records visually',
+              'Automatic SSL for every subdomain (api.yoursite.com, mail.yoursite.com)',
+              'Useful for agencies managing all client DNS from one place',
+            ]} />
+          </Card>
+        </div>
+        <Card>
+          <SectionLabel>SSL — fully automated, zero user involvement</SectionLabel>
+          <BulletList items={[
+            'Cloudflare Universal SSL: automatically provisions TLS cert for every custom hostname added',
+            'Wildcard cert covers *.rgforms.app — all free-tier subdomains are HTTPS with no configuration',
+            'Custom domain SSL: Cloudflare issues cert within minutes of DNS resolution',
+            'Auto-renewal: Cloudflare renews all certs silently — no Let\'s Encrypt expiry emails ever',
+            'HSTS enabled by default: browsers force HTTPS, prevents mixed-content warnings',
           ]} />
         </Card>
       </div>
+
+      {/* Export to Next.js */}
+      <div className="flex flex-col gap-4">
+        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
+          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Export to Next.js — own your code</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>No other website builder does this. Download a full, working Next.js project and deploy it anywhere.</p>
+        </div>
+        <CalloutBox>
+          <Strong>Why this is a major differentiator:</Strong> Squarespace, Wix, and Webflow all hold your site
+          hostage. If you want to leave, you lose your design and have to rebuild. rgforms is the only
+          builder where leaving is a first-class feature — download your code and self-host on Netlify, Vercel,
+          or your own server. Your data is already in Google Sheets. Your site is already yours.
+          This builds massive trust with developers who would otherwise never use a website builder.
+        </CalloutBox>
+        <Card>
+          <SectionLabel>Generated project structure</SectionLabel>
+          <CodeBlock>{`acme-yoga-studio/
+├── app/
+│   ├── layout.tsx              ← GA4, fonts, global CSS
+│   ├── page.tsx                ← home (hero + module sections)
+│   ├── blog/
+│   │   ├── page.tsx            ← blog index
+│   │   └── [slug]/page.tsx     ← blog post (ISR, revalidate: 300)
+│   ├── services/page.tsx
+│   ├── team/page.tsx
+│   ├── events/page.tsx
+│   ├── gallery/page.tsx
+│   ├── contact/page.tsx
+│   └── sitemap.ts              ← auto-generates sitemap.xml from Sheet data
+├── components/
+│   ├── modules/
+│   │   ├── Hero.tsx
+│   │   ├── Services.tsx        ← pre-built, styled for chosen visual style
+│   │   ├── Team.tsx
+│   │   └── ...                 ← only the modules the user provisioned
+│   └── ui/                     ← Button, Card, Nav, Footer primitives
+├── lib/
+│   ├── sheets.ts               ← pre-configured with SCRIPT_URL + SHEET_ID
+│   └── types.ts                ← TypeScript types per module
+├── public/
+│   └── favicon.ico
+├── .env.example                ← SCRIPT_URL, SHEET_ID, GA_ID all pre-filled
+├── next.config.ts
+├── tailwind.config.ts
+└── README.md                   ← 5-step deploy guide for Netlify / Vercel`}
+          </CodeBlock>
+        </Card>
+        <Card>
+          <SectionLabel>lib/sheets.ts — pre-configured, user just deploys</SectionLabel>
+          <CodeBlock>{`// This file is generated with the user's actual SCRIPT_URL baked in.
+// User copies .env.example to .env.local — values are already correct.
+
+const SCRIPT_URL = process.env.SCRIPT_URL!; // pre-filled from provisioning
+
+export async function getRows<T>(module: string): Promise<T[]> {
+  const res = await fetch(
+    \`\${SCRIPT_URL}?action=data&module=\${module}\`,
+    { next: { revalidate: 300 } }  // ISR: re-fetch every 5 minutes
+  );
+  if (!res.ok) return [];
+  return res.json();
+}
+
+// Usage in any page:
+// const services = await getRows<Service>('services');
+// → returns the user's Google Sheet rows as typed objects`}
+          </CodeBlock>
+        </Card>
+        <Card>
+          <SectionLabel>Deploy to Netlify in 5 steps (what README.md says)</SectionLabel>
+          <BulletList items={[
+            '1. Unzip the download. Open terminal: npm install',
+            '2. Copy .env.example → .env.local  (all values already pre-filled)',
+            '3. npm run dev — verify site works locally at localhost:3000',
+            '4. Push to a GitHub repo',
+            '5. Connect repo to Netlify / Vercel — deploy. Your domain from before still works via CNAME.',
+          ]} />
+          <p className="text-xs leading-relaxed mt-1" style={{ color: 'var(--color-subtle)' }}>
+            Export is available on Studio plan and above. It&apos;s a powerful trust signal even for users
+            who never export — knowing they <em>can</em> leave removes the fear of commitment.
+          </p>
+        </Card>
+      </div>
+
+      {/* Sheet as CMS */}
+      <div className="flex flex-col gap-4">
+        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
+          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>The Sheet as CMS</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Every website section is a Sheet tab. Every piece of content is a row. No CMS login ever.</p>
+        </div>
+        <Card>
+          <SectionLabel>Provisioned Sheet structure</SectionLabel>
+          <CodeBlock>{`Tab: _config
+  key               | value
+  site_name         | Brooklyn Yoga Studio
+  tagline           | Mind. Body. Community.
+  primary_color     | #7c9e8f
+  style             | warm          ← change this to swap visual style instantly
+  font              | Lato
+  ga_id             | G-XXXXXXXXXX  ← user adds GA4 ID here
+  meta_description  | Yoga classes in Brooklyn…
+
+Tab: blog       title | slug | body | published | publish_at | date | author | og_image
+Tab: team       name | title | bio | photo_url | linkedin | order | published
+Tab: services   name | description | price | icon | featured | order | published
+Tab: testimonials  name | company | quote | rating | photo_url | order | published
+Tab: faq        question | answer | category | order | published
+Tab: events     title | date | time | location | description | ticket_url | published
+Tab: nav        label | page | order | hidden
+Tab: booking_submissions    ← booking form responses land here
+Tab: contact_submissions    ← contact form responses land here`}
+          </CodeBlock>
+        </Card>
+        <Card>
+          <SectionLabel>Column conventions — universal across all modules</SectionLabel>
+          <BulletList items={[
+            'published: TRUE/FALSE — hides/shows row site-wide. Default TRUE in AI seed data.',
+            'publish_at: ISO datetime — hourly trigger auto-publishes at that time. Free scheduled posts.',
+            'order: integer — sort order of section items. Reorder by editing the number.',
+            'slug: URL-safe string — "my-post" becomes /blog/my-post on the live site.',
+            'meta_description / og_image: per-row SEO overrides. Falls back to _config defaults.',
+            'Any extra column is silently ignored — clients add notes columns without breaking anything.',
+          ]} />
+        </Card>
+      </div>
+
+      {/* SEO */}
+      <div className="flex flex-col gap-4">
+        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
+          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>SEO — complete out of the box</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Because rgforms hosts the site (not Apps Script), we get real HTTP, clean URLs, and proper server-side rendering.</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Card>
+            <SectionLabel>What every site gets automatically</SectionLabel>
+            <BulletList items={[
+              'Clean path-based URLs: /blog/my-post, /services, /team (not ?page= query strings)',
+              '<title> and <meta description> per page, from Sheet row or _config fallback',
+              'Open Graph tags: og:title, og:description, og:image on every page',
+              'JSON-LD structured data per page type (LocalBusiness, BlogPosting, FAQPage, Person)',
+              'sitemap.xml auto-generated from all published pages and blog slugs',
+              'robots.txt configured per site (allow all by default, customizable)',
+              'Google Analytics 4: GA4 tag injected from ga_id in _config Sheet',
+              'Proper HTTP 404 pages — real 404 status codes, not a 200 with error content',
+              'Canonical URLs: prevent duplicate content between www and non-www',
+            ]} />
+          </Card>
+          <Card>
+            <SectionLabel>JSON-LD structured data — auto-built from Sheet rows</SectionLabel>
+            <CodeBlock>{`// Cloudflare Worker injects per-page schema:
+
+// Home → LocalBusiness
+{ "@type": "LocalBusiness",
+  "name": config.site_name,
+  "description": config.meta_description,
+  "url": "https://acmeyoga.com" }
+
+// Blog post → BlogPosting (rich result eligible)
+{ "@type": "BlogPosting",
+  "headline": post.title,
+  "author": { "@type": "Person", "name": post.author },
+  "datePublished": post.date,
+  "image": post.og_image }
+
+// FAQ page → FAQPage (Google shows as accordion in search)
+{ "@type": "FAQPage",
+  "mainEntity": faqs.map(f => ({
+    "@type": "Question", "name": f.question,
+    "acceptedAnswer": { "text": f.answer }
+  })) }
+
+// No configuration needed. Filled automatically from Sheet data.`}
+            </CodeBlock>
+          </Card>
+        </div>
+      </div>
+
+      {/* Infrastructure costs */}
+      <div className="flex flex-col gap-4">
+        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
+          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Infrastructure costs — real numbers</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Cloudflare Workers does not charge for egress. This changes everything about the cost model.</p>
+        </div>
+        <Card>
+          <SectionLabel>Monthly infra cost at scale</SectionLabel>
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
+            <div className="grid px-4 py-2 text-xs font-semibold uppercase tracking-wider"
+              style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>
+              <span>Component</span><span>1,000 sites</span><span>10,000 sites</span><span>100,000 sites</span>
+            </div>
+            {[
+              { c: 'Cloudflare Workers (requests)', a: '$5', b: '$15', d: '$100' },
+              { c: 'Cloudflare KV (configs + cache)', a: '$0', b: '$5', d: '$30' },
+              { c: 'Firestore (user metadata)', a: '$0', b: '$0', d: '$20' },
+              { c: 'Claude Haiku (AI provisions)', a: '$1', b: '$10', d: '$100' },
+              { c: 'Cloudflare egress', a: '$0', b: '$0', d: '$0' },
+              { c: 'Total infra / month', a: '$6', b: '$30', d: '$250' },
+            ].map(({ c, a, b, d }, i) => (
+              <div key={c} className="grid px-4 py-2.5 text-xs"
+                style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr', borderBottom: '1px solid var(--color-border)', background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)' }}>
+                <span style={{ color: c.includes('Total') ? 'var(--color-text)' : 'var(--color-muted)', fontWeight: c.includes('Total') ? 700 : 400 }}>{c}</span>
+                <span style={{ color: c.includes('Total') ? 'oklch(0.72 0.18 145)' : 'var(--color-muted)', fontWeight: c.includes('Total') ? 700 : 400 }}>{a}</span>
+                <span style={{ color: c.includes('Total') ? 'oklch(0.72 0.18 145)' : 'var(--color-muted)', fontWeight: c.includes('Total') ? 700 : 400 }}>{b}</span>
+                <span style={{ color: c.includes('Total') ? 'oklch(0.72 0.18 145)' : 'var(--color-muted)', fontWeight: c.includes('Total') ? 700 : 400 }}>{d}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
+            Cloudflare Workers Paid plan: $5/mo flat + $0.50/million requests beyond 10M. No egress fees ever.
+            At 100,000 sites each averaging 30 visitors/day × 2 pages: 180M requests/month → $90 Workers cost.
+            This entire platform runs for <strong style={{ color: 'var(--color-text)' }}>$250/mo at 100,000 sites.</strong>
+          </p>
+        </Card>
+      </div>
+
+      {/* Pricing tiers */}
+      <div className="flex flex-col gap-4">
+        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
+          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Pricing tiers</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Four tiers. Each one unlocks the reason the previous tier felt limiting.</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          {[
+            {
+              name: 'Free', price: 'Free', highlight: false,
+              features: ['username.rgforms.app', '5 modules max', '1 site', 'All templates', 'Manual module picker', 'rgforms badge in footer', '3 provisioning credits'],
+              gate: 'Custom domain and badge removal require Launch.',
+            },
+            {
+              name: 'Launch', price: '$19', highlight: false,
+              features: ['Custom domain + DNS setup', 'All modules', '1 site', 'AI provisioning', 'No badge', 'Basic analytics', 'Style swap anytime'],
+              gate: 'Multiple sites and code export require Studio.',
+            },
+            {
+              name: 'Studio', price: '$39', highlight: true,
+              features: ['Everything in Launch', '3 sites', 'Next.js code export', 'Full analytics + referrers', 'Webhooks on form submit', 'Priority CDN routing', 'Client access to Sheet CMS'],
+              gate: 'Unlimited sites and white-label require Agency.',
+            },
+            {
+              name: 'Agency', price: '$79', highlight: false,
+              features: ['Everything in Studio', 'Unlimited sites', 'White-label badge', '5 team seats (+$8/seat)', 'Client dashboard login', 'API access', 'Priority support'],
+              gate: 'Enterprise / BAA: future roadmap.',
+            },
+          ].map(({ name, price, highlight, features, gate }) => (
+            <div key={name} className="rounded-xl border p-4 flex flex-col gap-3"
+              style={{ background: highlight ? 'oklch(0.65 0.22 285 / 0.06)' : 'var(--color-surface)', borderColor: highlight ? 'oklch(0.65 0.22 285 / 0.35)' : 'var(--color-border)' }}>
+              <div>
+                <p className="text-sm font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>{name}</p>
+                <div className="flex items-baseline gap-1 mt-1">
+                  <span className="text-2xl font-extrabold" style={{ color: highlight ? 'var(--color-accent)' : 'var(--color-text)', fontFamily: 'var(--font-display)' }}>{price}</span>
+                  {price !== 'Free' && <span className="text-xs" style={{ color: 'var(--color-muted)' }}>/mo</span>}
+                </div>
+              </div>
+              <ul className="flex flex-col gap-1.5">
+                {features.map(f => (
+                  <li key={f} className="flex items-start gap-2 text-xs" style={{ color: 'var(--color-muted)' }}>
+                    <span className="shrink-0 mt-0.5 text-xs" style={{ color: 'oklch(0.72 0.18 145)' }}>✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-[10px] leading-relaxed pt-2" style={{ borderTop: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>{gate}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Unit economics */}
+      <div className="flex flex-col gap-4">
+        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
+          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Unit economics + revenue projections</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Real cost per user. Real margin. Realistic growth trajectory.</p>
+        </div>
+        <Card>
+          <SectionLabel>Cost per user per month (variable cost only)</SectionLabel>
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
+            <div className="grid px-4 py-2 text-xs font-semibold uppercase tracking-wider"
+              style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>
+              <span>Cost item</span><span>Free user</span><span>Launch ($19)</span><span>Agency ($79)</span>
+            </div>
+            {[
+              { item: 'Hosting (Cloudflare Workers)', free: '~$0.0003', launch: '~$0.003', agency: '~$0.03' },
+              { item: 'AI provisioning (amortized)', free: '$0', launch: '$0.01', agency: '$0.05' },
+              { item: 'Firestore metadata', free: '~$0.001', launch: '~$0.001', agency: '~$0.01' },
+              { item: 'Stripe fees (on sub revenue)', free: '$0', launch: '$0.85', agency: '$2.59' },
+              { item: 'Total variable cost / user', free: '< $0.01', launch: '~$0.86', agency: '~$2.69' },
+              { item: 'Revenue', free: '$0 (credit upsell)', launch: '$19', agency: '$79' },
+              { item: 'Gross margin', free: 'n/a', launch: '~96%', agency: '~97%' },
+            ].map(({ item, free, launch, agency }, i) => (
+              <div key={item} className="grid px-4 py-2.5 text-xs"
+                style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr', borderBottom: '1px solid var(--color-border)', background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)' }}>
+                <span style={{ color: item.includes('margin') || item.includes('Revenue') ? 'var(--color-text)' : 'var(--color-muted)', fontWeight: item.includes('margin') || item.includes('Total') ? 700 : 400 }}>{item}</span>
+                <span style={{ color: 'var(--color-muted)' }}>{free}</span>
+                <span style={{ color: item.includes('margin') ? 'oklch(0.72 0.18 145)' : 'var(--color-muted)', fontWeight: item.includes('margin') ? 700 : 400 }}>{launch}</span>
+                <span style={{ color: item.includes('margin') ? 'oklch(0.72 0.18 145)' : 'var(--color-muted)', fontWeight: item.includes('margin') ? 700 : 400 }}>{agency}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+        <Card>
+          <SectionLabel>Revenue projections — conservative growth model</SectionLabel>
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
+            <div className="grid px-4 py-2 text-xs font-semibold uppercase tracking-wider"
+              style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>
+              <span>Quarter</span><span>Free</span><span>Launch</span><span>Studio</span><span>Agency</span>
+              <span style={{ color: 'oklch(0.72 0.18 145)' }}>MRR</span>
+            </div>
+            {[
+              { q: 'Q1 (launch)', f: '200', la: '30', s: '10', ag: '3', mrr: '$1,107' },
+              { q: 'Q2', f: '800', la: '100', s: '35', ag: '12', mrr: '$4,303' },
+              { q: 'Q3', f: '3,000', la: '350', s: '120', ag: '40', mrr: '$15,910' },
+              { q: 'Q4', f: '8,000', la: '900', s: '300', ag: '100', mrr: '$40,800' },
+              { q: 'Y2 Q2', f: '25,000', la: '2,500', s: '800', ag: '250', mrr: '$110,750' },
+            ].map(({ q, f, la, s, ag, mrr }, i) => (
+              <div key={q} className="grid px-4 py-2.5 text-xs"
+                style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr', borderBottom: '1px solid var(--color-border)', background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)', color: 'var(--color-muted)' }}>
+                <span style={{ color: 'var(--color-text)' }}>{q}</span>
+                <span>{f}</span><span>{la}</span><span>{s}</span><span>{ag}</span>
+                <span className="font-bold" style={{ color: 'oklch(0.72 0.18 145)', fontFamily: 'var(--font-display)' }}>{mrr}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
+            MRR = (Launch × $19) + (Studio × $39) + (Agency × $79) + free-tier credit pack revenue (20% of free users buy ~$12 avg).
+            Infra cost at Y2 Q2 (25,000 sites): ~$80/mo. Net margin on subscription revenue: ~97%.
+            At $110K MRR, the entire product runs for $80/mo in infra.
+          </p>
+        </Card>
+        <Card>
+          <SectionLabel>Additional revenue streams — compounding over time</SectionLabel>
+          <BulletList items={[
+            'Domain sales: $2–4 markup per .com/yr. At 5,000 domains: ~$15,000/yr recurring.',
+            'Badge backlinks: every free site has "Powered by rgforms" → SEO + brand impressions → compounding organic growth.',
+            'Agency resale: agencies charge clients $50–150/mo for a site rgforms hosts for $0.03. High-margin resale channel.',
+            'Credit packs: free users buy provisions ($5–40). 20% conversion assumed in projections above.',
+            'White-label add-on: $10/mo extra for custom badge text ("Powered by YourAgency"). Low effort, pure margin.',
+            'AI re-provision: user asks AI to redesign their site → 2 credits + $0.01 AI cost → same revenue as new site.',
+          ]} />
+        </Card>
+      </div>
+
+      {/* Build phases */}
+      <div className="flex flex-col gap-4">
+        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
+          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>What to build — four phases</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Phase 1 is a launchable product. Each phase adds the feature that unlocks the next revenue tier.</p>
+        </div>
+        <PhaseCard
+          number={1}
+          title="MVP — hosted sites with manual module picker"
+          timeline="8–10 weeks"
+          cost="~$5/mo infra (Cloudflare Workers Paid)"
+          outcome="A fully hosted website builder at username.rgforms.app. Users pick modules, pick a style, provision a real working site. No AI yet, no custom domain yet — but a real product."
+          steps={[
+            'Cloudflare Worker: multi-tenant routing (KV hostname → userId → site config)',
+            'Apps Script template: doGet JSON API + doPost form handler + onEdit cache purge trigger',
+            'Provisioning API: create Sheet (with all selected module tabs) + compile + deploy Script + register in KV',
+            '3 visual styles: Clean, Bold, Warm. 5 core modules: hero, services, testimonials, contact, blog.',
+            'rgforms dashboard: site list, module toggles, style picker, "Open Sheet" link',
+            'Cache purge endpoint: POST /api/purge?siteId= — called by onEdit trigger, clears Cloudflare cache',
+            'Subdomain provisioning: username.rgforms.app → Cloudflare custom hostname + SSL',
+            'rgforms badge injected in footer of every free site',
+          ]}
+        />
+        <PhaseCard
+          number={2}
+          title="AI provisioning + custom domains"
+          timeline="4–6 weeks"
+          cost="~$10/mo added (Claude API)"
+          outcome="Non-technical users can describe their business and get a fully provisioned site in 90 seconds. Custom domains unlock the first paid tier."
+          steps={[
+            'AI provisioning: Claude Haiku API call with user description → site spec JSON → confirmation UI → provision',
+            'Seed data injection: AI-generated rows written into each Sheet tab during provisioning',
+            'Confirmation screen: show module list, style preview, seed data summary, credit cost — editable before committing',
+            'Custom domain flow: Path 2 (bring your own) — CNAME instructions + DNS propagation polling + auto SSL',
+            'Domain purchase: Path 1 — Namecheap API integration, Stripe Checkout for domain registration',
+            'All 9 visual styles. All 18 content + 7 form modules.',
+            'Launch tier billing: Stripe subscriptions, plan enforcement in Worker middleware',
+          ]}
+        />
+        <PhaseCard
+          number={3}
+          title="Next.js export + full SEO suite"
+          timeline="4–5 weeks"
+          cost="~$0 added infra"
+          outcome="Studio tier unlocked. Developers adopt the platform. Export feature becomes the most-shared feature in the product."
+          steps={[
+            'Next.js project generator: build zip from template with pre-configured lib/sheets.ts + user\'s module components',
+            'Sitemap.xml: Cloudflare Worker serves /sitemap.xml from Sheet data (blog slugs + all pages)',
+            'robots.txt: served per-site, configurable from _config Sheet',
+            'JSON-LD structured data: per page type, auto-built from Sheet rows in Worker renderer',
+            'Proper HTTP 404: Worker returns 404 status for unknown slugs',
+            'RSS feed: /feed.xml from blog module rows',
+            'Studio tier billing + 3-site limit enforcement',
+          ]}
+        />
+        <PhaseCard
+          number={4}
+          title="Agency dashboard + white-label"
+          timeline="6–8 weeks"
+          cost="~$20/mo added (Firestore for multi-seat)"
+          outcome="Agencies adopt rgforms as their white-label website platform. Each agency becomes a distribution channel."
+          steps={[
+            'Multi-site dashboard: all sites in one view, client name, last edit time, live status, analytics ping count',
+            'Client access: invite client by email → they get read/write access to their site\'s Sheet + view-only dashboard',
+            'White-label badge: "Powered by [Agency Name]" instead of "Powered by rgforms" — $10/mo add-on',
+            'Team seats: invite team members with role-based access (Admin / Editor / Viewer)',
+            'Site templates: save a configured site as a template → provision new client sites from it in 1 click',
+            'Agency billing: manage client subscriptions from the agency dashboard, collect markup',
+            'DNS management dashboard: Path 3 — full DNS editor for clients with transferred nameservers',
+          ]}
+        />
+      </div>
+
+    </div>
+  );
+}
 
       {/* Architecture */}
       <div className="flex flex-col gap-4">
@@ -1404,47 +2256,12 @@ function serveSitemap() {
         />
       </div>
 
-      {/* Revenue projections */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Revenue projections — sites tier</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Credit packs + badge-driven new users. Before any gateway upgrades are counted.</p>
-        </div>
-        <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
-          <div className="grid px-5 py-2.5 text-xs font-semibold uppercase tracking-wider"
-            style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>
-            <span>Sites live</span><span>Credit buyers (30%)</span><span>Avg pack</span><span>Badge signups/mo</span>
-            <span style={{ color: 'oklch(0.72 0.18 145)' }}>Monthly Rev</span>
-          </div>
-          {[
-            { s: '100', b: '30', a: '$15', bg: '50', r: '$450' },
-            { s: '1,000', b: '300', a: '$18', bg: '500', r: '$5,400' },
-            { s: '5,000', b: '1,500', a: '$20', bg: '2,500', r: '$30,000' },
-          ].map(({ s, b, a, bg, r }, i) => (
-            <div key={s} className="grid px-5 py-3 text-sm"
-              style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', borderBottom: '1px solid var(--color-border)', background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)', color: 'var(--color-muted)' }}>
-              <span>{s}</span><span>{b}</span><span>{a}</span><span>{bg}</span>
-              <span className="font-bold" style={{ color: 'oklch(0.72 0.18 145)', fontFamily: 'var(--font-display)' }}>{r}</span>
-            </div>
-          ))}
-        </div>
-        <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-          Site builders buy larger credit packs than form-only users (avg $18–20 vs $7) because a full
-          site costs 3 credits plus individual module additions. Badge-driven signups compound over time —
-          each new user may build another site, driving more impressions. Infra cost at 5,000 sites: $0/mo.
-        </p>
-      </div>
-
-    </div>
-  );
-}
-
 // ─── Tabs shell ───────────────────────────────────────────────────────────────
 
 const TABS = [
   { id: 'starter', label: 'Starter Plan', sublabel: 'Free · No gateway' },
   { id: 'gateway', label: 'Gateway Plans', sublabel: 'Builder · Pro · Business' },
-  { id: 'sites', label: 'Sites Plan', sublabel: 'Google-native · $0 infra' },
+  { id: 'sites', label: 'Sites Plan', sublabel: 'AI-powered · Custom domains · Export' },
 ] as const;
 
 type TabId = typeof TABS[number]['id'];
