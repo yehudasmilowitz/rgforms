@@ -2,1566 +2,1442 @@
 
 import { useState } from 'react';
 
-// ─── Shared primitives ────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Plan A — rgforms Gateway
+// Visual identity: Steel blue, technical, developer-documentation feel.
+// Dense information, monospace labels, left-bordered section headers.
+// ─────────────────────────────────────────────────────────────────────────────
 
-function Mono({ children }: { children: React.ReactNode }) {
-  return (
-    <code className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>
-      {children}
-    </code>
-  );
-}
-function Strong({ children }: { children: React.ReactNode }) {
-  return <strong style={{ color: 'var(--color-text)' }}>{children}</strong>;
-}
-function Accent({ children }: { children: React.ReactNode }) {
-  return <span style={{ color: 'var(--color-accent)' }}>{children}</span>;
-}
-function CalloutBox({ children, accent = false }: { children: React.ReactNode; accent?: boolean }) {
-  return (
-    <div
-      className="rounded-xl border p-5 text-sm leading-relaxed"
-      style={{
-        background: accent ? 'oklch(0.65 0.22 285 / 0.06)' : 'var(--color-surface)',
-        borderColor: accent ? 'oklch(0.65 0.22 285 / 0.25)' : 'var(--color-border)',
-        color: 'var(--color-muted)',
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>{children}</p>
-  );
-}
-function Card({ children, accent = false }: { children: React.ReactNode; accent?: boolean }) {
-  return (
-    <div
-      className="rounded-xl border p-5 flex flex-col gap-3"
-      style={{
-        background: accent ? 'oklch(0.65 0.22 285 / 0.04)' : 'var(--color-surface)',
-        borderColor: accent ? 'oklch(0.65 0.22 285 / 0.25)' : 'var(--color-border)',
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-function CodeBlock({ children }: { children: string }) {
-  return (
-    <div
-      className="rounded-lg p-3 text-xs font-mono leading-loose overflow-x-auto whitespace-pre"
-      style={{ background: 'var(--color-surface-2)', color: 'var(--color-muted)' }}
-    >
-      {children}
-    </div>
-  );
-}
-function BulletList({ items, color }: { items: string[]; color?: string }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      {items.map((item) => (
-        <div key={item} className="flex items-start gap-2 text-sm" style={{ color: 'var(--color-muted)' }}>
-          <span className="shrink-0 mt-0.5 text-xs" style={{ color: color ?? 'var(--color-accent)' }}>→</span>
-          {item}
-        </div>
-      ))}
-    </div>
-  );
-}
+function PlanATab() {
+  const blue = 'oklch(0.60 0.20 240)';
+  const blueAlpha = (a: number) => `oklch(0.60 0.20 240 / ${a})`;
+  const green = 'oklch(0.72 0.18 145)';
+  const warn = 'oklch(0.72 0.18 35)';
 
-// ─── Tier card (gateway tab) ──────────────────────────────────────────────────
-
-function TierCard({ name, price, period = '/mo', highlight = false, tag, features, target, upgradeHook }: {
-  name: string; price: string; period?: string; highlight?: boolean; tag?: string;
-  features: string[]; target: string; upgradeHook: string;
-}) {
-  return (
-    <div
-      className="rounded-xl border p-5 flex flex-col gap-4"
-      style={{
-        background: highlight ? 'oklch(0.65 0.22 285 / 0.06)' : 'var(--color-surface)',
-        borderColor: highlight ? 'oklch(0.65 0.22 285 / 0.35)' : 'var(--color-border)',
-      }}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>{name}</p>
-            {tag && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide"
-                style={{ color: 'oklch(0.65 0.22 285)', background: 'oklch(0.65 0.22 285 / 0.10)', border: '1px solid oklch(0.65 0.22 285 / 0.30)' }}>
-                {tag}
-              </span>
-            )}
-          </div>
-          <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-extrabold" style={{ color: highlight ? 'var(--color-accent)' : 'var(--color-text)', fontFamily: 'var(--font-display)' }}>
-              {price}
-            </span>
-            {price !== 'Free' && <span className="text-xs" style={{ color: 'var(--color-muted)' }}>{period}</span>}
-          </div>
-        </div>
+  function ASection({ title, sub }: { title: string; sub?: string }) {
+    return (
+      <div className="flex flex-col gap-0.5 pb-3 mb-1"
+        style={{ borderBottom: `2px solid ${blueAlpha(0.25)}` }}>
+        <p className="text-xs font-mono uppercase tracking-widest font-bold"
+          style={{ color: blue }}>
+          {title}
+        </p>
+        {sub && <p className="text-xs" style={{ color: 'var(--color-subtle)' }}>{sub}</p>}
       </div>
-      <ul className="flex flex-col gap-1.5">
-        {features.map((f) => (
-          <li key={f} className="flex items-start gap-2 text-sm" style={{ color: 'var(--color-muted)' }}>
-            <span className="shrink-0 mt-0.5 text-xs" style={{ color: 'oklch(0.72 0.18 145)' }}>✓</span>
-            {f}
-          </li>
-        ))}
-      </ul>
-      <div className="flex flex-col gap-1 pt-1" style={{ borderTop: '1px solid var(--color-border)' }}>
-        <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--color-subtle)' }}>Target</p>
-        <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{target}</p>
-      </div>
-      <div className="rounded-lg p-3 text-xs leading-relaxed"
-        style={{ background: 'var(--color-surface-2)', borderLeft: '2px solid var(--color-accent)', color: 'var(--color-muted)' }}>
-        <span style={{ color: 'var(--color-accent)' }}>Upgrade hook: </span>{upgradeHook}
-      </div>
-    </div>
-  );
-}
-
-function PhaseCard({ number, title, timeline, cost, outcome, steps }: {
-  number: number; title: string; timeline: string; cost: string; outcome: string; steps: string[];
-}) {
-  return (
-    <div className="rounded-xl border p-5 flex flex-col gap-4" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
-      <div className="flex items-start gap-4">
-        <div className="flex items-center justify-center w-9 h-9 rounded-full text-sm font-bold shrink-0"
-          style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-accent)', fontFamily: 'var(--font-display)' }}>
-          {number}
-        </div>
-        <div className="flex flex-col gap-0.5 flex-1">
-          <p className="text-sm font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>{title}</p>
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-xs" style={{ color: 'var(--color-muted)' }}>{timeline}</span>
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold"
-              style={{ color: 'oklch(0.72 0.18 145)', background: 'oklch(0.72 0.18 145 / 0.10)', border: '1px solid oklch(0.72 0.18 145 / 0.30)' }}>
-              {cost}
-            </span>
-          </div>
-        </div>
-      </div>
-      <ul className="flex flex-col gap-1.5 ml-13">
-        {steps.map((s) => (
-          <li key={s} className="flex items-start gap-2 text-sm" style={{ color: 'var(--color-muted)' }}>
-            <span className="shrink-0 mt-0.5 text-xs" style={{ color: 'var(--color-accent)' }}>→</span>
-            {s}
-          </li>
-        ))}
-      </ul>
-      <div className="rounded-lg p-3 text-xs leading-relaxed font-semibold"
-        style={{ background: 'oklch(0.65 0.22 285 / 0.06)', borderLeft: '2px solid var(--color-accent)', color: 'var(--color-text)' }}>
-        Outcome: <span style={{ color: 'var(--color-muted)', fontWeight: 400 }}>{outcome}</span>
-      </div>
-    </div>
-  );
-}
-
-// ─── Starter tab ─────────────────────────────────────────────────────────────
-
-function StarterTab() {
-  return (
-    <div className="flex flex-col gap-8">
-
-      {/* Architecture */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Architecture</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>How data flows — and where rgforms is not involved</p>
-        </div>
-        <Card>
-          <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            On the free tier, rgforms provisions the infrastructure once and then steps out of the
-            way entirely. Every form submission flows directly from the user&apos;s site to Google&apos;s
-            Apps Script server to their Google Sheet. rgforms is never in that path at runtime.
-          </p>
-          <CodeBlock>{`Provisioning (one-time, while user is logged in):
-  rgforms → Google APIs (user token) → creates Sheet + Script + deploys code → done
-
-Runtime (every submission, rgforms not involved):
-  Browser → POST script.google.com/macros/…/exec
-          → Google Apps Script (runs as user, in their account)
-          → appends row to their Sheet
-          → sends notification email (if configured)`}
-          </CodeBlock>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-            The user&apos;s OAuth token is used only during provisioning and never stored.
-            After setup completes, rgforms has zero access to submissions or sheet contents.
-          </p>
-        </Card>
-
-        <Card>
-          <SectionLabel>Google Apps Script quotas — know before you promise</SectionLabel>
-          <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            The free tier is bound by Google&apos;s platform limits. These are per-account limits,
-            not per-module. They apply to the script owner&apos;s Google account.
-          </p>
-          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
-            <div className="grid px-4 py-2 text-xs font-semibold uppercase tracking-wider"
-              style={{ gridTemplateColumns: '1.5fr 1fr 1fr', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>
-              <span>Quota</span>
-              <span>Free Gmail</span>
-              <span>Workspace</span>
-            </div>
-            {[
-              { quota: 'Email sends (MailApp)', free: '100 / day', workspace: '1,500 / day' },
-              { quota: 'URL Fetch calls (ping)', free: '20,000 / day', workspace: '20,000 / day' },
-              { quota: 'Script execution time', free: '6 min / run', workspace: '6 min / run' },
-              { quota: 'Concurrent executions', free: '30', workspace: '30' },
-              { quota: 'Spreadsheet writes', free: 'Rate-limited', workspace: 'Rate-limited' },
-              { quota: 'Triggers', free: '20 total', workspace: '20 total' },
-            ].map(({ quota, free, workspace }, i) => (
-              <div key={quota} className="grid px-4 py-2.5 text-xs gap-4"
-                style={{ gridTemplateColumns: '1.5fr 1fr 1fr', borderBottom: '1px solid var(--color-border)', background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)' }}>
-                <span style={{ color: 'var(--color-text)' }}>{quota}</span>
-                <span style={{ color: 'var(--color-muted)' }}>{free}</span>
-                <span style={{ color: 'oklch(0.72 0.18 145)' }}>{workspace}</span>
-              </div>
-            ))}
-          </div>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-            <strong style={{ color: 'var(--color-text)' }}>Practical ceiling:</strong> free Gmail users can handle ~100 form
-            submissions/day that trigger email notifications. Workspace users can handle ~1,500/day.
-            For higher volumes, email notifications should be disabled or users should upgrade to
-            the gateway tier (where we send notifications server-side, bypassing Apps Script email quotas entirely).
-          </p>
-        </Card>
-      </div>
-
-      {/* What to build */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>What to build — free tier only</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Minimal infra. No gateway, no stored tokens, no proxy layer.</p>
-        </div>
-        <Card>
-          <SectionLabel>Required infrastructure</SectionLabel>
-          <CodeBlock>{`next.config.ts
-  Remove output: 'export' → enables API routes
-
-Firestore collections:
-  users/{userId}
-    email, plan: 'free', createdAt, lastActiveAt
-
-  users/{userId}/credits
-    balance: number          ← provisioning credits remaining
-
-  modules/{moduleId}
-    userId, projectId, type, name
-    sheetId, scriptId, deploymentUrl
-    createdAt
-
-  modules/{moduleId}/stats/{YYYY-MM}
-    count: number            ← incremented by ping endpoint
-
-API routes needed:
-  POST /api/auth/callback    ← Google OAuth exchange
-  POST /api/provision        ← deduct credit, run provisioning
-  POST /api/ping             ← submission counter (called by script)
-  POST /api/stripe/webhook   ← credit pack purchases
-  GET  /api/credits          ← balance check for dashboard`}
-          </CodeBlock>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-            Total infra cost at this stage: Firebase free tier (Spark plan) covers all Firestore
-            reads/writes until meaningful scale. Only cost is hosting (~$0 on Firebase App Hosting
-            free tier) and Stripe fees on credit packs.
-          </p>
-        </Card>
-      </div>
-
-      {/* Provisioning credits */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Provisioning credits</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>The primary revenue mechanism on the free tier. Monetizes the one moment we control.</p>
-        </div>
-
-        <Card>
-          <SectionLabel>Pack pricing</SectionLabel>
-          <CodeBlock>{`Free tier includes: 3 provisions (seeded on signup)
-
-Credit packs (one-time Stripe Checkout):
-  $5  → 10 provisions   (~$0.50 each)
-  $15 → 40 provisions   (~$0.37 each)
-  $40 → 150 provisions  (~$0.27 each)
-
-Stripe fee math (why packs, not per-provision):
-  $0.50 single charge  → ~$0.33 fees → $0.17 net  (34% kept)
-  $5 pack, 10 uses     → ~$0.45 fees → $4.55 net  (91% kept)`}
-          </CodeBlock>
-        </Card>
-
-        <Card>
-          <SectionLabel>Provisioning flow — credit check</SectionLabel>
-          <CodeBlock>{`// POST /api/provision
-1. Verify session (httpOnly cookie → Firestore session doc)
-2. Read users/{userId}/credits.balance
-3. if balance < 1:
-     return 402 { error: 'no_credits', checkoutUrl: '...' }
-     → client shows "Buy credits" modal → Stripe Checkout
-4. if balance >= 1:
-     begin provisioning (create Sheet + Script + deploy)
-     on success: decrement balance by 1 in Firestore transaction
-     on failure: do NOT decrement (provision failed, credit preserved)
-5. Write modules/{moduleId} doc with result metadata`}
-          </CodeBlock>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-            The decrement happens <strong style={{ color: 'var(--color-text)' }}>after</strong> successful
-            provisioning — a failed provision doesn&apos;t cost a credit. Use a Firestore transaction
-            to make the decrement atomic.
-          </p>
-        </Card>
-
-        <Card>
-          <SectionLabel>Stripe webhook — crediting the purchase</SectionLabel>
-          <CodeBlock>{`// POST /api/stripe/webhook
-// Event: checkout.session.completed
-
-const session = event.data.object;
-const userId = session.metadata.userId;
-const credits = session.metadata.credits; // '10', '40', or '150'
-
-await db
-  .doc(\`users/\${userId}/credits\`)
-  .update({ balance: FieldValue.increment(Number(credits)) });`}
-          </CodeBlock>
-        </Card>
-      </div>
-
-      {/* Analytics ping */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Analytics ping</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Submission counting without payload access. Dashboard engagement + upgrade pressure.</p>
-        </div>
-
-        <Card>
-          <SectionLabel>Deployed inside every free-tier script</SectionLabel>
-          <CodeBlock>{`const MODULE_ID = '__MODULE_ID__'; // replaced at provision time
-const PING_URL  = 'https://rgforms.app/api/ping';
-
-function doPost(e) {
-  // Fire-and-forget — does not block form handler, never throws
-  try {
-    UrlFetchApp.fetch(PING_URL, {
-      method: 'post',
-      contentType: 'application/json',
-      payload: JSON.stringify({ moduleId: MODULE_ID }),
-      muteHttpExceptions: true,
-    });
-  } catch (_) {}
-
-  // ... rest of handler (write to sheet, send email, etc.)
-}`}
-          </CodeBlock>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-            The ping uses one of the 20,000/day UrlFetch quota — well within limits for any
-            realistic free-tier volume. The <Mono>try/catch</Mono> ensures a ping failure never
-            breaks a form submission. The code is visible in the script editor — fully transparent.
-          </p>
-        </Card>
-
-        <Card>
-          <SectionLabel>Server-side ping handler</SectionLabel>
-          <CodeBlock>{`// POST /api/ping
-export async function POST(req: Request) {
-  const { moduleId } = await req.json();
-  if (!moduleId || typeof moduleId !== 'string') {
-    return new Response(null, { status: 400 });
+    );
   }
 
-  const month = new Date().toISOString().slice(0, 7); // 'YYYY-MM'
-  await db
-    .doc(\`modules/\${moduleId}/stats/\${month}\`)
-    .set({ count: FieldValue.increment(1) }, { merge: true });
-
-  return new Response(null, { status: 204 });
-}`}
-          </CodeBlock>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-            No auth required on this endpoint — <Mono>moduleId</Mono> is a non-guessable UUID
-            written into the script at provision time. If someone spams it, their count goes up,
-            which only hurts their own upgrade decision. No sensitive data is involved.
-          </p>
-        </Card>
-
-        <Card>
-          <SectionLabel>Dashboard display + upgrade hook</SectionLabel>
-          <BulletList items={[
-            'Dashboard reads modules/{moduleId}/stats/{YYYY-MM} for each of the user\'s modules',
-            'Shows: "Contact form — 312 submissions this month", "Blog API — 47 this month"',
-            'Upgrade CTA: "See who submitted and what they said → Builder plan"',
-            'Monthly count resets automatically (new document per month, old ones kept for history)',
-            'Free tier sees current month only. Paid tiers see full history.',
-          ]} />
-        </Card>
+  function ACard({ children, highlight }: { children: React.ReactNode; highlight?: boolean }) {
+    return (
+      <div className="rounded-lg p-4 flex flex-col gap-3 text-sm"
+        style={{
+          background: highlight ? blueAlpha(0.05) : 'var(--color-surface)',
+          border: `1px solid ${highlight ? blueAlpha(0.35) : 'var(--color-border)'}`,
+        }}>
+        {children}
       </div>
+    );
+  }
 
-      {/* HIPAA */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>HIPAA advantage</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>The free tier&apos;s data architecture is a compliance feature, not a limitation.</p>
-        </div>
-        <CalloutBox accent>
-          <Strong>The pitch:</Strong> &ldquo;The free tier is architecturally incapable of accessing
-          your PHI. Submissions go directly from your site to your Google Sheet — rgforms is never
-          in that path. If your Google Workspace account has a signed BAA with Google (which covers
-          Sheets and Apps Script), you are HIPAA-compatible with zero additional compliance overhead
-          on our side. We don&apos;t need to sign a BAA with you because we never touch your data.&rdquo;
-        </CalloutBox>
-        <Card>
-          <BulletList items={[
-            'Google Workspace BAA covers: Gmail, Drive, Docs, Sheets, Apps Script — the full free-tier data path',
-            'rgforms never stores OAuth tokens beyond the active session (discarded after provisioning)',
-            'Only data we hold: module metadata (IDs, names, sheet URLs) and monthly submission counts — no PHI',
-            'Ping endpoint receives: moduleId + timestamp. No form fields, no patient data, ever.',
-            'BAA support for gateway tiers is planned for a future Enterprise tier — not available yet.',
-          ]} />
-        </Card>
+  function ACallout({ children, type = 'info' }: { children: React.ReactNode; type?: 'info' | 'warn' }) {
+    const c = type === 'warn' ? `oklch(0.72 0.18 35 / 0.08)` : blueAlpha(0.06);
+    const b = type === 'warn' ? `2px solid ${warn}` : `2px solid ${blue}`;
+    return (
+      <div className="rounded-r-lg px-4 py-3 text-sm leading-relaxed"
+        style={{ background: c, borderLeft: b, color: 'var(--color-muted)' }}>
+        {children}
       </div>
+    );
+  }
 
-      {/* Upgrade hooks */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Upgrade triggers</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Specific moments that push free users toward Builder.</p>
-        </div>
-        <div className="flex flex-col gap-2">
-          {[
-            { trigger: 'Credit pack friction', detail: 'User buys their second credit pack ($15). At that point they\'ve spent $15 on provisions alone — the Builder plan at $9/mo is now obviously better value. Show the comparison at checkout.' },
-            { trigger: 'Submission count curiosity', detail: '"Your contact form got 847 submissions this month." The count is visible but the contents aren\'t. The desire to see who submitted is the upgrade. Surface this prominently in the dashboard.' },
-            { trigger: 'Client-facing URL', detail: 'Developer builds a client site, client sees the script.google.com URL. Client asks for a clean URL. Developer upgrades to Builder ($9). This is the most common real-world trigger.' },
-            { trigger: 'Manual authorization', detail: 'The "visit this URL once in your browser" step confuses non-technical users. Documented as a free-tier limitation. Gateway tier removes it completely — no browser visit needed.' },
-            { trigger: 'Badge removal', detail: '"Powered by rgforms" on a client\'s form confirmation page. Any agency building for a client will upgrade to remove it.' },
-            { trigger: 'Email quota hit', detail: 'Free Gmail users hit 100 email notifications/day. Workspace users hit 1,500/day. Gateway tier sends emails server-side, bypassing Apps Script quotas entirely.' },
-          ].map(({ trigger, detail }) => (
-            <div key={trigger} className="flex flex-col gap-1 rounded-lg p-3" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
-              <p className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>{trigger}</p>
-              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{detail}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+  function ACode({ children }: { children: string }) {
+    return (
+      <pre className="rounded p-3 text-xs font-mono leading-loose overflow-x-auto whitespace-pre"
+        style={{ background: 'var(--color-surface-2)', color: 'var(--color-muted)', border: `1px solid ${blueAlpha(0.15)}` }}>
+        {children}
+      </pre>
+    );
+  }
 
-      {/* Free tier revenue */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Free tier revenue projections</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Before a single paid subscriber. Assumes 20% of free users buy at least one credit pack.</p>
-        </div>
-        <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
-          <div className="grid px-5 py-2.5 text-xs font-semibold uppercase tracking-wider"
-            style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>
-            <span>Free Users</span>
-            <span>Pack buyers (20%)</span>
-            <span>Avg pack</span>
-            <span style={{ color: 'oklch(0.72 0.18 145)' }}>Monthly Rev</span>
+  function ABullet({ items, color }: { items: string[]; color?: string }) {
+    return (
+      <div className="flex flex-col gap-1.5">
+        {items.map((item) => (
+          <div key={item} className="flex items-start gap-2 text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+            <span className="shrink-0 mt-0.5 font-bold font-mono" style={{ color: color ?? blue }}>›</span>
+            {item}
           </div>
-          {[
-            { users: '200', buyers: '40', avg: '$5', rev: '$200' },
-            { users: '1,000', buyers: '200', avg: '$7', rev: '$1,400' },
-            { users: '5,000', buyers: '1,000', avg: '$8', rev: '$8,000' },
-          ].map(({ users, buyers, avg, rev }, i) => (
-            <div key={users} className="grid px-5 py-3 text-sm"
-              style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr', borderBottom: '1px solid var(--color-border)', background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)', color: 'var(--color-muted)' }}>
-              <span>{users}</span>
-              <span>{buyers}</span>
-              <span>{avg}</span>
-              <span className="font-bold" style={{ color: 'oklch(0.72 0.18 145)', fontFamily: 'var(--font-display)' }}>{rev}</span>
-            </div>
-          ))}
-        </div>
-        <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-          This revenue requires zero gateway infrastructure — just Firestore, Stripe, and the ping
-          endpoint. Infra cost at 5,000 free users: ~$20/mo. The free tier is not just a funnel;
-          it&apos;s a self-sustaining product line.
-        </p>
+        ))}
       </div>
+    );
+  }
 
-    </div>
-  );
-}
+  function ALabel({ children }: { children: React.ReactNode }) {
+    return (
+      <p className="text-[10px] font-mono font-bold uppercase tracking-wider"
+        style={{ color: blue }}>{children}</p>
+    );
+  }
 
-// ─── Gateway tab ──────────────────────────────────────────────────────────────
+  function APhase({ n, title, timeline, cost, outcome, steps }: {
+    n: number; title: string; timeline: string; cost: string; outcome: string; steps: string[];
+  }) {
+    return (
+      <div className="rounded-lg border p-4 flex flex-col gap-3"
+        style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', borderLeft: `3px solid ${blue}` }}>
+        <div className="flex items-start gap-3">
+          <div className="flex items-center justify-center w-7 h-7 rounded shrink-0 text-xs font-mono font-bold"
+            style={{ background: blueAlpha(0.1), border: `1px solid ${blueAlpha(0.3)}`, color: blue }}>
+            {String(n).padStart(2, '0')}
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{title}</p>
+            <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+              <span className="text-xs font-mono" style={{ color: 'var(--color-subtle)' }}>{timeline}</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded font-mono font-semibold"
+                style={{ color: green, background: `oklch(0.72 0.18 145 / 0.10)`, border: `1px solid oklch(0.72 0.18 145 / 0.25)` }}>
+                {cost}
+              </span>
+            </div>
+          </div>
+        </div>
+        <ABullet items={steps} />
+        <div className="text-xs px-3 py-2 rounded"
+          style={{ background: blueAlpha(0.06), border: `1px solid ${blueAlpha(0.2)}`, color: 'var(--color-muted)' }}>
+          <span className="font-mono font-bold" style={{ color: blue }}>OUTCOME: </span>{outcome}
+        </div>
+      </div>
+    );
+  }
 
-function GatewayTab() {
   return (
     <div className="flex flex-col gap-8">
 
-      {/* Short URLs */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Short URLs — the growth engine</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>The gateway&apos;s most visible feature — and the marketing flywheel.</p>
+      {/* Header */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-start gap-3">
+          <div className="flex flex-col gap-0.5 flex-1">
+            <p className="text-lg font-bold font-mono" style={{ color: 'var(--color-text)' }}>Plan A — rgforms Gateway</p>
+            <p className="text-xs" style={{ color: 'var(--color-subtle)' }}>Monetize the existing product. Same users, same brand, same distribution. No pivot.</p>
+          </div>
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded"
+              style={{ color: blue, background: blueAlpha(0.10), border: `1px solid ${blueAlpha(0.3)}` }}>
+              LOW RISK
+            </span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded"
+              style={{ color: green, background: `oklch(0.72 0.18 145 / 0.10)`, border: `1px solid oklch(0.72 0.18 145 / 0.25)` }}>
+              SHIPS IN 4–6 WK
+            </span>
+          </div>
         </div>
-        <div className="flex flex-col gap-3">
-          <Card>
-            <div className="flex gap-3 items-start">
-              <span className="text-base shrink-0">❌</span>
-              <div>
-                <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-text)' }}>Free tier</p>
-                <Mono>https://script.google.com/macros/d/AKfycbxV7Gj9z3...MhQU/exec</Mono>
-                <p className="text-xs mt-1.5 leading-relaxed" style={{ color: 'var(--color-muted)' }}>90-character Google URL. Google&apos;s brand. Breaks on redeploy. No analytics, no control.</p>
-              </div>
+        <ACallout type="info">
+          <span className="font-mono font-bold" style={{ color: blue }}>TL;DR: </span>
+          Add a paid proxy layer on top of the provisioning-only product you already shipped.
+          Free-tier users get a 90-character Google URL. Paying users get{' '}
+          <code className="text-xs px-1 rounded" style={{ background: blueAlpha(0.12), color: blue }}>rg.fm/acme/contact</code>,
+          a submission inbox, webhooks, and server-side emails — without ever giving rgforms access to their data at rest.
+        </ACallout>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { label: 'TIME TO FIRST $', value: '4–6 weeks', sub: 'Builder tier only requirement' },
+            { label: 'NEW INFRA', value: 'Zero until paid', sub: 'Free tier already works' },
+            { label: 'CUSTOMER', value: 'Developers', sub: 'Same people, same brand' },
+          ].map(({ label, value, sub }) => (
+            <div key={label} className="rounded p-3 flex flex-col gap-1"
+              style={{ background: 'var(--color-surface)', border: `1px solid ${blueAlpha(0.2)}` }}>
+              <p className="text-[10px] font-mono font-bold" style={{ color: blue }}>{label}</p>
+              <p className="text-sm font-bold font-mono" style={{ color: 'var(--color-text)' }}>{value}</p>
+              <p className="text-[10px]" style={{ color: 'var(--color-subtle)' }}>{sub}</p>
             </div>
-          </Card>
-          <Card accent>
-            <div className="flex gap-3 items-start">
-              <span className="text-base shrink-0">✓</span>
-              <div>
-                <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-text)' }}>Gateway tier</p>
-                <Mono>https://rg.fm/acme/contact</Mono>
-                <p className="text-xs mt-1.5 leading-relaxed" style={{ color: 'var(--color-muted)' }}>Our brand in every embed on the internet. Stable forever. Full analytics, rate limiting, webhooks all enabled.</p>
-              </div>
-            </div>
-          </Card>
+          ))}
         </div>
-        <BulletList items={[
-          'Every site using rgforms embeds an rg.fm URL — free brand impressions at scale (same model as Mailchimp\'s badge)',
-          'URL stability: redeploy the script or migrate to hosted storage — the embed code never changes',
-          'The short URL is the choke point: rate limiting, billing enforcement, CORS, webhooks all happen here',
-          'Domain strategy: pick a punchy 4–5 char domain — rg.fm, rgf.sh — memorable in source code',
-        ]} />
+        <ACallout type="warn">
+          <span className="font-mono font-bold" style={{ color: warn }}>CEILING: </span>
+          This is a developer tool. The TAM is form backends — Formspree, Netlify Forms, Basin.
+          Real market, real revenue, but you will not reach non-technical business owners through this plan.
+          The goal here is <em>first revenue fast</em>, not scale. Get to $2–5k MRR on this,
+          then make a clear-eyed decision about Plans B and C.
+        </ACallout>
+      </div>
+
+      {/* Architecture */}
+      <div className="flex flex-col gap-3">
+        <ASection title="Architecture" sub="The free tier already works. The gateway is a proxy layer on top." />
+        <ACard>
+          <ALabel>Free tier (already shipped) — provisioning only</ALabel>
+          <ACode>{`Provisioning (one-time, user's OAuth token):
+  rgforms → Google APIs → creates Sheet + Apps Script → deploys → done
+
+Runtime (every submission — rgforms NOT involved):
+  Browser → POST script.google.com/.../exec
+          → Apps Script doPost() → appends row to Sheet → sends email
+          → rgforms never sees the submission payload. Ever.`}
+          </ACode>
+          <p className="text-xs" style={{ color: 'var(--color-subtle)' }}>
+            "Architecturally incapable of accessing your data" is a sentence no competitor can say.
+            Especially valuable for healthcare-adjacent or privacy-conscious buyers.
+          </p>
+        </ACard>
+        <ACard>
+          <ALabel>Gateway tier — the proxy layer that unlocks paid features</ALabel>
+          <ACode>{`Runtime (paid tiers — rgforms in the path):
+  Browser → POST rg.fm/acme/contact
+          → Next.js middleware: rate limit · billing check · CORS
+          → Gateway route: look up slug → { scriptId, userId, refreshToken }
+          → Mint fresh access token from stored refresh token
+          → POST googleapis.com/v1/scripts/{scriptId}:run { function: 'doPost' }
+          → Script runs in user's account → appends to their Sheet
+          → rgforms logs metadata only (timestamp, moduleId, status)
+          → fire webhooks → store payload (paid tiers) → return to browser
+
+Key unlock: scripts deployed as "Only myself" — never reachable via public URL.
+Gateway calls scripts.run API authenticated by stored OAuth refresh token.
+No "visit this URL once" step. No 90-character Google URL in embed code.`}
+          </ACode>
+        </ACard>
+        <ACard>
+          <ALabel>HIPAA — real advantage, narrow scope</ALabel>
+          <ABullet items={[
+            'Free tier: rgforms never in the data path at runtime. If user has Google Workspace BAA, entire data flow is covered.',
+            'Gateway tier: rgforms stores a refresh token and logs submission metadata — this requires a BAA with rgforms.',
+            'Free tier = no BAA needed. Gateway tier = BAA needed, planned for Enterprise.',
+            '"Architecturally incapable of accessing your PHI" applies to free tier only — be precise.',
+          ]} />
+        </ACard>
       </div>
 
       {/* Pricing */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Gateway pricing tiers</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>All gateway tiers include: no manual script authorization, private script execution via scripts.run API.</p>
+      <div className="flex flex-col gap-3">
+        <ASection title="Gateway Pricing Tiers" sub="All gateway tiers: private execution via scripts.run API, server-side email, no manual script auth." />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[
+            {
+              name: 'Builder', price: '$9', tag: null, highlight: false,
+              features: ['3 projects, 10 modules', 'Short URLs (rg.fm/your-form)', 'No manual script auth', '5,000 submissions / month', 'Submission inbox (last 500)', 'Basic analytics', 'Remove badge'],
+              target: 'Freelancers, client sites, small blogs.',
+              hook: 'Needs webhooks or per-project API keys.',
+            },
+            {
+              name: 'Pro', price: '$24', tag: 'BEST VALUE', highlight: true,
+              features: ['Unlimited projects & modules', 'Vanity slugs (rg.fm/acme/contact)', '50,000 submissions / month', 'Full analytics', 'Webhooks (unlimited)', 'CORS + IP allowlist', 'API keys per project', 'CSV export'],
+              target: 'Small agencies, growing startups, teams of 1–3.',
+              hook: 'Needs team seats or custom domain.',
+            },
+            {
+              name: 'Business', price: '$59', tag: null, highlight: false,
+              features: ['Everything in Pro', 'Hosted Firestore storage', 'Team seats (5 + $8/seat)', 'Custom domain (api.yourco.com)', '500k submissions / month', 'Priority support + SLA', 'BAA — Enterprise roadmap'],
+              target: 'Established agencies, high-traffic API users.',
+              hook: 'Needs enterprise volume or team management.',
+            },
+          ].map(({ name, price, tag, highlight, features, target, hook }) => (
+            <div key={name} className="rounded-lg border p-4 flex flex-col gap-3"
+              style={{
+                background: highlight ? blueAlpha(0.06) : 'var(--color-surface)',
+                borderColor: highlight ? blueAlpha(0.40) : 'var(--color-border)',
+                borderWidth: highlight ? 1.5 : 1,
+              }}>
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-bold font-mono" style={{ color: 'var(--color-text)' }}>{name}</p>
+                    {tag && (
+                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded"
+                        style={{ color: blue, background: blueAlpha(0.12), border: `1px solid ${blueAlpha(0.3)}` }}>
+                        {tag}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-baseline gap-0.5 mt-1">
+                    <span className="text-xl font-bold font-mono" style={{ color: highlight ? blue : 'var(--color-text)' }}>{price}</span>
+                    <span className="text-xs font-mono" style={{ color: 'var(--color-subtle)' }}>/mo</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
+                {features.map((f) => (
+                  <div key={f} className="flex items-start gap-2 text-xs" style={{ color: 'var(--color-muted)' }}>
+                    <span className="shrink-0 mt-0.5 font-bold" style={{ color: green }}>✓</span>{f}
+                  </div>
+                ))}
+              </div>
+              <div className="pt-2" style={{ borderTop: `1px solid ${blueAlpha(0.15)}` }}>
+                <p className="text-[10px] font-mono" style={{ color: 'var(--color-subtle)' }}>→ {target}</p>
+                <p className="text-[10px] font-mono mt-0.5" style={{ color: blue }}>↑ {hook}</p>
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <TierCard
-            name="Builder"
-            price="$9"
-            features={[
-              '3 projects, 10 modules',
-              'Short URLs (rg.fm/your-form)',
-              'No manual script auth',
-              '5,000 submissions / month',
-              'Submission inbox (last 500)',
-              'Basic analytics',
-              'Remove badge',
-            ]}
-            target="Freelancers, client sites, small blogs."
-            upgradeHook="Needs webhooks or per-project API keys."
-          />
-          <TierCard
-            name="Pro"
-            price="$24"
-            highlight
-            tag="Best value"
-            features={[
-              'Unlimited projects & modules',
-              'Vanity slugs (rg.fm/acme/contact)',
-              '50,000 submissions / month',
-              'Full analytics',
-              'Webhooks (unlimited)',
-              'CORS + IP allowlist',
-              'API keys per project',
-              'CSV export',
-            ]}
-            target="Small agencies, growing startups, teams of 1–3."
-            upgradeHook="Needs team seats or custom domain."
-          />
-          <TierCard
-            name="Business"
-            price="$59"
-            features={[
-              'Everything in Pro',
-              'Hosted Firestore storage',
-              'Team seats (5 + $8/seat)',
-              'Custom domain',
-              '500k submissions / month*',
-              'Priority support + SLA',
-              'BAA — planned for future Enterprise tier',
-            ]}
-            target="Established agencies, high-traffic API users."
-            upgradeHook="Needs enterprise volume or team seats."
-          />
-        </div>
-        <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-          * Submission limits on gateway tiers are enforced by our infrastructure, not Apps Script.
-          Email notifications are sent server-side on paid tiers, bypassing Apps Script&apos;s
-          100–1,500/day email quota entirely.
-        </p>
       </div>
 
-      {/* Gateway architecture */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Gateway architecture</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>How private script execution works — no manual auth, no public URLs.</p>
+      {/* Upgrade triggers */}
+      <div className="flex flex-col gap-3">
+        <ASection title="Upgrade Triggers" sub="The specific moments free users become paying customers." />
+        <div className="flex flex-col gap-2">
+          {[
+            { t: 'The URL conversation', d: 'Developer shows a client their contact form. Client sees script.google.com/macros/d/AKfycbx… in the browser. Client asks "can we have a real URL?" Developer upgrades to Builder ($9). This is the highest-converting trigger.' },
+            { t: 'Second credit pack friction', d: "User buys their second credit pack ($15). They've now spent $15 on provisions alone. Builder at $9/mo is obviously better value. Show the comparison at checkout." },
+            { t: 'Submission count curiosity', d: '"Your contact form got 847 submissions this month." Count visible, contents aren\'t. The desire to see who submitted drives upgrades. Surface this prominently.' },
+            { t: 'Manual authorization', d: 'The "visit this URL once in your browser" step breaks on client handoffs. Documented as a free-tier limitation. Gateway removes it.' },
+            { t: 'Badge on client deliverable', d: '"Powered by rgforms" on a form confirmation page. Any agency building for a paying client will upgrade to remove it.' },
+            { t: 'Email quota hit', d: 'Free Gmail: 100 notification emails/day. Gateway sends server-side via Resend/Nodemailer — bypasses Apps Script quotas entirely.' },
+          ].map(({ t, d }) => (
+            <div key={t} className="flex items-start gap-3 rounded p-3"
+              style={{ background: 'var(--color-surface)', border: `1px solid ${blueAlpha(0.15)}` }}>
+              <span className="shrink-0 font-bold font-mono text-sm" style={{ color: blue }}>›</span>
+              <div>
+                <p className="text-xs font-mono font-semibold" style={{ color: 'var(--color-text)' }}>{t}</p>
+                <p className="text-xs leading-relaxed mt-0.5" style={{ color: 'var(--color-muted)' }}>{d}</p>
+              </div>
+            </div>
+          ))}
         </div>
-        <Card>
-          <SectionLabel>Runtime data flow</SectionLabel>
-          <CodeBlock>{`Browser → POST rg.fm/slug
-  → Next.js middleware (rate limit, billing check, CORS)
-  → Gateway route: look up slug in Firestore → get { scriptId, userId }
-  → Mint fresh access token from stored refresh token
-  → POST https://script.googleapis.com/v1/scripts/{scriptId}:run
-      { function: 'doPost', parameters: [e] }
-  → Receive result → log metadata to Firestore → return to browser
-
-Side effects (async):
-  → increment monthly submission counter
-  → fire webhooks (if configured)
-  → store payload in Firestore (paid tiers only)`}
-          </CodeBlock>
-        </Card>
-        <Card>
-          <SectionLabel>Eliminating manual script authorization</SectionLabel>
-          <BulletList items={[
-            'Scripts deployed as "Only myself" — never reachable via public URL',
-            'Gateway calls scripts/{scriptId}:run authenticated by stored OAuth refresh token',
-            'Refresh token encrypted at rest in Firestore, fresh access token minted per call',
-            'Scope consent triggered inline during provisioning — user never leaves the app',
-            'Requires https://www.googleapis.com/auth/script.projects added to sign-in scopes (already needed for provisioning)',
-          ]} />
-        </Card>
       </div>
 
-      {/* What to build */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>What to build — gateway tiers</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Three phases. Phase 1 is sufficient to start charging for gateway plans.</p>
-        </div>
-        <PhaseCard
-          number={1}
-          title="The Gateway"
-          timeline="4–6 weeks"
-          cost="~$0 infra"
-          outcome="A chargeable product. Short URLs work, Stripe is wired, billing limits are enforced."
+      {/* Build phases */}
+      <div className="flex flex-col gap-3">
+        <ASection title="Build Phases" sub="Three phases. Phase 1 alone is a chargeable product." />
+        <APhase n={1} title="The Gateway" timeline="4–6 weeks" cost="~$0 added infra"
+          outcome="A chargeable product. Short URLs work, Stripe is wired, billing limits enforced."
           steps={[
-            'Remove output: \'export\' from next.config.ts — enable Next.js server mode',
-            'Add Firestore — users, projects, sessions, short URLs, refresh tokens (encrypted)',
+            "Remove output: 'export' from next.config.ts — enable Next.js server mode",
+            'Firestore: users, projects, sessions, short URLs, encrypted refresh tokens',
             'Backend session: Google OAuth → JWT in httpOnly cookie + Firestore session doc',
-            'Short URL table: { slug, scriptId, userId, projectId } with Next.js middleware redirect',
-            'Gateway proxy route: /api/gateway/[slug] — validate, log metadata, call scripts.run, return response',
-            'Billing enforcement: check Firestore submission count before forwarding, 429 if over limit',
-            'Stripe Checkout + webhook: subscription billing, update plan field in Firestore',
-            'Server-side email notifications: send via Nodemailer/Resend instead of Apps Script MailApp',
+            'Short URL table: { slug, scriptId, userId } — Next.js middleware resolves to script',
+            'Gateway route: validate → log metadata → mint access token → call scripts.run → return',
+            'Billing: check Firestore submission count before forwarding, 429 if over limit',
+            'Stripe Checkout + webhook: subscription billing, update plan in Firestore',
+            'Server-side emails: Resend/Nodemailer instead of MailApp, bypasses quota limits',
           ]}
         />
-        <PhaseCard
-          number={2}
-          title="Analytics + Webhooks"
-          timeline="4–6 weeks"
-          cost="~$50/mo"
-          outcome="The features that justify Pro pricing. Users have a reason to stay and upgrade."
+        <APhase n={2} title="Analytics + Webhooks" timeline="4–6 weeks" cost="~$50/mo"
+          outcome="Features that justify Pro pricing. Users have a reason to stay and upgrade."
           steps={[
-            'Analytics dashboard: request volume, error rate, latency — from Firestore counter docs',
-            'Submission inbox: store payloads for paying users (free = ping count only)',
+            'Submission inbox: store payloads for paying users in Firestore',
+            'Analytics dashboard: volume, error rate, latency from Firestore counter docs',
             'Webhook system: async delivery to user-configured URLs on each POST',
-            'API key system: issue keys per project, validate in gateway before forwarding',
-            'CORS + IP allowlist: validate in gateway middleware, return 403 with clear error',
-            'Vanity slugs: Pro users set custom rg.fm/acme/contact paths',
+            'API key system: issue keys per project, validate in gateway middleware',
+            'CORS + IP allowlist: validate in gateway, return 403 with clear error',
+            'Vanity slugs: Pro users set rg.fm/acme/contact paths',
+            'CSV export of submission inbox',
           ]}
         />
-        <PhaseCard
-          number={3}
-          title="Hosted Storage Tier"
-          timeline="When Phase 2 is profitable"
-          cost="~$200/mo"
-          outcome="Business tier unlocked. Data lives in Firestore, not just Sheets. Real query capabilities."
+        <APhase n={3} title="Hosted Storage Tier" timeline="When Phase 2 profitable" cost="~$200/mo"
+          outcome="Business tier unlocked. Data lives in Firestore. Query params. Custom domains."
           steps={[
             'Business tier: write submissions to Firestore instead of routing through Sheets API',
             'Google Sheet kept as user-owned backup and spreadsheet view',
             'Query params: ?where=published:true&sort=created_at:desc&limit=20',
-            'Custom domain routing: api.yourco.com → gateway via CNAME',
+            'Custom domain routing: api.yourco.com → gateway via CNAME + SSL',
             'Team collaboration: invite by email, role-based access',
           ]}
         />
       </div>
 
+      {/* Revenue */}
+      <div className="flex flex-col gap-3">
+        <ASection title="Revenue Projections" sub="Conservative. 2–5% free-to-paid conversion (industry standard for developer freemium)." />
+        <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${blueAlpha(0.25)}` }}>
+          <div className="grid px-4 py-2 text-[10px] font-mono font-bold uppercase tracking-wider"
+            style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', background: blueAlpha(0.08), borderBottom: `1px solid ${blueAlpha(0.2)}`, color: blue }}>
+            <span>Month</span><span>Free users</span><span>Paid (3%)</span><span>Avg plan</span><span>MRR</span>
+          </div>
+          {[
+            { mo: '3', f: '200', p: '6', avg: '$9', mrr: '$54' },
+            { mo: '6', f: '800', p: '24', avg: '$11', mrr: '$264' },
+            { mo: '9', f: '2,000', p: '60', avg: '$14', mrr: '$840' },
+            { mo: '12', f: '5,000', p: '150', avg: '$16', mrr: '$2,400' },
+          ].map(({ mo, f, p, avg, mrr }, i) => (
+            <div key={mo} className="grid px-4 py-2.5 text-xs font-mono"
+              style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', borderBottom: `1px solid ${blueAlpha(0.1)}`, background: i % 2 === 0 ? 'var(--color-surface)' : 'transparent', color: 'var(--color-muted)' }}>
+              <span>Mo {mo}</span><span>{f}</span><span>{p}</span><span>{avg}</span>
+              <span className="font-bold" style={{ color: green }}>{mrr}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
+          3% free-to-paid is the realistic baseline for a developer freemium. At $2,400 MRR (Month 12),
+          the gateway tier is profitable but not a business on its own. The value is what you learn and
+          the infrastructure you now have to support Plans B and C.
+        </p>
+      </div>
+
     </div>
   );
 }
 
-// ─── Sites tab ────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Plan B — The Service Model
+// Visual identity: Warm amber, human-centered, business pitch feel.
+// Larger headings, story-driven callouts, warm border treatments.
+// ─────────────────────────────────────────────────────────────────────────────
 
-function SitesTab() {
+function PlanBTab() {
+  const amber = 'oklch(0.73 0.17 65)';
+  const amberA = (a: number) => `oklch(0.73 0.17 65 / ${a})`;
+  const warnRed = 'oklch(0.68 0.18 25)';
+  const warnRedA = (a: number) => `oklch(0.68 0.18 25 / ${a})`;
+  const green = 'oklch(0.72 0.18 145)';
+
+  function BSection({ title, sub }: { title: string; sub?: string }) {
+    return (
+      <div className="pb-3 mb-1" style={{ borderBottom: `3px solid ${amberA(0.35)}` }}>
+        <p className="text-base font-bold" style={{ color: 'var(--color-text)', letterSpacing: '-0.01em' }}>{title}</p>
+        {sub && <p className="text-sm mt-1" style={{ color: 'var(--color-muted)' }}>{sub}</p>}
+      </div>
+    );
+  }
+
+  function BCard({ children, highlighted }: { children: React.ReactNode; highlighted?: boolean }) {
+    return (
+      <div className="rounded-2xl p-5 flex flex-col gap-3"
+        style={{
+          background: highlighted ? amberA(0.06) : 'var(--color-surface)',
+          border: `1.5px solid ${highlighted ? amberA(0.40) : 'var(--color-border)'}`,
+        }}>
+        {children}
+      </div>
+    );
+  }
+
+  function BStory({ children }: { children: React.ReactNode }) {
+    return (
+      <div className="rounded-2xl p-5 text-sm leading-relaxed"
+        style={{
+          background: amberA(0.07),
+          border: `1.5px solid ${amberA(0.35)}`,
+          color: 'var(--color-muted)',
+          borderLeft: `4px solid ${amber}`,
+        }}>
+        {children}
+      </div>
+    );
+  }
+
+  function BWarn({ children }: { children: React.ReactNode }) {
+    return (
+      <div className="rounded-2xl p-5 text-sm leading-relaxed"
+        style={{
+          background: warnRedA(0.06),
+          border: `1.5px solid ${warnRedA(0.35)}`,
+          color: 'var(--color-muted)',
+          borderLeft: `4px solid ${warnRed}`,
+        }}>
+        {children}
+      </div>
+    );
+  }
+
+  function BLabel({ children }: { children: React.ReactNode }) {
+    return <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>{children}</p>;
+  }
+
+  function BBullet({ items, strike }: { items: string[]; strike?: boolean }) {
+    return (
+      <div className="flex flex-col gap-2">
+        {items.map((item) => (
+          <div key={item} className="flex items-start gap-2.5 text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+            <span className="shrink-0 mt-0.5 text-base" style={{ color: strike ? warnRed : amber }}>
+              {strike ? '✕' : '•'}
+            </span>
+            <span style={{ textDecoration: strike ? 'none' : 'none' }}>{item}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  function BMoney({ value, label }: { value: string; label: string }) {
+    return (
+      <div className="flex flex-col items-center gap-0.5 rounded-2xl p-4"
+        style={{ background: amberA(0.08), border: `1px solid ${amberA(0.25)}` }}>
+        <span className="text-2xl font-bold" style={{ color: amber }}>{value}</span>
+        <span className="text-xs text-center leading-snug" style={{ color: 'var(--color-subtle)' }}>{label}</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-9">
 
-      {/* Concept */}
+      {/* Header */}
       <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>The product</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>A complete website builder for non-technical users. Beautiful templates. Forms that work. Data you own. Your domain.</p>
+        <div>
+          <p className="text-2xl font-bold" style={{ color: 'var(--color-text)', letterSpacing: '-0.02em' }}>
+            Plan B — The Service Model
+          </p>
+          <p className="text-sm mt-1" style={{ color: 'var(--color-muted)' }}>
+            Done-for-you websites for non-technical business owners. Vertical-first. Starts manual, productizes later.
+          </p>
         </div>
-        <CalloutBox accent>
-          <Strong>The pitch:</Strong> &ldquo;Tell us about your business in one sentence. Our AI designs the entire
-          site — picks your modules, writes real seed content, configures your forms — and provisions everything in
-          90 seconds. Your site runs on your domain, beautiful out of the box. Your data lives in a Google Sheet
-          you own and can edit like a spreadsheet. When you outgrow us: download a full Next.js project and
-          self-host it anywhere. No vendor lock-in. No designer needed. No technical knowledge required.&rdquo;
-        </CalloutBox>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <BStory>
+          <span className="font-bold" style={{ color: amber }}>The origin story: </span>
+          A friend called. He wanted a site for his real estate wholesale business.
+          He&apos;d already bought a domain and started on Squarespace but couldn&apos;t get it to look professional
+          or add forms that actually worked the way he needed. He wanted sellers to find him online and submit
+          property information — that&apos;s it. He just needed the digital stamp and the leads to flow in.
+          This is the product. Not a platform. Not a Squarespace competitor. A specific solution for a specific person
+          who exists in every city in the country.
+        </BStory>
+        <BWarn>
+          <span className="font-bold" style={{ color: warnRed }}>The hard truth about your friend: </span>
+          He called you because he knows you — not because he found your product.
+          The real question isn&apos;t &ldquo;is there value for him?&rdquo; It&apos;s &ldquo;how does the next person
+          like him find you instead of Durable or GoDaddy AI Builder?&rdquo; He won&apos;t search &ldquo;Google Sheets website
+          builder.&rdquo; He&apos;ll search &ldquo;website for real estate investor&rdquo; and land on whoever ranks or advertises.
+          The answer to this question is the entire business plan.
+        </BWarn>
+      </div>
+
+      {/* What the customer gets */}
+      <div className="flex flex-col gap-4">
+        <BSection title="What the customer buys vs. what runs underneath"
+          sub="The customer never sees the words 'Apps Script,' 'Google Sheets,' or 'provisioning.'" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <BCard highlighted>
+            <BLabel>What the customer sees</BLabel>
+            <BBullet items={[
+              "A beautiful website at their domain that looks better than what they'd build on Squarespace",
+              'A form where sellers (or clients) submit their information',
+              'An email notification every time someone fills out the form',
+              'A simple spreadsheet where all their leads accumulate, ready to work',
+              'A site they can tell people about and feel proud of',
+            ]} />
+          </BCard>
+          <BCard>
+            <BLabel>What runs underneath (invisible to them)</BLabel>
+            <BBullet items={[
+              'Google Apps Script deployed in their own Google account',
+              'A Google Sheet in their own Drive collecting every lead',
+              "The sheet is their CMS — but they don't know it as a CMS, they just open it like a spreadsheet",
+              'rgforms provisioned it all in 90 seconds; the customer never touched any of it',
+              "If rgforms disappears tomorrow, their site keeps working and their leads keep coming in",
+            ]} />
+          </BCard>
+        </div>
+        <BCard>
+          <BLabel>The notification email is the primary interface</BLabel>
+          <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+            Most non-technical users will never open their Google Sheet. They&apos;ll get an email that says
+            &ldquo;New lead from John Smith — 123 Main St, 3bed/2bath, asking $180k, motivated seller.&rdquo; That&apos;s
+            the product. The Sheet is a bonus for the 20% who want to organize and filter their leads.
+            Design around the email first, the Sheet second.
+          </p>
+        </BCard>
+      </div>
+
+      {/* Pricing */}
+      <div className="flex flex-col gap-4">
+        <BSection title="Pricing — one plan, no tier ladder"
+          sub="Non-technical buyers don't want to choose a plan. They want one answer at one price." />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <BCard>
+            <BLabel>Free — lead magnet only</BLabel>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+              Subdomain (acmewholesale.rgforms.app), rgforms badge, 1 lead form.
+              Lets people try it. Not a real product — just enough to feel the value
+              and feel the friction (the ugly URL, the badge).
+            </p>
+          </BCard>
+          <BCard highlighted>
+            <div className="flex items-baseline gap-1">
+              <span className="text-3xl font-bold" style={{ color: amber }}>$12</span>
+              <span className="text-sm" style={{ color: 'var(--color-muted)' }}>/mo — the only plan</span>
+            </div>
+            <BBullet items={[
+              'Custom domain (the one they already bought)',
+              'No badge',
+              'All modules for their vertical',
+              'Unlimited form submissions',
+              'Lead notification emails',
+              'Google Sheet with all leads',
+            ]} />
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
+              Squarespace is $16–49/mo and data is theirs. You&apos;re $12/mo and they own everything.
+              This should be an easy yes.
+            </p>
+          </BCard>
+          <BCard>
+            <BLabel>$299 one-time — &ldquo;we build it for you&rdquo;</BLabel>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+              You spend 2 hours. They get a finished, polished site — logo placed, copy written,
+              forms configured, domain connected. They go on the $12/mo plan forever.
+            </p>
+            <div className="rounded-xl p-3 flex flex-col gap-1"
+              style={{ background: amberA(0.08), border: `1px solid ${amberA(0.25)}` }}>
+              <p className="text-xs font-bold" style={{ color: 'var(--color-text)' }}>Unit economics per done-for-you customer:</p>
+              <p className="text-xs" style={{ color: 'var(--color-muted)' }}>Setup: $299 − $10 infra = <span className="font-bold" style={{ color: green }}>$289 profit</span></p>
+              <p className="text-xs" style={{ color: 'var(--color-muted)' }}>Recurring: $12/mo − $0.03 infra = <span className="font-bold" style={{ color: green }}>$11.97/mo</span></p>
+              <p className="text-xs" style={{ color: 'var(--color-muted)' }}>24-month LTV: $299 + ($11.97 × 24) = <span className="font-bold" style={{ color: green }}>$586</span></p>
+            </div>
+          </BCard>
+        </div>
+        <BStory>
+          <span className="font-bold" style={{ color: amber }}>Why the done-for-you tier is the unlock: </span>
+          It&apos;s the highest-margin item in your catalog and the easiest to sell to this customer.
+          Your friend would have paid $300 to never touch it himself. Most SaaS founders refuse to do this
+          because &ldquo;it doesn&apos;t scale.&rdquo; It doesn&apos;t have to scale —
+          it has to fund the next six months while you figure out what does.
+          Do 50 of these manually. Watch what every customer struggles with.
+          The AI provisioning flow in Plan C is built from that data.
+        </BStory>
+      </div>
+
+      {/* Vertical strategy */}
+      <div className="flex flex-col gap-4">
+        <BSection title="The vertical strategy — why this beats 'any business'"
+          sub="'AI website builder for any business' is a crowded ocean. 'Website for real estate wholesalers' is a pond with two competitors." />
+        <BCard highlighted>
+          <BLabel>Vertical 1: Real estate investors / wholesalers (start here)</BLabel>
+          <BBullet items={[
+            'Your friend is in this market. You understand the language and the problem.',
+            'Very large community: BiggerPockets (2M+ members), local REI groups in every city, active Facebook groups',
+            'Clear, specific need: a site that collects seller leads with specific property information fields',
+            'They are NOT technical. They use Squarespace, Carrot.com, or a freelancer-built site.',
+            'Carrot.com charges $49–149/mo for basically this product. You undercut at $12/mo with data ownership.',
+            'The language they use: "motivated seller website," "wholesale buyer\'s list," "property submission form"',
+          ]} />
+          <div className="rounded-xl p-3 text-xs font-mono leading-loose"
+            style={{ background: 'var(--color-surface-2)', border: `1px solid ${amberA(0.2)}`, color: 'var(--color-muted)' }}>
+            {`Forms a real estate wholesaler actually needs:
+  Seller intake:   address | beds/baths | condition | asking price
+                   timeline | mortgage balance | why selling | contact info
+  Buyer criteria:  name | email | markets | price range | property types
+                   cash buyer? | closing timeline | experience level
+  Agent referral:  name | email | referral name | property address | commission split`}
+          </div>
+        </BCard>
+        <BCard>
+          <BLabel>Verticals 2–3: expand after Vertical 1 has 25+ customers</BLabel>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {[
+              { v: 'Local service businesses', d: 'Plumbers, landscapers, cleaners, contractors. Need: quote request form + service area + testimonials. Currently: Wix or nothing. Community: Nextdoor, local Facebook groups, Alignable.' },
+              { v: 'Solo professionals', d: 'Lawyers, accountants, therapists, consultants. Need: clean site + intake form + meeting booking. Currently: Squarespace or Calendly-only. Community: LinkedIn, bar associations, local chambers.' },
+            ].map(({ v, d }) => (
+              <div key={v} className="rounded-xl p-3 flex flex-col gap-1.5"
+                style={{ background: amberA(0.05), border: `1px solid ${amberA(0.2)}` }}>
+                <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{v}</p>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{d}</p>
+              </div>
+            ))}
+          </div>
+        </BCard>
+      </div>
+
+      {/* Acquisition */}
+      <div className="flex flex-col gap-4">
+        <BSection title="How to actually get the first 50 clients"
+          sub="Not SEO, not Product Hunt, not Hacker News. Those channels reach developers. Your buyer is not a developer." />
+        <div className="flex flex-col gap-3">
           {[
-            { title: 'Non-technical business owner', body: 'Describe your business. AI builds the site. Edit content by typing in a spreadsheet. Live on your domain in under 2 minutes — no designer, no developer, no CMS to learn.' },
-            { title: 'Freelancer / developer', body: 'Build client sites 10× faster. Client gets a Google Sheet as their CMS — they can update their own content without ever calling you. Export clean Next.js code if they want to self-host later.' },
-            { title: 'Agency', body: 'White-label the builder. Provision client sites in minutes. They manage content in Sheets. You earn recurring revenue. Unlimited sites on one plan.' },
-          ].map(({ title, body }) => (
-            <div key={title} className="rounded-lg p-3 flex flex-col gap-1.5"
-              style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
-              <p className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>{title}</p>
-              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{body}</p>
+            {
+              ch: '1. The origin story as content',
+              effort: 'Low effort, high signal',
+              d: "Write the story about building your friend's site. Post it in BiggerPockets, REI Facebook groups, local real estate investor Meetup communities. \"My friend needed a seller website, Squarespace was too hard, here's what I built him — $12/mo.\" Link to his live site. People in that community will DM you.",
+            },
+            {
+              ch: '2. Done-for-you as the acquisition channel',
+              effort: 'High effort, builds referral engine',
+              d: "Offer to build the first 5 sites free (or at cost) in exchange for a testimonial and referrals. Real estate investors talk to each other constantly. One happy customer in a local REI group is worth 10 Google Ads. The $299 done-for-you fee comes later once you have proof.",
+            },
+            {
+              ch: '3. Targeted Facebook/Instagram ads in specific markets',
+              effort: 'Paid, scalable once validated',
+              d: 'Target: real estate investors in specific metro areas. Ad copy: "Wholesale website with motivated seller form — $12/mo. Less than Squarespace. Your leads go straight to your Google Sheet." Budget: $10–20/day. Cost per trial: probably $8–15 if copy is specific enough.',
+            },
+            {
+              ch: '4. Local networking (REIA meetings)',
+              effort: 'Time-intensive, high conversion',
+              d: "Every city has a REIA (Real Estate Investors Association) that meets monthly. Bring a laptop. Show the product live. $12/mo is a non-decision for someone who's writing $50k contracts. Offer to set it up at the meeting for anyone who wants it ($299 done-for-you).",
+            },
+          ].map(({ ch, effort, d }) => (
+            <div key={ch} className="rounded-2xl p-4 flex flex-col gap-2"
+              style={{ background: 'var(--color-surface)', border: `1.5px solid var(--color-border)` }}>
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>{ch}</p>
+                <span className="text-[10px] px-2 py-0.5 rounded-full shrink-0 font-semibold"
+                  style={{ color: amber, background: amberA(0.12), border: `1px solid ${amberA(0.3)}` }}>
+                  {effort}
+                </span>
+              </div>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>{d}</p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* System architecture */}
+      {/* What to build */}
       <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>System architecture</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>rgforms hosts the website. Apps Script is a JSON API. Google holds all the data. Two completely separated concerns.</p>
+        <BSection title="What to build — and what NOT to build"
+          sub="The 'not' list is as important as the 'yes' list. Scope kills service businesses." />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <BCard highlighted>
+            <BLabel>Build this for v1</BLabel>
+            <BBullet items={[
+              '3 vertical templates only: real estate investor, local service business, solo professional',
+              '8 modules that cover 90% of small business needs: hero, services, testimonials, faq, gallery, blog, contact form, intake form',
+              '3 visual styles: Professional (clean/navy), Warm (friendly/approachable), Bold (modern/high-contrast)',
+              'Subdomain + custom domain connection (CNAME + guided DNS)',
+              'Lead notification emails from Apps Script (100/day free Gmail, 1500/day Workspace)',
+              'Google Sheet per site with all submissions accumulating',
+              'Simple dashboard: site URL, "Open your Sheet," module toggles',
+            ]} />
+          </BCard>
+          <BCard>
+            <BLabel>Do NOT build for v1</BLabel>
+            <BBullet strike items={[
+              '9 visual styles — your buyer doesn\'t want choices. They want one good answer.',
+              '25 modules — build the 8 that cover real estate, service, and solo pro. Nothing else.',
+              'Next.js export — your buyer will never use it. Add when developers adopt the platform.',
+              'White-label agency tier — a completely different sale, different support, different pricing.',
+              'AI provisioning — do the first 50 manually. Learn what the AI actually needs to generate correctly.',
+              'Full DNS management dashboard — CNAME instructions are enough for v1.',
+              'Multiple sites per account — one site per customer is the whole use case.',
+            ]} />
+          </BCard>
         </div>
-        <Card>
-          <SectionLabel>Runtime data flow — how a page visit works</SectionLabel>
-          <CodeBlock>{`Visitor → yourdomain.com (or username.rgforms.app)
-        → Cloudflare CDN: cache hit → serve HTML instantly (~15ms)
-        → Cloudflare CDN: cache miss → invoke Cloudflare Worker
+      </div>
 
-Cloudflare Worker (multi-tenant — one deployment serves ALL sites):
-  1. Read Host header → look up { userId, siteConfig, scriptUrl } from KV
-  2. Parse path: /blog/my-post → { module: 'blog', slug: 'my-post' }
-  3. Fetch data: GET scriptUrl?action=data&module=blog (Apps Script JSON API)
-     → Apps Script reads Sheet, returns JSON array (CacheService, 5-min TTL)
-  4. Render HTML: inject data into the chosen template component
-  5. Set Cache-Control: s-maxage=300 → Cloudflare caches for 5 min
-  6. Return full SSR HTML with <title>, meta, JSON-LD, GA4 tag
+      {/* Competitive */}
+      <div className="flex flex-col gap-4">
+        <BSection title="Competitive reality — honest"
+          sub="The actual competition is not Formspree. It's Durable, Carrot, Wix AI, and Squarespace." />
+        <div className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid var(--color-border)` }}>
+          <div className="grid px-5 py-2.5 text-xs font-bold"
+            style={{ gridTemplateColumns: '1fr 1fr 1.5fr 1.5fr', background: amberA(0.08), borderBottom: `1px solid var(--color-border)`, color: amber }}>
+            <span>Competitor</span><span>Price</span><span>Their strength</span><span>Your wedge</span>
+          </div>
+          {[
+            { c: 'Carrot.com', p: '$49–149/mo', s: 'Built for real estate specifically. SEO-optimized templates.', w: '4× cheaper. Data in your Google account. They don\'t own your leads.' },
+            { c: 'Durable.co', p: '$15/mo', s: 'AI builds site in 30 seconds. 200k+ users. Big brand awareness.', w: 'Vertical-specific forms. Your data stays in Google. They don\'t offer real estate intake forms.' },
+            { c: 'Wix AI Builder', p: '$17–36/mo', s: 'Huge distribution, brand recognition, templates.', w: 'Their data is locked in Wix. Your leads are in your Google Sheet, always.' },
+            { c: 'Squarespace', p: '$16–49/mo', s: 'Design quality. Brand credibility.', w: 'Forms are notoriously janky. Data locked. DNS setup confusing. You\'re $12 and set it up for them.' },
+            { c: 'GoDaddy Website Builder', p: '$10–25/mo', s: 'Sold alongside domain purchase.', w: 'Terrible design output. Their forms don\'t send real-time emails reliably.' },
+          ].map(({ c, p, s, w }, i) => (
+            <div key={c} className="grid px-5 py-3 text-xs items-start gap-2"
+              style={{ gridTemplateColumns: '1fr 1fr 1.5fr 1.5fr', borderBottom: `1px solid var(--color-border)`, background: i % 2 === 0 ? 'var(--color-surface)' : 'transparent' }}>
+              <span className="font-semibold" style={{ color: 'var(--color-text)' }}>{c}</span>
+              <span style={{ color: 'var(--color-muted)' }}>{p}</span>
+              <span style={{ color: 'var(--color-muted)' }}>{s}</span>
+              <span style={{ color: green }}>{w}</span>
+            </div>
+          ))}
+        </div>
+        <BWarn>
+          <span className="font-bold" style={{ color: warnRed }}>The Durable problem: </span>
+          &ldquo;Describe your business, AI builds your site in 30 seconds&rdquo;
+          is Durable&apos;s exact pitch from 2023. They have 200,000+ users and real distribution. You cannot
+          beat them on that feature alone. You beat them by being specific where they&apos;re generic:
+          real estate intake forms with the right fields, not a generic contact form.
+          The vertical specificity is the moat, not the AI.
+        </BWarn>
+      </div>
 
-Form submission (stays directly in Google — no rgforms proxy on free tier):
-  Browser → POST scriptUrl (Apps Script doPost)
-          → appends row to Sheet tab → sends email (MailApp) → returns JSON
+      {/* The moat */}
+      <div className="flex flex-col gap-4">
+        <BSection title="The real moat — what no competitor can say"
+          sub="These three claims are simultaneously true. None of the competitors above can make all three." />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            { claim: 'Your leads are yours forever', detail: "They accumulate in a Google Sheet in your own Google account. If you cancel, stop paying, or we disappear — your data is still there. No other builder can say this. Squarespace, Wix, Durable all hold your form data hostage." },
+            { claim: 'The forms actually work', detail: "Every submission emails you instantly, from Google's servers, with the exact fields that matter for your business. Squarespace forms are notoriously unreliable. GoDaddy's are worse. Ours are built on the same infrastructure that handles billions of Gmail emails." },
+            { claim: 'Less than Squarespace, more than nothing', detail: "$12/mo is below the psychological 'is this worth it?' threshold for someone writing $50k contracts. The positioning isn't 'cheap alternative to Squarespace' — it's 'less than a Starbucks run a week for a professional digital presence.'" },
+          ].map(({ claim, detail }) => (
+            <div key={claim} className="rounded-2xl p-5 flex flex-col gap-2"
+              style={{ background: amberA(0.07), border: `1.5px solid ${amberA(0.35)}` }}>
+              <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>{claim}</p>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>{detail}</p>
+            </div>
+          ))}
+        </div>
+      </div>
 
-Cache invalidation (near real-time updates):
-  User edits Sheet → Apps Script onEdit trigger
-  → POST https://workers.rgforms.app/api/purge?siteId=xxx
-  → Cloudflare Worker purges all cached pages for that site
-  → next visitor gets fresh HTML within ~1 second of the Sheet edit`}
-          </CodeBlock>
-        </Card>
-        <Card>
-          <SectionLabel>Why Cloudflare Workers — the key architectural decision</SectionLabel>
-          <BulletList items={[
-            'One Next.js-like Worker deployment serves every user\'s site — no per-user deployment cost',
-            'Cloudflare\'s edge network (300+ PoPs globally) — pages load in <50ms from cache, worldwide',
-            'Custom domains: Cloudflare handles SSL, HTTPS, certificate renewal automatically per domain',
-            'Workers KV: ultra-fast key-value store for site configs and cached Apps Script responses',
-            'No egress fees — Cloudflare does not charge for outbound bandwidth (unlike AWS/GCP)',
-            'At 50,000 sites: ~$30/mo total hosting cost. This is the entire business\'s web infrastructure.',
+      {/* Revenue */}
+      <div className="flex flex-col gap-4">
+        <BSection title="Revenue model — the first 6 months"
+          sub="Manual. Unsexy. The goal is 50 paying customers and enough signal to decide on Plan C." />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-1">
+          <BMoney value="$289" label="profit per done-for-you setup" />
+          <BMoney value="$11.97" label="net recurring / customer / mo" />
+          <BMoney value="$586" label="24-month LTV per customer" />
+          <BMoney value="~$5/mo" label="total infra cost" />
+        </div>
+        <div className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid var(--color-border)` }}>
+          <div className="grid px-5 py-2.5 text-xs font-bold"
+            style={{ gridTemplateColumns: '1fr 1.5fr 1fr 1fr 1fr', background: amberA(0.08), borderBottom: `1px solid var(--color-border)`, color: amber }}>
+            <span>Month</span><span>Done-for-you</span><span>Self-serve $12</span><span>Setup fees</span><span>Total rev</span>
+          </div>
+          {[
+            { mo: '1–2', dfy: '5 (free/discounted)', ss: '0', fees: '$0', rev: '$60 MRR' },
+            { mo: '3', dfy: '5 at $299', ss: '5', fees: '$1,495', rev: '$1,555' },
+            { mo: '4', dfy: '8 at $299', ss: '12', fees: '$2,392', rev: '$2,536' },
+            { mo: '5', dfy: '10 at $299', ss: '22', fees: '$2,990', rev: '$3,254' },
+            { mo: '6', dfy: '10 at $299', ss: '35', fees: '$2,990', rev: '$3,410 + $420 MRR' },
+          ].map(({ mo, dfy, ss, fees, rev }, i) => (
+            <div key={mo} className="grid px-5 py-3 text-xs items-start"
+              style={{ gridTemplateColumns: '1fr 1.5fr 1fr 1fr 1fr', borderBottom: `1px solid var(--color-border)`, background: i % 2 === 0 ? 'var(--color-surface)' : 'transparent', color: 'var(--color-muted)' }}>
+              <span style={{ color: 'var(--color-text)', fontWeight: 600 }}>{mo}</span>
+              <span>{dfy}</span><span>{ss}</span><span>{fees}</span>
+              <span className="font-bold" style={{ color: green }}>{rev}</span>
+            </div>
+          ))}
+        </div>
+        <BCard>
+          <BLabel>The decision gate at month 6</BLabel>
+          <BBullet items={[
+            'If you have 50+ customers and referrals are coming in: you have product-market fit. Build Plan C.',
+            'If you have 50+ customers but retention is poor (churn >5%/mo): fix the product before scaling.',
+            'If you have <20 customers after 6 months of effort: the vertical or pricing is wrong. Pivot the vertical, not the architecture.',
+            'The data from 50 done-for-you builds is the market research for Plan C\'s AI provisioning. Don\'t skip this.',
           ]} />
-        </Card>
-        <Card>
-          <SectionLabel>Apps Script role — JSON API only, not a web server</SectionLabel>
-          <CodeBlock>{`// Apps Script doGet — returns data as JSON (not HTML)
-function doGet(e) {
-  const action = e.parameter.action;
-  const module = e.parameter.module || '';
+        </BCard>
+      </div>
 
-  if (action !== 'data') {
-    return jsonResponse({ error: 'invalid_action' });
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Plan C — Platform Vision
+// Visual identity: Violet/purple, ambitious, futuristic, data-heavy.
+// Dark card surfaces, bold metrics, structural code blocks, phase gates.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function PlanCTab() {
+  const violet = 'oklch(0.63 0.24 295)';
+  const violetA = (a: number) => `oklch(0.63 0.24 295 / ${a})`;
+  const green = 'oklch(0.72 0.18 145)';
+  const warn = 'oklch(0.70 0.16 30)';
+  const warnA = (a: number) => `oklch(0.70 0.16 30 / ${a})`;
+
+  function CSection({ title, sub }: { title: string; sub?: string }) {
+    return (
+      <div className="flex flex-col gap-1 pb-3 mb-1" style={{ borderBottom: `1px solid ${violetA(0.3)}` }}>
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-5 rounded-full shrink-0" style={{ background: violet }} />
+          <p className="text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--color-text)' }}>{title}</p>
+        </div>
+        {sub && <p className="text-xs ml-4" style={{ color: 'var(--color-subtle)' }}>{sub}</p>}
+      </div>
+    );
   }
 
-  const rows = getCachedRows(module); // CacheService, 5-min TTL
+  function CCard({ children, dark }: { children: React.ReactNode; dark?: boolean }) {
+    return (
+      <div className="rounded-xl p-4 flex flex-col gap-3"
+        style={{
+          background: dark ? violetA(0.08) : 'var(--color-surface)',
+          border: `1px solid ${dark ? violetA(0.35) : violetA(0.15)}`,
+        }}>
+        {children}
+      </div>
+    );
+  }
+
+  function CAlert({ children, type = 'vision' }: { children: React.ReactNode; type?: 'vision' | 'warn' }) {
+    const isWarn = type === 'warn';
+    return (
+      <div className="rounded-xl p-4 text-sm leading-relaxed"
+        style={{
+          background: isWarn ? warnA(0.07) : violetA(0.07),
+          border: `1px solid ${isWarn ? warnA(0.35) : violetA(0.30)}`,
+          color: 'var(--color-muted)',
+          borderTop: `3px solid ${isWarn ? warn : violet}`,
+        }}>
+        {children}
+      </div>
+    );
+  }
+
+  function CCode({ children }: { children: string }) {
+    return (
+      <pre className="rounded-lg p-3 text-xs font-mono leading-loose overflow-x-auto whitespace-pre"
+        style={{
+          background: 'oklch(0.12 0.02 250 / 0.8)',
+          color: 'oklch(0.85 0.05 250)',
+          border: `1px solid ${violetA(0.2)}`,
+        }}>
+        {children}
+      </pre>
+    );
+  }
+
+  function CBullet({ items }: { items: string[] }) {
+    return (
+      <div className="flex flex-col gap-1.5">
+        {items.map((item) => (
+          <div key={item} className="flex items-start gap-2 text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+            <span className="shrink-0 mt-0.5 font-bold" style={{ color: violet }}>→</span>
+            {item}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  function CLabel({ children }: { children: React.ReactNode }) {
+    return (
+      <p className="text-xs font-bold uppercase tracking-widest" style={{ color: violet }}>{children}</p>
+    );
+  }
+
+  function CPhase({ n, title, timeline, cost, outcome, steps, gate }: {
+    n: number; title: string; timeline: string; cost: string; outcome: string; steps: string[]; gate: string;
+  }) {
+    return (
+      <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${violetA(0.25)}` }}>
+        <div className="flex items-center gap-3 px-4 py-3"
+          style={{ background: violetA(0.10), borderBottom: `1px solid ${violetA(0.2)}` }}>
+          <div className="flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-bold font-mono shrink-0"
+            style={{ background: violet, color: '#fff' }}>
+            {n}
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>{title}</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-[10px] font-mono" style={{ color: 'var(--color-subtle)' }}>{timeline}</span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded"
+                style={{ color: green, background: `oklch(0.72 0.18 145 / 0.12)` }}>
+                {cost}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="p-4 flex flex-col gap-3">
+          <CBullet items={steps} />
+          <div className="rounded-lg p-3 text-xs"
+            style={{ background: violetA(0.06), border: `1px solid ${violetA(0.2)}`, color: 'var(--color-muted)' }}>
+            <span className="font-bold" style={{ color: violet }}>Outcome: </span>{outcome}
+          </div>
+          <div className="text-[10px] px-2 py-1.5 rounded"
+            style={{ background: warnA(0.06), border: `1px solid ${warnA(0.25)}`, color: 'var(--color-subtle)' }}>
+            <span className="font-bold" style={{ color: warn }}>Gate: </span>{gate}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-8">
+
+      {/* Header */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-lg font-bold" style={{ color: violet }}>Plan C — Platform Vision</p>
+            <p className="text-sm mt-0.5" style={{ color: 'var(--color-muted)' }}>
+              The ambitious website builder. Real architecture. Honest scope. Build this after Plan B proves demand.
+            </p>
+          </div>
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded"
+              style={{ color: violet, background: violetA(0.12), border: `1px solid ${violetA(0.3)}` }}>
+              REQUIRES PLAN B FIRST
+            </span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded"
+              style={{ color: warn, background: warnA(0.10), border: `1px solid ${warnA(0.3)}` }}>
+              40–50 WK BUILD
+            </span>
+          </div>
+        </div>
+        <CAlert type="warn">
+          <span className="font-bold" style={{ color: warn }}>Prerequisites before starting Plan C: </span>
+          50+ paying customers from Plan B. Real data on what the AI needs to generate (from 50 done-for-you builds).
+          A decision on the brand (rgforms or a new brand — see below).
+          This is a 40–50 week build for one person. Starting it before Plan B validates demand
+          is how promising pivots run out of runway.
+        </CAlert>
+        <CAlert type="vision">
+          <span className="font-bold" style={{ color: violet }}>The real differentiator — not what you think: </span>
+          Every AI website builder does &ldquo;describe your business, we build your site in 30 seconds.&rdquo;
+          Durable launched this in 2023. Wix AI, Framer AI, Squarespace Blueprint followed.
+          AI provisioning is table stakes, not a wedge.
+          The actual differentiator is: <strong>your content lives in a Google Sheet you own
+          and you can export working Next.js source code.</strong> No builder in this space does both.
+          Lead with the Sheet and the export. Treat AI as a convenience feature, not the headline.
+        </CAlert>
+      </div>
+
+      {/* Architecture */}
+      <div className="flex flex-col gap-3">
+        <CSection title="System Architecture"
+          sub="rgforms hosts the website. Apps Script is a JSON data API. One Cloudflare Worker deployment serves every user." />
+        <CCard dark>
+          <CLabel>Runtime flow — how a page visit works</CLabel>
+          <CCode>{`Visitor → yourdomain.com (or username.rgforms.app)
+        → Cloudflare CDN: cache hit → serve HTML instantly (~15ms, worldwide)
+        → cache miss → invoke Cloudflare Worker
+
+Cloudflare Worker (one deployment, serves ALL user sites):
+  1. Read Host header → KV lookup: domain → { userId, siteConfig, scriptUrl }
+  2. Parse path: /blog/my-post → { module: 'blog', slug: 'my-post' }
+  3. Fetch data: GET scriptUrl?action=data&module=blog (Apps Script JSON API)
+     → Apps Script reads Sheet → returns JSON (CacheService, 5-min TTL)
+  4. Render HTML: inject data into chosen template, apply style CSS vars
+  5. Set Cache-Control: s-maxage=300 → Cloudflare caches for 5 min
+  6. Return full SSR HTML with <title>, meta, JSON-LD, GA4 tag, sitemap link
+
+Form submission (free tier — direct to Apps Script, not proxied):
+  Browser → POST scriptUrl (doPost) → appends row to Sheet → email notification
+
+Cache invalidation (near real-time):
+  User edits Sheet → onEdit trigger → POST /api/purge?siteId=xxx
+  → Worker purges site pages from Cloudflare cache
+  → next visitor gets fresh HTML within ~1 second`}
+          </CCode>
+        </CCard>
+        <CCard>
+          <CLabel>Apps Script — JSON API only, never serves HTML</CLabel>
+          <CCode>{`function doGet(e) {
+  if (e.parameter.action !== 'data') return jsonErr('invalid_action');
+  const rows = getCachedRows(e.parameter.module); // CacheService, 5-min TTL
   return ContentService
     .createTextOutput(JSON.stringify(rows))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-// Apps Script doPost — form submissions go straight to Sheet
 function doPost(e) {
   const { module, fields } = JSON.parse(e.postData.contents);
-  const sheet = SpreadsheetApp.getActive()
-    .getSheetByName(module + '_submissions');
-  sheet.appendRow([new Date(), ...Object.values(fields)]);
-  MailApp.sendEmail(NOTIFICATION_EMAIL, 'New ' + module, formatEmail(fields));
-  return jsonResponse({ ok: true });
+  SpreadsheetApp.getActive()
+    .getSheetByName(module + '_submissions')
+    .appendRow([new Date(), ...Object.values(fields)]);
+  MailApp.sendEmail(OWNER_EMAIL, 'New lead', formatEmail(fields));
+  return jsonOk();
 }
 
-// onEdit — busts Cloudflare cache when Sheet is edited
 function onEdit(e) {
   CacheService.getScriptCache().remove(e.range.getSheet().getName());
   UrlFetchApp.fetch(PURGE_URL + '?siteId=' + SITE_ID, { method: 'post' });
 }`}
-          </CodeBlock>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-            Apps Script never serves HTML. It is purely a data layer — read JSON, write rows.
-            The Cloudflare Worker owns the rendering. This separation is what makes the export feature possible.
+          </CCode>
+          <p className="text-xs" style={{ color: 'var(--color-subtle)' }}>
+            Apps Script never serves HTML. It is purely a data layer. The Cloudflare Worker owns rendering.
+            This separation makes the Next.js export possible — same data source whether rendered by Cloudflare
+            or the user&apos;s self-hosted Next.js app.
           </p>
-        </Card>
-      </div>
-
-      {/* AI provisioning */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>AI provisioning — the star feature</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>One sentence about your business. AI designs the whole site. User confirms. 90-second provision.</p>
-        </div>
-        <Card>
-          <SectionLabel>The full flow</SectionLabel>
-          <CodeBlock>{`Step 1 — User types a description (no form to fill):
-  "I run a yoga studio in Brooklyn. Morning classes, private sessions,
-   4 instructors. I want to take class bookings and sell retreat packages."
-
-Step 2 — Claude Haiku processes the prompt (cost: ~$0.008/call):
-  Input:  system prompt + user description   (~800 tokens)
-  Output: structured site spec JSON          (~2,500 tokens)
-  Time:   ~1.5 seconds
-
-Step 3 — rgforms shows a confirmation screen (user can edit before committing):
-  ┌─────────────────────────────────────────────────┐
-  │ Site name:     Brooklyn Yoga Studio              │
-  │ Style:         Warm   Font: Lato   Color: #7c9e8f│
-  │                                                  │
-  │ Sections (8):  hero · services · team · events   │
-  │                gallery · testimonials · faq · loc │
-  │                                                  │
-  │ Forms (3):     booking · contact · newsletter    │
-  │                                                  │
-  │ Seed data:     3 services, 2 team members,       │
-  │                2 FAQ items, 1 testimonial         │
-  │                (edit anything in your Sheet after)│
-  │                                                  │
-  │ Credits used:  4 (3 bundle + 1 extra module)     │
-  │                                                  │
-  │         [Edit]              [Build my site →]    │
-  └─────────────────────────────────────────────────┘
-
-Step 4 — User clicks "Build my site":
-  → Create Google Sheet with all tabs + seed data pre-filled
-  → Compile Apps Script (JSON API + form handlers + onEdit trigger)
-  → Deploy script as web app
-  → Register site in Cloudflare KV: { siteId → scriptUrl, config }
-  → Provision subdomain: username.rgforms.app → live
-
-Total time: ~60–90 seconds. Site is live with real content.`}
-          </CodeBlock>
-        </Card>
-        <Card>
-          <SectionLabel>What the AI generates — the site spec JSON</SectionLabel>
-          <CodeBlock>{`{
-  "siteConfig": {
-    "site_name": "Brooklyn Yoga Studio",
-    "tagline": "Mind. Body. Community.",
-    "style": "warm",
-    "font": "Lato",
-    "primary_color": "#7c9e8f",
-    "meta_description": "Yoga classes in Brooklyn — morning flow, private sessions, and retreat experiences for all levels.",
-    "ga_placeholder": true    // user adds GA4 ID later in _config Sheet
-  },
-  "modules": ["hero","services","team","events","gallery","testimonials","faq","locations"],
-  "formModules": ["booking","contact","newsletter"],
-  "seedData": {
-    "services": [
-      { "name": "Morning Flow", "price": "$22 / class", "featured": "TRUE",
-        "description": "60-minute vinyasa to start your day grounded.", "order": "1" },
-      { "name": "Private Session", "price": "From $120",
-        "description": "One-on-one instruction tailored to your goals.", "order": "2" },
-      { "name": "Weekend Retreat", "price": "$450",
-        "description": "2-day immersive retreat upstate. Meals included.", "order": "3" }
-    ],
-    "team": [
-      { "name": "Sarah Chen", "title": "Founder & Lead Instructor",
-        "bio": "RYT-500 certified, 12 years teaching experience.", "order": "1" },
-      { "name": "Marcus Rivera", "title": "Meditation Teacher",
-        "bio": "Specializes in mindfulness and restorative practice.", "order": "2" }
-    ],
-    "faq": [
-      { "question": "Do I need experience?",
-        "answer": "All levels welcome. Morning Flow suits beginners.", "order": "1" },
-      { "question": "What should I bring?",
-        "answer": "Mat, water bottle, comfortable clothing. Blocks provided.", "order": "2" }
-    ]
-  },
-  "bookingConfig": {
-    "services_list": "Morning Flow|Private Session|Weekend Retreat",
-    "confirmation_message": "Thank you! We'll confirm your booking within 24 hours."
-  }
-}`}
-          </CodeBlock>
-        </Card>
-        <Card>
-          <SectionLabel>AI cost — negligible at any scale</SectionLabel>
-          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
-            <div className="grid px-4 py-2 text-xs font-semibold uppercase tracking-wider"
-              style={{ gridTemplateColumns: '2fr 1fr 1fr', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>
-              <span>Item</span><span>Rate</span><span>Cost</span>
-            </div>
-            {[
-              { item: 'Claude Haiku input (~800 tokens)', rate: '$0.80 / 1M tokens', cost: '$0.00064' },
-              { item: 'Claude Haiku output (~2,500 tokens)', rate: '$4.00 / 1M tokens', cost: '$0.01000' },
-              { item: 'Total per AI provision', rate: '—', cost: '$0.01064' },
-              { item: '1,000 provisions / month', rate: '$0.01064 each', cost: '$10.64 / mo' },
-              { item: '10,000 provisions / month', rate: '$0.01064 each', cost: '$106 / mo' },
-            ].map(({ item, rate, cost }, i) => (
-              <div key={item} className="grid px-4 py-2.5 text-xs"
-                style={{ gridTemplateColumns: '2fr 1fr 1fr', borderBottom: '1px solid var(--color-border)', background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)' }}>
-                <span style={{ color: 'var(--color-text)' }}>{item}</span>
-                <span style={{ color: 'var(--color-muted)' }}>{rate}</span>
-                <span style={{ color: cost.includes('mo') ? 'oklch(0.72 0.18 145)' : 'var(--color-muted)', fontWeight: cost.includes('mo') ? 700 : 400 }}>{cost}</span>
-              </div>
-            ))}
-          </div>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-            At 10,000 AI provisions/month the cost is $106 — easily absorbed by credit pack revenue from those same provisions.
-            AI provisioning is included on Launch tier and above; free tier users get a manual module-picker instead.
-          </p>
-        </Card>
-      </div>
-
-      {/* Module library */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Module library — the full catalog</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Every module is a Sheet tab + a rendered section + optional form handler. AI picks the right set; users add more at any time.</p>
-        </div>
-        <Card>
-          <SectionLabel>Content modules — read from Sheet, rendered on site</SectionLabel>
-          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
-            <div className="grid px-4 py-2 text-xs font-semibold uppercase tracking-wider"
-              style={{ gridTemplateColumns: '1fr 2fr', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>
-              <span>Module</span><span>Sheet tab = CMS for</span>
-            </div>
-            {[
-              { m: 'hero',         s: 'Headline, subheadline, CTA button text + link, background image — single row' },
-              { m: 'blog',         s: 'Posts: title, slug, body (Markdown), author, date, tags, og_image. Index + post pages.' },
-              { m: 'services',     s: 'Offerings: name, description, price, icon, featured flag, order' },
-              { m: 'team',         s: 'Staff: name, title, bio, photo_url, linkedin, twitter, order' },
-              { m: 'testimonials', s: 'Reviews: name, company, quote, rating (1–5), photo_url, order' },
-              { m: 'faq',          s: 'Q&A pairs: question, answer, category. Collapsible accordion, grouped.' },
-              { m: 'gallery',      s: 'Portfolio / photos: title, image_url (Drive link), description, tag, link' },
-              { m: 'events',       s: 'Schedule: title, date, time, location, description, ticket_url' },
-              { m: 'menu',         s: 'Food/drink: name, description, price, category, dietary_flags, image_url' },
-              { m: 'products',     s: 'Catalog: name, price, image, description, variants, buy_link (external checkout)' },
-              { m: 'jobs',         s: 'Open roles: title, department, location, type (full/part), description, apply_url' },
-              { m: 'press',        s: 'Media coverage: publication, headline, date, link, logo_url' },
-              { m: 'partners',     s: 'Logos + names: company, logo_url, website, tier (gold/silver/bronze)' },
-              { m: 'stats',        s: 'Key numbers: label, value, suffix — e.g. "Clients served", "500", "+"' },
-              { m: 'timeline',     s: 'History / roadmap: year, title, description. Renders as vertical timeline.' },
-              { m: 'resources',    s: 'Downloads / links: title, type (PDF/video/link), url, description, date' },
-              { m: 'locations',    s: 'Multi-location: name, address, phone, hours, map_embed_url' },
-              { m: 'pricing',      s: 'Plans: name, price, period, features (pipe-delimited), highlight, cta_label' },
-            ].map(({ m, s }, i) => (
-              <div key={m} className="grid px-4 py-2.5 text-xs items-start"
-                style={{ gridTemplateColumns: '1fr 2fr', borderBottom: '1px solid var(--color-border)', background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)' }}>
-                <Mono>{m}</Mono>
-                <span style={{ color: 'var(--color-muted)' }}>{s}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-        <Card>
-          <SectionLabel>Form modules — write to Sheet tab, trigger notification email</SectionLabel>
-          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
-            <div className="grid px-4 py-2 text-xs font-semibold uppercase tracking-wider"
-              style={{ gridTemplateColumns: '1fr 2fr', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>
-              <span>Module</span><span>Collects → Sheet tab</span>
-            </div>
-            {[
-              { m: 'contact',    s: 'Name, email, message, subject. Universal — on every site.' },
-              { m: 'newsletter', s: 'Email, first name, opt-in timestamp. Subscribers accumulate.' },
-              { m: 'booking',    s: 'Name, email, date, time, service, notes. Appointment request.' },
-              { m: 'quote',      s: 'Name, email, company, project type, budget range, description. RFQ.' },
-              { m: 'apply',      s: 'Name, email, role, resume_url (Drive link), cover letter.' },
-              { m: 'rsvp',       s: 'Name, email, event_id, headcount, dietary notes.' },
-              { m: 'intake',     s: 'Custom fields defined in _config. Any intake form or survey.' },
-            ].map(({ m, s }, i) => (
-              <div key={m} className="grid px-4 py-2.5 text-xs items-start"
-                style={{ gridTemplateColumns: '1fr 2fr', borderBottom: '1px solid var(--color-border)', background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)' }}>
-                <Mono>{m}</Mono>
-                <span style={{ color: 'var(--color-muted)' }}>{s}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-      </div>
-
-      {/* Business type presets */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Any business type — AI-generated or manual preset</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>These are the module combinations the AI picks by default. Every combination is fully editable — add or remove modules at any time.</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {[
-            { biz: 'Digital Agency',         mods: 'hero · services · team · testimonials · blog · stats · contact', form: 'contact + quote' },
-            { biz: 'Freelance Portfolio',     mods: 'hero · gallery · services · testimonials · blog · contact', form: 'contact' },
-            { biz: 'Restaurant / Cafe',       mods: 'hero · menu · gallery · events · testimonials · locations', form: 'contact + booking + rsvp' },
-            { biz: 'Law Firm',               mods: 'hero · services · team · testimonials · faq · blog · locations', form: 'contact + intake' },
-            { biz: 'Medical Practice',        mods: 'hero · services · team · faq · testimonials · locations', form: 'contact + booking + intake' },
-            { biz: 'SaaS / App Landing',      mods: 'hero · stats · services · pricing · faq · testimonials · blog', form: 'contact + newsletter' },
-            { biz: 'E-commerce (light)',      mods: 'hero · products · gallery · testimonials · faq · blog', form: 'contact + newsletter' },
-            { biz: 'Non-profit',             mods: 'hero · stats · events · team · partners · press · timeline', form: 'contact + newsletter + rsvp' },
-            { biz: 'Real Estate Agent',       mods: 'hero · gallery · services · testimonials · stats · locations', form: 'contact + booking + quote' },
-            { biz: 'Personal Brand / Speaker',mods: 'hero · blog · events · press · testimonials · resources', form: 'contact + newsletter + booking' },
-            { biz: 'Fitness / Wellness',      mods: 'hero · services · team · events · gallery · testimonials', form: 'contact + booking + newsletter' },
-            { biz: 'Tech Startup',           mods: 'hero · stats · services · team · press · jobs · blog · faq', form: 'contact + newsletter + apply' },
-            { biz: 'Consulting Firm',         mods: 'hero · services · team · blog · partners · stats', form: 'contact + quote' },
-            { biz: 'Event / Conference',      mods: 'hero · events · team (speakers) · partners (sponsors) · faq · gallery', form: 'contact + rsvp + newsletter' },
-            { biz: 'Photography Studio',      mods: 'hero · gallery · services · pricing · testimonials · blog', form: 'contact + booking + quote' },
-            { biz: 'Contractor / Trades',     mods: 'hero · services · gallery · testimonials · stats · locations', form: 'contact + quote + booking' },
-            { biz: 'School / Tutoring',       mods: 'hero · services · team · events · faq · testimonials', form: 'contact + booking + newsletter' },
-            { biz: 'Accounting / Finance',    mods: 'hero · services · team · faq · resources · testimonials · blog', form: 'contact + intake + quote' },
-          ].map(({ biz, mods, form }) => (
-            <div key={biz} className="rounded-lg p-3 flex flex-col gap-1.5"
-              style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
-              <p className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>{biz}</p>
-              <p className="text-[10px] font-mono leading-relaxed" style={{ color: 'var(--color-accent)' }}>{mods}</p>
-              <p className="text-[10px]" style={{ color: 'var(--color-subtle)' }}>Forms: {form}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Visual styles */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Visual styles — independent of modules</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>The AI picks a style based on your business type. Users swap styles any time — same data, new look, no re-provisioning.</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          {[
-            { name: 'Clean',      desc: 'White background, generous whitespace, Inter. Safe, professional, universal.', tag: 'Default' },
-            { name: 'Bold',       desc: 'Large type, high contrast, accent color blocks. Agencies and creative studios.', tag: '' },
-            { name: 'Minimal',    desc: 'Near-monochrome, tight grid. Portfolio, personal brand, architects.', tag: '' },
-            { name: 'Warm',       desc: 'Cream background, serif headings, earthy tones. Restaurants, wellness, artisans.', tag: '' },
-            { name: 'Corporate',  desc: 'Navy/gray palette, formal type, structured grid. Law, finance, consulting.', tag: '' },
-            { name: 'Playful',    desc: 'Rounded cards, bright accents, relaxed layout. Schools, studios, consumer apps.', tag: '' },
-            { name: 'Dark',       desc: 'Dark background, neon accent, code aesthetic. Tech, SaaS, developer tools.', tag: '' },
-            { name: 'Magazine',   desc: 'Multi-column editorial grid, image-forward. Media, blogs, news outlets.', tag: '' },
-            { name: 'Storefront', desc: 'Product-card grid, price badges, CTA-heavy. Catalogs, e-commerce light.', tag: '' },
-          ].map(({ name, desc, tag }) => (
-            <div key={name} className="rounded-lg p-3 flex flex-col gap-1"
-              style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
-              <div className="flex items-center gap-2">
-                <p className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>{name}</p>
-                {tag && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold"
-                  style={{ color: 'oklch(0.65 0.22 285)', background: 'oklch(0.65 0.22 285 / 0.10)', border: '1px solid oklch(0.65 0.22 285 / 0.30)' }}>{tag}</span>}
-              </div>
-              <p className="text-[10px] leading-relaxed" style={{ color: 'var(--color-subtle)' }}>{desc}</p>
-            </div>
-          ))}
-        </div>
-        <Card>
-          <SectionLabel>Style × module independence — how it works technically</SectionLabel>
-          <CodeBlock>{`// A "style" is a CSS variable set + layout config. Modules don't know about style.
-
-// _config Sheet (user can edit color, font, style directly):
-  primary_color | #7c9e8f
-  style         | warm          ← Cloudflare Worker reads this, applies CSS vars
-  font          | Lato
-
-// Cloudflare Worker selects the CSS file at render time:
-  const styles = await KV.get('style:warm:css'); // pre-built CSS string per style
-  const html = renderTemplate(moduleData, { styles, config });
-
-// Changing style = editing _config Sheet → Worker reads new value on next cache miss.
-// No re-provisioning. No script recompile. No credits spent.`}
-          </CodeBlock>
-        </Card>
-      </div>
-
-      {/* Custom domains */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Custom domains + DNS — simplified for non-technical users</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Three paths. The easiest is fully automated — no DNS knowledge required.</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card accent>
-            <SectionLabel>Path 1 — Buy through rgforms (recommended)</SectionLabel>
-            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-              User types a domain name → rgforms checks availability via Namecheap API → user pays in Stripe
-              Checkout → rgforms registers the domain, sets nameservers to Cloudflare, provisions SSL, adds
-              the Cloudflare DNS record. Done. Zero user interaction with DNS.
-            </p>
-            <CodeBlock>{`User flow:
-  1. Type "acmeyoga.com"
-  2. See: "Available — $12.99/yr"
-  3. Click Buy (Stripe Checkout)
-  4. Done — acmeyoga.com is live
-
-rgforms backend:
-  → Namecheap API: register domain
-  → Set nameservers: ns1.cloudflare.com
-  → Cloudflare API: add zone, CNAME record
-  → Cloudflare API: add custom hostname
-  → SSL: auto-provisioned by Cloudflare
-  → KV: map acmeyoga.com → userId`}
-            </CodeBlock>
-            <p className="text-xs" style={{ color: 'var(--color-subtle)' }}>
-              Revenue: $2–4 markup per domain/year. At 2,000 domains: ~$6,000/yr passive.
-            </p>
-          </Card>
-          <Card>
-            <SectionLabel>Path 2 — Bring your own domain (guided)</SectionLabel>
-            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-              User enters their existing domain. rgforms shows step-by-step DNS instructions with
-              copy-paste values and a live propagation checker that turns green when complete.
-            </p>
-            <CodeBlock>{`rgforms dashboard shows:
-
-  Step 1: Log into your registrar
-  Step 2: Add these DNS records:
-
-  Type  Name   Value
-  CNAME www  → sites.rgforms.app
-  A     @    → 104.21.x.x (Cloudflare)
-
-  [Copy CNAME]  [Copy A record]
-
-  Step 3: Waiting for DNS...
-    ○ www.acmeyoga.com — propagating
-    ✓ www.acmeyoga.com — live! (~15 min avg)`}
-            </CodeBlock>
-          </Card>
-          <Card>
-            <SectionLabel>Path 3 — Transfer DNS to rgforms</SectionLabel>
-            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-              Power users change their nameservers to rgforms-managed Cloudflare.
-              Full DNS control from the rgforms dashboard — add subdomains, MX records for email,
-              TXT records for verification, all in one place.
-            </p>
-            <BulletList items={[
-              'Nameservers: ns1.rgforms-dns.app / ns2.rgforms-dns.app',
-              'Dashboard DNS editor: add A, CNAME, MX, TXT records visually',
-              'Automatic SSL for every subdomain (api.yoursite.com, mail.yoursite.com)',
-              'Useful for agencies managing all client DNS from one place',
-            ]} />
-          </Card>
-        </div>
-        <Card>
-          <SectionLabel>SSL — fully automated, zero user involvement</SectionLabel>
-          <BulletList items={[
-            'Cloudflare Universal SSL: automatically provisions TLS cert for every custom hostname added',
-            'Wildcard cert covers *.rgforms.app — all free-tier subdomains are HTTPS with no configuration',
-            'Custom domain SSL: Cloudflare issues cert within minutes of DNS resolution',
-            'Auto-renewal: Cloudflare renews all certs silently — no Let\'s Encrypt expiry emails ever',
-            'HSTS enabled by default: browsers force HTTPS, prevents mixed-content warnings',
-          ]} />
-        </Card>
-      </div>
-
-      {/* Export to Next.js */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Export to Next.js — own your code</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>No other website builder does this. Download a full, working Next.js project and deploy it anywhere.</p>
-        </div>
-        <CalloutBox>
-          <Strong>Why this is a major differentiator:</Strong> Squarespace, Wix, and Webflow all hold your site
-          hostage. If you want to leave, you lose your design and have to rebuild. rgforms is the only
-          builder where leaving is a first-class feature — download your code and self-host on Netlify, Vercel,
-          or your own server. Your data is already in Google Sheets. Your site is already yours.
-          This builds massive trust with developers who would otherwise never use a website builder.
-        </CalloutBox>
-        <Card>
-          <SectionLabel>Generated project structure</SectionLabel>
-          <CodeBlock>{`acme-yoga-studio/
-├── app/
-│   ├── layout.tsx              ← GA4, fonts, global CSS
-│   ├── page.tsx                ← home (hero + module sections)
-│   ├── blog/
-│   │   ├── page.tsx            ← blog index
-│   │   └── [slug]/page.tsx     ← blog post (ISR, revalidate: 300)
-│   ├── services/page.tsx
-│   ├── team/page.tsx
-│   ├── events/page.tsx
-│   ├── gallery/page.tsx
-│   ├── contact/page.tsx
-│   └── sitemap.ts              ← auto-generates sitemap.xml from Sheet data
-├── components/
-│   ├── modules/
-│   │   ├── Hero.tsx
-│   │   ├── Services.tsx        ← pre-built, styled for chosen visual style
-│   │   ├── Team.tsx
-│   │   └── ...                 ← only the modules the user provisioned
-│   └── ui/                     ← Button, Card, Nav, Footer primitives
-├── lib/
-│   ├── sheets.ts               ← pre-configured with SCRIPT_URL + SHEET_ID
-│   └── types.ts                ← TypeScript types per module
-├── public/
-│   └── favicon.ico
-├── .env.example                ← SCRIPT_URL, SHEET_ID, GA_ID all pre-filled
-├── next.config.ts
-├── tailwind.config.ts
-└── README.md                   ← 5-step deploy guide for Netlify / Vercel`}
-          </CodeBlock>
-        </Card>
-        <Card>
-          <SectionLabel>lib/sheets.ts — pre-configured, user just deploys</SectionLabel>
-          <CodeBlock>{`// This file is generated with the user's actual SCRIPT_URL baked in.
-// User copies .env.example to .env.local — values are already correct.
-
-const SCRIPT_URL = process.env.SCRIPT_URL!; // pre-filled from provisioning
-
-export async function getRows<T>(module: string): Promise<T[]> {
-  const res = await fetch(
-    \`\${SCRIPT_URL}?action=data&module=\${module}\`,
-    { next: { revalidate: 300 } }  // ISR: re-fetch every 5 minutes
-  );
-  if (!res.ok) return [];
-  return res.json();
-}
-
-// Usage in any page:
-// const services = await getRows<Service>('services');
-// → returns the user's Google Sheet rows as typed objects`}
-          </CodeBlock>
-        </Card>
-        <Card>
-          <SectionLabel>Deploy to Netlify in 5 steps (what README.md says)</SectionLabel>
-          <BulletList items={[
-            '1. Unzip the download. Open terminal: npm install',
-            '2. Copy .env.example → .env.local  (all values already pre-filled)',
-            '3. npm run dev — verify site works locally at localhost:3000',
-            '4. Push to a GitHub repo',
-            '5. Connect repo to Netlify / Vercel — deploy. Your domain from before still works via CNAME.',
-          ]} />
-          <p className="text-xs leading-relaxed mt-1" style={{ color: 'var(--color-subtle)' }}>
-            Export is available on Studio plan and above. It&apos;s a powerful trust signal even for users
-            who never export — knowing they <em>can</em> leave removes the fear of commitment.
-          </p>
-        </Card>
-      </div>
-
-      {/* Sheet as CMS */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>The Sheet as CMS</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Every website section is a Sheet tab. Every piece of content is a row. No CMS login ever.</p>
-        </div>
-        <Card>
-          <SectionLabel>Provisioned Sheet structure</SectionLabel>
-          <CodeBlock>{`Tab: _config
-  key               | value
-  site_name         | Brooklyn Yoga Studio
-  tagline           | Mind. Body. Community.
-  primary_color     | #7c9e8f
-  style             | warm          ← change this to swap visual style instantly
-  font              | Lato
-  ga_id             | G-XXXXXXXXXX  ← user adds GA4 ID here
-  meta_description  | Yoga classes in Brooklyn…
-
-Tab: blog       title | slug | body | published | publish_at | date | author | og_image
-Tab: team       name | title | bio | photo_url | linkedin | order | published
-Tab: services   name | description | price | icon | featured | order | published
-Tab: testimonials  name | company | quote | rating | photo_url | order | published
-Tab: faq        question | answer | category | order | published
-Tab: events     title | date | time | location | description | ticket_url | published
-Tab: nav        label | page | order | hidden
-Tab: booking_submissions    ← booking form responses land here
-Tab: contact_submissions    ← contact form responses land here`}
-          </CodeBlock>
-        </Card>
-        <Card>
-          <SectionLabel>Column conventions — universal across all modules</SectionLabel>
-          <BulletList items={[
-            'published: TRUE/FALSE — hides/shows row site-wide. Default TRUE in AI seed data.',
-            'publish_at: ISO datetime — hourly trigger auto-publishes at that time. Free scheduled posts.',
-            'order: integer — sort order of section items. Reorder by editing the number.',
-            'slug: URL-safe string — "my-post" becomes /blog/my-post on the live site.',
-            'meta_description / og_image: per-row SEO overrides. Falls back to _config defaults.',
-            'Any extra column is silently ignored — clients add notes columns without breaking anything.',
-          ]} />
-        </Card>
-      </div>
-
-      {/* SEO */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>SEO — complete out of the box</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Because rgforms hosts the site (not Apps Script), we get real HTTP, clean URLs, and proper server-side rendering.</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Card>
-            <SectionLabel>What every site gets automatically</SectionLabel>
-            <BulletList items={[
-              'Clean path-based URLs: /blog/my-post, /services, /team (not ?page= query strings)',
-              '<title> and <meta description> per page, from Sheet row or _config fallback',
-              'Open Graph tags: og:title, og:description, og:image on every page',
-              'JSON-LD structured data per page type (LocalBusiness, BlogPosting, FAQPage, Person)',
-              'sitemap.xml auto-generated from all published pages and blog slugs',
-              'robots.txt configured per site (allow all by default, customizable)',
-              'Google Analytics 4: GA4 tag injected from ga_id in _config Sheet',
-              'Proper HTTP 404 pages — real 404 status codes, not a 200 with error content',
-              'Canonical URLs: prevent duplicate content between www and non-www',
-            ]} />
-          </Card>
-          <Card>
-            <SectionLabel>JSON-LD structured data — auto-built from Sheet rows</SectionLabel>
-            <CodeBlock>{`// Cloudflare Worker injects per-page schema:
-
-// Home → LocalBusiness
-{ "@type": "LocalBusiness",
-  "name": config.site_name,
-  "description": config.meta_description,
-  "url": "https://acmeyoga.com" }
-
-// Blog post → BlogPosting (rich result eligible)
-{ "@type": "BlogPosting",
-  "headline": post.title,
-  "author": { "@type": "Person", "name": post.author },
-  "datePublished": post.date,
-  "image": post.og_image }
-
-// FAQ page → FAQPage (Google shows as accordion in search)
-{ "@type": "FAQPage",
-  "mainEntity": faqs.map(f => ({
-    "@type": "Question", "name": f.question,
-    "acceptedAnswer": { "text": f.answer }
-  })) }
-
-// No configuration needed. Filled automatically from Sheet data.`}
-            </CodeBlock>
-          </Card>
-        </div>
-      </div>
-
-      {/* Infrastructure costs */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Infrastructure costs — real numbers</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Cloudflare Workers does not charge for egress. This changes everything about the cost model.</p>
-        </div>
-        <Card>
-          <SectionLabel>Monthly infra cost at scale</SectionLabel>
-          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
-            <div className="grid px-4 py-2 text-xs font-semibold uppercase tracking-wider"
-              style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>
-              <span>Component</span><span>1,000 sites</span><span>10,000 sites</span><span>100,000 sites</span>
+        </CCard>
+        <CCard>
+          <CLabel>Infrastructure cost — real Cloudflare numbers</CLabel>
+          <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${violetA(0.2)}` }}>
+            <div className="grid px-4 py-2 text-[10px] font-mono font-bold uppercase tracking-wider"
+              style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr', background: violetA(0.10), borderBottom: `1px solid ${violetA(0.2)}`, color: violet }}>
+              <span>Component</span><span>1K sites</span><span>10K sites</span><span>100K sites</span>
             </div>
             {[
               { c: 'Cloudflare Workers (requests)', a: '$5', b: '$15', d: '$100' },
               { c: 'Cloudflare KV (configs + cache)', a: '$0', b: '$5', d: '$30' },
-              { c: 'Firestore (user metadata)', a: '$0', b: '$0', d: '$20' },
-              { c: 'Claude Haiku (AI provisions)', a: '$1', b: '$10', d: '$100' },
-              { c: 'Cloudflare egress', a: '$0', b: '$0', d: '$0' },
-              { c: 'Total infra / month', a: '$6', b: '$30', d: '$250' },
+              { c: 'Firestore (user metadata only)', a: '$0', b: '$0', d: '$20' },
+              { c: 'Claude Sonnet (AI provisions)', a: '$1', b: '$10', d: '$100' },
+              { c: 'Egress fees', a: '$0', b: '$0', d: '$0' },
+              { c: 'Total / month', a: '$6', b: '$30', d: '$250' },
             ].map(({ c, a, b, d }, i) => (
-              <div key={c} className="grid px-4 py-2.5 text-xs"
-                style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr', borderBottom: '1px solid var(--color-border)', background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)' }}>
+              <div key={c} className="grid px-4 py-2 text-xs font-mono"
+                style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr', borderBottom: `1px solid ${violetA(0.1)}`, background: i % 2 === 0 ? 'var(--color-surface)' : 'transparent' }}>
                 <span style={{ color: c.includes('Total') ? 'var(--color-text)' : 'var(--color-muted)', fontWeight: c.includes('Total') ? 700 : 400 }}>{c}</span>
-                <span style={{ color: c.includes('Total') ? 'oklch(0.72 0.18 145)' : 'var(--color-muted)', fontWeight: c.includes('Total') ? 700 : 400 }}>{a}</span>
-                <span style={{ color: c.includes('Total') ? 'oklch(0.72 0.18 145)' : 'var(--color-muted)', fontWeight: c.includes('Total') ? 700 : 400 }}>{b}</span>
-                <span style={{ color: c.includes('Total') ? 'oklch(0.72 0.18 145)' : 'var(--color-muted)', fontWeight: c.includes('Total') ? 700 : 400 }}>{d}</span>
+                {[a, b, d].map((v, vi) => (
+                  <span key={vi} style={{ color: c.includes('Total') ? green : 'var(--color-muted)', fontWeight: c.includes('Total') ? 700 : 400 }}>{v}</span>
+                ))}
               </div>
             ))}
           </div>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-            Cloudflare Workers Paid plan: $5/mo flat + $0.50/million requests beyond 10M. No egress fees ever.
-            At 100,000 sites each averaging 30 visitors/day × 2 pages: 180M requests/month → $90 Workers cost.
-            This entire platform runs for <strong style={{ color: 'var(--color-text)' }}>$250/mo at 100,000 sites.</strong>
+          <p className="text-xs" style={{ color: 'var(--color-subtle)' }}>
+            Cloudflare does not charge for egress. At 100,000 sites: $250/mo total web infrastructure.
           </p>
-        </Card>
+        </CCard>
       </div>
 
-      {/* Pricing tiers */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Pricing tiers</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Four tiers. Each one unlocks the reason the previous tier felt limiting.</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-          {[
-            {
-              name: 'Free', price: 'Free', highlight: false,
-              features: ['username.rgforms.app', '5 modules max', '1 site', 'All templates', 'Manual module picker', 'rgforms badge in footer', '3 provisioning credits'],
-              gate: 'Custom domain and badge removal require Launch.',
-            },
-            {
-              name: 'Launch', price: '$19', highlight: false,
-              features: ['Custom domain + DNS setup', 'All modules', '1 site', 'AI provisioning', 'No badge', 'Basic analytics', 'Style swap anytime'],
-              gate: 'Multiple sites and code export require Studio.',
-            },
-            {
-              name: 'Studio', price: '$39', highlight: true,
-              features: ['Everything in Launch', '3 sites', 'Next.js code export', 'Full analytics + referrers', 'Webhooks on form submit', 'Priority CDN routing', 'Client access to Sheet CMS'],
-              gate: 'Unlimited sites and white-label require Agency.',
-            },
-            {
-              name: 'Agency', price: '$79', highlight: false,
-              features: ['Everything in Studio', 'Unlimited sites', 'White-label badge', '5 team seats (+$8/seat)', 'Client dashboard login', 'API access', 'Priority support'],
-              gate: 'Enterprise / BAA: future roadmap.',
-            },
-          ].map(({ name, price, highlight, features, gate }) => (
-            <div key={name} className="rounded-xl border p-4 flex flex-col gap-3"
-              style={{ background: highlight ? 'oklch(0.65 0.22 285 / 0.06)' : 'var(--color-surface)', borderColor: highlight ? 'oklch(0.65 0.22 285 / 0.35)' : 'var(--color-border)' }}>
-              <div>
-                <p className="text-sm font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>{name}</p>
-                <div className="flex items-baseline gap-1 mt-1">
-                  <span className="text-2xl font-extrabold" style={{ color: highlight ? 'var(--color-accent)' : 'var(--color-text)', fontFamily: 'var(--font-display)' }}>{price}</span>
-                  {price !== 'Free' && <span className="text-xs" style={{ color: 'var(--color-muted)' }}>/mo</span>}
+      {/* AI provisioning */}
+      <div className="flex flex-col gap-3">
+        <CSection title="AI Provisioning — honest scope and cost"
+          sub="A convenience feature, not the product. Treat it that way in the marketing." />
+        <CCard dark>
+          <CLabel>The full flow</CLabel>
+          <CCode>{`Step 1 — User types a description:
+  "I'm a real estate wholesaler in Chicago. I need a site to collect
+   seller leads and build a buyer's list."
+
+Step 2 — Claude generates site spec (Sonnet for quality, not Haiku):
+  Input:  system prompt + business description      (~1,200 tokens)
+  Output: site config JSON + seed data per module   (~6,000 tokens)
+  Cost:   ~$0.05/provision with Sonnet (not $0.008)
+  Time:   ~3 seconds
+
+  NOTE: Haiku output quality for coherent vertical-specific seed data
+  across 8 modules is insufficient. Use Sonnet for paid AI provisions.
+  At $0.05/provision and 1,000 provisions/month: $50/mo.
+
+Step 3 — Confirmation screen (editable before committing):
+  Site name: Chicago REI Solutions
+  Style: Professional (navy/clean)
+  Sections: hero · services · testimonials · faq · locations · contact
+  Forms: seller-intake · buyer-criteria · contact
+  Seed data: 3 services, 2 testimonials, 4 FAQ items (edit in Sheet after)
+  Credits: 4
+
+Step 4 — User confirms → 90-second provision → site is live`}
+          </CCode>
+        </CCard>
+      </div>
+
+      {/* Module library */}
+      <div className="flex flex-col gap-3">
+        <CSection title="Module Library"
+          sub="Start with 8 content + 4 form modules. Expand based on what Plan B customers actually need." />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <CCard>
+            <CLabel>Content modules (read from Sheet)</CLabel>
+            <div className="flex flex-col gap-0.5">
+              {[
+                { m: 'hero', d: 'Headline, subhead, CTA, background image' },
+                { m: 'services', d: 'Offerings: name, description, price, icon' },
+                { m: 'team', d: 'Staff: name, title, bio, photo, social links' },
+                { m: 'testimonials', d: 'Reviews: name, quote, rating, company' },
+                { m: 'faq', d: 'Q&A pairs, grouped by category' },
+                { m: 'gallery', d: 'Photos/portfolio: image (Drive), title, tag' },
+                { m: 'blog', d: 'Posts: title, slug, Markdown body, date' },
+                { m: 'locations', d: 'Address, hours, phone, Maps embed URL' },
+                { m: 'pricing', d: 'Plans: name, price, features, highlight' },
+                { m: 'events', d: 'Schedule: title, date, location, ticket URL' },
+                { m: 'stats', d: 'Key numbers: label, value, suffix' },
+                { m: 'jobs', d: 'Open roles: title, dept, type, apply URL' },
+              ].map(({ m, d }) => (
+                <div key={m} className="flex items-start gap-2 text-xs py-1.5" style={{ borderBottom: `1px solid ${violetA(0.10)}` }}>
+                  <code className="text-[10px] px-1.5 py-0.5 rounded font-mono shrink-0"
+                    style={{ background: violetA(0.12), color: violet, border: `1px solid ${violetA(0.25)}` }}>
+                    {m}
+                  </code>
+                  <span style={{ color: 'var(--color-muted)' }}>{d}</span>
                 </div>
-              </div>
-              <ul className="flex flex-col gap-1.5">
-                {features.map(f => (
-                  <li key={f} className="flex items-start gap-2 text-xs" style={{ color: 'var(--color-muted)' }}>
-                    <span className="shrink-0 mt-0.5 text-xs" style={{ color: 'oklch(0.72 0.18 145)' }}>✓</span>{f}
-                  </li>
+              ))}
+            </div>
+          </CCard>
+          <div className="flex flex-col gap-4">
+            <CCard>
+              <CLabel>Form modules (write to Sheet)</CLabel>
+              <div className="flex flex-col gap-0.5">
+                {[
+                  { m: 'contact', d: 'Name, email, message. Universal.' },
+                  { m: 'intake', d: 'Custom fields from _config. Any intake form.' },
+                  { m: 'booking', d: 'Service, date/time, name, notes.' },
+                  { m: 'quote', d: 'Project type, budget, description, RFQ.' },
+                  { m: 'newsletter', d: 'Email + first name. Subscribers in Sheet.' },
+                  { m: 'apply', d: 'Role, resume (Drive link), cover letter.' },
+                ].map(({ m, d }) => (
+                  <div key={m} className="flex items-start gap-2 text-xs py-1.5" style={{ borderBottom: `1px solid ${violetA(0.10)}` }}>
+                    <code className="text-[10px] px-1.5 py-0.5 rounded font-mono shrink-0"
+                      style={{ background: violetA(0.12), color: violet, border: `1px solid ${violetA(0.25)}` }}>
+                      {m}
+                    </code>
+                    <span style={{ color: 'var(--color-muted)' }}>{d}</span>
+                  </div>
                 ))}
-              </ul>
-              <p className="text-[10px] leading-relaxed pt-2" style={{ borderTop: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>{gate}</p>
+              </div>
+            </CCard>
+            <CCard>
+              <CLabel>Visual styles</CLabel>
+              <CBullet items={[
+                'Professional — white bg, Inter, navy accent. Law, finance, consulting.',
+                'Warm — cream bg, serif headings, earthy tones. Restaurants, wellness, local biz.',
+                'Bold — high contrast, large type, accent blocks. Agencies, creatives.',
+                'Modern — dark bg, neon accent, code aesthetic. Tech, SaaS.',
+                'Minimal — monochrome, tight grid. Portfolio, architects, photographers.',
+              ]} />
+            </CCard>
+          </div>
+        </div>
+      </div>
+
+      {/* Custom domains */}
+      <div className="flex flex-col gap-3">
+        <CSection title="Custom Domains — simplified for non-technical users"
+          sub="Two paths. Path 1 requires zero DNS knowledge from the user." />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <CCard dark>
+            <CLabel>Path 1 — Buy through rgforms (push this)</CLabel>
+            <CCode>{`User types "chicagoreibuys.com"
+→ rgforms checks availability (Namecheap API)
+→ "Available — $12.99/yr"
+→ User pays in Stripe Checkout
+→ rgforms registers domain (Namecheap API)
+→ Sets nameservers to Cloudflare
+→ Adds CNAME record for www
+→ SSL provisioned automatically
+→ Done — zero user DNS interaction`}
+            </CCode>
+            <p className="text-xs" style={{ color: 'var(--color-subtle)' }}>Revenue: $2–4 markup/domain/yr. At 2,000 domains: ~$6k/yr passive.</p>
+          </CCard>
+          <CCard>
+            <CLabel>Path 2 — Bring your own (guided)</CLabel>
+            <CBullet items={[
+              'User enters existing domain',
+              'rgforms shows step-by-step with copy-paste DNS records',
+              'Live propagation checker turns green when DNS resolves (~15 min avg)',
+              'SSL auto-provisioned by Cloudflare once DNS resolves',
+              'Visual screenshots for GoDaddy, Namecheap, Google Domains',
+            ]} />
+          </CCard>
+        </div>
+      </div>
+
+      {/* Export */}
+      <div className="flex flex-col gap-3">
+        <CSection title="Export to Next.js — the trust signal"
+          sub="No other builder does this. 'You can always leave' makes people more willing to commit." />
+        <CCard dark>
+          <CLabel>What the exported project contains</CLabel>
+          <CCode>{`acme-site/
+├── app/
+│   ├── layout.tsx              ← GA4, fonts, global CSS
+│   ├── page.tsx                ← home (hero + module sections)
+│   ├── blog/[slug]/page.tsx    ← blog post (ISR, revalidate: 300)
+│   ├── services/page.tsx
+│   ├── contact/page.tsx
+│   └── sitemap.ts              ← auto-generates sitemap.xml
+├── components/modules/         ← only the user's provisioned modules
+├── lib/sheets.ts               ← pre-configured with SCRIPT_URL + SHEET_ID
+├── .env.example                ← all values pre-filled from provisioning
+├── next.config.ts
+└── README.md                   ← "deploy to Netlify in 5 steps"
+
+lib/sheets.ts (pre-configured):
+  const SCRIPT_URL = process.env.SCRIPT_URL!; // their actual URL, baked in
+  export async function getRows<T>(module: string): Promise<T[]> {
+    const res = await fetch(\`\${SCRIPT_URL}?action=data&module=\${module}\`,
+      { next: { revalidate: 300 } });
+    return res.json();
+  }`}
+          </CCode>
+        </CCard>
+      </div>
+
+      {/* SEO */}
+      <div className="flex flex-col gap-3">
+        <CSection title="SEO — complete, automatic"
+          sub="Because rgforms hosts the site (not Apps Script), every SEO capability is available." />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {[
+            { t: 'Clean URLs', d: '/blog/my-post, /services, /team — not ?page= query strings. Proper path-based routing from the Cloudflare Worker.' },
+            { t: 'Per-page meta tags', d: '<title> and <meta description> from Sheet row or _config fallback. Open Graph for social sharing.' },
+            { t: 'JSON-LD structured data', d: 'LocalBusiness (home), BlogPosting (blog posts), FAQPage (faq tab — Google shows as accordion in search), Person (team).' },
+            { t: 'Sitemap.xml', d: 'Auto-generated from all published pages and blog slugs. Submit to Google Search Console in one click.' },
+            { t: 'Proper HTTP status codes', d: '404 returns 404, not 200. 301 redirects for old slugs. This matters for Google indexing.' },
+            { t: 'Google Analytics 4', d: 'GA4 tag injected from ga_id in _config Sheet. User adds their property ID — tracking is automatic.' },
+          ].map(({ t, d }) => (
+            <div key={t} className="rounded-lg p-3 flex flex-col gap-1"
+              style={{ background: 'var(--color-surface)', border: `1px solid ${violetA(0.2)}` }}>
+              <p className="text-xs font-bold" style={{ color: violet }}>{t}</p>
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{d}</p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Unit economics */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Unit economics + revenue projections</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Real cost per user. Real margin. Realistic growth trajectory.</p>
+      {/* Competitive */}
+      <div className="flex flex-col gap-3">
+        <CSection title="Competitive Landscape — platform level"
+          sub="At platform scale you're competing with well-funded companies. Be precise about where you win." />
+        <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${violetA(0.25)}` }}>
+          <div className="grid px-4 py-2 text-[10px] font-mono font-bold uppercase tracking-wider"
+            style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr', background: violetA(0.10), borderBottom: `1px solid ${violetA(0.2)}`, color: violet }}>
+            <span>Competitor</span><span>Funding / scale</span><span>What they lack</span><span>Your only advantage</span>
+          </div>
+          {[
+            { c: 'Durable.co', f: '$22M raised, 200k users', l: 'Data locked. No export. Generic forms.', a: 'Sheet CMS + Next.js export' },
+            { c: 'Framer', f: '$27M raised, design-focused', l: 'Complex for non-technical users. No form backend.', a: 'Simpler. Real form-to-Sheet.' },
+            { c: 'Wix AI Builder', f: 'Public co, $1.5B revenue', l: 'Data silo. Expensive at scale. No export.', a: 'Data ownership story.' },
+            { c: 'Dorik AI', f: 'Bootstrapped, $8M ARR', l: 'No spreadsheet CMS. Forms via Zapier.', a: 'Integrated CMS + forms.' },
+            { c: 'Webflow', f: '$140M raised, $213M ARR', l: 'Complex. No non-technical path.', a: 'Easier onboarding, same export.' },
+          ].map(({ c, f, l, a }, i) => (
+            <div key={c} className="grid px-4 py-2.5 text-xs items-start"
+              style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr', borderBottom: `1px solid ${violetA(0.12)}`, background: i % 2 === 0 ? 'var(--color-surface)' : 'transparent' }}>
+              <span className="font-semibold" style={{ color: 'var(--color-text)' }}>{c}</span>
+              <span style={{ color: 'var(--color-muted)' }}>{f}</span>
+              <span style={{ color: 'var(--color-muted)' }}>{l}</span>
+              <span style={{ color: green }}>{a}</span>
+            </div>
+          ))}
         </div>
-        <Card>
-          <SectionLabel>Cost per user per month (variable cost only)</SectionLabel>
-          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
-            <div className="grid px-4 py-2 text-xs font-semibold uppercase tracking-wider"
-              style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>
-              <span>Cost item</span><span>Free user</span><span>Launch ($19)</span><span>Agency ($79)</span>
-            </div>
-            {[
-              { item: 'Hosting (Cloudflare Workers)', free: '~$0.0003', launch: '~$0.003', agency: '~$0.03' },
-              { item: 'AI provisioning (amortized)', free: '$0', launch: '$0.01', agency: '$0.05' },
-              { item: 'Firestore metadata', free: '~$0.001', launch: '~$0.001', agency: '~$0.01' },
-              { item: 'Stripe fees (on sub revenue)', free: '$0', launch: '$0.85', agency: '$2.59' },
-              { item: 'Total variable cost / user', free: '< $0.01', launch: '~$0.86', agency: '~$2.69' },
-              { item: 'Revenue', free: '$0 (credit upsell)', launch: '$19', agency: '$79' },
-              { item: 'Gross margin', free: 'n/a', launch: '~96%', agency: '~97%' },
-            ].map(({ item, free, launch, agency }, i) => (
-              <div key={item} className="grid px-4 py-2.5 text-xs"
-                style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr', borderBottom: '1px solid var(--color-border)', background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)' }}>
-                <span style={{ color: item.includes('margin') || item.includes('Revenue') ? 'var(--color-text)' : 'var(--color-muted)', fontWeight: item.includes('margin') || item.includes('Total') ? 700 : 400 }}>{item}</span>
-                <span style={{ color: 'var(--color-muted)' }}>{free}</span>
-                <span style={{ color: item.includes('margin') ? 'oklch(0.72 0.18 145)' : 'var(--color-muted)', fontWeight: item.includes('margin') ? 700 : 400 }}>{launch}</span>
-                <span style={{ color: item.includes('margin') ? 'oklch(0.72 0.18 145)' : 'var(--color-muted)', fontWeight: item.includes('margin') ? 700 : 400 }}>{agency}</span>
+        <CAlert type="warn">
+          <span className="font-bold" style={{ color: warn }}>The distribution problem: </span>
+          Every competitor above is losing (if they are) on distribution and design quality, not on cost structure
+          or technical architecture. Your cost advantage is real — it gives you margin headroom, not customer acquisition.
+          You still need a channel. The answer from Plan B: vertical communities + done-for-you services + referral.
+          Do not assume the platform will self-distribute.
+        </CAlert>
+      </div>
+
+      {/* Brand decision */}
+      <div className="flex flex-col gap-3">
+        <CSection title="The brand decision — separate brand or hard pivot?"
+          sub="rgforms.com positions as form backends. This product is a website builder. They attract different customers." />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <CCard dark>
+            <CLabel>Option A — Separate brand (recommended)</CLabel>
+            <CBullet items={[
+              'New domain: something like sitecraft.app, sheetsite.co, gridsite.io — domain that says "website" not "form"',
+              'rgforms becomes the form backend product (Plan A), separate from the website product',
+              'Plan B and Plan C live under the new brand',
+              'Advantages: cleaner messaging, different SEO keywords, different customer expectations',
+              'Real cost: you split your marketing attention — only do this if Plan B shows real pull',
+            ]} />
+          </CCard>
+          <CCard>
+            <CLabel>Option B — Hard pivot from rgforms</CLabel>
+            <CBullet items={[
+              'rgforms becomes a website builder. Form backend is one feature.',
+              'Pro: keep existing user base, existing SEO equity, existing brand awareness',
+              'Con: confuses existing developer users. "rgforms" says nothing about websites.',
+              'Viable if rgforms has minimal traction and you want a clean break',
+              "Not viable if Plan A is generating meaningful MRR — don't abandon paying customers",
+            ]} />
+          </CCard>
+        </div>
+      </div>
+
+      {/* Pricing */}
+      <div className="flex flex-col gap-3">
+        <CSection title="Pricing Tiers — for the platform product"
+          sub="The free tier must be genuinely painful in exactly one way: the URL." />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            {
+              name: 'Free', price: 'Free', dark: false,
+              features: ['username.sitecraft.app', '5 modules', '1 site', 'All styles', 'rgforms badge', '3 credits included'],
+              gate: 'Custom domain + badge removal = upgrade.',
+            },
+            {
+              name: 'Launch', price: '$15/mo', dark: false,
+              features: ['Custom domain + SSL', 'All modules', '1 site', 'AI provisioning', 'No badge', 'Basic analytics'],
+              gate: 'More sites + export = Studio.',
+            },
+            {
+              name: 'Studio', price: '$35/mo', dark: true,
+              features: ['Everything in Launch', '3 sites', 'Next.js code export', 'Full analytics', 'Webhooks', 'Priority CDN'],
+              gate: 'Unlimited sites + white-label = Agency.',
+            },
+            {
+              name: 'Agency', price: '$75/mo', dark: false,
+              features: ['Unlimited sites', 'White-label badge', '5 team seats (+$8)', 'Client dashboard', 'API access'],
+              gate: 'Enterprise / BAA: future roadmap.',
+            },
+          ].map(({ name, price, dark, features, gate }) => (
+            <div key={name} className="rounded-xl p-4 flex flex-col gap-3"
+              style={{
+                background: dark ? violetA(0.10) : 'var(--color-surface)',
+                border: `1px solid ${dark ? violetA(0.40) : violetA(0.18)}`,
+              }}>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wide" style={{ color: dark ? violet : 'var(--color-text)' }}>{name}</p>
+                <p className="text-xl font-bold mt-0.5" style={{ color: dark ? violet : 'var(--color-text)' }}>{price}</p>
               </div>
-            ))}
-          </div>
-        </Card>
-        <Card>
-          <SectionLabel>Revenue projections — conservative growth model</SectionLabel>
-          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
-            <div className="grid px-4 py-2 text-xs font-semibold uppercase tracking-wider"
-              style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>
-              <span>Quarter</span><span>Free</span><span>Launch</span><span>Studio</span><span>Agency</span>
-              <span style={{ color: 'oklch(0.72 0.18 145)' }}>MRR</span>
-            </div>
-            {[
-              { q: 'Q1 (launch)', f: '200', la: '30', s: '10', ag: '3', mrr: '$1,107' },
-              { q: 'Q2', f: '800', la: '100', s: '35', ag: '12', mrr: '$4,303' },
-              { q: 'Q3', f: '3,000', la: '350', s: '120', ag: '40', mrr: '$15,910' },
-              { q: 'Q4', f: '8,000', la: '900', s: '300', ag: '100', mrr: '$40,800' },
-              { q: 'Y2 Q2', f: '25,000', la: '2,500', s: '800', ag: '250', mrr: '$110,750' },
-            ].map(({ q, f, la, s, ag, mrr }, i) => (
-              <div key={q} className="grid px-4 py-2.5 text-xs"
-                style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr', borderBottom: '1px solid var(--color-border)', background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)', color: 'var(--color-muted)' }}>
-                <span style={{ color: 'var(--color-text)' }}>{q}</span>
-                <span>{f}</span><span>{la}</span><span>{s}</span><span>{ag}</span>
-                <span className="font-bold" style={{ color: 'oklch(0.72 0.18 145)', fontFamily: 'var(--font-display)' }}>{mrr}</span>
+              <div className="flex flex-col gap-1">
+                {features.map((f) => (
+                  <div key={f} className="flex items-start gap-2 text-xs" style={{ color: 'var(--color-muted)' }}>
+                    <span className="shrink-0 mt-0.5" style={{ color: violet }}>→</span>{f}
+                  </div>
+                ))}
               </div>
-            ))}
+              <p className="text-[10px] pt-2 leading-relaxed" style={{ borderTop: `1px solid ${violetA(0.15)}`, color: 'var(--color-subtle)' }}>{gate}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Revenue */}
+      <div className="flex flex-col gap-3">
+        <CSection title="Revenue Projections — with honest conversion rates"
+          sub="2–5% free-to-paid (industry standard). Not 15%. Projections based on Plan B building distribution first." />
+        <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${violetA(0.25)}` }}>
+          <div className="grid px-4 py-2 text-[10px] font-mono font-bold uppercase tracking-wider"
+            style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', background: violetA(0.10), borderBottom: `1px solid ${violetA(0.2)}`, color: violet }}>
+            <span>Quarter</span><span>Free users</span><span>Paid (4%)</span><span>Avg plan</span><span>MRR</span>
           </div>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-            MRR = (Launch × $19) + (Studio × $39) + (Agency × $79) + free-tier credit pack revenue (20% of free users buy ~$12 avg).
-            Infra cost at Y2 Q2 (25,000 sites): ~$80/mo. Net margin on subscription revenue: ~97%.
-            At $110K MRR, the entire product runs for $80/mo in infra.
-          </p>
-        </Card>
-        <Card>
-          <SectionLabel>Additional revenue streams — compounding over time</SectionLabel>
-          <BulletList items={[
-            'Domain sales: $2–4 markup per .com/yr. At 5,000 domains: ~$15,000/yr recurring.',
-            'Badge backlinks: every free site has "Powered by rgforms" → SEO + brand impressions → compounding organic growth.',
-            'Agency resale: agencies charge clients $50–150/mo for a site rgforms hosts for $0.03. High-margin resale channel.',
-            'Credit packs: free users buy provisions ($5–40). 20% conversion assumed in projections above.',
-            'White-label add-on: $10/mo extra for custom badge text ("Powered by YourAgency"). Low effort, pure margin.',
-            'AI re-provision: user asks AI to redesign their site → 2 credits + $0.01 AI cost → same revenue as new site.',
-          ]} />
-        </Card>
+          {[
+            { q: 'Q1 (launch)', f: '300', p: '12', avg: '$15', mrr: '$180' },
+            { q: 'Q2', f: '1,200', p: '48', avg: '$18', mrr: '$864' },
+            { q: 'Q3', f: '4,000', p: '160', avg: '$20', mrr: '$3,200' },
+            { q: 'Q4', f: '10,000', p: '400', avg: '$22', mrr: '$8,800' },
+            { q: 'Y2 Q2', f: '30,000', p: '1,200', avg: '$24', mrr: '$28,800' },
+          ].map(({ q, f, p, avg, mrr }, i) => (
+            <div key={q} className="grid px-4 py-2.5 text-xs font-mono"
+              style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', borderBottom: `1px solid ${violetA(0.10)}`, background: i % 2 === 0 ? 'var(--color-surface)' : 'transparent', color: 'var(--color-muted)' }}>
+              <span style={{ color: 'var(--color-text)' }}>{q}</span>
+              <span>{f}</span><span>{p}</span><span>{avg}</span>
+              <span className="font-bold" style={{ color: green }}>{mrr}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
+          At Y2 Q2 ($28,800 MRR), infra cost is ~$80/mo. Net margin: ~97%.
+          These numbers assume Plan B has built real distribution. Without distribution, free user growth is the bottleneck, not conversion.
+        </p>
+        <CAlert type="warn">
+          <span className="font-bold" style={{ color: warn }}>Honest timeline for one person: </span>
+          Phase 1 (hosted sites + 3 styles + 8 modules + subdomains) is 8–10 weeks optimistically.
+          Phase 2 (AI provisioning + custom domains) is 4–6 weeks.
+          Phase 3 (Next.js export + full SEO) is 4–5 weeks.
+          Phase 4 (agency dashboard) is 6–8 weeks.
+          Total: 22–29 weeks happy path.
+          Realistically, with debugging, UX iteration, and support interruptions:{' '}
+          <strong>40–50 weeks.</strong> This is a year-long build. Plan accordingly.
+        </CAlert>
       </div>
 
       {/* Build phases */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>What to build — four phases</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Phase 1 is a launchable product. Each phase adds the feature that unlocks the next revenue tier.</p>
-        </div>
-        <PhaseCard
-          number={1}
-          title="MVP — hosted sites with manual module picker"
-          timeline="8–10 weeks"
-          cost="~$5/mo infra (Cloudflare Workers Paid)"
-          outcome="A fully hosted website builder at username.rgforms.app. Users pick modules, pick a style, provision a real working site. No AI yet, no custom domain yet — but a real product."
+      <div className="flex flex-col gap-3">
+        <CSection title="Build Phases"
+          sub="Each phase is a shippable product. Don't start the next phase until the previous one has paying users." />
+        <CPhase n={1} title="Hosted sites — the smallest viable product"
+          timeline="8–10 weeks" cost="~$5/mo (Cloudflare Workers Paid)"
+          outcome="A hosted website builder at username.sitecraft.app. 3 styles. 8 modules. Real sites. No AI yet."
           steps={[
-            'Cloudflare Worker: multi-tenant routing (KV hostname → userId → site config)',
+            'Cloudflare Worker: multi-tenant routing by hostname (KV: domain → userId → site config)',
             'Apps Script template: doGet JSON API + doPost form handler + onEdit cache purge trigger',
-            'Provisioning API: create Sheet (with all selected module tabs) + compile + deploy Script + register in KV',
-            '3 visual styles: Clean, Bold, Warm. 5 core modules: hero, services, testimonials, contact, blog.',
-            'rgforms dashboard: site list, module toggles, style picker, "Open Sheet" link',
-            'Cache purge endpoint: POST /api/purge?siteId= — called by onEdit trigger, clears Cloudflare cache',
-            'Subdomain provisioning: username.rgforms.app → Cloudflare custom hostname + SSL',
-            'rgforms badge injected in footer of every free site',
+            'Provisioning API: create multi-tab Sheet + compile + deploy Script + register site in KV',
+            '3 visual styles: Professional, Warm, Bold. 8 core modules. Manual module picker.',
+            'Subdomain provisioning: username.sitecraft.app + SSL (Cloudflare custom hostname)',
+            'Dashboard: site list, module toggles, style picker, "Open Sheet" link',
+            'Badge in footer of every free site',
           ]}
+          gate="Don't start Phase 2 until you have 10+ paying users who found you on their own."
         />
-        <PhaseCard
-          number={2}
-          title="AI provisioning + custom domains"
-          timeline="4–6 weeks"
-          cost="~$10/mo added (Claude API)"
-          outcome="Non-technical users can describe their business and get a fully provisioned site in 90 seconds. Custom domains unlock the first paid tier."
+        <CPhase n={2} title="AI provisioning + custom domains"
+          timeline="4–6 weeks" cost="~$50/mo added (Claude Sonnet)"
+          outcome="Non-technical users describe their business and get a live site in 90 seconds. Custom domains unlock Launch tier."
           steps={[
-            'AI provisioning: Claude Haiku API call with user description → site spec JSON → confirmation UI → provision',
-            'Seed data injection: AI-generated rows written into each Sheet tab during provisioning',
-            'Confirmation screen: show module list, style preview, seed data summary, credit cost — editable before committing',
-            'Custom domain flow: Path 2 (bring your own) — CNAME instructions + DNS propagation polling + auto SSL',
-            'Domain purchase: Path 1 — Namecheap API integration, Stripe Checkout for domain registration',
-            'All 9 visual styles. All 18 content + 7 form modules.',
-            'Launch tier billing: Stripe subscriptions, plan enforcement in Worker middleware',
+            'Claude Sonnet API: user description → site spec JSON + seed data (use Sonnet, not Haiku, for quality)',
+            'Seed data injection: AI-generated rows written into each Sheet tab at provision time',
+            'Confirmation screen: module list, style preview, seed data summary, credit cost — editable before committing',
+            'Custom domain Path 1: Namecheap API + Stripe Checkout + auto DNS/SSL (push this)',
+            'Custom domain Path 2: CNAME instructions + DNS propagation checker + auto SSL',
+            'Launch tier billing: Stripe subscriptions + plan enforcement in Worker middleware',
           ]}
+          gate="Don't start Phase 3 until AI provisioning has produced 50+ live sites you didn't build yourself."
         />
-        <PhaseCard
-          number={3}
-          title="Next.js export + full SEO suite"
-          timeline="4–5 weeks"
-          cost="~$0 added infra"
-          outcome="Studio tier unlocked. Developers adopt the platform. Export feature becomes the most-shared feature in the product."
+        <CPhase n={3} title="Next.js export + full SEO"
+          timeline="4–5 weeks" cost="~$0 added infra"
+          outcome="Studio tier unlocked. Export builds developer trust. Sites are fully SEO-complete."
           steps={[
-            'Next.js project generator: build zip from template with pre-configured lib/sheets.ts + user\'s module components',
-            'Sitemap.xml: Cloudflare Worker serves /sitemap.xml from Sheet data (blog slugs + all pages)',
-            'robots.txt: served per-site, configurable from _config Sheet',
-            'JSON-LD structured data: per page type, auto-built from Sheet rows in Worker renderer',
-            'Proper HTTP 404: Worker returns 404 status for unknown slugs',
-            'RSS feed: /feed.xml from blog module rows',
-            'Studio tier billing + 3-site limit enforcement',
+            "Next.js project generator: zip file with pre-configured lib/sheets.ts + user's module components",
+            'sitemap.xml: Worker serves /sitemap.xml from Sheet data (blog slugs + all pages)',
+            'JSON-LD per page: LocalBusiness, BlogPosting, FAQPage — auto-built from Sheet rows',
+            'Proper 404 status codes + RSS feed from blog module',
+            'Studio tier billing + 3-site enforcement',
           ]}
+          gate="Don't start Phase 4 until Studio tier has 20+ paying subscribers."
         />
-        <PhaseCard
-          number={4}
-          title="Agency dashboard + white-label"
-          timeline="6–8 weeks"
-          cost="~$20/mo added (Firestore for multi-seat)"
-          outcome="Agencies adopt rgforms as their white-label website platform. Each agency becomes a distribution channel."
+        <CPhase n={4} title="Agency dashboard + white-label"
+          timeline="6–8 weeks" cost="~$20/mo added (Firestore multi-seat)"
+          outcome="Agencies adopt as white-label platform. Each agency is a distribution channel."
           steps={[
-            'Multi-site dashboard: all sites in one view, client name, last edit time, live status, analytics ping count',
-            'Client access: invite client by email → they get read/write access to their site\'s Sheet + view-only dashboard',
-            'White-label badge: "Powered by [Agency Name]" instead of "Powered by rgforms" — $10/mo add-on',
-            'Team seats: invite team members with role-based access (Admin / Editor / Viewer)',
-            'Site templates: save a configured site as a template → provision new client sites from it in 1 click',
-            'Agency billing: manage client subscriptions from the agency dashboard, collect markup',
-            'DNS management dashboard: Path 3 — full DNS editor for clients with transferred nameservers',
+            'Multi-site dashboard: all sites, client names, last-edit times, analytics ping counts',
+            'Client access: invite by email → Sheet edit access + view-only dashboard',
+            'White-label badge: "Powered by [Agency Name]" — $10/mo add-on',
+            'Team seats: Admin / Editor / Viewer roles',
+            'Site templates: save configured site → provision new clients from it in 1 click',
           ]}
+          gate="This is the scale tier. Only build it if you have evidence agencies want it."
         />
       </div>
 
@@ -1569,727 +1445,47 @@ Tab: contact_submissions    ← contact form responses land here`}
   );
 }
 
-      {/* Architecture */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Architecture — rgforms not in the path</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Provision once, step away completely. Same model as free-tier forms.</p>
-        </div>
-        <Card>
-          <SectionLabel>Full runtime flow</SectionLabel>
-          <CodeBlock>{`Provisioning (one-time, while user is logged in):
-  rgforms → Google APIs (user token)
-           → creates Sheet with all content tabs (_config, blog, team, services…)
-           → compiles chosen template into Apps Script source code
-           → deploys script as web app (Execute as: User, Access: Anyone)
-           → writes { scriptUrl, sheetUrl } to Firestore → done
-
-Page view (every request, rgforms not involved):
-  Visitor → GET script.google.com/macros/…/exec?page=blog&slug=my-post
-          → Apps Script doGet(e): check CacheService (300s TTL)
-          → cache hit  → render HTML from cached rows → return
-          → cache miss → read Sheet tab → render HTML → put cache → return
-
-Form submit (contact, newsletter):
-  Browser → POST script.google.com/macros/…/exec
-          → doPost(e): append row to Sheet, send email (MailApp)
-          → optional ping to rgforms /api/ping for analytics counter
-          → return JSON { ok: true }
-
-Sheet edit (content update):
-  User edits any cell → onEdit trigger fires → CACHE.remove(sheetName)
-  → next page view fetches fresh data → site updated within seconds`}
-          </CodeBlock>
-        </Card>
-        <Card>
-          <SectionLabel>Infrastructure cost to rgforms at runtime</SectionLabel>
-          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
-            <div className="grid px-4 py-2 text-xs font-semibold uppercase tracking-wider"
-              style={{ gridTemplateColumns: '2fr 1fr 1fr', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>
-              <span>Component</span><span>Provider</span><span>Cost</span>
-            </div>
-            {[
-              { c: 'Web server / HTML rendering', p: 'Apps Script (HtmlService)', cost: '$0' },
-              { c: 'Content database', p: 'Google Sheets', cost: '$0' },
-              { c: 'Page cache', p: 'Apps Script CacheService', cost: '$0' },
-              { c: 'SSL certificate', p: 'Google (included)', cost: '$0' },
-              { c: 'Global CDN delivery', p: "Google's network", cost: '$0' },
-              { c: 'Email notifications', p: 'MailApp (Apps Script)', cost: '$0' },
-              { c: 'Analytics', p: 'Google Analytics 4', cost: '$0' },
-              { c: 'Media / image storage', p: 'Google Drive', cost: '$0' },
-              { c: 'rgforms infra cost per site', p: '—', cost: '$0 / mo' },
-            ].map(({ c, p, cost }, i) => (
-              <div key={c} className="grid px-4 py-2.5 text-xs"
-                style={{ gridTemplateColumns: '2fr 1fr 1fr', borderBottom: '1px solid var(--color-border)', background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)' }}>
-                <span style={{ color: 'var(--color-text)' }}>{c}</span>
-                <span style={{ color: 'var(--color-muted)' }}>{p}</span>
-                <span style={{ color: cost === '$0 / mo' ? 'oklch(0.72 0.18 145)' : 'var(--color-muted)', fontWeight: cost === '$0 / mo' ? 700 : 400 }}>{cost}</span>
-              </div>
-            ))}
-          </div>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-            Infra cost at 10,000 live sites: still $0/mo. This tier scales infinitely with zero marginal cost to rgforms.
-            The only cost is the provisioning API calls — covered by credit purchases.
-          </p>
-        </Card>
-      </div>
-
-      {/* Sheet as CMS */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>The Sheet as CMS</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Every website section is a Sheet tab. Every piece of content is a row. No CMS login, no dashboard — just a spreadsheet.</p>
-        </div>
-        <Card>
-          <SectionLabel>Provisioned Sheet structure</SectionLabel>
-          <CodeBlock>{`Tab: _config
-  key               | value
-  site_name         | Acme Agency
-  tagline           | We build great things
-  logo_drive_id     | 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms
-  primary_color     | #6B48FF
-  theme             | agency
-  font              | Inter
-  ga_id             | G-XXXXXXXXXX     ← GA4 injected into every page automatically
-  meta_description  | Full-service digital agency in New York
-
-Tab: blog
-  title | slug | body | published | publish_at | date | author | og_image | meta_description
-
-Tab: team
-  name | title | bio | photo_url | linkedin | twitter | order | published
-
-Tab: services
-  name | description | price | icon | featured | order | published
-
-Tab: testimonials
-  name | company | quote | rating | photo_url | published | order
-
-Tab: faq
-  question | answer | category | order | published
-
-Tab: gallery
-  title | image_url | description | tag | link | order | published
-
-Tab: events
-  title | date | location | description | ticket_url | published
-
-Tab: nav
-  label | page | slug | order | external_url
-
-Tab: contact_submissions    ← existing module — form responses land here`}
-          </CodeBlock>
-        </Card>
-        <Card>
-          <SectionLabel>Column conventions — discoverable, not magic</SectionLabel>
-          <BulletList items={[
-            'published: TRUE/FALSE — controls visibility site-wide. Unpublished rows never appear.',
-            'publish_at: ISO date — time trigger auto-sets published=TRUE at that timestamp. Zero-cost scheduled content.',
-            'order: integer — sort order within a section. Lower = higher on the page.',
-            'slug: URL-safe string — e.g. "my-blog-post" becomes ?page=blog&slug=my-blog-post',
-            'meta_description / og_image: per-row SEO overrides. Falls back to _config site defaults.',
-            'Any extra column is silently ignored — adding columns never breaks the site.',
-          ]} />
-        </Card>
-      </div>
-
-      {/* Apps Script as web server */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Apps Script as web server</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>doGet() handles every page view. doPost() handles every form. One deployed script, full site.</p>
-        </div>
-        <Card>
-          <SectionLabel>Routing pattern — compiled into the script at provision time</SectionLabel>
-          <CodeBlock>{`function doGet(e) {
-  const page   = (e.parameter.page || 'home').toLowerCase();
-  const slug   = e.parameter.slug   || '';
-  const format = e.parameter.format || 'html';
-  const q      = e.parameter.q      || '';
-
-  // Special non-HTML formats — served from same endpoint
-  if (format === 'sitemap') return serveSitemap();
-  if (format === 'rss')     return serveRss();
-
-  const config = getConfig(); // reads _config tab (always cached)
-  const html   = renderPage(page, slug, q, config);
-
-  return HtmlService.createHtmlOutput(html)
-    .setTitle(getTitle(page, slug, config))
-    .addMetaTag('description',   getMetaDesc(page, slug, config))
-    .addMetaTag('og:title',      getOgTitle(page, slug, config))
-    .addMetaTag('og:image',      getOgImage(page, slug, config))
-    .addMetaTag('og:url',        getCanonical(page, slug))
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-}
-
-function renderPage(page, slug, q, config) {
-  switch (page) {
-    case 'home':      return tpl.home(getHomeData(), config);
-    case 'blog':      return slug
-                        ? tpl.post(getBlogPost(slug), config)
-                        : tpl.blogIndex(getBlogPosts(), config);
-    case 'services':  return tpl.services(getRows('services'), config);
-    case 'team':      return tpl.team(getRows('team'), config);
-    case 'faq':       return tpl.faq(getRows('faq'), config);
-    case 'gallery':   return tpl.gallery(getRows('gallery'), config);
-    case 'events':    return tpl.events(getRows('events'), config);
-    case 'contact':   return tpl.contact(config);
-    case 'search':    return tpl.search(searchAll(q), q, config);
-    default:          return tpl.notFound(config);
-  }
-}`}
-          </CodeBlock>
-        </Card>
-        <Card>
-          <SectionLabel>CacheService — performance without infrastructure</SectionLabel>
-          <CodeBlock>{`const CACHE = CacheService.getScriptCache();
-const TTL   = 300; // 5 min. Google limits: max 6h, 6MB/key, 100MB total per script.
-
-function cached(key, fn) {
-  const hit = CACHE.get(key);
-  if (hit) return JSON.parse(hit);
-  const data = fn();
-  try { CACHE.put(key, JSON.stringify(data), TTL); } catch (_) {}
-  return data;
-}
-
-function getRows(tab) {
-  return cached(tab, () => {
-    const sheet  = SpreadsheetApp.getActive().getSheetByName(tab);
-    const [head, ...rows] = sheet.getDataRange().getValues();
-    return rows
-      .map(r => Object.fromEntries(head.map((k, i) => [k, r[i]])))
-      .filter(r => r.published === 'TRUE' || r.published === true);
-  });
-}
-
-// onEdit trigger — fires when user edits any cell in the Sheet
-function onEdit(e) {
-  const tab = e.range.getSheet().getName();
-  CACHE.remove(tab);
-  CACHE.remove('_config'); // config change affects all pages
-  // Result: site reflects the edit within milliseconds of saving the cell.
-}`}
-          </CodeBlock>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-            First request after an edit: ~600–900ms (Sheet read). Every subsequent request within 5 min: ~80–150ms (cache hit).
-            The <Mono>onEdit</Mono> trigger is provisioned by rgforms — the user never has to set it up.
-          </p>
-        </Card>
-        <Card>
-          <SectionLabel>Scheduled publishing — time-triggered, zero rgforms infra</SectionLabel>
-          <CodeBlock>{`// Hourly time-based trigger — provisioned by rgforms at setup time
-function checkScheduledPosts() {
-  const now   = new Date();
-  const sheet = SpreadsheetApp.getActive().getSheetByName('blog');
-  const data  = sheet.getDataRange().getValues();
-  const head  = data[0];
-  const piCol = head.indexOf('publish_at') + 1;  // 1-indexed for setCell
-  const puCol = head.indexOf('published')  + 1;
-
-  data.slice(1).forEach((row, i) => {
-    const publishAt = new Date(row[piCol - 1]);
-    if (row[puCol - 1] !== 'TRUE' && publishAt && publishAt <= now) {
-      sheet.getRange(i + 2, puCol).setValue('TRUE');
-      CACHE.remove('blog');
-    }
-  });
-}`}
-          </CodeBlock>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-            User writes a future date in <Mono>publish_at</Mono>. Post goes live automatically.
-            Runs in the user&apos;s Google account. rgforms is not involved.
-          </p>
-        </Card>
-      </div>
-
-      {/* Module library */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Module library — the full catalog</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Every module is a Sheet tab + a rendered section + optional form handler. Add any combination.</p>
-        </div>
-        <Card>
-          <SectionLabel>Content modules (read from Sheet, rendered on the page)</SectionLabel>
-          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
-            <div className="grid px-4 py-2 text-xs font-semibold uppercase tracking-wider"
-              style={{ gridTemplateColumns: '1fr 2fr', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>
-              <span>Module</span><span>Sheet tab = CMS for</span>
-            </div>
-            {[
-              { m: 'hero',         s: 'Headline, subheadline, CTA button, background image — single row in Sheet' },
-              { m: 'blog',         s: 'Posts: title, slug, body (Markdown), author, date, tags, og_image. Index + post pages.' },
-              { m: 'services',     s: 'Offerings: name, description, price, icon, featured flag, order' },
-              { m: 'team',         s: 'Staff: name, title, bio, photo_url, linkedin, twitter, order' },
-              { m: 'testimonials', s: 'Reviews: name, company, quote, rating (1–5), photo_url, order' },
-              { m: 'faq',          s: 'Q&A pairs: question, answer, category. Collapsible accordion, grouped.' },
-              { m: 'gallery',      s: 'Portfolio / photos: title, image_url (Drive link), description, tag, link' },
-              { m: 'events',       s: 'Schedule: title, date, time, location, description, ticket_url' },
-              { m: 'menu',         s: 'Food/drink: name, description, price, category, dietary_flags, image_url' },
-              { m: 'products',     s: 'Catalog: name, price, image, description, variants, buy_link (external checkout)' },
-              { m: 'jobs',         s: 'Open roles: title, department, location, type (full/part), description, apply_url' },
-              { m: 'press',        s: 'Media coverage: publication, headline, date, link, logo_url' },
-              { m: 'partners',     s: 'Logos + names: company, logo_url, website, tier (gold/silver/bronze)' },
-              { m: 'stats',        s: 'Key numbers: label, value, suffix (e.g. "Clients served", "500", "+")' },
-              { m: 'timeline',     s: 'History / roadmap: year, title, description. Renders as vertical timeline.' },
-              { m: 'resources',    s: 'Downloads / links: title, type (PDF/video/link), url, description, date' },
-              { m: 'locations',    s: 'Multi-location: name, address, phone, hours, map_embed_url' },
-              { m: 'pricing',      s: 'Plans: name, price, period, features (pipe-delimited), highlight, cta_label' },
-            ].map(({ m, s }, i) => (
-              <div key={m} className="grid px-4 py-2.5 text-xs items-start"
-                style={{ gridTemplateColumns: '1fr 2fr', borderBottom: '1px solid var(--color-border)', background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)' }}>
-                <Mono>{m}</Mono>
-                <span style={{ color: 'var(--color-muted)' }}>{s}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-        <Card>
-          <SectionLabel>Form modules (write to Sheet, trigger email)</SectionLabel>
-          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
-            <div className="grid px-4 py-2 text-xs font-semibold uppercase tracking-wider"
-              style={{ gridTemplateColumns: '1fr 2fr', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', color: 'var(--color-subtle)' }}>
-              <span>Module</span><span>Collects → Sheet tab</span>
-            </div>
-            {[
-              { m: 'contact',    s: 'Name, email, message, subject. The universal module — on every site.' },
-              { m: 'newsletter', s: 'Email, first name, opt-in timestamp. Subscribers accumulate in Sheet.' },
-              { m: 'booking',    s: 'Name, email, date, time, service, notes. Appointment request form.' },
-              { m: 'quote',      s: 'Name, email, company, project type, budget range, description. RFQ form.' },
-              { m: 'apply',      s: 'Name, email, role, resume_url (Drive), cover letter. Job application form.' },
-              { m: 'rsvp',       s: 'Name, email, event_id, headcount, dietary notes. Event RSVP form.' },
-              { m: 'intake',     s: 'Fully custom — column names defined in _config. Any intake or survey form.' },
-            ].map(({ m, s }, i) => (
-              <div key={m} className="grid px-4 py-2.5 text-xs items-start"
-                style={{ gridTemplateColumns: '1fr 2fr', borderBottom: '1px solid var(--color-border)', background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-2)' }}>
-                <Mono>{m}</Mono>
-                <span style={{ color: 'var(--color-muted)' }}>{s}</span>
-              </div>
-            ))}
-          </div>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-            Any number of form modules can coexist on one site — a restaurant can have contact + booking + rsvp
-            all writing to separate Sheet tabs. Each is provisioned independently (1 credit each).
-          </p>
-        </Card>
-      </div>
-
-      {/* Business type matrix */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Any business type — pre-built combinations</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>These are templates: curated module selections, not locked layouts. Any module can be added or removed.</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {[
-            { biz: 'Digital Agency', mods: 'hero · services · team · testimonials · blog · contact · stats', form: 'contact + quote' },
-            { biz: 'Freelance Portfolio', mods: 'hero · gallery · services · testimonials · blog · contact', form: 'contact' },
-            { biz: 'Restaurant / Cafe', mods: 'hero · menu · gallery · events · testimonials · locations', form: 'contact + booking + rsvp' },
-            { biz: 'Law Firm', mods: 'hero · services · team · testimonials · faq · blog · locations', form: 'contact + intake' },
-            { biz: 'Medical Practice', mods: 'hero · services · team · faq · testimonials · locations', form: 'contact + booking + intake' },
-            { biz: 'SaaS / App Landing', mods: 'hero · stats · services · pricing · faq · testimonials · blog', form: 'contact + newsletter' },
-            { biz: 'E-commerce (light)', mods: 'hero · products · gallery · testimonials · faq · blog', form: 'contact + newsletter' },
-            { biz: 'Non-profit', mods: 'hero · stats · events · team · partners · press · timeline', form: 'contact + newsletter + rsvp' },
-            { biz: 'Real Estate Agent', mods: 'hero · gallery · services · testimonials · stats · locations', form: 'contact + booking + quote' },
-            { biz: 'Personal Brand / Speaker', mods: 'hero · blog · events · press · testimonials · resources', form: 'contact + newsletter + booking' },
-            { biz: 'Fitness / Wellness Studio', mods: 'hero · services · team · events · gallery · testimonials', form: 'contact + booking + newsletter' },
-            { biz: 'Tech Startup', mods: 'hero · stats · services · team · press · jobs · blog · faq', form: 'contact + newsletter + apply' },
-            { biz: 'Consulting Firm', mods: 'hero · services · team · case studies (blog) · partners · stats', form: 'contact + quote' },
-            { biz: 'Event / Conference', mods: 'hero · events · team (speakers) · partners (sponsors) · faq · gallery', form: 'contact + rsvp + newsletter' },
-            { biz: 'Photography Studio', mods: 'hero · gallery · services · pricing · testimonials · blog', form: 'contact + booking + quote' },
-            { biz: 'Accounting / Finance', mods: 'hero · services · team · faq · resources · testimonials · blog', form: 'contact + intake + quote' },
-            { biz: 'Contractor / Trades', mods: 'hero · services · gallery · testimonials · stats · locations', form: 'contact + quote + booking' },
-            { biz: 'School / Tutoring', mods: 'hero · services · team · events · faq · testimonials', form: 'contact + booking + newsletter' },
-          ].map(({ biz, mods, form }) => (
-            <div key={biz} className="rounded-lg p-3 flex flex-col gap-1.5"
-              style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
-              <p className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>{biz}</p>
-              <p className="text-[10px] font-mono leading-relaxed" style={{ color: 'var(--color-accent)' }}>{mods}</p>
-              <p className="text-[10px]" style={{ color: 'var(--color-subtle)' }}>Forms: {form}</p>
-            </div>
-          ))}
-        </div>
-        <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-          These 18 combinations cover the vast majority of small-to-medium business websites.
-          Each is a starting point — users add or remove modules as their business evolves.
-          A photography studio that starts a blog adds the blog module for 1 credit, no re-provisioning needed.
-        </p>
-      </div>
-
-      {/* Template system */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Template system — visual styles, not cages</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>A template is a visual style + a curated starting module set. Modules are independent of the template.</p>
-        </div>
-        <Card>
-          <SectionLabel>How the compile step works</SectionLabel>
-          <CodeBlock>{`// At provision time, rgforms builds the script source from parts:
-
-1. Core engine    — doGet router, CacheService, onEdit trigger, renderPage()
-2. Active modules — only the modules the user selected are compiled in
-                    (unused modules = zero bytes in the deployed script)
-3. Visual theme   — the HTML/CSS template for the chosen style
-4. Site config    — MODULE_LIST, SCRIPT_URL constants injected as literals
-
-// Result: one self-contained .gs file uploaded via Apps Script API.
-// The deployed script has no runtime dependency on rgforms whatsoever.
-
-// Theme change (color, font): user edits _config Sheet — no recompile.
-// Module add:     user requests +1 module from dashboard → 1 credit →
-//                 rgforms recompiles + redeploys the script in-place.
-// Template swap:  user picks a new visual style → 2 credits →
-//                 same modules, new HTML/CSS wrapper, redeployed.`}
-          </CodeBlock>
-        </Card>
-        <Card>
-          <SectionLabel>Visual styles library</SectionLabel>
-          <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--color-muted)' }}>
-            Styles are independent of module content — any style works with any module combination.
-            Users pick a style at setup and can swap it any time (2 credits for a recompile).
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            {[
-              { name: 'Clean',       desc: 'White background, generous whitespace, Inter font. Safe, professional, universal.', tag: 'Default' },
-              { name: 'Bold',        desc: 'Large type, high contrast, accent color sections. High-energy agencies and studios.', tag: '' },
-              { name: 'Minimal',     desc: 'Near-monochrome, tight grid, no borders. Suits portfolio and personal brand sites.', tag: '' },
-              { name: 'Warm',        desc: 'Cream background, serif headings, earthy tones. Restaurants, wellness, artisans.', tag: '' },
-              { name: 'Corporate',   desc: 'Navy/gray palette, structured grid, formal type. Law, finance, consulting.', tag: '' },
-              { name: 'Playful',     desc: 'Rounded cards, bright accents, relaxed layout. Schools, studios, consumer apps.', tag: '' },
-              { name: 'Dark',        desc: 'Dark background, neon accent, code-like details. Tech, SaaS, developer tools.', tag: '' },
-              { name: 'Magazine',    desc: 'Multi-column editorial grid, prominent imagery. Media, blogs, news outlets.', tag: '' },
-              { name: 'Storefront',  desc: 'Product-card grid, price badges, CTA-heavy. E-commerce light, catalogs.', tag: '' },
-            ].map(({ name, desc, tag }) => (
-              <div key={name} className="rounded-lg p-3 flex flex-col gap-1"
-                style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
-                <div className="flex items-center gap-2">
-                  <p className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>{name}</p>
-                  {tag && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold"
-                    style={{ color: 'oklch(0.65 0.22 285)', background: 'oklch(0.65 0.22 285 / 0.10)', border: '1px solid oklch(0.65 0.22 285 / 0.30)' }}>{tag}</span>}
-                </div>
-                <p className="text-[10px] leading-relaxed" style={{ color: 'var(--color-subtle)' }}>{desc}</p>
-              </div>
-            ))}
-          </div>
-        </Card>
-        <Card>
-          <SectionLabel>Section ordering — controlled entirely by the nav Sheet tab</SectionLabel>
-          <CodeBlock>{`Tab: nav
-  label          | page      | order | hidden
-  Home           | home      | 1     | FALSE
-  Services       | services  | 2     | FALSE
-  Our Work       | gallery   | 3     | FALSE
-  Blog           | blog      | 4     | FALSE
-  About          | team      | 5     | FALSE
-  Contact        | contact   | 6     | FALSE
-  Client Login   | —         | 7     | TRUE   ← hidden from nav, page still exists
-
-// Reorder: change the order column. Site reflects it on next page view.
-// Hide a section: set hidden=TRUE. Module still compiled, just removed from nav.
-// Add a page: user adds 1 row here + the module was provisioned → it appears.`}
-          </CodeBlock>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-            Navigation is data, not code. Clients can reorder their own nav by editing this tab —
-            no developer needed, no re-provisioning, no credits spent.
-          </p>
-        </Card>
-      </div>
-
-      {/* SEO */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>SEO on the free tier</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>What Apps Script can do. What it can&apos;t. Honest limits with a clear upgrade path.</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Card>
-            <SectionLabel>What works</SectionLabel>
-            <BulletList items={[
-              '<title> and <meta description> per page via HtmlService.setTitle() + addMetaTag()',
-              'Open Graph tags: og:title, og:description, og:image — injected server-side on every page',
-              'JSON-LD structured data: LocalBusiness, BlogPosting, Person — auto-built from Sheet rows',
-              'Sitemap XML: served at ?format=sitemap from blog + custom pages tabs',
-              'RSS feed: served at ?format=rss — Atom-compatible, great for content distribution',
-              'Google Analytics 4: GA tag injected automatically from ga_id in _config Sheet',
-              'Server-side rendering: full HTML returned to crawler, no JS execution required',
-            ]} />
-          </Card>
-          <Card>
-            <SectionLabel>Limitations (honest)</SectionLabel>
-            <BulletList items={[
-              'Domain is script.google.com — not the user\'s brand. Search Console can\'t verify ownership.',
-              'URL structure: ?page=blog&slug=my-post — not clean path-based. Works, but non-ideal.',
-              'HTTP status: Apps Script always returns 200 — no real 404 pages for crawlers.',
-              'No robots.txt at the script URL — can\'t configure crawl directives.',
-              'Cold-start latency: 500ms–1.5s on first hit after idle (5-min cache eliminates for repeat visitors).',
-              '→ All solved by upgrading to the gateway tier (real domain, path URLs, proper HTTP).',
-            ]} color="oklch(0.65 0.15 25)" />
-          </Card>
-        </div>
-        <Card>
-          <SectionLabel>JSON-LD structured data — auto-generated from Sheet rows, zero config</SectionLabel>
-          <CodeBlock>{`// Home page → LocalBusiness schema
-{ "@context": "https://schema.org", "@type": "LocalBusiness",
-  "name": config.site_name, "description": config.meta_description,
-  "image": config.logo_url, "url": scriptUrl }
-
-// Blog post → BlogPosting schema
-{ "@context": "https://schema.org", "@type": "BlogPosting",
-  "headline": post.title, "author": { "@type": "Person", "name": post.author },
-  "datePublished": post.date, "image": post.og_image,
-  "description": post.meta_description }
-
-// Team page → ItemList of Person schemas
-{ "@context": "https://schema.org", "@type": "ItemList",
-  "itemListElement": team.map((m, i) => ({
-    "@type": "ListItem", "position": i + 1,
-    "item": { "@type": "Person", "name": m.name, "jobTitle": m.title,
-               "image": m.photo_url, "sameAs": [m.linkedin, m.twitter] }
-  })) }
-
-// FAQ page → FAQPage schema (Google shows these as rich results in search)
-{ "@context": "https://schema.org", "@type": "FAQPage",
-  "mainEntity": faqs.map(f => ({
-    "@type": "Question", "name": f.question,
-    "acceptedAnswer": { "@type": "Answer", "text": f.answer }
-  })) }`}
-          </CodeBlock>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-subtle)' }}>
-            FAQ schema is particularly valuable — Google surfaces FAQ rich results directly in search with zero
-            additional configuration. Just fill in the faq Sheet tab.
-          </p>
-        </Card>
-        <Card>
-          <SectionLabel>Sitemap + RSS — served from the same script URL</SectionLabel>
-          <CodeBlock>{`// ?format=sitemap → ContentService returns XML
-function serveSitemap() {
-  const posts  = getBlogPosts();
-  const pages  = ['home', 'services', 'team', 'faq', 'contact', 'gallery'];
-  const base   = ScriptApp.getService().getUrl();
-
-  const urls = [
-    ...pages.map(p => \`<url><loc>\${base}?page=\${p}</loc></url>\`),
-    ...posts.map(p => \`<url><loc>\${base}?page=blog&slug=\${p.slug}</loc>
-                          <lastmod>\${p.date}</lastmod></url>\`),
-  ].join('\\n');
-
-  return ContentService
-    .createTextOutput(\`<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\${urls}</urlset>\`)
-    .setMimeType(ContentService.MimeType.XML);
-}`}
-          </CodeBlock>
-        </Card>
-      </div>
-
-      {/* Google ecosystem depth */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Google ecosystem depth</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Features that are free because they live inside Google&apos;s platform — not in spite of it.</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {[
-            { title: 'Google Drive for media', body: 'Images live in Google Drive, referenced by file ID. Apps Script generates the public sharing URL programmatically. Logo, blog thumbnails, portfolio images — zero-cost media hosting with the user\'s own storage quota.' },
-            { title: 'Google Analytics 4', body: 'The ga_id value from _config injects a GA4 <script> tag into every page. Full pageview tracking, scroll depth, form events — at zero cost to rgforms. The user sees their traffic in Google Analytics, not in a separate rgforms dashboard.' },
-            { title: 'Google Fonts', body: 'Font choice in _config (Inter, Playfair Display, Roboto, etc.) injects a Google Fonts <link> tag. Professional typography from Google\'s CDN at zero cost.' },
-            { title: 'Google Maps embed', body: 'Address in _config generates a Maps embed iframe (no API key needed for embed URLs). Essential for restaurants and local businesses. Shows up on the contact and home pages automatically.' },
-            { title: 'YouTube embeds', body: 'Any youtube.com URL in an image_url or video_url column is automatically converted to a responsive embed iframe. Video content — product demos, testimonials, tutorials — requires zero additional setup.' },
-            { title: 'Site search', body: '?page=search&q=keyword queries all Sheet tabs simultaneously — blog titles, service names, FAQ questions, team bios. Full-text search with zero Algolia or Elasticsearch dependency. Results ranked by relevance score computed in the script.' },
-            { title: 'Markdown in blog body', body: 'Blog post body column accepts Markdown. A lightweight JS Markdown renderer (marked.js, ~30KB) is compiled into the script template. Users write formatted content in plain text — no rich text editor needed.' },
-            { title: 'Multilingual via LanguageApp', body: 'Apps Script includes LanguageApp.translate(text, from, to). A ?lang=es query param on any page triggers auto-translation of all visible text. Experimental but possible entirely within Google\'s infrastructure.' },
-          ].map(({ title, body }) => (
-            <div key={title} className="rounded-lg p-3 flex flex-col gap-1.5"
-              style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
-              <p className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>{title}</p>
-              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{body}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* HIPAA angle */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>HIPAA advantage — carried forward</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>The sites tier inherits the free tier&apos;s compliance architecture by construction.</p>
-        </div>
-        <CalloutBox accent>
-          <Strong>The pitch:</Strong> &ldquo;Every form submission — contact requests, intake forms, newsletter signups — flows
-          directly from the patient&apos;s browser to your Google Sheet. rgforms is never in that path.
-          If your Google Workspace account has a signed BAA with Google (which covers Sheets and Apps Script),
-          your entire website is HIPAA-compatible. We don&apos;t need to sign a BAA with you because we never
-          touch your data — not at runtime, not ever on this tier.&rdquo;
-        </CalloutBox>
-        <Card>
-          <BulletList items={[
-            'Therapist practice sites, medical provider directories, patient intake forms — all viable on this tier',
-            'The website itself is served by Apps Script (Google) — no rgforms server sees the HTTP request',
-            'Submissions go browser → Apps Script → Sheet (Google infrastructure, covered by Workspace BAA)',
-            'rgforms stores: module metadata, script URL, sheet URL. No form payloads. No patient data. Ever.',
-            'This is not a feature to add later — it is the default architecture of this entire tier.',
-          ]} />
-        </Card>
-      </div>
-
-      {/* Monetization */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Monetization — three engines</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Credits, badge traffic, and the Google URL that sells every upgrade itself.</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card>
-            <SectionLabel>1. Site provisioning credits</SectionLabel>
-            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-              A full site bundle (6 modules) costs <Strong>3 credits</Strong> — discounted vs. provisioning each
-              individually. Extra modules added later: 1 credit each. Template re-provision: 2 credits.
-            </p>
-            <p className="text-xs leading-relaxed mt-1" style={{ color: 'var(--color-subtle)' }}>
-              Agencies building for clients buy the $40 pack (150 credits) and provision 50 client sites.
-              That&apos;s $0.80/site — far cheaper than any managed hosting solution they can name.
-            </p>
-          </Card>
-          <Card accent>
-            <SectionLabel>2. Badge flywheel</SectionLabel>
-            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-              Every free site has &ldquo;Powered by rgforms&rdquo; in the footer, linking to rgforms.app.
-              A site with 500 visitors/month = 500 brand impressions. At 10,000 live sites:
-              <Strong> 5M impressions/month at $0 ad spend.</Strong>
-            </p>
-            <p className="text-xs leading-relaxed mt-1" style={{ color: 'var(--color-subtle)' }}>
-              At 0.1% CTR → 5,000 new visitors/month from the badge alone. Badge removal is the
-              first upgrade trigger ($9/mo Builder plan). This is the Mailchimp model applied to websites.
-            </p>
-          </Card>
-          <Card>
-            <SectionLabel>3. The URL that sells itself</SectionLabel>
-            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-              Every free site URL is <Mono>script.google.com/macros/d/AKfy…/exec</Mono>.
-              The ugliest URL in web development. Every client who sees it asks for a real domain.
-              Every developer who demos a client site feels this pain immediately.
-            </p>
-            <p className="text-xs leading-relaxed mt-1" style={{ color: 'var(--color-subtle)' }}>
-              Builder ($9/mo) → <Mono>rg.fm/client</Mono>. Pro ($24/mo) → vanity slug.
-              Business ($59/mo) → custom domain. The URL sells every tier with zero sales effort.
-            </p>
-          </Card>
-        </div>
-      </div>
-
-      {/* Upgrade triggers */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>Upgrade triggers — sites specific</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>The exact moments a sites user becomes a paying customer.</p>
-        </div>
-        <div className="flex flex-col gap-2">
-          {[
-            { trigger: 'The URL conversation', detail: 'Client sees script.google.com in their browser and asks "can we have a real domain?" Developer upgrades to Builder ($9/mo) for rg.fm/client-name. This single conversation is the highest-converting upgrade moment in the product — it happens on every client engagement.' },
-            { trigger: 'Badge on a client deliverable', detail: '"Powered by rgforms" in a client\'s footer is unprofessional. Any developer building for a client will pay $9/mo to remove it before the site goes live. The badge is doing direct sales work on every live site.' },
-            { trigger: 'Google Search Console rejection', detail: '"Why isn\'t my site showing up on Google?" The script.google.com domain is the answer — Search Console won\'t verify it. Gateway tier with a clean domain solves this. It\'s the most emotionally compelling reason to upgrade.' },
-            { trigger: 'Template change friction', detail: 'Re-provisioning for a template change costs 2 credits. After paying for credits twice to change templates, the user sees that a paid plan includes unlimited re-provisioning. Show the cost comparison at credit checkout.' },
-            { trigger: 'Multiple client sites compound cost', detail: 'Building a second client site costs another 3 credits. A developer building 5 sites/month spends ~15 credits/month. At $0.37/credit (mid pack), that\'s $5.55/mo on credits alone — $9/mo for Builder starts to look obvious.' },
-            { trigger: 'Content editor access conflict', detail: 'User shares the Google Sheet with a client or content writer for editing. But sharing the Sheet also exposes the Apps Script code. Pro plan\'s dashboard-based content editing solves this without exposing the underlying script.' },
-          ].map(({ trigger, detail }) => (
-            <div key={trigger} className="flex flex-col gap-1 rounded-lg p-3" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
-              <p className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>{trigger}</p>
-              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{detail}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Build phases */}
-      <div className="flex flex-col gap-4">
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-          <p className="text-base font-bold" style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}>What to build — sites tier</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Three phases. Phase 1 is launchable alongside the existing free tier — no new infra needed.</p>
-        </div>
-        <PhaseCard
-          number={1}
-          title="Sites MVP — Agency + Portfolio templates"
-          timeline="6–8 weeks"
-          cost="$0 new infra"
-          outcome="Users can provision a full working website — blog, team, services, contact — running entirely in Google's infrastructure."
-          steps={[
-            'Write the Apps Script site template in TypeScript as a compiled string (doGet router + CacheService + onEdit trigger)',
-            'Build 2 HTML/CSS templates: agency (services · team · testimonials · contact) and portfolio (gallery · blog · contact)',
-            'Extend provisioning API: create multi-tab Sheet structure, compile chosen template into script source, deploy',
-            'Update credit system: site bundle = 3 credits (vs 1 credit per individual module)',
-            'Add Sites section to rgforms dashboard: site URL, module list, "Open Sheet" link, "Rebuild" button',
-            'Inject GA4 tag if ga_id is present in _config. Inject "Powered by rgforms" badge in all template footers.',
-            'Provision the onEdit trigger and hourly scheduled-publishing trigger automatically during setup',
-          ]}
-        />
-        <PhaseCard
-          number={2}
-          title="SEO suite + 4 more templates"
-          timeline="4–6 weeks"
-          cost="$0 new infra"
-          outcome="Sites are SEO-complete with structured data, sitemaps, and RSS. Template library covers 90% of small-business use cases."
-          steps={[
-            'Add sitemap.xml: ?format=sitemap reads blog slugs + custom pages, returns valid XML urlset',
-            'Add RSS feed: ?format=rss — Atom-compatible XML from blog tab',
-            'Inject JSON-LD per page type: LocalBusiness (home), BlogPosting (blog post), FAQPage (faq tab), Person (team)',
-            'Per-row SEO: meta_description and og_image columns parsed per page; fall back to _config defaults',
-            'Add site search: ?page=search&q= filters all Sheet tabs, returns scored results rendered as HTML',
-            'Build 4 new templates: blog, small-business, restaurant, saas-landing',
-            'Google Drive media helper: function converts Drive file ID to public sharing URL in rendered HTML',
-            'Markdown rendering in blog body: compile marked.js (~30KB) into the script template',
-          ]}
-        />
-        <PhaseCard
-          number={3}
-          title="Template editor + agency dashboard"
-          timeline="When Phase 2 is live"
-          cost="~$20/mo (Firestore metadata only)"
-          outcome="Agencies manage multiple client sites from one dashboard. Non-technical users customize appearance without touching the Sheet."
-          steps={[
-            'Theme customizer in rgforms dashboard: pick primary_color, font, accent — writes directly to _config Sheet',
-            'Module toggle: enable/disable sections from dashboard UI without touching the Sheet tab',
-            'Multi-site view: all provisioned sites with status, last-edit time, analytics ping count',
-            'Site clone: duplicate a site\'s Sheet structure + script for a new client — 1 credit to re-provision',
-            'Analytics ping for page views (same /api/ping model as form submissions) — visible in dashboard',
-            'Agency white-label badge: "Powered by [Agency Name]" instead of "Powered by rgforms" — paid add-on ($4/mo)',
-          ]}
-        />
-      </div>
-
 // ─── Tabs shell ───────────────────────────────────────────────────────────────
 
 const TABS = [
-  { id: 'starter', label: 'Starter Plan', sublabel: 'Free · No gateway' },
-  { id: 'gateway', label: 'Gateway Plans', sublabel: 'Builder · Pro · Business' },
-  { id: 'sites', label: 'Sites Plan', sublabel: 'AI-powered · Custom domains · Export' },
+  { id: 'plan-a', label: 'Plan A — Gateway', sublabel: 'Existing product · Low risk' },
+  { id: 'plan-b', label: 'Plan B — Service', sublabel: 'Done-for-you · Vertical-first' },
+  { id: 'plan-c', label: 'Plan C — Platform', sublabel: 'AI builder · Scale vision' },
 ] as const;
 
 type TabId = typeof TABS[number]['id'];
 
 export default function BusinessPlanTabs() {
-  const [active, setActive] = useState<TabId>('starter');
+  const [active, setActive] = useState<TabId>('plan-a');
+
+  const accentByTab: Record<TabId, string> = {
+    'plan-a': 'oklch(0.60 0.20 240)',
+    'plan-b': 'oklch(0.73 0.17 65)',
+    'plan-c': 'oklch(0.63 0.24 295)',
+  };
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Tab bar */}
-      <div className="flex gap-2 p-1 rounded-xl" style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
+      <div className="flex gap-1.5 p-1 rounded-xl" style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
         {TABS.map((tab) => {
           const isActive = active === tab.id;
+          const accent = accentByTab[tab.id];
           return (
             <button
               key={tab.id}
               onClick={() => setActive(tab.id)}
-              className="flex-1 flex flex-col items-center gap-0.5 rounded-lg px-4 py-3 text-sm font-semibold transition-colors"
+              className="flex-1 flex flex-col items-center gap-0.5 rounded-lg px-3 py-3 text-sm font-semibold transition-all"
               style={{
                 background: isActive ? 'var(--color-bg)' : 'transparent',
-                border: isActive ? '1px solid var(--color-border)' : '1px solid transparent',
+                border: isActive ? `1px solid ${accent}` : '1px solid transparent',
                 color: isActive ? 'var(--color-text)' : 'var(--color-muted)',
                 fontFamily: 'var(--font-display)',
                 cursor: 'pointer',
+                boxShadow: isActive ? `0 0 0 1px ${accent}20` : 'none',
               }}
             >
               {tab.label}
-              <span className="text-[10px] font-normal" style={{ color: isActive ? 'var(--color-accent)' : 'var(--color-subtle)' }}>
+              <span className="text-[10px] font-normal" style={{ color: isActive ? accent : 'var(--color-subtle)' }}>
                 {tab.sublabel}
               </span>
             </button>
@@ -2297,8 +1493,7 @@ export default function BusinessPlanTabs() {
         })}
       </div>
 
-      {/* Tab content */}
-      {active === 'starter' ? <StarterTab /> : active === 'gateway' ? <GatewayTab /> : <SitesTab />}
+      {active === 'plan-a' ? <PlanATab /> : active === 'plan-b' ? <PlanBTab /> : <PlanCTab />}
     </div>
   );
 }
