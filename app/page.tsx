@@ -83,7 +83,7 @@ export default function Page() {
       <div className="absolute inset-0 hero-grid pointer-events-none" aria-hidden="true" />
 
       <motion.section
-        className="relative z-10 w-full max-w-xl flex flex-col items-center text-center gap-10"
+        className="relative z-10 w-full max-w-2xl flex flex-col items-center text-center gap-10"
         variants={heroContainer}
         initial="hidden"
         animate="visible"
@@ -117,7 +117,7 @@ export default function Page() {
             <span style={{ color: 'var(--color-muted)' }}>In minutes.</span>
           </p>
 
-          <p className="text-base leading-relaxed max-w-md" style={{ color: 'var(--color-muted)' }}>
+          <p className="text-base leading-relaxed max-w-lg" style={{ color: 'var(--color-muted)' }}>
             Describe your site. AI spins a complete Google Sheet + live API into your Drive —
             forms, content, gallery, newsletter, and more. No server. No subscription. No lock-in.
           </p>
@@ -130,18 +130,18 @@ export default function Page() {
 
         {/* ── Built on ─────────────────────────────────────────────────────── */}
         <motion.div variants={fadeUp} className="flex items-center gap-3 -mt-4">
-          <span className="text-xs tracking-wide" style={{ color: 'var(--color-subtle)' }}>Built on</span>
+          <span className="text-xs tracking-wide" style={{ color: 'var(--color-muted)' }}>Built on</span>
           <div
             className="flex items-center gap-1 px-3 py-1.5 rounded-lg border"
             style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
           >
             <span title="Google Sheets" className="opacity-80 hover:opacity-100 transition-opacity"><GoogleSheetsIcon /></span>
-            <span className="mx-1.5 text-[10px]" style={{ color: 'var(--color-border)' }}>·</span>
+            <span className="mx-1.5 text-[10px]" style={{ color: 'var(--color-muted)' }}>·</span>
             <span title="Google Drive" className="opacity-80 hover:opacity-100 transition-opacity"><GoogleDriveIcon /></span>
-            <span className="mx-1.5 text-[10px]" style={{ color: 'var(--color-border)' }}>·</span>
+            <span className="mx-1.5 text-[10px]" style={{ color: 'var(--color-muted)' }}>·</span>
             <span title="Google Apps Script" className="opacity-80 hover:opacity-100 transition-opacity"><GoogleAppsScriptIcon /></span>
           </div>
-          <span className="text-xs tracking-wide" style={{ color: 'var(--color-subtle)' }}>— entirely yours</span>
+          <span className="text-xs tracking-wide" style={{ color: 'var(--color-muted)' }}>— entirely yours</span>
         </motion.div>
 
         {/* ── Feature trio ─────────────────────────────────────────────────── */}
@@ -187,7 +187,7 @@ export default function Page() {
 
         {/* ── How it works ─────────────────────────────────────────────────── */}
         <motion.div variants={fadeUp} className="w-full flex flex-col gap-4">
-          <p className="text-xs font-semibold uppercase tracking-widest text-center" style={{ color: 'var(--color-subtle)' }}>
+          <p className="text-xs font-semibold uppercase tracking-widest text-center" style={{ color: 'var(--color-muted)' }}>
             How it works
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -223,7 +223,7 @@ export default function Page() {
 
         {/* ── Module types ─────────────────────────────────────────────────── */}
         <motion.div variants={fadeUp} className="flex flex-col items-center gap-3">
-          <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--color-subtle)' }}>
+          <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--color-muted)' }}>
             What you can build
           </p>
           <div className="flex flex-wrap justify-center gap-2">
@@ -240,7 +240,7 @@ export default function Page() {
         </motion.div>
 
         {/* ── Trust note ───────────────────────────────────────────────────── */}
-        <motion.p className="text-xs leading-relaxed max-w-xs" style={{ color: 'var(--color-subtle)' }} variants={fadeUp}>
+        <motion.p className="text-xs leading-relaxed max-w-xs" style={{ color: 'var(--color-muted)' }} variants={fadeUp}>
           Your data stays in your Drive. We see nothing.{' '}
           OAuth tokens live in memory only and vanish when you close the tab.
         </motion.p>
