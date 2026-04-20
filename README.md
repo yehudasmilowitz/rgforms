@@ -1,6 +1,6 @@
 # RG Forms
 
-> Zero-backend HTML contact forms powered by your own Google Drive. Sign in with Google, configure your form, and get a copy-paste embed snippet — backed entirely by infrastructure you already own.
+> AI-powered website backends in your Google Drive. Describe your site, get a fully provisioned Google Sheet + Apps Script API — forms, content, gallery, newsletter, and more. No server, no subscription, yours forever.
 
 **Live site**: [rgforms.com](https://rgforms.com)
 
@@ -8,14 +8,15 @@
 
 ## What it does
 
-RG Forms automates the [DWYL serverless form pattern](https://github.com/dwyl/learn-to-send-email-via-google-script-html-no-server). In under 2 minutes, it:
+RG Forms provisions your entire website's data backend inside your own Google Drive in under two minutes:
 
-1. Creates a Google Sheet in your Drive (to store submissions)
-2. Creates a container-bound Apps Script (the form handler)
-3. Deploys it as a public HTTPS web app
-4. Generates a copy-paste embed snippet for HTML, React, Vue, or Angular
+1. **Describe your site** — tell the AI what you're building; Gemini proposes a full module structure
+2. **Review and customize** — edit field labels, types, email settings, and spam protection per module
+3. **Provision everything** — one Google Sheet, one Drive folder, one Apps Script web app
+4. **Manage post-launch** — add/remove modules, edit form fields, seed AI data, all without redeploying
+5. **Export CLAUDE.md** — a skill file that makes Claude Code an agent for your site's API
 
-No RG Forms server is ever involved. Every API call is made from your browser using your own OAuth token. The Sheet, the Script, and all form data belong entirely to you.
+No RG Forms server is ever involved in provisioning or in serving your site's data. Every API call is made from your browser using your own OAuth token. Everything belongs entirely to you.
 
 ---
 
@@ -24,25 +25,63 @@ No RG Forms server is ever involved. Every API call is made from your browser us
 ```
 Your Browser
     │
-    ├─── Google OAuth (popup flow, token in memory only)
-    │
-    ├─── Google Sheets API  ──▶  Creates spreadsheet + _config tab
-    │
-    ├─── Apps Script API    ──▶  Creates, uploads, and deploys doPost() handler
-    │
-    └─── (no RG Forms server involved at any point)
+    ├─── Google OAuth           ──▶  Short-lived token, memory only
+    ├─── Gemini API (server*)   ──▶  AI proposes module structure / seeds sample data
+    ├─── Google Drive API       ──▶  Creates Sheet + Drive folder
+    └─── Apps Script API        ──▶  Creates & deploys doPost/doGet handler
 
-Later, when a visitor submits your form:
+  * The only RG Forms server route: /api/propose-manifest and /api/seed-data — 
+    forwards prompt to Gemini, returns response, logs nothing.
 
-Visitor's Browser
+Your site's live API (after provisioning):
+
+Visitor's Browser / Claude agent / your frontend
     │
-    └─── POST fetch(deploymentUrl, { body: URLSearchParams })
+    └─── fetch(scriptUrl, { body: URLSearchParams })  ← POST (form submission)
+    └─── fetch(scriptUrl?tab=blog&token=...)          ← GET (read data)
               │
-              └─── Apps Script doPost()  [runs on Google's servers]
-                        ├─── Appends row to your Sheet
-                        ├─── Sends email notification (with CC/BCC, reply-to)
-                        └─── Returns JSON { result: 'success' }
+              └─── Apps Script reads _manifest tab at runtime
+                        ├─── form:      appends row, sends email (CC/BCC/reply-to)
+                        ├─── rows:      GET returns JSON array
+                        ├─── key-value: GET returns config object
+                        └─── Returns { result: 'success' } or { result: 'error', error: '...' }
 ```
+
+---
+
+## Module types
+
+| Module | Tab type | What it stores |
+|---|---|---|
+| Contact Form | form | Submissions → sheet rows + email notification |
+| Newsletter | form | Email subscriber addresses |
+| Blog / Content | rows | Posts with title, body, slug, published flag |
+| Gallery | rows | Image captions + Drive file IDs |
+| Calendar / Events | rows | Date-structured events with start/end times |
+| Asset Storage | asset | Drive subfolder; doGet lists files as JSON |
+| Site Config | key-value | Flat key-value pairs (tagline, social links, etc.) |
+| Custom Rows | rows | Any column structure you define |
+
+---
+
+## The manifest pattern
+
+The Apps Script handler never has your site structure hardcoded. Instead it reads a `_manifest` tab in your Google Sheet on every request — a JSON object listing all your modules, their types, field configs, and folder references.
+
+This means adding, removing, or editing modules only requires updating the sheet. **No redeployment. No script changes. Your endpoint URL never changes.**
+
+---
+
+## CLAUDE.md skill export
+
+The Site Kit generates a `CLAUDE.md` file you can drop into any project. It gives Claude Code full knowledge of:
+
+- Your API endpoint URL and auth token
+- Every module, tab name, type, and column schema
+- Exact calling conventions for GET and POST
+- Response format: `{ result: 'success' }` / `{ result: 'error', error: '...' }`
+- Form field names, types, and honeypot conventions
+- Drive folder URLs for asset modules
 
 ---
 
@@ -50,12 +89,13 @@ Visitor's Browser
 
 | Layer | Choice |
 |---|---|
-| Framework | Next.js 15 (App Router, static export) |
+| Framework | Next.js 15 (App Router) |
 | Language | TypeScript |
 | Styling | Tailwind CSS v4 (CSS-first, oklch color system) |
 | Auth | Google Identity Services — token model (popup, in-memory only) |
+| AI | Gemini 2.5 Flash — site structure proposals + sample data generation |
 | 3D / Animation | React Three Fiber + Motion |
-| Deployment | Static export — works on Vercel, Netlify, GitHub Pages |
+| Deployment | Vercel |
 | Backend | None — the deployed Apps Script IS the backend |
 
 ---
@@ -67,6 +107,7 @@ Visitor's Browser
 - Node.js 18+
 - A Google Cloud project with the **Apps Script API** enabled
 - An OAuth 2.0 client ID (Web application type)
+- A Gemini API key (for AI features)
 
 ### Setup
 
@@ -80,9 +121,10 @@ Create `.env.local`:
 
 ```env
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_client_id_here.apps.googleusercontent.com
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
-In your Google Cloud Console, add the following to **Authorized JavaScript origins**:
+In your Google Cloud Console, add to **Authorized JavaScript origins**:
 
 ```
 http://localhost:3000
@@ -100,60 +142,63 @@ Then run:
 npm run dev
 ```
 
-> **Note**: The form provisioning flow works on localhost, but any embed snippet you generate will point to a live Apps Script deployment URL. The Apps Script endpoint itself is a public URL and works from anywhere.
+> **Note**: Provisioning works on localhost. Any generated Apps Script deployment URL is a live public endpoint and works from anywhere.
 
 ---
 
 ## Key files
 
 ```
+app/
+  api/
+    propose-manifest/   Gemini route: site description → module proposal
+    seed-data/          Gemini route: column names → realistic sample rows
+
 lib/
-  auth.ts             OAuth popup flow + token/userinfo fetching
-  provision.ts        5-step provisioning pipeline (Sheet → Script → Deploy)
-  scriptTemplate.ts   Apps Script code generation (doPost, doGet, email HTML)
-  snippetTemplate.ts  Embed snippet generators (HTML, React, Vue, Angular, AI Agent)
-  myForms.ts          List and delete forms from Drive
+  auth.ts               OAuth popup flow + token/userinfo fetching
+  createSite.ts         Full site provisioning (Sheet + Drive folder + Apps Script)
+  siteScript.ts         Apps Script code generation (doPost, doGet, manifest-driven)
+  siteTabHelpers.ts     Post-provisioning sheet utilities (add/remove tabs, update headers)
+  provision.ts          Legacy single-form provisioning pipeline
+  modules/registry.ts   Module type registry
 
 components/
-  FormBuilder.tsx     3-step form builder wizard
-  FieldRow.tsx        Draggable field editor
-  Dashboard.tsx       "My Forms" list, delete, sign-out
-  ResultPanel.tsx     Embed snippet display + instructions
+  SiteStarter.tsx       AI site builder — describe → propose → customize → provision
+  SiteKit.tsx           Site management — modules, form editor, AI seed, CLAUDE.md export
+  SiteSelect.tsx        Site list — open, create, delete sites
+  FormFieldEditor.tsx   Per-form field config (labels, types, required, email settings)
 
 context/
-  AppContext.tsx      Global state (useReducer) — screens, auth, form config, steps
+  AppContext.tsx         Global state (useReducer) — screens, auth, manifests
 ```
 
 ---
 
-## How provisioning works
+## Provisioning flow
 
-The provisioning pipeline in `lib/provision.ts` makes 5 sequential API calls using the user's OAuth token:
+When you launch a site, `lib/createSite.ts` runs these steps in sequence using your OAuth token:
 
 | Step | API | Result |
 |---|---|---|
-| 1 | Google Sheets API | Creates spreadsheet with field headers + hidden `_config` tab |
-| 2 | Apps Script API | Creates script project bound to the sheet |
-| 3 | Sheets API | Writes config JSON to `_config` tab (email, fields, metadata) |
-| 4 | Apps Script API | Uploads generated `doPost()` handler code |
-| 5 | Apps Script API | Creates version → deploys as public web app → returns URL |
-
-If step 2 fails (Apps Script API not enabled), the sheet created in step 1 is automatically deleted to avoid orphaned Drive files.
+| 1 | Google Drive API | Creates a Drive folder for the site |
+| 2 | Google Sheets API | Creates the Sheet with all module tabs pre-populated + `_manifest` tab |
+| 3 | Apps Script API | Creates a standalone script project |
+| 4 | Apps Script API | Uploads the manifest-driven `doPost` / `doGet` handler |
+| 5 | Apps Script API | Deploys as a public web app → returns the endpoint URL |
+| 6 | Sheets API | Writes the final manifest JSON (including the script URL) to `_manifest` |
 
 ---
 
 ## How the Apps Script works
 
-The generated script (`lib/scriptTemplate.ts`) is a single JavaScript file uploaded to the user's Apps Script project. It contains:
+The generated script (`lib/siteScript.ts`) is a single JS file uploaded to the user's Apps Script project:
 
-- **`doPost(e)`** — receives form submissions, appends a row to the sheet, sends email
-- **`doGet()`** — returns a status HTML page when the deployment URL is visited directly
-- **`CONFIG`** — a JSON constant baked in at generation time (email addresses, honeypot field, etc.)
-- **`normalizeHeader(h)`** — converts `"My Email Field"` → `"my_email_field"` for field matching
-- **`escapeHtml(str)`** — sanitizes submission data before displaying in email HTML
-- **`buildEmailHtml()`** — generates a styled HTML email with all submitted fields
+- **`doPost(e)`** — reads `_manifest` tab, finds the matching form tab, appends a row, sends email via `GmailApp.sendEmail` (supports CC, BCC, custom subject, sender name, reply-to, honeypot)
+- **`doGet(e)`** — reads `_manifest` tab, returns tab data as JSON (rows array, key-value object, or asset file list)
+- **`_manifest` tab** — live JSON config, updated by RG Forms when you add/remove modules; no script redeploy needed
+- **Response format** — always `{ result: 'success' }` or `{ result: 'error', error: '...' }`
 
-The script deploys with `executeAs: USER_DEPLOYING` (runs as the form creator) and `access: ANYONE_ANONYMOUS` (publicly callable endpoint). OAuth scope is `spreadsheets.currentonly` — access to the one bound sheet only.
+Scopes declared in `appsscript.json`: `spreadsheets.currentonly`, `gmail.send`, `drive.readonly`.
 
 ---
 
@@ -161,43 +206,24 @@ The script deploys with `executeAs: USER_DEPLOYING` (runs as the form creator) a
 
 | Concern | Approach |
 |---|---|
-| OAuth token | In-memory only (React state), never persisted, revoked on sign-out |
+| OAuth token | In-memory only (React state), never persisted |
 | Drive access | `drive.file` scope — only files created by this app |
-| Sheet access | Container-bound script = `spreadsheets.currentonly` (one sheet) |
-| Spam protection | Optional honeypot field (hidden input, silently rejected server-side) |
-| Email safety | `escapeHtml()` on all submitted values before rendering in email |
-| CORS | Apps Script public web apps return correct CORS headers automatically |
-| Rate limiting | Google's Apps Script quotas apply (100 emails/day on free accounts) |
-
-For ideas on improving security (origin verification, reCAPTCHA), see [/ideas](/ideas).
-
----
-
-## Embed snippet formats
-
-After provisioning, RG Forms generates snippets in five formats:
-
-- **HTML** — self-contained `<form>` with inline CSS and vanilla JS fetch handler
-- **React** — functional component with `useState` and typed form submission
-- **Vue** — Composition API component with `ref()` and `@submit.prevent`
-- **Angular** — standalone component with `HttpClient`
-- **AI Agent** — plain-text instructions describing the form spec and API contract (for LLM-assisted implementation)
+| Sheet access | `spreadsheets.currentonly` — one sheet only |
+| Script execution | Runs as the site owner; `ANYONE_ANONYMOUS` callable endpoint |
+| Spam protection | Optional honeypot field — silently accepted to confuse bots |
+| Email safety | All submitted values escaped before rendering in HTML email |
+| AI data | Gemini receives column names + module type only — no personal data |
+| CORS | Apps Script public web apps return CORS headers automatically |
 
 ---
 
 ## Limitations
 
 - **Email quota**: ~100 emails/day on free Google accounts (Google-imposed)
-- **No file uploads**: Apps Script handles URL-encoded data only, not multipart
-- **Token expiry**: OAuth tokens last ~1 hour; re-auth required (provisioning is one-time so this is fine)
-- **Script authorization**: After provisioning via API, the user must visit the deployment URL once to authorize the script (Google requirement)
-- **Apps Script API**: Must be enabled in the user's Google account before provisioning
-
----
-
-## Ideas & roadmap
-
-See the developer brainstorm page at [/ideas](/ideas) for the full list of planned features, modules, and security improvements — with implementation notes and feasibility ratings.
+- **No file uploads via API**: endpoint handles URL-encoded data; assets use Drive directly
+- **Script authorization**: after provisioning, user must visit the script URL once to authorize (Google requirement)
+- **Apps Script API**: must be enabled in the user's Google account before provisioning
+- **Token expiry**: OAuth tokens last ~1 hour; re-auth required (provisioning is one-time)
 
 ---
 
