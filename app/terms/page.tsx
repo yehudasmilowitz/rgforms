@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Terms of Service',
-  description: 'RG Forms terms of service. Free to use, no warranty, no liability. Plain-English terms for a zero-backend form builder.',
+  description: 'RG Forms terms of service. Free to use, no warranty, no liability. Plain-English terms for an AI-powered, zero-backend website backend builder.',
 
   robots: { index: false, follow: false },
 };
@@ -55,7 +55,7 @@ export default function TermsPage() {
             Terms of Service
           </h1>
           <p className="text-sm" style={{ color: 'var(--color-muted)' }}>
-            Last updated: March 2026
+            Last updated: April 2026
           </p>
         </header>
 
@@ -72,8 +72,8 @@ export default function TermsPage() {
           </p>
           <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
             RG Forms is free to use. We provide the service as-is with no warranties. You are
-            responsible for the forms you create and the data collected through them. Don&apos;t
-            use RG Forms for anything illegal or harmful.
+            responsible for the site modules you create, the data collected through them, and
+            any content generated with AI features. Don&apos;t use RG Forms for anything illegal or harmful.
           </p>
         </div>
 
@@ -88,10 +88,7 @@ export default function TermsPage() {
         <Section>
           <H2>2. Description of the service</H2>
           <P>
-            RG Forms is a free, static web application that helps you generate embeddable HTML
-            contact forms backed by your own Google Drive infrastructure — specifically a Google
-            Sheet and a Google Apps Script deployment. RG Forms operates entirely in your browser
-            and does not store or process any of your data on its own servers.
+            RG Forms is a free web application that uses AI to design and provision complete website backends — forms, content modules, galleries, newsletters, and more — backed by your own Google Drive infrastructure. A single Google Sheet and Google Apps Script deployment serve as your site&apos;s live API. Most operations run entirely in your browser; AI-powered features (site structure proposals and data seeding) route through a lightweight server-side endpoint that forwards requests to Google&apos;s Gemini API and returns the response without storing anything.
           </P>
           <P>
             The resources created by the Service (Google Sheets, Apps Script projects) are
@@ -167,6 +164,13 @@ export default function TermsPage() {
               </li>
             ))}
           </ul>
+        </Section>
+
+        <Section>
+          <H2>4a. AI-generated content</H2>
+          <P>
+            RG Forms offers AI-powered features (site structure proposals and data seeding) powered by Google&apos;s Gemini API. You are responsible for reviewing AI-generated content before use. RG Forms makes no guarantees about the accuracy, completeness, or suitability of AI-generated module structures or sample data. You must not rely on AI-generated data as a substitute for real data in production contexts.
+          </P>
         </Section>
 
         <Section>

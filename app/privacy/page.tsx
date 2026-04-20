@@ -5,7 +5,7 @@ import { GoogleDriveIcon, GoogleAppsScriptIcon, GoogleProfileIcon } from '@/comp
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'RG Forms collects no user data, runs no backend, and stores nothing. Your OAuth token lives only in browser memory. Plain-English privacy policy.',
+  description: 'RG Forms collects no user data, runs no backend, and stores nothing. Your OAuth token lives only in browser memory. AI seed data sends column names only. Plain-English privacy policy.',
   alternates: { canonical: 'https://rgforms.com/privacy/' },
   robots: { index: false, follow: false },
 };
@@ -57,7 +57,7 @@ export default function PrivacyPage() {
             Privacy Policy
           </h1>
           <p className="text-sm" style={{ color: 'var(--color-muted)' }}>
-            Last updated: March 2026
+            Last updated: April 2026
           </p>
         </header>
 
@@ -83,9 +83,7 @@ export default function PrivacyPage() {
         <Section>
           <H2>1. Who we are</H2>
           <P>
-            RG Forms is a static web application that helps you create zero-backend HTML contact
-            forms backed by your own Google Drive infrastructure. The service is provided as-is
-            with no warranty.
+            RG Forms is a static web application that uses AI to design and provision complete website backends — forms, content modules, galleries, newsletters, and more — entirely within your own Google Drive. The service is provided as-is with no warranty.
           </P>
         </Section>
 
@@ -208,13 +206,43 @@ export default function PrivacyPage() {
         </Section>
 
         <Section>
-          <H2>5. Your form submissions</H2>
+          <H2>5. AI-powered features (Gemini)</H2>
           <P>
-            After you generate a form with RG Forms, visitors who submit that form send their
-            data directly from their browser to your Google Apps Script deployment URL. That
-            data goes directly into your Google Sheet and is emailed to you. The &ldquo;Try it out&rdquo;
-            panel works the same way — it submits directly to your Apps Script, not through any
-            RG Forms server. We never see, intercept, or store any form submissions.
+            RG Forms offers two AI-powered features that communicate with Google&apos;s Gemini API:
+          </P>
+          <ul className="flex flex-col gap-2 list-none">
+            {[
+              'Site structure proposal: your plain-English site description is sent to Gemini to propose a module layout. This text is entered by you and contains no personal data unless you choose to include it.',
+              'Data seeding: when you request AI-generated sample rows, only the tab\'s column names, module type, and site slug are sent — no actual data, no form submissions, no personal information.',
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-2">
+                <span className="mt-1 shrink-0 text-xs" style={{ color: 'var(--color-accent)' }} aria-hidden="true">▸</span>
+                <span className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>{item}</span>
+              </li>
+            ))}
+          </ul>
+          <P>
+            These requests are made via a server-side API route hosted on the RG Forms domain — the only instance where any data passes through RG Forms infrastructure. The route forwards the prompt to Gemini and returns the response; nothing is logged or stored. Your use of these features is also subject to{' '}
+            <a
+              href="https://policies.google.com/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: 'var(--color-accent)' }}
+              className="underline hover:no-underline"
+            >
+              Google&apos;s privacy policy
+            </a>
+            .
+          </P>
+        </Section>
+
+        <Section>
+          <H2>6. Your site submissions and data</H2>
+          <P>
+            After provisioning, visitors who submit forms or query your site&apos;s API do so directly
+            from their browser to your Google Apps Script deployment URL. That data goes directly
+            into your Google Sheet and (for forms) is emailed to you. We never see, intercept,
+            or store any submissions or site data.
           </P>
           <P>
             You are responsible for the data collected through forms you create. If you collect

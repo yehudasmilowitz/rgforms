@@ -1,33 +1,26 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { GoogleSheetsIcon, GoogleAppsScriptIcon } from '@/components/google-icons';
+import { GoogleSheetsIcon, GoogleAppsScriptIcon, GoogleDriveIcon } from '@/components/google-icons';
 
 export const metadata: Metadata = {
   title: 'How It Works',
   description:
-    'Learn how RG Forms automates the DWYL serverless form pattern in 5 API calls — Google OAuth, Apps Script, and Sheets, all from your browser with no backend.',
+    'RG Forms uses AI to design your site\'s full backend structure, then provisions it as a single Google Sheet + Apps Script in your Drive — no server, no subscription.',
   alternates: { canonical: 'https://rgforms.com/how-it-works/' },
   openGraph: {
-    title: 'How RG Forms Works — Zero-Backend Contact Forms',
-    description: 'Five API calls. Ten seconds. A fully working contact form backed by your own Google Drive.',
+    title: 'How RG Forms Works — AI-Powered Site Backends',
+    description: 'Describe your site. AI designs the structure. Everything provisions in your Google Drive in under two minutes.',
     url: 'https://rgforms.com/how-it-works/',
   },
 };
 
 function Section({ children }: { children: React.ReactNode }) {
-  return (
-    <section className="flex flex-col gap-5">
-      {children}
-    </section>
-  );
+  return <section className="flex flex-col gap-5">{children}</section>;
 }
 
 function H2({ children }: { children: React.ReactNode }) {
   return (
-    <h2
-      className="text-xl font-bold mt-2"
-      style={{ color: 'var(--color-text)' }}
-    >
+    <h2 className="text-xl font-bold mt-2" style={{ color: 'var(--color-text)' }}>
       {children}
     </h2>
   );
@@ -41,15 +34,7 @@ function P({ children }: { children: React.ReactNode }) {
   );
 }
 
-function StepCard({
-  number,
-  title,
-  description,
-}: {
-  number: number;
-  title: string;
-  description: string;
-}) {
+function StepCard({ number, title, description }: { number: number; title: string; description: string }) {
   return (
     <div
       className="flex gap-4 rounded-xl border p-5"
@@ -57,21 +42,13 @@ function StepCard({
     >
       <div
         className="flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold shrink-0"
-        style={{
-          background: 'var(--color-surface-2)',
-          border: '1px solid var(--color-border)',
-          color: 'var(--color-accent)',
-        }}
+        style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-accent)' }}
       >
         {number}
       </div>
       <div className="flex flex-col gap-1">
-        <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
-          {title}
-        </p>
-        <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-          {description}
-        </p>
+        <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{title}</p>
+        <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>{description}</p>
       </div>
     </div>
   );
@@ -81,11 +58,7 @@ function CalloutBox({ children }: { children: React.ReactNode }) {
   return (
     <div
       className="rounded-xl border p-5 text-sm leading-relaxed"
-      style={{
-        background: 'rgba(108,99,255,0.06)',
-        borderColor: 'rgba(108,99,255,0.25)',
-        color: 'var(--color-muted)',
-      }}
+      style={{ background: 'rgba(108,99,255,0.06)', borderColor: 'rgba(108,99,255,0.25)', color: 'var(--color-muted)' }}
     >
       {children}
     </div>
@@ -104,50 +77,26 @@ export default function HowItWorksPage() {
         <header className="flex flex-col gap-4">
           <div
             className="inline-flex self-start items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold"
-            style={{
-              background: 'var(--color-surface-2)',
-              border: '1px solid var(--color-border)',
-              color: 'var(--color-muted)',
-            }}
+            style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-muted)' }}
           >
             Documentation
           </div>
-          <h1
-            className="text-3xl sm:text-4xl font-extrabold tracking-tight"
-            style={{ color: 'var(--color-text)' }}
-          >
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight" style={{ color: 'var(--color-text)' }}>
             How RG Forms works
           </h1>
           <p className="text-base sm:text-lg leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            RG Forms automates a proven serverless form pattern — giving you a fully functional
-            HTML contact form in under two minutes, backed entirely by infrastructure you already
-            own in Google Drive.
+            RG Forms uses AI to design your website&apos;s full data backend — forms, content, gallery, calendar, newsletter, and more — then provisions it entirely inside your Google Drive. No server, no subscription, no lock-in.
           </p>
         </header>
 
         {/* The problem */}
         <Section>
-          <H2>The problem with contact forms</H2>
+          <H2>The problem with website backends</H2>
           <P>
-            Most contact form solutions require a paid subscription, a backend server, or hand
-            over your submission data to a third party. Even simple form-handling services add
-            monthly costs and vendor lock-in for something that should be a solved problem.
+            Most websites need a backend the moment they add a contact form, a blog, or a newsletter signup. The options are either a paid SaaS (that owns your data), a DIY server (that requires ongoing maintenance), or a patchwork of separate tools that don&apos;t talk to each other.
           </P>
           <P>
-            The{' '}
-            <a
-              href="https://github.com/dwyl/learn-to-send-email-via-google-script-html-no-server"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: 'var(--color-accent)' }}
-              className="underline hover:no-underline"
-            >
-              DWYL serverless form pattern
-            </a>{' '}
-            solves this elegantly: use a Google Apps Script as a free, serverless HTTP endpoint
-            that writes submissions to a Google Sheet and emails you. The catch? Setting it up
-            manually takes 20–30 minutes and involves navigating multiple Google dashboards.
-            RG Forms does it for you in seconds.
+            RG Forms takes a different approach: your entire site&apos;s backend lives in a single Google Sheet that you already own. A single Google Apps Script acts as the API layer, reading a live configuration tab on every request. There&apos;s nothing to maintain and nothing to pay for.
           </P>
         </Section>
 
@@ -155,9 +104,7 @@ export default function HowItWorksPage() {
         <Section>
           <H2>Architecture overview</H2>
           <P>
-            RG Forms is a fully static web app — there is no RG Forms server, no database, and no
-            third-party storage. Every API call is made directly from your browser using your
-            own Google OAuth access token. The resources created belong entirely to you.
+            RG Forms is a fully static web app — there is no RG Forms server, no database, and no third-party storage. Every API call is made directly from your browser using your own Google OAuth access token. The resources created belong entirely to you.
           </P>
           <div
             className="rounded-xl border p-5 font-mono text-xs leading-loose overflow-x-auto"
@@ -165,25 +112,35 @@ export default function HowItWorksPage() {
           >
             <pre>{`Your Browser
     │
-    ├─── Google OAuth (sign-in, access token)
-    │
-    ├─── Google Sheets API  ──▶  Creates your spreadsheet
-    │
-    ├─── Apps Script API    ──▶  Creates & deploys your handler
-    │
+    ├─── Google OAuth          ──▶  Short-lived access token (memory only)
+    ├─── Gemini API (Google)   ──▶  AI proposes site module structure
+    ├─── Google Drive API      ──▶  Creates Sheet + Drive folder
+    ├─── Apps Script API       ──▶  Creates & deploys API handler
     └─── (no RG Forms server involved)
 
-Later, when your form is submitted:
+Your site's live API (after provisioning):
 
-Visitor's Browser (or "Try it out" panel)
+Visitor's Browser / Your Claude agent
     │
-    └─── fetch(deploymentUrl, { body: URLSearchParams })
+    └─── fetch(scriptUrl, { body: URLSearchParams })
               │
-              └─── Apps Script doPost()
-                        ├─── Appends row to Google Sheet
-                        ├─── Sends email to you
-                        └─── Returns JSON { result: 'success' }`}</pre>
+              └─── Apps Script  ──▶  reads _manifest tab at runtime
+                        ├─── form tab:    appends row + sends email
+                        ├─── rows tab:    GET returns JSON array
+                        ├─── key-value:   GET returns config object
+                        └─── Returns { result: 'success' } or { result: 'error', error: '...' }`}</pre>
           </div>
+        </Section>
+
+        {/* The manifest pattern */}
+        <Section>
+          <H2>The manifest pattern — no redeployment needed</H2>
+          <P>
+            The Apps Script handler doesn&apos;t have your site structure hardcoded into it. Instead, it reads a <code className="text-xs px-1 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>_manifest</code> tab in your Google Sheet on every request. The manifest is a JSON object that lists all your modules — their names, types, form field configurations, and Drive folder references.
+          </P>
+          <P>
+            This means you can add a new module, remove an old one, or update form fields by simply updating the sheet and the manifest row. No redeployment. No changes to the script. Your endpoint URL never changes.
+          </P>
         </Section>
 
         {/* Step by step */}
@@ -198,103 +155,60 @@ Visitor's Browser (or "Try it out" panel)
 
           <StepCard
             number={2}
-            title="Configure your form"
-            description="Give your form a name (used as the spreadsheet title), set the email address for submission notifications, and add your fields. Supported types: text, email, textarea, phone, and select/dropdown. You can also customize email notifications with CC/BCC recipients, a custom subject line, sender name, and a dynamic reply-to field (automatically set to the first email field you add)."
+            title="Describe your site to AI"
+            description="Type a plain-English description of your website — what it does, what kind of content it has, whether it needs forms or a gallery. Gemini (Google's AI) reads this and proposes a complete module structure: each tab, its type (form, rows, key-value, asset, etc.), field names, and settings."
           />
 
           <StepCard
             number={3}
-            title="Google Sheet is created"
-            description="RG Forms creates a new Google Spreadsheet in your Drive, titled with your form name. A hidden _config tab stores metadata. The first row of the main sheet is pre-populated with your field names as column headers."
+            title="Review and customize"
+            description="You see each proposed module as a card. For form-type modules, you can expand the field editor to customize field labels, types (text, email, textarea, phone, select), required flags, and email settings (CC, BCC, subject, sender name, reply-to, honeypot spam protection). Accept, edit, or remove any module before provisioning."
           />
 
           <StepCard
             number={4}
-            title="Apps Script is created"
-            description="Using your access token, RG Forms calls the Google Apps Script API to create a new script project bound directly to the spreadsheet. Binding the script to its sheet means it only needs access to that one file — not all your spreadsheets. The script is pre-written — a doPost() handler that maps form data to your sheet columns and sends email notifications, plus a doGet() that returns a simple confirmation page."
+            title="Google Drive is provisioned"
+            description="A Drive folder is created for your site. Inside it: a Google Sheet with one tab per module plus a _manifest tab, and an asset subfolder for any file storage modules. All columns are pre-populated based on the module type and your field definitions."
           />
 
           <StepCard
             number={5}
-            title="Handler code is uploaded"
-            description="The doPost() function is generated based on your field definitions and uploaded to the Apps Script project. It maps incoming form data to the correct columns in your sheet and sends a formatted HTML email notification — including any CC/BCC addresses, custom subject, sender name, and reply-to field you configured."
+            title="Apps Script is deployed"
+            description="A single Apps Script project is created and bound to your sheet. The doPost() handler receives form submissions; doGet() serves row data as JSON. Both read the _manifest tab at runtime so the script never needs to be updated as your site evolves. The script is deployed as a public web app — producing the unique HTTPS URL that is your site's API endpoint."
           />
 
           <StepCard
             number={6}
-            title="Script is deployed as a web app"
-            description="The Apps Script is deployed as a public web app with execute-as-user permissions. This deployment produces a unique HTTPS URL — the endpoint your form will POST to."
+            title="Authorize your script"
+            description="Because the script was deployed via API, Google requires a one-time manual authorization before it can run. Open the script URL shown in the Site Kit, sign in if prompted, and approve the permissions dialog. The script requests three scopes: access to its one spreadsheet (spreadsheets.currentonly), email sending (gmail.send), and read access to its Drive folder (drive.readonly). This runs under your Google account — not ours."
           />
 
           <StepCard
             number={7}
-            title="Authorize your script"
-            description="Because the script was deployed via API rather than the Apps Script editor, Google requires you to authorize it once before it can run. RG Forms shows you an 'Authorize script' button — click it, sign in if prompted, and approve the permissions dialog. The script only requests access to this one spreadsheet (not all your Drive files) and the ability to send email on your behalf. You only need to do this once."
-          />
-
-          <StepCard
-            number={8}
-            title="Embed snippet is generated"
-            description="RG Forms generates a self-contained HTML+JS snippet with your deployment URL baked in. Paste it anywhere in your HTML and the form is live. No additional configuration needed."
+            title="Manage and evolve your site"
+            description="From the Site Kit, you can add new modules at any time, remove ones you no longer need, and edit form field configurations — all with instant effect. No code changes, no redeployment. Use AI-powered data seeding to populate any module with realistic sample data using Gemini, or export your CLAUDE.md skill file so your Claude Code agent knows your site's full API and data schema."
           />
         </Section>
 
-        {/* What the Apps Script does */}
-        <Section>
-          <H2>What happens when a form is submitted</H2>
-          <P>
-            When a visitor submits your form, their browser sends a POST request directly to
-            your Apps Script deployment URL. Google's servers run your doPost() function, which:
-          </P>
-          <ol className="flex flex-col gap-2 list-none">
-            {[
-              'Reads the column headers from row 1 of your sheet.',
-              'Maps each form field to its matching column.',
-              'Appends a new row with the submission data and a timestamp.',
-              'Sends an HTML email notification (with CC/BCC, custom subject, and reply-to if configured).',
-              'Returns a JSON response — { result: "success" } on success.',
-            ].map((item, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <span
-                  className="text-xs font-bold shrink-0 mt-0.5"
-                  style={{ color: 'var(--color-accent)', minWidth: '1rem' }}
-                >
-                  {i + 1}.
-                </span>
-                <span className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-                  {item}
-                </span>
-              </li>
-            ))}
-          </ol>
-          <P>
-            The embed snippet posts using{' '}
-            <code
-              className="text-xs px-1.5 py-0.5 rounded font-mono"
-              style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}
-            >
-              URLSearchParams
-            </code>{' '}
-            and reads the JSON response to confirm success — showing a success message or an error
-            alert accordingly. The &ldquo;Try it out&rdquo; panel works the same way, giving you an accurate
-            preview of what your visitors will experience.
-          </P>
-        </Section>
-
-        {/* What's in your Drive */}
+        {/* What gets created */}
         <Section>
           <H2>What gets created in your Google Drive</H2>
           <div className="flex flex-col gap-3">
             {[
               {
+                icon: <GoogleDriveIcon />,
+                title: 'A Drive folder',
+                body: 'Named after your site slug. Contains your Google Sheet and any asset subfolders. You can browse, share, and manage it like any other Drive folder.',
+              },
+              {
                 icon: <GoogleSheetsIcon />,
-                title: 'A Google Spreadsheet',
-                body: 'Named after your form. Contains a header row matching your fields, and a hidden _config tab with metadata. All submissions are appended as rows.',
+                title: 'A Google Sheet with multiple tabs',
+                body: 'One tab per module (form submissions, blog posts, gallery images, etc.) plus a _manifest tab that the script reads on every request. All tabs are pre-populated with the correct column headers.',
               },
               {
                 icon: <GoogleAppsScriptIcon />,
-                title: 'A Google Apps Script project',
-                body: 'Contains the doPost() handler. Bound to its spreadsheet, so it only has access to that one file. You can view and edit it at any time via script.google.com. It runs under your Google account.',
+                title: 'A single Apps Script web app',
+                body: 'One script handles all your modules dynamically by reading the _manifest tab. It supports form submissions (doPost) and data retrieval (doGet). One deployment URL, forever — no matter how many modules you add or remove.',
               },
             ].map(({ icon, title, body }) => (
               <div
@@ -304,19 +218,63 @@ Visitor's Browser (or "Try it out" panel)
               >
                 <span className="leading-none mt-0.5 shrink-0">{icon}</span>
                 <div className="flex flex-col gap-1">
-                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
-                    {title}
-                  </p>
-                  <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-                    {body}
-                  </p>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{title}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>{body}</p>
                 </div>
               </div>
             ))}
           </div>
+        </Section>
+
+        {/* Module types */}
+        <Section>
+          <H2>Module types</H2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {[
+              { type: 'Contact Form', desc: 'Submissions go to a sheet tab + email notification. Supports CC, BCC, custom subject, honeypot spam protection.' },
+              { type: 'Newsletter', desc: 'Single email field form. Collects subscriber addresses in a dedicated tab.' },
+              { type: 'Blog / Content', desc: 'Structured rows with title, body, slug, and published flag. Your doGet endpoint returns published items as JSON.' },
+              { type: 'Gallery', desc: 'Links Google Drive image files to rows in a sheet tab. Your doGet returns captions and Drive file IDs.' },
+              { type: 'Calendar / Events', desc: 'Date-structured rows with title, description, start/end times. Returned as a sorted JSON array.' },
+              { type: 'Asset Storage', desc: 'Files are uploaded to a Drive subfolder. The doGet endpoint lists them for your frontend.' },
+              { type: 'Site Config', desc: 'Key-value pairs for site-wide settings (tagline, social links, etc.). Retrieved as a single JSON object.' },
+              { type: 'Custom Rows', desc: 'Freeform tabular data with any column structure you define. Returned as a JSON array.' },
+            ].map(({ type, desc }) => (
+              <div
+                key={type}
+                className="rounded-xl border p-4 flex flex-col gap-1"
+                style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+              >
+                <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{type}</p>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        {/* CLAUDE.md */}
+        <Section>
+          <H2>CLAUDE.md — your AI skill file</H2>
           <P>
-            Both files are owned by your Google account. RG Forms has no ongoing access to them
-            after provisioning — it only calls the APIs during the one-time setup flow.
+            After provisioning, the Site Kit lets you export a <code className="text-xs px-1 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>CLAUDE.md</code> file. Drop this into your website project and Claude Code will understand your site&apos;s entire backend without any configuration:
+          </P>
+          <div className="flex flex-col gap-2">
+            {[
+              'Your API endpoint URL and authentication token',
+              'Every module, its tab name, type, and column schema',
+              'Exact calling conventions for GET (data retrieval) and POST (form submissions)',
+              'Expected response formats — { result: "success" } / { result: "error", error: "..." }',
+              'Form field names, types, and honeypot instructions',
+              'Drive folder URLs for asset modules',
+            ].map((item) => (
+              <div key={item} className="flex items-start gap-2">
+                <span className="shrink-0 mt-1 text-xs" style={{ color: 'var(--color-accent)' }}>▸</span>
+                <span className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>{item}</span>
+              </div>
+            ))}
+          </div>
+          <P>
+            You can also use the AI seed data feature to populate any module with realistic sample rows generated by Gemini — useful for testing your frontend before real data arrives. The seed request sends only your column names and module type to the AI — no personal data.
           </P>
         </Section>
 
@@ -327,23 +285,23 @@ Visitor's Browser (or "Try it out" panel)
             {[
               {
                 title: 'Email quota',
-                body: 'Google Apps Script free accounts are limited to roughly 100 email notifications per day. This is a Google-imposed limit and applies to your personal Apps Script quota.',
+                body: 'Google Apps Script free accounts are limited to roughly 100 email notifications per day. This is a Google-imposed limit that applies to your personal Apps Script quota.',
               },
               {
                 title: 'One-time script authorization required',
-                body: 'After provisioning, you must visit the deployment URL once while signed in to Google to authorize the script. This is a Google requirement for scripts deployed via the API. RG Forms walks you through it. When you authorize, Google will show the script requesting access to this one spreadsheet only (not all your spreadsheets) and the ability to send email on your behalf. These permissions are granted to the script running under your own Google account, not to RG Forms.',
+                body: 'After provisioning, you must visit the script URL once while signed in to Google to authorize it. This is a Google requirement for scripts deployed via the API. The authorization dialog will show the script requesting spreadsheets.currentonly, gmail.send, and drive.readonly — all scoped to the resources for this one site.',
               },
               {
                 title: 'Apps Script API must be enabled',
-                body: 'The Google Apps Script API must be enabled in your Google account as part of the initial setup. If it isn\'t enabled when you generate a form, RG Forms will let you know and show a direct link to turn it on — it\'s a single toggle in your Google settings.',
+                body: 'The Google Apps Script API must be enabled in your Google account before provisioning. If it isn\'t, RG Forms will detect this and show a direct link to enable it — it\'s a single toggle.',
               },
               {
-                title: 'No file uploads',
-                body: 'The form supports text-based field types only. File inputs are not supported because the Apps Script endpoint handles URL-encoded form data, not multipart uploads.',
+                title: 'No file uploads via the form endpoint',
+                body: 'The API endpoint handles URL-encoded data and JSON, not multipart uploads. File storage uses Drive directly — asset modules list files you upload to Drive manually or via the Drive API.',
               },
               {
-                title: 'Basic spam protection only',
-                body: 'RG Forms offers an optional honeypot field — a hidden input that bots tend to fill in, causing the submission to be silently discarded by the Apps Script handler. For higher-traffic forms or stronger protection, consider adding reCAPTCHA to your embed HTML manually.',
+                title: 'Honeypot-only spam protection',
+                body: 'Forms support a honeypot hidden field that silently discards bot submissions. For higher-traffic forms, consider adding reCAPTCHA to your frontend HTML manually.',
               },
             ].map(({ title, body }) => (
               <div
@@ -351,12 +309,8 @@ Visitor's Browser (or "Try it out" panel)
                 className="rounded-xl border p-4 flex flex-col gap-1"
                 style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
               >
-                <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
-                  {title}
-                </p>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-                  {body}
-                </p>
+                <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{title}</p>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>{body}</p>
               </div>
             ))}
           </div>
@@ -365,10 +319,7 @@ Visitor's Browser (or "Try it out" panel)
         {/* Trust */}
         <CalloutBox>
           <strong style={{ color: 'var(--color-text)' }}>No data leaves your Google account.</strong>{' '}
-          RG Forms is a static site that makes API calls on your behalf using a short-lived access
-          token that never touches our servers. Form submissions — including the &ldquo;Try it out&rdquo;
-          panel — go directly from the browser to your own Apps Script endpoint and land in your
-          own Google Sheet. We never see them.{' '}
+          RG Forms is a static site that makes API calls on your behalf using a short-lived access token that never touches our servers. Submissions and data go directly from the browser to your own Apps Script endpoint and land in your own Google Sheet. The AI seed feature sends only column names and module types to Gemini — no personal information.{' '}
           <Link href="/privacy" style={{ color: 'var(--color-accent)' }} className="underline hover:no-underline">
             Read our privacy policy.
           </Link>
@@ -379,13 +330,17 @@ Visitor's Browser (or "Try it out" panel)
           <Link
             href="/"
             className="px-6 py-3 rounded-lg text-sm font-semibold"
-            style={{
-              background: 'var(--color-accent)',
-              color: '#fff',
-            }}
+            style={{ background: 'var(--color-accent)', color: '#fff' }}
           >
-            Create your form →
+            Build your site backend →
           </Link>
+        </div>
+
+        {/* Footer nav */}
+        <div className="pt-4 border-t flex items-center gap-4" style={{ borderColor: 'var(--color-border)' }}>
+          <Link href="/" className="text-sm" style={{ color: 'var(--color-accent)' }}>← Back to RG Forms</Link>
+          <Link href="/privacy" className="text-sm nav-link">Privacy Policy</Link>
+          <Link href="/terms" className="text-sm nav-link">Terms of Service</Link>
         </div>
 
       </article>
