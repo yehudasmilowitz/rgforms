@@ -148,7 +148,7 @@ export default function SimplePlan() {
             <Label color={green}>POC — one Sheet, all tabs</Label>
             <Code>{`Project "Acme Wholesale"
   /project-sheet
-    tab: _config       ← site name, template, colors
+    tab: _config       ← site name, template, module list
     tab: hero          ← headline, subtitle, cta
     tab: services      ← title, description, price
     tab: testimonials  ← name, quote, rating
@@ -162,22 +162,117 @@ export default function SimplePlan() {
 
       <Rule />
 
+      {/* Dynamic modules */}
+      <section className="flex flex-col gap-4">
+        <Label>Adding + updating modules after provisioning</Label>
+        <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+          The <code className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>_config</code> tab
+          acts as a live module registry — a <code className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>modules</code> row
+          that lists which tabs are active and in what order. The Script reads this list at runtime.
+          The renderer renders whatever is in it. Adding a module is a single dashboard action.
+        </p>
+
+        <Code>{`_config tab (the module registry):
+
+  key         | value
+  site_name   | Acme Wholesale
+  template    | professional
+  modules     | hero,services,testimonials,gallery,contact_form
+              ↑ the renderer renders sections in this exact order
+
+To add a "blog" module later:
+  1. User clicks "Add module → Blog" in the rgforms dashboard
+  2. rgforms calls addTab("blog") on the existing Script
+     → creates the tab with correct column headers
+     → appends "blog" to the modules row in _config
+  3. Renderer sees blog in the list → renders the blog section
+  4. User adds/edits rows in the blog tab → site updates live
+
+No reprovisioning. No new Script URL. Same Sheet, new tab.`}
+        </Code>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[
+            {
+              action: 'Update content',
+              how: 'Edit a row in any tab. onEdit fires, cache clears, site reflects it within 5 seconds.',
+              works: true,
+            },
+            {
+              action: 'Add a module',
+              how: '"Add module" in dashboard → tab created + _config.modules updated. No new Script deploy.',
+              works: true,
+            },
+            {
+              action: 'Add a form',
+              how: 'Same as adding a module. Each form type (contact, booking, quote) is just a tab the Script routes doPost to.',
+              works: true,
+            },
+            {
+              action: 'Add a custom field',
+              how: 'Add a column to the tab in the Sheet. The Script reads all columns generically as key-value pairs. Renderer shows known fields, ignores unknown ones.',
+              works: true,
+            },
+            {
+              action: 'Remove a module',
+              how: 'Remove its name from _config.modules. Tab stays in the Sheet (data preserved) but renderer skips it.',
+              works: true,
+            },
+            {
+              action: 'Reorder sections',
+              how: 'Edit the order of names in _config.modules. Renderer re-renders in the new order immediately.',
+              works: true,
+            },
+          ].map(({ action, how, works }) => (
+            <div key={action} className="rounded-lg p-3 flex flex-col gap-1.5"
+              style={{ background: works ? greenA(0.05) : 'var(--color-surface)', border: `1px solid ${works ? greenA(0.20) : 'var(--color-border)'}` }}>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold" style={{ color: works ? green : amber }}>
+                  {works ? '✓' : '—'}
+                </span>
+                <p className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>{action}</p>
+              </div>
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{how}</p>
+            </div>
+          ))}
+        </div>
+
+        <Note>
+          <span className="font-semibold" style={{ color: violet }}>The one thing to design right from the start: </span>
+          The Script must read tab columns generically — not hardcoded field names. Each row becomes a plain
+          object with whatever keys the columns define. This means a user can add a{' '}
+          <code className="text-xs px-1 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>phone</code> column
+          to their services tab without touching any code — it just shows up as an extra field.
+          Templates decide which fields to feature prominently and which to display as secondary info.
+        </Note>
+      </section>
+
+      <Rule />
+
       {/* The Script */}
       <section className="flex flex-col gap-4">
         <Label>The Apps Script — what it does</Label>
         <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-          One script, two endpoints. No change to the Google infrastructure — still runs entirely in the
-          user&apos;s account, still costs $0 to operate.
+          One script, two endpoints, fully dynamic. The Script never has a hardcoded list of tabs —
+          it reads whatever tabs exist and routes by name.
         </p>
         <Code>{`doGet(e)
   ?tab=services    → returns JSON array of rows from "services" tab
-  ?tab=all         → returns { config, hero, services, testimonials, gallery }
-  (uses CacheService, 5-min TTL — fast repeat fetches)
+                     (columns read generically — any field works)
+  ?tab=all         → reads _config.modules list → fetches each tab
+                     → returns { config, hero, services, ... }
+                     (only the active modules, in config order)
+  (CacheService, 5-min TTL per tab — fast repeat fetches)
 
 doPost(e)
   body: { tab: "contact_form", fields: { name, email, message } }
-  → appends row to "contact_form" tab
+  → appends row to whichever tab is named in "tab"
   → sends email notification to site owner
+  (works for any form tab — contact, booking, quote, intake, etc.)
+
+addTab(tabName)   ← called by rgforms dashboard "Add module" button
+  → inserts a new tab with the standard column headers for that module type
+  → appends tabName to _config.modules row
 
 onEdit(e)
   → clears cache for the edited tab
@@ -361,13 +456,16 @@ onEdit(e)
             <p className="text-xs font-bold" style={{ color: green }}>In the POC</p>
             <Check items={[
               'Multi-tab Sheet provisioning (one per project)',
-              'Unified Apps Script (doGet all tabs + doPost form handler)',
-              'CacheService for fast repeated fetches',
-              '/preview renderer — fetches + renders the Sheet data',
-              '4 CSS templates stored in _config tab',
+              'Unified Apps Script — fully dynamic, reads tab columns generically',
+              '_config tab as module registry (modules row = active tab list + order)',
+              'addTab() function — dashboard can add new module tabs without reprovisioning',
+              'CacheService per tab, 5-min TTL — fast repeat fetches',
+              '/preview renderer — reads _config.modules, renders sections in order',
+              '4 CSS templates stored in _config tab, changeable anytime',
               'Template picker in the rgforms dashboard',
-              'Contact form submissions → append to Sheet tab + email',
+              'Any form tab routed through doPost → append row + email notification',
               'onEdit cache invalidation (near-real-time content updates)',
+              'Module reorder by editing _config.modules order',
             ]} />
           </div>
           <div className="flex flex-col gap-3">
