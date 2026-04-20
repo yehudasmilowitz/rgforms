@@ -91,6 +91,9 @@ const initialState: AppState = {
   siteStarterProgress: [],
   siteStarterResult: null,
   siteStarterError: null,
+  // Site manifest (v5)
+  siteManifest: null,
+  siteManifestError: null,
   // Project
   selectedProject: null,
   projectCreateName: '',
@@ -368,6 +371,10 @@ function reducer(state: AppState, action: AppAction): AppState {
         siteStarterResult: null,
         siteStarterError: null,
       };
+    case 'SET_SITE_MANIFEST':
+      return { ...state, screen: 'site-kit', siteManifest: action.payload, siteManifestError: null };
+    case 'SITE_MANIFEST_ERROR':
+      return { ...state, screen: 'site-starter', siteManifestError: action.payload };
 
     // ── Project ───────────────────────────────────────────────────────────────
     case 'SELECT_PROJECT':

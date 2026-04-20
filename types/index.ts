@@ -311,13 +311,15 @@ export interface ProjectModuleEntry {
 export interface Project {
   projectId: string;
   projectName: string;
-  template: ProjectTemplate;
+  template: string;
   createdAt: string;
   modules: ProjectModuleEntry[];
 }
 
 export interface SiteStarterConfig {
   template: ProjectTemplate | null;
+  /** Dynamic module list produced by the AI manifest flow (overrides template). */
+  customModules?: Array<{ moduleType: string; nameSuffix: string }>;
   siteName: string;
   notifyEmail: string;
   projectId: string;
@@ -336,8 +338,33 @@ export interface SiteStarterModuleProgress {
 export interface SiteStarterResult {
   projectId: string;
   projectName: string;
-  template: ProjectTemplate;
+  template: string;
   modules: SiteStarterModuleProgress[];
+}
+
+// ─── Site Manifest Types (v5 one-Sheet architecture) ─────────────────────────
+
+export interface SiteTab {
+  name:           string;
+  label:          string;
+  type:           'key_value' | 'rows' | 'form' | 'asset';
+  moduleType:     string;
+  nameSuffix:     string;
+  drive_folder_id?: string;
+}
+
+export interface SiteManifest {
+  project_slug:          string;
+  created_at:            string;
+  google_account:        string;
+  script_url:            string;
+  script_token:          string;
+  sheet_id:              string;
+  sheet_url:             string;
+  drive_root_folder_id:  string;
+  drive_root_folder_url: string;
+  notification_email:    string;
+  tabs:                  SiteTab[];
 }
 
 // ─── Developer UX Types ───────────────────────────────────────────────────────
@@ -391,6 +418,9 @@ export interface AppState {
   siteStarterProgress: SiteStarterModuleProgress[];
   siteStarterResult: SiteStarterResult | null;
   siteStarterError: string | null;
+  // Site manifest state (v5 one-Sheet provisioning)
+  siteManifest: SiteManifest | null;
+  siteManifestError: string | null;
   // Project state
   selectedProject: ProjectSummary | null;
   projectCreateName: string;
@@ -459,6 +489,8 @@ export type AppAction =
   | { type: 'SET_SITE_STARTER_RESULT'; payload: SiteStarterResult }
   | { type: 'SITE_STARTER_ERROR'; payload: string }
   | { type: 'RESET_SITE_STARTER' }
+  | { type: 'SET_SITE_MANIFEST'; payload: SiteManifest }
+  | { type: 'SITE_MANIFEST_ERROR'; payload: string }
   // Project actions
   | { type: 'SELECT_PROJECT'; payload: ProjectSummary }
   | { type: 'BACK_TO_PROJECTS' }

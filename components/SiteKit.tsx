@@ -3,29 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { useApp } from '@/context/AppContext';
-import type { SiteStarterModuleProgress, ProjectTemplate } from '@/types';
-
-// ─── Module type labels and icons ────────────────────────────────────────────
-
-const MODULE_TYPE_LABELS: Record<string, string> = {
-  siteconfig:  'Site Config',
-  gallery:     'Gallery',
-  content:     'Content',
-  calendar:    'Calendar',
-  testimonial: 'Testimonials',
-  faq:         'FAQ',
-  menu:        'Menu',
-  newsletter:  'Newsletter',
-  form:        'Form',
-};
-
-const TEMPLATE_LABELS: Record<ProjectTemplate, string> = {
-  portfolio:  'Portfolio',
-  restaurant: 'Restaurant',
-  saas:       'SaaS / Landing',
-  nonprofit:  'Non-profit / Church',
-  agency:     'Agency',
-};
+import type { SiteTab } from '@/types';
 
 // ─── Small icons ──────────────────────────────────────────────────────────────
 
@@ -83,203 +61,185 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-// ─── Module card ──────────────────────────────────────────────────────────────
+// ─── Tab pill ────────────────────────────────────────────────────────────────
 
-function ModuleCard({ mod, index }: { mod: SiteStarterModuleProgress; index: number }) {
-  const isLive    = mod.status === 'complete';
-  const typeLabel = MODULE_TYPE_LABELS[mod.moduleType] ?? mod.moduleType;
+const TAB_TYPE_COLORS: Record<string, string> = {
+  key_value: 'oklch(0.65 0.22 285)',
+  rows:      'oklch(0.60 0.20 240)',
+  form:      'oklch(0.73 0.17 65)',
+  asset:     'oklch(0.73 0.10 75)',
+};
 
-  const sheetUrl = mod.sheetId
-    ? `https://docs.google.com/spreadsheets/d/${mod.sheetId}/edit`
-    : null;
-
+function TabPill({ tab }: { tab: SiteTab }) {
+  const color = TAB_TYPE_COLORS[tab.type] ?? 'var(--color-muted)';
   return (
-    <motion.div
-      className="flex flex-col gap-3 p-4 rounded-xl border"
-      style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.07, duration: 0.35 }}
+    <div
+      className="flex items-center gap-2 px-3 py-2 rounded-lg"
+      style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
     >
-      {/* Card header */}
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-col gap-0.5 min-w-0">
-          <span className="text-sm font-semibold leading-snug" style={{ color: 'var(--color-text)' }}>
-            {mod.moduleName}
-          </span>
-          <span
-            className="inline-flex w-fit items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide"
-            style={{
-              background: 'var(--color-surface-2)',
-              color:      'var(--color-muted)',
-              border:     '1px solid var(--color-border)',
-            }}
-          >
-            {typeLabel}
-          </span>
-        </div>
-        {/* Status badge */}
-        <span
-          className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
-          style={{
-            background: isLive
-              ? 'oklch(0.25 0.08 150 / 0.6)'
-              : 'oklch(0.40 0.18 25 / 0.10)',
-            color: isLive ? 'var(--color-success)' : 'var(--color-error)',
-            border: `1px solid ${isLive ? 'oklch(0.55 0.20 150 / 0.30)' : 'oklch(0.55 0.20 25 / 0.30)'}`,
-          }}
-        >
-          <span
-            className="w-1.5 h-1.5 rounded-full"
-            style={{ background: isLive ? 'var(--color-success)' : 'var(--color-error)' }}
-          />
-          {isLive ? 'Live' : 'Error'}
-        </span>
-      </div>
-
-      {/* Deployment URL */}
-      {isLive && mod.deploymentUrl && (
-        <div
-          className="flex items-center gap-2 px-3 py-2 rounded-lg"
-          style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}
-        >
-          <span className="flex-1 text-xs font-mono truncate" style={{ color: 'var(--color-muted)' }}>
-            {mod.deploymentUrl}
-          </span>
-          <CopyButton text={mod.deploymentUrl} />
-        </div>
-      )}
-
-      {/* Error message */}
-      {!isLive && mod.error && (
-        <p className="text-xs leading-relaxed" style={{ color: 'var(--color-error)' }}>
-          {mod.error}
-        </p>
-      )}
-
-      {/* Link to Google Sheet */}
-      {isLive && sheetUrl && (
-        <a
-          href={sheetUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs font-medium transition-colors focus:outline-none"
-          style={{ color: 'var(--color-muted)' }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-muted)'; }}
-        >
-          <ExternalLinkIcon />
-          Open Google Sheet
-        </a>
-      )}
-    </motion.div>
+      <span
+        className="w-2 h-2 rounded-full shrink-0"
+        style={{ background: color }}
+      />
+      <span className="text-sm font-medium flex-1" style={{ color: 'var(--color-text)' }}>
+        {tab.label}
+      </span>
+      <span
+        className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded"
+        style={{ color, background: color.replace(')', ' / 0.10)'), border: `1px solid ${color.replace(')', ' / 0.25)')}` }}
+      >
+        {tab.type === 'key_value' ? 'config' : tab.type}
+      </span>
+    </div>
   );
 }
 
-// ─── CLAUDE.md export generator ───────────────────────────────────────────────
+// ─── Manifest guide (embedded in downloaded JSON) ────────────────────────────
+
+function buildManifestGuide(tabs: SiteTab[], scriptToken: string) {
+  const hasForms   = tabs.some((t) => t.type === 'form');
+  const hasAssets  = tabs.some((t) => t.type === 'asset');
+  const exampleTab = tabs.find((t) => t.type !== 'form');
+
+  return {
+    _readme: 'Implementation guide — safe to delete once your site is wired up.',
+    security: {
+      note: 'Keep script_url and script_token in server-side environment variables. Never expose them to the browser.',
+      env_example: `SITE_SCRIPT_URL=${tabs[0] ? '(your script_url above)' : ''}\nSITE_TOKEN=${scriptToken}`,
+    },
+    nextjs_proxy: {
+      note: 'Create one route handler to proxy all tab requests. The token stays server-side; your frontend calls /api/site/[tab] instead.',
+      example: [
+        '// app/api/site/[tab]/route.ts',
+        'export async function GET(req: Request, { params }: { params: { tab: string } }) {',
+        '  const url = `${process.env.SITE_SCRIPT_URL}?token=${process.env.SITE_TOKEN}&tab=${params.tab}`;',
+        '  const res = await fetch(url, { next: { revalidate: 60 } });',
+        '  return Response.json(await res.json());',
+        '}',
+      ].join('\n'),
+    },
+    caching: {
+      note: 'Apps Script has ~1–2 s cold starts. Always fetch server-side with a revalidate window so your pages stay fast and the script stays warm.',
+      ...(exampleTab && {
+        example: [
+          `// app/page.tsx`,
+          `const res = await fetch(\`/api/site/${exampleTab.name}\`, { next: { revalidate: 60 } });`,
+          `const data = await res.json();`,
+        ].join('\n'),
+      }),
+    },
+    ...(hasForms && {
+      form_submissions: {
+        note: 'POST form submissions to your own proxy route. The proxy appends the token before forwarding to Apps Script.',
+        example: [
+          '// app/api/site/submit/route.ts',
+          'export async function POST(req: Request) {',
+          '  const { tab, fields } = await req.json();',
+          '  const res = await fetch(process.env.SITE_SCRIPT_URL!, {',
+          '    method: "POST",',
+          '    headers: { "Content-Type": "application/json" },',
+          '    body: JSON.stringify({ token: process.env.SITE_TOKEN, tab, fields }),',
+          '  });',
+          '  return Response.json(await res.json());',
+          '}',
+        ].join('\n'),
+      },
+    }),
+    ...(hasAssets && {
+      images: {
+        note: 'Asset tab items include a ready-to-use url field served from Google\'s CDN — no proxy needed since it contains no secrets.',
+        url_format: 'https://lh3.googleusercontent.com/d/<fileId>',
+        nextjs_config: 'Add lh3.googleusercontent.com to images.domains (or remotePatterns) in next.config.js',
+      },
+    }),
+    content_updates: 'Edit the Google Sheet directly to add or update content — no redeployment needed. Changes appear on the next revalidation cycle.',
+    authorization: 'Visit the script_url once in your browser as the Google account owner to authorize the web app before going live.',
+  };
+}
+
+// ─── CLAUDE.md generator ──────────────────────────────────────────────────────
 
 function generateClaudeMd(
-  projectName: string,
-  template: ProjectTemplate,
-  modules: SiteStarterModuleProgress[],
+  projectSlug: string,
+  scriptUrl: string,
+  scriptToken: string,
+  sheetUrl: string,
+  driveFolderUrl: string,
+  tabs: SiteTab[],
   date: string,
 ): string {
-  const templateLabel = TEMPLATE_LABELS[template] ?? template;
-
-  const modulesSections = modules
-    .filter((m) => m.status === 'complete' && m.deploymentUrl)
-    .map((m) => {
-      const typeLabel = MODULE_TYPE_LABELS[m.moduleType] ?? m.moduleType;
-      const endpoint  = m.deploymentUrl!;
-
-      let usageLine = '';
-      switch (m.moduleType) {
-        case 'siteconfig':
-          usageLine = `GET ${endpoint}?json=1 → { data: { key: value, ... } }`;
-          break;
-        case 'gallery':
-          usageLine = `GET ${endpoint}?json=1 → { images: [...] }\nGET ${endpoint}?json=1&featured=1 → featured only\nGET ${endpoint}?json=1&category=x → filtered`;
-          break;
-        case 'content':
-          usageLine = `GET ${endpoint}?json=1 → { data: [...], total: N }\nGET ${endpoint}?json=1&slug=my-slug → single item`;
-          break;
-        case 'calendar':
-          usageLine = `GET ${endpoint}?json=1 → { events: [...] } (upcoming)\nGET ${endpoint}?json=1&all=1 → all events\nGET ${endpoint}?json=1&past=1 → past events`;
-          break;
-        case 'testimonial':
-          usageLine = `GET ${endpoint}?json=1 → { testimonials: [...] }`;
-          break;
-        case 'faq':
-          usageLine = `GET ${endpoint}?json=1 → { faqs: [...] }\nGET ${endpoint}?json=1&category=x → filtered by category`;
-          break;
-        case 'menu':
-          usageLine = `GET ${endpoint}?json=1 → { items: [...] }\nGET ${endpoint}?json=1&category=x → filtered`;
-          break;
-        case 'newsletter':
-          usageLine = `POST ${endpoint} with { email: "..." } → subscribe`;
-          break;
-        case 'form':
-          usageLine = `POST ${endpoint} with form data → submit\nContent-Type: application/json or application/x-www-form-urlencoded`;
-          break;
-        default:
-          usageLine = `GET ${endpoint}?json=1`;
+  const tabDocs = tabs
+    .map((tab) => {
+      if (tab.type === 'key_value') {
+        return `#### \`${tab.name}\` — ${tab.label} (config)
+GET ${scriptUrl}?token=${scriptToken}&tab=${tab.name}
+Returns: \`{ site_name: "...", tagline: "...", ... }\``;
       }
-
-      const sheetUrl = m.sheetId
-        ? `https://docs.google.com/spreadsheets/d/${m.sheetId}/edit`
-        : null;
-
-      return `### ${typeLabel}: ${m.moduleName}
-Endpoint: ${endpoint}
-${sheetUrl ? `Sheet: ${sheetUrl}` : ''}
-
-Usage:
-${usageLine}
-
-\`\`\`javascript
-// Fetch example
-const res = await fetch('${endpoint}?json=1');
-const data = await res.json();
-\`\`\``;
+      if (tab.type === 'rows') {
+        return `#### \`${tab.name}\` — ${tab.label} (rows)
+GET ${scriptUrl}?token=${scriptToken}&tab=${tab.name}
+Returns: \`[{ title: "...", ... }, ...]\``;
+      }
+      if (tab.type === 'form') {
+        return `#### \`${tab.name}\` — ${tab.label} (form submissions)
+POST ${scriptUrl}
+Body: \`{ token: "${scriptToken}", tab: "${tab.name}", fields: { name: "...", email: "...", ... } }\`
+Returns: \`{ success: true }\``;
+      }
+      if (tab.type === 'asset') {
+        return `#### \`${tab.name}\` — ${tab.label} (Drive assets)
+GET ${scriptUrl}?token=${scriptToken}&tab=${tab.name}
+Returns: \`[{ id, name, mimeType, isImage, size, url, driveUrl, createdAt, updatedAt }, ...]\`
+Image URLs use the Google Docs viewer format: https://lh3.googleusercontent.com/d/<id>`;
+      }
+      return '';
     })
-    .join('\n\n---\n\n');
+    .filter(Boolean)
+    .join('\n\n');
 
-  return `# ${projectName} — Site Backend
+  return `# ${projectSlug} — Site Backend
 
 Generated by RG Forms on ${date}
-Template: ${templateLabel}
 
 ---
 
-## Overview
+## Architecture
 
-This project uses RG Forms — a serverless Google Drive backend.
-All data lives in your Google Drive. No server, no database, no API keys required on the frontend.
+One Google Sheet, one Apps Script web app. All data lives in your Google Drive.
+No server, no database, no hosting required.
 
-All endpoints are Google Apps Script web apps.
-- Bare URL (no params) → authorization page
-- Append ?json=1 → JSON data
-- Apps Script cold starts take ~800ms–2s. Warm requests are fast.
-- Use server-side fetching with caching (Next.js ISR, Astro SSG) to avoid cold starts in production.
+- **Sheet**: ${sheetUrl}
+- **Drive folder**: ${driveFolderUrl}
+- **API endpoint**: ${scriptUrl}
+- **Token**: \`${scriptToken}\` (include in every request)
 
 ---
 
-## APIs
+## API Reference
 
-${modulesSections}
+All requests require \`token=${scriptToken}\`.
+
+${tabDocs}
+
+---
+
+## Usage notes
+
+1. **Authorization**: Visit the script URL once in your browser to authorize it before use.
+2. **Cold starts**: Apps Script cold starts take ~800ms–2s. Use server-side caching (Next.js ISR, Astro SSG) in production.
+3. **Content updates**: Edit the Google Sheet directly — no redeployment needed.
+4. **Forms**: POST submissions are appended as new rows. Email notifications go to the configured address.
 
 ---
 
 ## Instructions for Claude
 
-When the user asks you to build UI that uses data from this project:
-1. Use the endpoint URLs from this file — do not invent URLs.
-2. For GET endpoints, append ?json=1 to get JSON data.
-3. For server-rendered frameworks (Next.js, Astro, SvelteKit, Nuxt), fetch on the server with caching.
-4. For client-side-only sites, add a TTL cache to avoid repeated cold starts.
-5. Never hardcode content — always fetch from the appropriate module endpoint.
-6. To add/edit content, direct the user to edit the corresponding Google Sheet — no redeployment needed.
-7. Authorization: each endpoint must be visited once by the owner to authorize the script before it goes live.
+When building UI for this project:
+1. Use the single endpoint URL above for all tabs.
+2. Include the token in every request.
+3. Use \`tab=<name>\` param for GET, \`tab\` in the body for POST.
+4. Fetch on the server with caching for production builds.
+5. Never hardcode content — always fetch from the API.
 `;
 }
 
@@ -287,22 +247,42 @@ When the user asks you to build UI that uses data from this project:
 
 export default function SiteKit() {
   const { state, dispatch } = useApp();
-  const result = state.siteStarterResult!;
+  const manifest = state.siteManifest;
 
-  if (!result) return null;
+  if (!manifest) return null;
 
-  const templateLabel = TEMPLATE_LABELS[result.template] ?? result.template;
-  const liveCount     = result.modules.filter((m) => m.status === 'complete').length;
-  const total         = result.modules.length;
+  const date = new Date(manifest.created_at).toLocaleDateString('en-US', {
+    year: 'numeric', month: 'long', day: 'numeric',
+  });
 
-  function handleExportSkill() {
-    const date    = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    const content = generateClaudeMd(result.projectName, result.template, result.modules, date);
-    const blob    = new Blob([content], { type: 'text/markdown' });
-    const url     = URL.createObjectURL(blob);
-    const a       = document.createElement('a');
-    a.href        = url;
-    a.download    = 'CLAUDE.md';
+  function handleDownloadManifest() {
+    const guide = buildManifestGuide(manifest!.tabs, manifest!.script_token);
+    const blob = new Blob([JSON.stringify({ ...manifest, ...guide }, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `${manifest!.project_slug}-manifest.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function handleExportClaudeMd() {
+    const content = generateClaudeMd(
+      manifest!.project_slug,
+      manifest!.script_url,
+      manifest!.script_token,
+      manifest!.sheet_url,
+      manifest!.drive_root_folder_url,
+      manifest!.tabs,
+      date,
+    );
+    const blob = new Blob([content], { type: 'text/markdown' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'CLAUDE.md';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -317,47 +297,25 @@ export default function SiteKit() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="w-full max-w-3xl mx-auto flex flex-col gap-8">
+      <div className="w-full max-w-2xl mx-auto flex flex-col gap-8">
 
         {/* Header */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
+          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-subtle)' }}>
+            {manifest.google_account}
+          </p>
           <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
-            🎉 Your site kit is ready
+            Site backend ready
           </h1>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-lg font-semibold" style={{ color: 'var(--color-text)' }}>
-              {result.projectName}
-            </span>
-            <span
-              className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
-              style={{
-                background: 'var(--color-accent-subtle)',
-                color:      'var(--color-accent)',
-                border:     '1px solid var(--color-accent-border)',
-              }}
-            >
-              {templateLabel}
-            </span>
-            <span
-              className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-              style={{
-                background: 'var(--color-surface)',
-                color:      'var(--color-muted)',
-                border:     '1px solid var(--color-border)',
-              }}
-            >
-              {liveCount} of {total} live
-            </span>
-          </div>
+          <p className="text-sm" style={{ color: 'var(--color-muted)' }}>
+            {manifest.tabs.length} tab{manifest.tabs.length !== 1 ? 's' : ''} · provisioned {date}
+          </p>
         </div>
 
         {/* Authorization notice */}
         <div
           className="rounded-xl border px-4 py-3 flex items-start gap-3"
-          style={{
-            background:  'oklch(0.78 0.18 75 / 0.06)',
-            borderColor: 'oklch(0.78 0.18 75 / 0.25)',
-          }}
+          style={{ background: 'oklch(0.78 0.18 75 / 0.06)', borderColor: 'oklch(0.78 0.18 75 / 0.25)' }}
         >
           <span className="text-base shrink-0 mt-0.5">⚠️</span>
           <div className="flex flex-col gap-0.5">
@@ -365,39 +323,88 @@ export default function SiteKit() {
               One-time authorization required
             </p>
             <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-              Visit each endpoint URL once in your browser to authorize it. After that it serves data publicly.
-              The endpoint URL without <code className="font-mono px-1 rounded" style={{ background: 'var(--color-surface-2)' }}>?json=1</code> shows the authorization page.
+              Visit the script URL below once in your browser to authorize the web app. After authorizing you&apos;ll see{' '}
+              <code className="font-mono px-1 rounded text-[11px]" style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
+                {'{'}status: &quot;ok&quot;{'}'}
+              </code>
+              {' '}— that means the API is live and ready.
             </p>
           </div>
         </div>
 
-        {/* Module cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {result.modules.map((mod, i) => (
-            <ModuleCard key={`${mod.moduleType}-${mod.moduleName}`} mod={mod} index={i} />
-          ))}
+        {/* API endpoint */}
+        <div className="flex flex-col gap-3 p-4 rounded-xl border"
+          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-muted)' }}>
+            API Endpoint
+          </p>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg"
+            style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
+            <span className="flex-1 text-xs font-mono truncate" style={{ color: 'var(--color-text)' }}>
+              {manifest.script_url}
+            </span>
+            <CopyButton text={manifest.script_url} />
+          </div>
+          <div className="flex items-center gap-2">
+            <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
+              Token: <code className="font-mono px-1.5 py-0.5 rounded text-[11px]"
+                style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
+                {manifest.script_token}
+              </code>
+            </p>
+            <CopyButton text={manifest.script_token} />
+          </div>
+          <div className="flex items-center gap-4 flex-wrap">
+            <a href={manifest.script_url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-medium"
+              style={{ color: 'var(--color-accent)' }}>
+              <ExternalLinkIcon /> Open Script (authorize)
+            </a>
+            <a href={manifest.sheet_url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-medium"
+              style={{ color: 'var(--color-muted)' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-muted)'; }}>
+              <ExternalLinkIcon /> Open Google Sheet
+            </a>
+            <a href={manifest.drive_root_folder_url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-medium"
+              style={{ color: 'var(--color-muted)' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-muted)'; }}>
+              <ExternalLinkIcon /> Open Drive Folder
+            </a>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex flex-col gap-3">
+          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-muted)' }}>
+            Tabs ({manifest.tabs.length})
+          </p>
+          <div className="flex flex-col gap-2">
+            {manifest.tabs.map((tab) => (
+              <TabPill key={tab.name} tab={tab} />
+            ))}
+          </div>
         </div>
 
         {/* Actions */}
         <div className="flex gap-3 flex-wrap">
           <button
             type="button"
-            onClick={handleExportSkill}
+            onClick={handleExportClaudeMd}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl border text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-            style={{
-              background:  'var(--color-accent-subtle)',
-              borderColor: 'var(--color-accent-border)',
-              color:       'var(--color-accent)',
-            }}
+            style={{ background: 'var(--color-accent-subtle)', borderColor: 'var(--color-accent-border)', color: 'var(--color-accent)' }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background   = 'var(--color-accent)';
-              (e.currentTarget as HTMLButtonElement).style.color        = '#fff';
-              (e.currentTarget as HTMLButtonElement).style.borderColor  = 'var(--color-accent)';
+              (e.currentTarget as HTMLButtonElement).style.background  = 'var(--color-accent)';
+              (e.currentTarget as HTMLButtonElement).style.color       = '#fff';
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-accent)';
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background   = 'var(--color-accent-subtle)';
-              (e.currentTarget as HTMLButtonElement).style.color        = 'var(--color-accent)';
-              (e.currentTarget as HTMLButtonElement).style.borderColor  = 'var(--color-accent-border)';
+              (e.currentTarget as HTMLButtonElement).style.background  = 'var(--color-accent-subtle)';
+              (e.currentTarget as HTMLButtonElement).style.color       = 'var(--color-accent)';
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-accent-border)';
             }}
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -409,13 +416,30 @@ export default function SiteKit() {
 
           <button
             type="button"
+            onClick={handleDownloadManifest}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+            style={{ background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-accent)';
+              (e.currentTarget as HTMLButtonElement).style.color       = 'var(--color-accent)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-border)';
+              (e.currentTarget as HTMLButtonElement).style.color       = 'var(--color-muted)';
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M7 1v8M4 6l3 3 3-3" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M1 10v2a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-2" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
+            </svg>
+            Download Manifest (JSON)
+          </button>
+
+          <button
+            type="button"
             onClick={() => dispatch({ type: 'RESET_SITE_STARTER' })}
             className="px-5 py-2.5 rounded-xl border text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-            style={{
-              background:  'transparent',
-              borderColor: 'var(--color-border)',
-              color:       'var(--color-muted)',
-            }}
+            style={{ background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-accent)';
               (e.currentTarget as HTMLButtonElement).style.color       = 'var(--color-accent)';

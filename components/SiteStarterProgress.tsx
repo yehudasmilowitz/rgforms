@@ -2,11 +2,18 @@
 
 import { motion } from 'motion/react';
 import { useApp } from '@/context/AppContext';
-import type { SiteStarterModuleProgress, ProjectTemplate } from '@/types';
+import type { SiteStarterModuleProgress } from '@/types';
 
-// ─── Module type → human label map ───────────────────────────────────────────
+// ─── Step / module type → human label map ────────────────────────────────────
 
-const MODULE_TYPE_LABELS: Record<string, string> = {
+const STEP_LABELS: Record<string, string> = {
+  // v5 provision steps
+  drive:    'Drive folder + asset storage',
+  sheet:    'Google Sheet + tabs',
+  script:   'Apps Script project',
+  deploy:   'Web app deployment',
+  manifest: 'Manifest + configuration',
+  // legacy module types (kept for backward compat)
   siteconfig:  'Site Config',
   gallery:     'Gallery',
   content:     'Content',
@@ -16,14 +23,6 @@ const MODULE_TYPE_LABELS: Record<string, string> = {
   menu:        'Menu',
   newsletter:  'Newsletter',
   form:        'Form',
-};
-
-const TEMPLATE_LABELS: Record<ProjectTemplate, string> = {
-  portfolio: 'Portfolio',
-  restaurant: 'Restaurant',
-  saas: 'SaaS / Landing',
-  nonprofit: 'Non-profit / Church',
-  agency: 'Agency',
 };
 
 // ─── Status icons ─────────────────────────────────────────────────────────────
@@ -92,7 +91,7 @@ function StatusIcon({ status }: { status: SiteStarterModuleProgress['status'] })
 
 function ModuleRow({ mod, index }: { mod: SiteStarterModuleProgress; index: number }) {
   const isRunning = mod.status === 'running';
-  const typeLabel = MODULE_TYPE_LABELS[mod.moduleType] ?? mod.moduleType;
+  const typeLabel = STEP_LABELS[mod.moduleType] ?? mod.moduleType;
   const truncUrl  = mod.deploymentUrl
     ? mod.deploymentUrl.replace('https://script.google.com/macros/s/', '…/s/').slice(0, 60) + (mod.deploymentUrl.length > 60 ? '…' : '')
     : null;
@@ -158,10 +157,6 @@ export default function SiteStarterProgress() {
   const hasError = siteStarterProgress.some((m) => m.status === 'error');
   const allDone  = total > 0 && siteStarterProgress.every((m) => m.status === 'complete' || m.status === 'error');
 
-  const templateLabel = siteStarterConfig.template
-    ? TEMPLATE_LABELS[siteStarterConfig.template] ?? siteStarterConfig.template
-    : '';
-
   return (
     <main
       className="min-h-screen flex flex-col items-center justify-center px-4 py-16"
@@ -179,9 +174,7 @@ export default function SiteStarterProgress() {
             Spinning up your site kit…
           </h1>
           <p className="text-sm" style={{ color: 'var(--color-muted)' }}>
-            {siteStarterConfig.siteName && templateLabel
-              ? `${siteStarterConfig.siteName} · ${templateLabel}`
-              : 'Provisioning modules in parallel'}
+            {siteStarterConfig.siteName ?? 'Setting up your site backend…'}
           </p>
           <div
             className="mt-1 px-3 py-1 rounded-full text-xs font-semibold"
