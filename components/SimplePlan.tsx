@@ -148,13 +148,15 @@ export default function SimplePlan() {
             <Label color={green}>POC — one Sheet, all tabs</Label>
             <Code>{`Project "Acme Wholesale"
   /project-sheet
-    tab: _config       ← site name, template, module list
+    tab: _config       ← site name, template, module list,
+                          asset_folder_id (Drive folder for this project)
     tab: hero          ← headline, subtitle, cta
     tab: services      ← title, description, price
     tab: testimonials  ← name, quote, rating
-    tab: gallery       ← image_url, caption, category
+    tab: gallery       ← image_url, caption, category (Sheet rows)
+    tab: assets        ← Script reads Drive folder, not Sheet rows
     tab: contact_form  ← submissions append here
-  1 Script, 1 URL`}
+  1 Sheet, 1 Script, 1 Drive folder, 1 URL`}
             </Code>
           </div>
         </div>
@@ -166,54 +168,40 @@ export default function SimplePlan() {
       <section className="flex flex-col gap-4">
         <Label>Module taxonomy — what a &quot;module&quot; actually is</Label>
         <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-          rgforms already knows how to provision several module types. In the POC, every one of those types becomes
-          a tab in the project Sheet. There are three families, plus site config:
+          Every module becomes a tab in the project Sheet. There are three families — content, form, and asset —
+          plus the site config tab. The distinction matters because content and form modules are both Sheet-row-based,
+          while asset modules are backed by a real Google Drive folder.
         </p>
+
+        {/* Content + Form: side by side */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
             {
               family: 'Content modules',
               color: green,
-              note: 'Read via doGet. Rendered as sections.',
+              note: 'Sheet rows. Read via doGet. Rendered as page sections.',
               types: [
                 { name: 'hero', cols: 'headline, subtitle, cta_text, cta_url, image_url' },
                 { name: 'services', cols: 'title, description, price, icon, slug' },
                 { name: 'blog', cols: 'title, slug, body (Markdown), date, published' },
                 { name: 'faq', cols: 'question, answer, category, order' },
                 { name: 'testimonials', cols: 'name, quote, rating, company, photo_url' },
+                { name: 'gallery', cols: 'title, image_url, caption, alt, category, featured, order' },
                 { name: 'team', cols: 'name, role, bio, photo_url, linkedin' },
-                { name: 'events', cols: 'title, date, location, description, slug' },
-              ],
-            },
-            {
-              family: 'Asset modules',
-              color: violet,
-              note: 'Read via doGet. Rendered as grids or media sections.',
-              types: [
-                { name: 'gallery', cols: 'image_url, caption, alt, category, featured, order' },
-                { name: 'portfolio', cols: 'title, image_url, tags, client, url' },
                 { name: 'menu', cols: 'name, description, price, category, image_url' },
-                { name: 'calendar', cols: 'title, start_date, end_date, location, notes' },
+                { name: 'events', cols: 'title, date, location, description, slug' },
               ],
             },
             {
               family: 'Form modules',
               color: amber,
-              note: 'Write via doPost. Submissions append to the tab.',
+              note: 'Sheet rows. Write via doPost. Submissions append to the tab.',
               types: [
                 { name: 'contact_form', cols: 'name, email, message, submitted_at' },
                 { name: 'booking', cols: 'name, email, phone, preferred_date, notes' },
                 { name: 'quote_request', cols: 'name, email, service, details, budget' },
                 { name: 'newsletter', cols: 'email, subscribed_at, source' },
                 { name: 'intake', cols: 'any custom fields — added as columns' },
-              ],
-            },
-            {
-              family: 'Site config',
-              color: 'var(--color-subtle)',
-              note: 'Key-value tab. Controls renderer + SEO.',
-              types: [
-                { name: '_config', cols: 'site_name, template, modules, meta_description, og_title, og_image, ga_id, …' },
               ],
             },
           ].map(({ family, color, note, types }) => (
@@ -234,13 +222,69 @@ export default function SimplePlan() {
             </div>
           ))}
         </div>
+
+        {/* Asset module — full-width, different explanation */}
+        <div className="rounded-xl p-4 flex flex-col gap-3"
+          style={{ background: 'var(--color-surface)', border: `1px solid var(--color-border)`, borderTop: `3px solid ${violet}` }}>
+          <div className="flex flex-col gap-0.5">
+            <p className="text-xs font-bold" style={{ color: violet }}>Asset module</p>
+            <p className="text-[10px]" style={{ color: 'var(--color-subtle)' }}>
+              Not Sheet rows. Backed by a real Google Drive folder. One folder per project, shared publicly. Script reads it via DriveApp.
+            </p>
+          </div>
+          <Code>{`How it works:
+
+  Provisioning creates one Drive folder for the project:
+    _config tab stores:
+      asset_folder_id  | 1BxK9mN…               ← Google Drive folder ID
+      asset_folder_url | drive.google.com/…      ← link you share with client
+
+  The "assets" tab in the Sheet is not a data tab.
+  When doGet?tab=assets is called, the Script runs:
+    DriveApp.getFolderById(asset_folder_id).getFiles()
+  and returns the file list as JSON — no Sheet rows involved.
+
+  Each file in the response:
+    { id, name, mimeType, isImage, size,
+      url: "https://lh3.googleusercontent.com/d/{fileId}",
+      driveUrl, createdAt, updatedAt }
+
+  The CDN URL (lh3.googleusercontent.com) is served by Google's
+  global CDN — no egress cost, no bandwidth bill.
+
+  To add files: user opens their Drive folder and uploads directly.
+  No upload UI needed in the rgforms dashboard for the POC.`}
+          </Code>
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+            This is why asset modules are different from gallery. A <strong style={{ color: 'var(--color-text)' }}>gallery</strong> is a
+            content module — rows in a Sheet where each row references an image URL hosted anywhere.
+            An <strong style={{ color: 'var(--color-text)' }}>asset module</strong> is a live read of actual files uploaded to Drive.
+            The renderer shows the assets tab as a media grid sourced from the Drive folder, not the Sheet.
+          </p>
+        </div>
+
+        {/* Site config */}
+        <div className="rounded-xl p-4 flex flex-col gap-2"
+          style={{ background: 'var(--color-surface)', border: `1px solid var(--color-border)`, borderTop: `3px solid var(--color-border)` }}>
+          <div className="flex flex-col gap-0.5">
+            <p className="text-xs font-bold" style={{ color: 'var(--color-subtle)' }}>Site config (_config tab)</p>
+            <p className="text-[10px]" style={{ color: 'var(--color-subtle)' }}>Key-value tab. The single source of truth for the whole project.</p>
+          </div>
+          <div className="rounded px-2 py-1.5" style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
+            <p className="text-[10px] leading-snug font-mono" style={{ color: 'var(--color-subtle)' }}>
+              site_name, template, modules (ordered list), asset_folder_id, asset_folder_url, meta_description, og_title, og_image, ga_id
+            </p>
+          </div>
+        </div>
+
         <Note>
-          <span className="font-semibold" style={{ color: violet }}>Blog is not a special case. </span>
-          Blog is a content module — the same infrastructure that renders a services section also renders a
-          blog listing and detail view. The difference is column schema and render logic, not a different
-          system. Any row-based tab with a <code className="text-xs px-1 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>slug</code> column
-          gets a detail route automatically. This is why adding a new content type (events, resources,
-          case studies) costs nothing in infrastructure — it&apos;s just a new tab with appropriate columns.
+          <span className="font-semibold" style={{ color: violet }}>The rule: one Sheet, one Script, one Drive folder per project. </span>
+          Content and form modules are just tabs with rows. The asset module is the one exception —
+          it reads from Drive, not from the Sheet. Everything else (blog, gallery, testimonials, forms)
+          is Sheet rows all the way down. Any row-based tab with a{' '}
+          <code className="text-xs px-1 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>slug</code>{' '}
+          column gets a detail route automatically — that&apos;s how blog, events, and services all work
+          without any extra infrastructure.
         </Note>
       </section>
 
