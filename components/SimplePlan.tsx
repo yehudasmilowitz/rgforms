@@ -154,9 +154,10 @@ export default function SimplePlan() {
     tab: services      ← title, description, price
     tab: testimonials  ← name, quote, rating
     tab: gallery       ← image_url, caption, category (Sheet rows)
-    tab: assets        ← Script reads Drive folder, not Sheet rows
+    tab: photos        ← reads photos/ subfolder in Drive
+    tab: docs          ← reads docs/ subfolder in Drive
     tab: contact_form  ← submissions append here
-  1 Sheet, 1 Script, 1 Drive folder, 1 URL`}
+  1 Sheet, 1 Script, 1 Drive root folder, 1 URL`}
             </Code>
           </div>
         </div>
@@ -232,34 +233,42 @@ export default function SimplePlan() {
               Not Sheet rows. Backed by a real Google Drive folder. One folder per project, shared publicly. Script reads it via DriveApp.
             </p>
           </div>
-          <Code>{`How it works:
+          <Code>{`Structure — one root folder, subfolders per asset tab:
 
-  Provisioning creates one Drive folder for the project:
-    _config tab stores:
-      asset_folder_id  | 1BxK9mN…               ← Google Drive folder ID
-      asset_folder_url | drive.google.com/…      ← link you share with client
+  _config tab stores:
+    asset_folder_id  | root-folder-id        ← created at provisioning
+    photos_folder_id | subfolder-id-A        ← created when photos tab added
+    docs_folder_id   | subfolder-id-B        ← created when docs tab added
 
-  The "assets" tab in the Sheet is not a data tab.
-  When doGet?tab=assets is called, the Script runs:
-    DriveApp.getFolderById(asset_folder_id).getFiles()
-  and returns the file list as JSON — no Sheet rows involved.
+  addTab("photos") does three things:
+    1. Creates a photos/ subfolder inside the root Drive folder
+    2. Stores photos_folder_id in _config
+    3. Appends "photos" to _config.modules
+
+  doGet?tab=photos calls:
+    DriveApp.getFolderById(photos_folder_id).getFiles()
+    → returns file list as JSON (no Sheet rows involved)
 
   Each file in the response:
     { id, name, mimeType, isImage, size,
       url: "https://lh3.googleusercontent.com/d/{fileId}",
       driveUrl, createdAt, updatedAt }
 
-  The CDN URL (lh3.googleusercontent.com) is served by Google's
-  global CDN — no egress cost, no bandwidth bill.
-
-  To add files: user opens their Drive folder and uploads directly.
-  No upload UI needed in the rgforms dashboard for the POC.`}
+  File URLs are served by Google's global CDN — zero egress cost.`}
           </Code>
+          <p className="text-xs font-semibold mt-1" style={{ color: 'var(--color-text)' }}>Upload UI — in the POC</p>
           <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            This is why asset modules are different from gallery. A <strong style={{ color: 'var(--color-text)' }}>gallery</strong> is a
-            content module — rows in a Sheet where each row references an image URL hosted anywhere.
-            An <strong style={{ color: 'var(--color-text)' }}>asset module</strong> is a live read of actual files uploaded to Drive.
-            The renderer shows the assets tab as a media grid sourced from the Drive folder, not the Sheet.
+            The rgforms dashboard includes a simple asset panel per asset tab: a file picker that uploads
+            directly to the correct Drive subfolder via the Drive API (already authorized through the same
+            OAuth session used for provisioning). Shows current files as thumbnails with name + size.
+            No separate auth, no extra infrastructure — the same Google token that creates Sheets and Scripts
+            can write to Drive.
+          </p>
+          <p className="text-xs leading-relaxed mt-1" style={{ color: 'var(--color-muted)' }}>
+            A <strong style={{ color: 'var(--color-text)' }}>gallery</strong> tab is a content module — Sheet rows where each row
+            references an image URL hosted anywhere (the image itself lives elsewhere).
+            An <strong style={{ color: 'var(--color-text)' }}>asset tab</strong> is actual file storage — files live in Drive,
+            the Script reads the folder live, the renderer shows whatever is there.
           </p>
         </div>
 
@@ -272,7 +281,7 @@ export default function SimplePlan() {
           </div>
           <div className="rounded px-2 py-1.5" style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
             <p className="text-[10px] leading-snug font-mono" style={{ color: 'var(--color-subtle)' }}>
-              site_name, template, modules (ordered list), asset_folder_id, asset_folder_url, meta_description, og_title, og_image, ga_id
+              site_name, template, modules (ordered list), asset_folder_id, {'{tabName}'}_folder_id (per asset tab), meta_description, og_title, og_image, ga_id
             </p>
           </div>
         </div>
@@ -596,6 +605,10 @@ onEdit(e)
               'JSON-LD — LocalBusiness on home, BlogPosting on blog posts, FAQPage on faq module',
               '6 CSS templates in _config tab, changeable anytime',
               'Template picker in the rgforms dashboard',
+              'Asset module — one root Drive folder per project, subfolders per asset tab (photos/, docs/, etc.)',
+              'addTab() for asset type — creates Drive subfolder + stores folder_id in _config',
+              'Asset upload UI in dashboard — file picker uploads directly to the correct Drive subfolder (same OAuth session)',
+              'Asset tab renders as media grid sourced from Drive folder, not Sheet rows',
               'Any form tab routed through doPost → append row + email notification',
               'onEdit cache invalidation (near-real-time content updates)',
               'Module reorder by editing _config.modules order',
