@@ -633,7 +633,16 @@ onEdit(e)
               colorA: violetA,
               isTemplates: true,
             },
-          ].map(({ n, label, detail, unlocks, effort, color, colorA, isCloudflare, isGemini, isTemplates }) => (
+            {
+              n: '7', label: 'Security + gateway layer',
+              detail: '',
+              unlocks: '',
+              effort: '1–2 weeks',
+              color: amber,
+              colorA: amberA,
+              isSecurity: true,
+            },
+          ].map(({ n, label, detail, unlocks, effort, color, colorA, isCloudflare, isGemini, isTemplates, isSecurity }) => (
             <div key={n} className="rounded-xl p-4 flex flex-col gap-2"
               style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderLeft: `3px solid ${color}` }}>
               <div className="flex items-center justify-between gap-3">
@@ -772,6 +781,52 @@ Cost at 1,000 sites:
                     Higher perceived value (better-looking sites justify higher pricing). Gemini can suggest
                     the right template based on business type. Premium templates become a paid feature — free
                     tier gets 2, paid tiers get all 6+.
+                  </p>
+                </div>
+              )}
+              {isSecurity && (
+                <div className="flex flex-col gap-2">
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                    Once real domains and real users are on the platform, the Apps Script URL becomes a liability.
+                    Any request to <code className="text-[10px] px-1 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>script.google.com/…/exec</code> bypasses
+                    your platform entirely — scrapers, direct API abuse, and malicious form submissions all go
+                    straight to Google and you have zero visibility. The gateway layer fixes this.
+                  </p>
+                  <Code>{`What the security layer adds:
+
+  Domain-level request blocking
+    → Only requests arriving through your Cloudflare Worker are served
+    → Direct hits to the Apps Script URL return 403
+    → Enforced via a secret header: Worker sets X-RGForms-Token on every
+      fetch; Script checks for it and rejects anything without it
+    → Token is stored in Cloudflare KV, rotated per-site — not in the Sheet
+
+  Rate limiting (Cloudflare)
+    → Per-domain: 100 req/min on read endpoints, 10 req/min on form POST
+    → Blocks brute-force form spam at the edge, before it hits Apps Script
+    → No cost — Cloudflare rate limiting is included in the Workers plan
+
+  Form submission validation
+    → Worker validates required fields + basic types before forwarding to Script
+    → Honeypot field injected into every form at render time
+    → Duplicate submission window: same email + same form = reject for 60s
+
+  Abuse reporting
+    → Per-site request log written to KV (last 500 events, rolling)
+    → Dashboard shows: request volume, top IPs, form submission count
+    → You can kill a site's token from the dashboard → all traffic stops instantly
+
+  Why this needs the gateway (Cloudflare Workers + KV):
+    The gateway IS the security layer. Without it, there's no choke point.
+    You can't block domain-level requests if the Script URL is public.
+    Build #4 (Cloudflare) first — #7 is an extension of the same Worker.`}
+                  </Code>
+                  <p className="text-xs" style={{ color }}>
+                    <span className="font-semibold">Unlocks: </span>
+                    Enterprise and agency buyers require this before they put client sites on a platform.
+                    Also prevents a single abusive user from blowing through Apps Script quotas and
+                    taking down every site on your platform. The token rotation + kill-switch is a
+                    meaningful moat — a Sheets-based competitor can&apos;t offer this without the same gateway investment.
                   </p>
                 </div>
               )}
