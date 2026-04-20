@@ -1,6 +1,6 @@
-# 🛠️ rgforms Developer Guide
+# 🛠️ sheetspin Developer Guide
 
-A comprehensive reference for working on the rgforms codebase. Covers architecture, file structure, how to extend the app, and common pitfalls.
+A comprehensive reference for working on the sheetspin codebase. Covers architecture, file structure, how to extend the app, and common pitfalls.
 
 ---
 
@@ -21,7 +21,7 @@ A comprehensive reference for working on the rgforms codebase. Covers architectu
 
 ### No Backend
 
-rgforms has no server. There is no Express app, no API routes, no database, no server-side rendering. The `output: 'export'` setting in `next.config.ts` produces a directory of static HTML, CSS, and JS files that can be hosted anywhere.
+sheetspin has no server. There is no Express app, no API routes, no database, no server-side rendering. The `output: 'export'` setting in `next.config.ts` produces a directory of static HTML, CSS, and JS files that can be hosted anywhere.
 
 Every action that would normally go to a server — authentication, data storage, Google API calls — is done entirely from the browser using the signed-in user's own OAuth token.
 
@@ -84,7 +84,7 @@ builder (create another form, same auth)
 ## 2. File Structure Walkthrough
 
 ```
-rgforms/
+sheetspin/
 ├── app/
 │   ├── layout.tsx              # Root layout, fonts, GIS script tag, metadata
 │   ├── page.tsx                # Landing screen (sign-in CTA)
@@ -265,7 +265,7 @@ After all 5 provisioning steps complete, `lib/snippetTemplate.ts` generates the 
 The snippet is a self-contained block of HTML and JavaScript. Here is the structure:
 
 ```html
-<form class="rgforms-form" id="rg-form"
+<form class="sheetspin-form" id="rg-form"
       action="DEPLOYMENT_URL"
       method="POST">
   <!-- One input element per field, matching type and label -->
@@ -389,7 +389,7 @@ if (error.status === 401) {
 - All pages must be `'use client'` components or work without server rendering
 - The `googleapis` npm package is used at the type level for TypeScript; actual API calls go through `fetch()` with the Bearer token
 
-If you find yourself wanting to add a server-side component, consider whether the operation can be done client-side with the user's OAuth token. If it genuinely requires a server, that is a significant architectural change — rgforms is designed to have zero backend.
+If you find yourself wanting to add a server-side component, consider whether the operation can be done client-side with the user's OAuth token. If it genuinely requires a server, that is a significant architectural change — sheetspin is designed to have zero backend.
 
 ---
 
@@ -421,7 +421,7 @@ If CORS errors persist for a specific hosting environment, the fallback approach
 
 **Symptom:** Developers try to add `tailwind.config.ts` and wonder why it has no effect.
 
-**Cause:** rgforms uses Tailwind CSS v4, which uses CSS-first configuration. There is no `tailwind.config.ts`.
+**Cause:** sheetspin uses Tailwind CSS v4, which uses CSS-first configuration. There is no `tailwind.config.ts`.
 
 **How to customize:** All theme customization goes in `app/globals.css` using `@theme`:
 
@@ -520,4 +520,4 @@ If something breaks in production:
 - [Apps Script API reference](https://developers.google.com/apps-script/api/reference/rest)
 - [Next.js Static Exports](https://nextjs.org/docs/app/building-your-application/deploying/static-exports)
 - [Tailwind CSS v4](https://tailwindcss.com/blog/tailwindcss-v4)
-- [DWYL serverless form pattern](https://github.com/dwyl/learn-to-send-email-via-google-script-html-no-server) (the pattern rgforms automates)
+- [DWYL serverless form pattern](https://github.com/dwyl/learn-to-send-email-via-google-script-html-no-server) (the pattern sheetspin automates)

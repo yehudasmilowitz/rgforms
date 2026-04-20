@@ -261,7 +261,7 @@ export async function createSite(
     await fetch(`${DRIVE_API}/${sheetId}`, {
       method: 'PATCH',
       headers: authHeaders(token),
-      body: JSON.stringify({ appProperties: { rgforms_type: 'site', project_slug: projectSlug } }),
+      body: JSON.stringify({ appProperties: { sheetspin_type: 'site', project_slug: projectSlug } }),
     }).catch(() => {});
 
     onStep('sheet', 'complete');

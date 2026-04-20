@@ -4,4 +4,4 @@ Allow: /
 Disallow: /builder/
 Disallow: /_next/
 
-Sitemap: https://rgforms.com/sitemap.xml
+Sitemap: https://sheetspin.com/sitemap.xml

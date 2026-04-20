@@ -91,16 +91,16 @@ function getAngularFieldTemplate(field: FormField, indent: string = '      '): s
 // Shared basic CSS (included in HTML snippet, referenced in others)
 // ---------------------------------------------------------------------------
 
-const EMBED_CSS = `.rgforms-form {
+const EMBED_CSS = `.sheetspin-form {
   display: flex;
   flex-direction: column;
   gap: 12px;
   max-width: 480px;
   font-family: system-ui, -apple-system, sans-serif;
 }
-.rgforms-form input,
-.rgforms-form textarea,
-.rgforms-form select {
+.sheetspin-form input,
+.sheetspin-form textarea,
+.sheetspin-form select {
   width: 100%;
   padding: 10px 14px;
   border: 1px solid #d1d5db;
@@ -113,17 +113,17 @@ const EMBED_CSS = `.rgforms-form {
   transition: border-color 0.15s, box-shadow 0.15s;
   box-sizing: border-box;
 }
-.rgforms-form textarea {
+.sheetspin-form textarea {
   min-height: 100px;
   resize: vertical;
 }
-.rgforms-form input:focus,
-.rgforms-form textarea:focus,
-.rgforms-form select:focus {
+.sheetspin-form input:focus,
+.sheetspin-form textarea:focus,
+.sheetspin-form select:focus {
   border-color: #6366f1;
   box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
 }
-.rgforms-form button[type="submit"] {
+.sheetspin-form button[type="submit"] {
   align-self: flex-start;
   padding: 10px 24px;
   background: #6366f1;
@@ -135,8 +135,8 @@ const EMBED_CSS = `.rgforms-form {
   cursor: pointer;
   transition: background 0.15s;
 }
-.rgforms-form button[type="submit"]:hover { background: #4f46e5; }
-.rgforms-form button[type="submit"]:disabled { opacity: 0.6; cursor: not-allowed; }`;
+.sheetspin-form button[type="submit"]:hover { background: #4f46e5; }
+.sheetspin-form button[type="submit"]:disabled { opacity: 0.6; cursor: not-allowed; }`;
 
 // ---------------------------------------------------------------------------
 // HTML snippet (with basic CSS and optional honeypot)
@@ -154,7 +154,7 @@ export function generateEmbedSnippet(config: FormConfig, deploymentUrl: string):
 ${EMBED_CSS}
 </style>
 
-<form class="rgforms-form" id="${formId}"
+<form class="sheetspin-form" id="${formId}"
     action="${deploymentUrl}"
     method="POST">
 ${fieldInputs}${honeypotField}
@@ -233,7 +233,7 @@ export default function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rgforms-form">
+    <form onSubmit={handleSubmit} className="sheetspin-form">
 ${fields}
       <button type="submit" disabled={status === 'sending'}>
         {status === 'sending' ? 'Sending...' : 'Send'}
@@ -257,7 +257,7 @@ export function generateVueSnippet(config: FormConfig, deploymentUrl: string): s
   const fields = config.fields.map((f) => getVueFieldTemplate(f)).join('\n');
 
   return `<template>
-  <form @submit.prevent="handleSubmit" class="rgforms-form">
+  <form @submit.prevent="handleSubmit" class="sheetspin-form">
 ${fields}
     <button type="submit" :disabled="status === 'sending'">
       {{ status === 'sending' ? 'Sending...' : 'Send' }}
@@ -400,7 +400,7 @@ type Status = 'idle' | 'sending' | 'success' | 'error';
   standalone: true,
   imports: [CommonModule],
   template: \`
-    <form (ngSubmit)="handleSubmit($event)" class="rgforms-form">
+    <form (ngSubmit)="handleSubmit($event)" class="sheetspin-form">
 ${fields}
       <button type="submit" [disabled]="status === 'sending'">
         {{ status === 'sending' ? 'Sending...' : 'Send' }}

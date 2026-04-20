@@ -123,7 +123,7 @@ export default function SimplePlan() {
       <section className="flex flex-col gap-4">
         <Label>What changes in provisioning</Label>
         <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-          Right now rgforms provisions each module separately — a form gets its own Sheet + Script, a content
+          Right now sheetspin provisions each module separately — a form gets its own Sheet + Script, a content
           module gets its own Sheet + Script. The POC changes one thing: instead of one Sheet per module,
           provision <strong style={{ color: 'var(--color-text)' }}>one Sheet per project</strong> with a tab for each module.
           One Script reads all the tabs and routes by name.
@@ -258,7 +258,7 @@ export default function SimplePlan() {
           </Code>
           <p className="text-xs font-semibold mt-1" style={{ color: 'var(--color-text)' }}>Upload UI — in the POC</p>
           <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            The rgforms dashboard includes a simple asset panel per asset tab: a file picker that uploads
+            The sheetspin dashboard includes a simple asset panel per asset tab: a file picker that uploads
             directly to the correct Drive subfolder via the Drive API (already authorized through the same
             OAuth session used for provisioning). Shows current files as thumbnails with name + size.
             No separate auth, no extra infrastructure — the same Google token that creates Sheets and Scripts
@@ -318,8 +318,8 @@ export default function SimplePlan() {
               ↑ the renderer renders sections in this exact order
 
 To add a "blog" module later:
-  1. User clicks "Add module → Blog" in the rgforms dashboard
-  2. rgforms calls addTab("blog") on the existing Script
+  1. User clicks "Add module → Blog" in the sheetspin dashboard
+  2. sheetspin calls addTab("blog") on the existing Script
      → creates the tab with correct column headers
      → appends "blog" to the modules row in _config
   3. Renderer sees blog in the list → renders the blog section
@@ -407,7 +407,7 @@ doPost(e)
   → sends email notification to site owner
   (works for any form tab — contact, booking, quote, intake, etc.)
 
-addTab(tabName)   ← called by rgforms dashboard "Add module" button
+addTab(tabName)   ← called by sheetspin dashboard "Add module" button
   → inserts a new tab with the standard column headers for that module type
   → appends tabName to _config.modules row
 
@@ -429,7 +429,7 @@ onEdit(e)
       <section className="flex flex-col gap-4">
         <Label>The renderer — viewing the Sheet as a website</Label>
         <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-          A new page in rgforms at <code className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>/preview</code>.
+          A new page in sheetspin at <code className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>/preview</code>.
           It takes a Script URL, fetches all tabs, and renders the site using the template stored in the{' '}
           <code className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>_config</code> tab.
           That&apos;s the whole product.
@@ -439,17 +439,17 @@ onEdit(e)
             {
               step: '1',
               label: 'User provisions a project',
-              detail: 'rgforms creates the multi-tab Sheet + deploys the Script. Same 90-second flow, but now one endpoint URL for the whole site.',
+              detail: 'sheetspin creates the multi-tab Sheet + deploys the Script. Same 90-second flow, but now one endpoint URL for the whole site.',
             },
             {
               step: '2',
               label: 'User picks a template',
-              detail: 'In the rgforms dashboard: 4 template choices (Professional, Warm, Bold, Minimal). Stored in the _config tab. Changeable anytime.',
+              detail: 'In the sheetspin dashboard: 4 template choices (Professional, Warm, Bold, Minimal). Stored in the _config tab. Changeable anytime.',
             },
             {
               step: '3',
               label: 'User gets a preview link',
-              detail: 'rgforms.app/preview?url=SCRIPT_URL — shareable. They show it to clients. They use it as the actual site. The URL is not pretty, but it works.',
+              detail: 'sheetspin.app/preview?url=SCRIPT_URL — shareable. They show it to clients. They use it as the actual site. The URL is not pretty, but it works.',
             },
             {
               step: '4',
@@ -532,13 +532,13 @@ onEdit(e)
           <Row label="Apps Script hosting (Google)" value="$0 — Google's infrastructure" />
           <Row label="Google Sheets storage" value="$0 — user's Drive" />
           <Row label="Email notifications" value="$0 — MailApp (100/day free)" />
-          <Row label="rgforms renderer page" value="$0 — already hosted on Firebase" />
+          <Row label="sheetspin renderer page" value="$0 — already hosted on Firebase" />
           <Row label="Per-site cost at 100 sites" value="~$0" highlight />
           <Row label="Per-site cost at 1,000 sites" value="~$0" highlight />
         </div>
         <Block>
           <span className="font-semibold" style={{ color: amber }}>The business model advantage: </span>
-          Google subsidizes the entire stack. Your only real cost is Firebase App Hosting for the rgforms
+          Google subsidizes the entire stack. Your only real cost is Firebase App Hosting for the sheetspin
           dashboard itself, which you already pay. Adding 1,000 sites to the renderer adds zero marginal cost.
           This is what makes $12/mo work — at 98%+ gross margin.
         </Block>
@@ -563,7 +563,7 @@ onEdit(e)
             ['Provision', 'Run the new multi-tab provisioning for his project — gets one Sheet with hero, services, testimonials, contact_form tabs'],
             ['Content', 'Migrate his current site content into the Sheet tabs (30 min, one time)'],
             ['Template', 'He picks Professional or Warm — done'],
-            ['Preview link', 'He gets rgforms.app/preview?url=HIS_SCRIPT_URL — share it, test it'],
+            ['Preview link', 'He gets sheetspin.app/preview?url=HIS_SCRIPT_URL — share it, test it'],
             ['His feedback', 'He tells you what doesn\'t work or what he wishes it did. That\'s the product spec.'],
             ['Charge him', '$12/mo starting month 2. He\'ll pay it — it\'s less than a lunch.'],
           ].map(([step, detail], i) => (
@@ -604,7 +604,7 @@ onEdit(e)
               'Sitemap.xml — generated at /preview?url=…&sitemap=1 from active modules + blog slugs',
               'JSON-LD — LocalBusiness on home, BlogPosting on blog posts, FAQPage on faq module',
               '6 CSS templates in _config tab, changeable anytime',
-              'Template picker in the rgforms dashboard',
+              'Template picker in the sheetspin dashboard',
               'Asset module — one root Drive folder per project, subfolders per asset tab (photos/, docs/, etc.)',
               'addTab() for asset type — creates Drive subfolder + stores folder_id in _config',
               'Asset upload UI in dashboard — file picker uploads directly to the correct Drive subfolder (same OAuth session)',
@@ -720,7 +720,7 @@ onEdit(e)
               {isCloudflare && (
                 <div className="flex flex-col gap-2">
                   <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-                    The preview renderer runs inside rgforms.app. That works for the POC but has three problems
+                    The preview renderer runs inside sheetspin.app. That works for the POC but has three problems
                     at scale: the URL isn&apos;t the user&apos;s domain, every page load hits your Next.js server,
                     and there&apos;s no edge caching. Cloudflare Workers fixes all three.
                   </p>
@@ -854,7 +854,7 @@ Cost at 1,000 sites:
   Domain-level request blocking
     → Only requests arriving through your Cloudflare Worker are served
     → Direct hits to the Apps Script URL return 403
-    → Enforced via a secret header: Worker sets X-RGForms-Token on every
+    → Enforced via a secret header: Worker sets X-Sheetspin-Token on every
       fetch; Script checks for it and rejects anything without it
     → Token is stored in Cloudflare KV, rotated per-site — not in the Sheet
 

@@ -125,10 +125,10 @@ export default function FoundationPlan() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="rounded-xl p-4 flex flex-col gap-3"
             style={{ background: forestA(0.06), border: `1px solid ${forestA(0.22)}`, borderTop: `3px solid ${forest}` }}>
-            <p className="text-xs font-bold" style={{ color: forest }}>Thing 1 — rgforms (the tool)</p>
+            <p className="text-xs font-bold" style={{ color: forest }}>Thing 1 — sheetspin (the tool)</p>
             <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
               A provisioning utility. Customer signs in with Google (one session, no refresh token stored),
-              describes their project, AI proposes a structure, they confirm, rgforms creates everything
+              describes their project, AI proposes a structure, they confirm, sheetspin creates everything
               in their Drive. Hands them a manifest JSON. Forgets them immediately.
             </p>
             <p className="text-xs" style={{ color: stone }}>
@@ -150,7 +150,7 @@ export default function FoundationPlan() {
         </div>
         <Callout color={forest} colorA={forestA}>
           <span className="font-semibold" style={{ color: forest }}>The separation is the insight. </span>
-          rgforms doesn&apos;t need customers — it&apos;s a tool. The service business has customers —
+          sheetspin doesn&apos;t need customers — it&apos;s a tool. The service business has customers —
           they&apos;re the people you already know. The tool makes the service fast and honest.
           The service pays the bills. Neither one needs to be the other thing.
         </Callout>
@@ -163,16 +163,16 @@ export default function FoundationPlan() {
         <Label>The manifest — the central artifact</Label>
         <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
           Provisioning produces one output: a JSON manifest describing everything that was created.
-          The customer downloads it. You use it to build their site. rgforms stores nothing — the manifest
+          The customer downloads it. You use it to build their site. sheetspin stores nothing — the manifest
           is the complete record, and it lives with the customer, not with you.
         </p>
-        <Code>{`// acme-hardware.rgforms.json
+        <Code>{`// acme-hardware.sheetspin.json
 {
   "project_slug": "acme-hardware",
   "created_at": "2026-04-20T14:22:10Z",
   "google_account": "owner@acmehardware.com",
   "script_url": "https://script.google.com/macros/s/AKfy.../exec",
-  "script_token": "rgf_s_xxxxxxxx",   // X-RGForms-Token — blocks direct hits
+  "script_token": "ss_xxxxxxxx",   // X-Sheetspin-Token — blocks direct hits
   "sheet_id": "1AbCdEfGhIjKlMnOpQrSt",
   "sheet_url": "https://docs.google.com/spreadsheets/d/1AbC.../edit",
   "drive_root_folder_id": "0B9zXyZAbCdEfGhIjKl",
@@ -238,7 +238,7 @@ export default function FoundationPlan() {
             {
               step: '1',
               label: 'Sign in with Google',
-              detail: 'Customer grants provisioning scopes. Session only — no refresh token stored. This is the only time rgforms has access to their Google account.',
+              detail: 'Customer grants provisioning scopes. Session only — no refresh token stored. This is the only time sheetspin has access to their Google account.',
             },
             {
               step: '2',
@@ -253,17 +253,17 @@ export default function FoundationPlan() {
             {
               step: '4',
               label: 'Customer reviews and edits',
-              detail: 'Each proposed tab is shown as a card. Customer can rename tabs, add/remove columns, toggle a tab off, change form fields. This is the only UI they interact with in rgforms.',
+              detail: 'Each proposed tab is shown as a card. Customer can rename tabs, add/remove columns, toggle a tab off, change form fields. This is the only UI they interact with in sheetspin.',
             },
             {
               step: '5',
               label: 'Confirm and provision (90 seconds)',
-              detail: 'rgforms creates: Sheet with correct tabs and column headers + seed rows, Drive root folder, per-tab Drive subfolders for asset tabs, Apps Script deployed as web app (running as the customer). All in their Google Drive.',
+              detail: 'sheetspin creates: Sheet with correct tabs and column headers + seed rows, Drive root folder, per-tab Drive subfolders for asset tabs, Apps Script deployed as web app (running as the customer). All in their Google Drive.',
             },
             {
               step: '6',
               label: 'Download manifest — done',
-              detail: 'One download button. One JSON file. Optionally: "Email this to your developer." rgforms session ends. No record kept. The manifest is the complete handoff document.',
+              detail: 'One download button. One JSON file. Optionally: "Email this to your developer." sheetspin session ends. No record kept. The manifest is the complete handoff document.',
             },
           ].map(({ step, label, detail }) => (
             <div key={step} className="flex items-start gap-3 rounded-lg p-3"
@@ -378,7 +378,7 @@ export default function FoundationPlan() {
             </p>
             <p className="text-xs leading-snug" style={{ color: 'var(--color-muted)' }}>
               To add photos, the customer opens their Drive folder bookmark (handed to them at onboarding)
-              and uploads directly. The rgforms dashboard also provides an upload panel for the session —
+              and uploads directly. The sheetspin dashboard also provides an upload panel for the session —
               file picker that writes to the correct subfolder via the Drive API, using the same OAuth
               access granted at provisioning. No separate auth.
             </p>
@@ -407,7 +407,7 @@ export default function FoundationPlan() {
           <Row label="spreadsheets" value="Create and write the Sheet"
             sub="Used once at provision time. Not needed after." />
           <Row label="drive.file" value="Create the Drive folder + subfolders"
-            sub="Scoped to files created by rgforms — cannot read pre-existing Drive files." />
+            sub="Scoped to files created by sheetspin — cannot read pre-existing Drive files." />
           <Row label="script.projects" value="Create the Apps Script project and paste code"
             sub="Used once at provision time." />
           <Row label="script.deployments" value="Deploy the Script as a web app"
@@ -415,12 +415,12 @@ export default function FoundationPlan() {
           <Row label="Gmail / MailApp" value="Not needed" hl={forest}
             sub="Form notifications use MailApp inside the Script — runs as the customer, no extra OAuth scope." />
           <Row label="Refresh token stored" value="Never" hl={forest}
-            sub="Session only. After provisioning completes, rgforms has no ongoing access." />
+            sub="Session only. After provisioning completes, sheetspin has no ongoing access." />
         </div>
         <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
           Four scopes, one session, zero stored tokens. The Script&apos;s own authorization — granted separately
           by the customer when they click through the deployment prompt — persists independently.
-          The site keeps working forever even if the customer revokes their rgforms OAuth access,
+          The site keeps working forever even if the customer revokes their sheetspin OAuth access,
           because the Script runs under its own authorization inside their account.
         </p>
         <Callout color={sand} colorA={sandA}>
@@ -492,11 +492,11 @@ Security check (every request):
           fetching from their specific tabs.
         </p>
         <Code>{`// How you use the manifest in the Next.js site
-// This is YOUR code, not rgforms — one file per customer
+// This is YOUR code, not sheetspin — one file per customer
 
-const MANIFEST = require('./acme-hardware.rgforms.json')
+const MANIFEST = require('./acme-hardware.sheetspin.json')
 const BASE = MANIFEST.script_url
-const TOKEN = process.env.RGFORMS_TOKEN  // the script_token, never public
+const TOKEN = process.env.SHEETSPIN_TOKEN  // the script_token, never public
 
 async function fetchTab(tab: string) {
   const res = await fetch(\`\${BASE}?tab=\${tab}&token=\${TOKEN}\`)
@@ -615,7 +615,7 @@ async function submitForm(formData: FormData) {
               'Template system (each site is custom)',
               'Typed client / npm package (that\'s v4 territory)',
               'Cloudflare Workers gateway (script runs server-side only)',
-              'Stripe billing in rgforms (invoice separately or use Stripe links)',
+              'Stripe billing in sheetspin (invoice separately or use Stripe links)',
               'Renderer / preview page (customer\'s site is the preview)',
               'Module registry / _config tab (that\'s v3 territory)',
               'SEO system / sitemap / JSON-LD (hardcoded in each Next.js site)',
@@ -639,7 +639,7 @@ async function submitForm(formData: FormData) {
           </div>
           {[
             ['This week', 'Call him. Tell him you\'re building a new version of his site that he can update himself. Offer it at $800 now, $49/mo after. He says yes.'],
-            ['Next 20 min', 'He signs in to rgforms.app. AI proposes: info, services, testimonials, gallery, contact_form. He confirms. Manifest downloads.'],
+            ['Next 20 min', 'He signs in to sheetspin.app. AI proposes: info, services, testimonials, gallery, contact_form. He confirms. Manifest downloads.'],
             ['That same session', 'He adds his photos to the gallery Drive folder. Done — he\'s set up.'],
             ['Next 4–6 hours (you)', 'Build the custom Next.js site from the manifest. Use the frontend-dev-skill. Real estate, real design, real copy.'],
             ['Day 2', 'Deploy to Vercel. Point his domain. Walk him through his Sheet — show him how to change his phone number. Send him the Drive folder bookmark.'],
@@ -687,7 +687,7 @@ async function submitForm(formData: FormData) {
             },
             {
               trigger: 'When customers ask for it specifically',
-              build: 'A template library (v3). A visual dashboard. Billing inside rgforms. None of these exist unless customers are blocked without them.',
+              build: 'A template library (v3). A visual dashboard. Billing inside sheetspin. None of these exist unless customers are blocked without them.',
               color: stone,
             },
           ].map(({ trigger, build, color }) => (

@@ -112,8 +112,8 @@ The Site Kit generates a `CLAUDE.md` file you can drop into any project. It give
 ### Setup
 
 ```bash
-git clone https://github.com/your-org/rgforms
-cd rgforms
+git clone https://github.com/your-org/sheetspin
+cd sheetspin
 npm install
 ```
 

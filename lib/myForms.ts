@@ -184,7 +184,7 @@ export async function listAllResources(accessToken: string, projectId: string, s
 // Returns all RG project spreadsheets from Drive.
 // Uses Drive appProperties (set during provisioning) so the query is exact — no name matching.
 export async function listProjects(accessToken: string, signal?: AbortSignal): Promise<ProjectSummary[]> {
-  const query  = encodeURIComponent("appProperties has { key='rgforms_type' and value='project' } and trashed=false");
+  const query  = encodeURIComponent("appProperties has { key='sheetspin_type' and value='project' } and trashed=false");
   const fields = encodeURIComponent('files(id,name,createdTime,webViewLink)');
   const res = await fetch(
     `${DRIVE_API}?q=${query}&fields=${fields}&orderBy=createdTime desc`,

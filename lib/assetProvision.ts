@@ -107,14 +107,14 @@ async function deployWebApp(token: string, scriptId: string): Promise<string> {
   const version = await apiCall<{ versionNumber: number }>(`${SCRIPT_API}/${scriptId}/versions`, {
     method: 'POST',
     headers: authHeaders(token),
-    body: JSON.stringify({ description: 'rgforms asset module initial version' }),
+    body: JSON.stringify({ description: 'sheetspin asset module initial version' }),
   });
   const result = await apiCall<{ entryPoints: Array<{ entryPointType: string; webApp: { url: string } }> }>(
     `${SCRIPT_API}/${scriptId}/deployments`,
     {
       method: 'POST',
       headers: authHeaders(token),
-      body: JSON.stringify({ versionNumber: version.versionNumber, manifestFileName: 'appsscript', description: 'rgforms asset API' }),
+      body: JSON.stringify({ versionNumber: version.versionNumber, manifestFileName: 'appsscript', description: 'sheetspin asset API' }),
     },
   );
   const webApp = result.entryPoints?.find((ep) => ep.entryPointType === 'WEB_APP');

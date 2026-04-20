@@ -256,7 +256,7 @@ export default function BusinessPage() {
           </p>
 
           <CalloutBox accent>
-            <Strong>The one-sentence pitch:</Strong> rgforms turns Google Sheets into a professional
+            <Strong>The one-sentence pitch:</Strong> sheetspin turns Google Sheets into a professional
             REST API in 2 minutes — free tier keeps your data entirely in your own Drive (HIPAA-compatible,
             zero vendor lock-in), paid tiers add the professional API layer on top.
           </CalloutBox>
@@ -272,7 +272,7 @@ export default function BusinessPage() {
 
           <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
             Every competing tool — Formspree, SheetDB, Contentful, Airtable — pays real infrastructure
-            costs for every user&apos;s data: compute, storage, bandwidth, redundancy. rgforms pays
+            costs for every user&apos;s data: compute, storage, bandwidth, redundancy. sheetspin pays
             almost none of that. On the free tier, Google runs the Apps Script, stores the submissions,
             and serves the API — all from the user&apos;s own Drive. Our infrastructure cost is near-fixed
             regardless of how many free users we add. On paid tiers, we introduce a gateway layer that
@@ -346,7 +346,7 @@ export default function BusinessPage() {
               <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>Free tier — no gateway</p>
               <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
                 Form submissions flow directly from the user&apos;s site → Google&apos;s Apps Script
-                server → their Google Sheet. rgforms is never in that path. We provision the
+                server → their Google Sheet. sheetspin is never in that path. We provision the
                 infrastructure once (creating the Sheet and deploying the script using their OAuth
                 token during setup), then step entirely out of the way.
               </p>
@@ -354,13 +354,13 @@ export default function BusinessPage() {
                 className="rounded-lg p-3 text-xs font-mono leading-loose"
                 style={{ background: 'var(--color-surface-2)', color: 'var(--color-muted)' }}
               >
-                {`Browser → script.google.com/macros/…/exec → Google Sheet\n         (rgforms is not in this path)`}
+                {`Browser → script.google.com/macros/…/exec → Google Sheet\n         (sheetspin is not in this path)`}
               </div>
               <div className="flex flex-col gap-1.5">
                 {[
                   'Scripts deployed as "Anyone can access, Execute as: Me" — standard public web app',
                   'OAuth token used only during provisioning, never stored long-term',
-                  'rgforms has zero access to submissions after setup completes',
+                  'sheetspin has zero access to submissions after setup completes',
                   'One-time browser authorization still required after provisioning (Google platform limitation)',
                   'Raw script.google.com URLs in every embed',
                 ].map((item) => (
@@ -430,7 +430,7 @@ export default function BusinessPage() {
                 { dim: 'PHI touches our servers', free: 'Never', paid: 'In transit (gateway)' },
                 { dim: 'PHI stored by us', free: 'Never', paid: 'Metadata only (payloads = Sheets)' },
                 { dim: 'Google Workspace BAA covers data', free: 'Yes — fully', paid: 'Yes — for Sheets/Firestore' },
-                { dim: 'rgforms BAA required', free: 'Debatable — provisioning-only access', paid: 'Yes — we become a Business Associate' },
+                { dim: 'sheetspin BAA required', free: 'Debatable — provisioning-only access', paid: 'Yes — we become a Business Associate' },
                 { dim: 'User data sovereignty', free: 'Complete — their Drive, their keys', paid: 'Partial — data in Drive, metadata in our Firestore' },
                 { dim: 'Breach exposure', free: 'None — we hold no PHI', paid: 'Transit-only if payloads not stored' },
               ].map(({ dim, free, paid }, i) => (
@@ -454,7 +454,7 @@ export default function BusinessPage() {
           <CalloutBox>
             <Strong>The pitch for free-tier HIPAA users:</Strong> &ldquo;The free tier is architecturally
             incapable of accessing your data. Submissions go directly from your site to your Google Sheet —
-            rgforms is not in that path. If your Google Workspace account has a signed BAA with Google
+            sheetspin is not in that path. If your Google Workspace account has a signed BAA with Google
             (covering Sheets and Apps Script), you&apos;re HIPAA-compatible with zero additional
             compliance overhead on our side.&rdquo; No competing form tool can say this.
           </CalloutBox>
@@ -538,7 +538,7 @@ export default function BusinessPage() {
 
           <CalloutBox accent>
             <Strong>The moat that deepens over time:</Strong> Every module a user creates writes a{' '}
-            <Mono>_config</Mono> tab that rgforms reads. Every webhook is configured in our dashboard.
+            <Mono>_config</Mono> tab that sheetspin reads. Every webhook is configured in our dashboard.
             Every short URL lives on our domain. Analytics history lives in our Firestore.
             Switching to a competitor means losing provisioned infrastructure, analytics history,
             webhook configs, and stable URLs. Switching cost compounds with every module created.
@@ -683,9 +683,9 @@ export default function BusinessPage() {
               className="rounded-xl border p-5 flex flex-col gap-3"
               style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
             >
-              <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>The "Built with rgforms" badge</p>
+              <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>The "Built with sheetspin" badge</p>
               <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-                Free tier form confirmation pages show a small "Powered by rgforms" link — the same
+                Free tier form confirmation pages show a small "Powered by sheetspin" link — the same
                 model Mailchimp used to reach millions. Pro tier removes it. Estimated reach: if 1,000
                 free-tier forms each get 50 unique visitors/month, that&apos;s 50,000 monthly brand
                 impressions at $0 CAC.

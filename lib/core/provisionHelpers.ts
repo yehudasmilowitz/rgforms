@@ -99,7 +99,7 @@ export async function uploadCode(
 export async function deployWebApp(
   token: string,
   scriptId: string,
-  description = 'rgforms API',
+  description = 'sheetspin API',
 ): Promise<string> {
   const version = await apiCall<{ versionNumber: number }>(`${SCRIPT_API}/${scriptId}/versions`, {
     method: 'POST',
@@ -235,7 +235,7 @@ export async function runProvisionPipeline<T extends BaseModuleResult>(
   onStepUpdate('deploy', 'running');
   let deploymentUrl = '';
   try {
-    deploymentUrl = await deployWebApp(token, scriptId, `rgforms ${moduleType} API`);
+    deploymentUrl = await deployWebApp(token, scriptId, `sheetspin ${moduleType} API`);
     onStepUpdate('deploy', 'complete');
   } catch (err) {
     onStepUpdate('deploy', 'error', (err as Error).message);

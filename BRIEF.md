@@ -1,4 +1,4 @@
-# rgforms — Project Brief
+# sheetspin — Project Brief
 
 **Domain:** sheetspin.com
 **Version:** 1.0
@@ -7,11 +7,11 @@
 
 ---
 
-## What is rgforms?
+## What is sheetspin?
 
-rgforms is a zero-backend, static web application that lets any developer create a fully functional HTML contact form in under two minutes. Users sign in with their Google account, configure form fields and a notification email in a visual builder, and receive a ready-to-paste embed snippet. No server, no database, no subscription — everything lives in the user's own Google Drive.
+sheetspin is a zero-backend, static web application that lets any developer create a fully functional HTML contact form in under two minutes. Users sign in with their Google account, configure form fields and a notification email in a visual builder, and receive a ready-to-paste embed snippet. No server, no database, no subscription — everything lives in the user's own Google Drive.
 
-rgforms automates the popular [DWYL serverless contact form pattern](https://github.com/dwyl/learn-to-send-email-via-google-script-html-no-server) (3k+ GitHub stars), eliminating the 15–30 minute manual setup of Google Sheets, Apps Script, and OAuth permissions.
+sheetspin automates the popular [DWYL serverless contact form pattern](https://github.com/dwyl/learn-to-send-email-via-google-script-html-no-server) (3k+ GitHub stars), eliminating the 15–30 minute manual setup of Google Sheets, Apps Script, and OAuth permissions.
 
 ---
 
@@ -43,7 +43,7 @@ rgforms automates the popular [DWYL serverless contact form pattern](https://git
 
 ## Authentication Flow (Updated for GIS)
 
-rgforms uses **Google Identity Services (GIS) Token Model**, the current standard for browser-only apps needing API access.
+sheetspin uses **Google Identity Services (GIS) Token Model**, the current standard for browser-only apps needing API access.
 
 1. Load GIS library: `<script src="https://accounts.google.com/gsi/client"></script>`
 2. User clicks "Sign in with Google"
@@ -60,9 +60,9 @@ rgforms uses **Google Identity Services (GIS) Token Model**, the current standar
 |---|---|
 | `https://www.googleapis.com/auth/spreadsheets` | Create the Google Sheet for form submissions |
 | `https://www.googleapis.com/auth/script.projects` | Create and deploy the Apps Script web app |
-| `https://www.googleapis.com/auth/drive.file` | Create Drive folder for form assets (only accesses files rgforms creates) |
+| `https://www.googleapis.com/auth/drive.file` | Create Drive folder for form assets (only accesses files sheetspin creates) |
 
-**Security:** rgforms never stores login data, tokens, or user information anywhere. There is no backend, no database, and no server. The access token exists only in browser memory for the duration of the session.
+**Security:** sheetspin never stores login data, tokens, or user information anywhere. There is no backend, no database, and no server. The access token exists only in browser memory for the duration of the session.
 
 ---
 
@@ -114,7 +114,7 @@ function doPost(e) {
 ## Generated Embed Snippet
 
 ```html
-<form class="rgforms-form" id="rg-form"
+<form class="sheetspin-form" id="rg-form"
       action="SCRIPT_DEPLOYMENT_URL"
       method="POST">
   <input type="text" name="name" placeholder="Name" required />
@@ -189,7 +189,7 @@ function doPost(e) {
 ## Project File Structure
 
 ```
-rgforms/
+sheetspin/
 ├── app/
 │   ├── layout.tsx              # Root layout, fonts, metadata
 │   ├── page.tsx                # Landing / sign-in screen
@@ -357,14 +357,14 @@ This is the only environment variable. It is `NEXT_PUBLIC_` (embedded in client 
 
 ## Privacy & Data Commitment
 
-**rgforms does not store anyone's login or data. Ever.**
+**sheetspin does not store anyone's login or data. Ever.**
 
 - No backend server exists
 - No database exists
 - No user tokens, emails, or form data are stored, logged, or transmitted to any server other than Google's own APIs
 - The access token lives only in browser memory and is destroyed when the tab closes
 - All created assets (Sheets, Scripts) belong to the user in their own Google Drive
-- rgforms has zero access to form submissions after setup is complete
+- sheetspin has zero access to form submissions after setup is complete
 
 ---
 

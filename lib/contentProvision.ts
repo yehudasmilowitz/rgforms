@@ -212,7 +212,7 @@ async function deployWebApp(accessToken: string, scriptId: string): Promise<stri
     {
       method: 'POST',
       headers: authHeaders(accessToken),
-      body: JSON.stringify({ description: 'rgforms content module initial version' }),
+      body: JSON.stringify({ description: 'sheetspin content module initial version' }),
     },
   );
 
@@ -224,7 +224,7 @@ async function deployWebApp(accessToken: string, scriptId: string): Promise<stri
     body: JSON.stringify({
       versionNumber: version.versionNumber,
       manifestFileName: 'appsscript',
-      description: 'rgforms content API deployment',
+      description: 'sheetspin content API deployment',
     }),
   });
 

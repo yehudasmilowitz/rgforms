@@ -239,7 +239,7 @@ function InventorySection() {
           <p className="text-xs font-bold uppercase tracking-wider" style={{ color: C.green }}>What exists and works</p>
           {[
             {
-              name: 'rgforms provisioning',
+              name: 'sheetspin provisioning',
               detail: 'Creates a Google Sheet + deploys an Apps Script web app in ~90 seconds using the user\'s OAuth token. The script handles doPost (form submissions) and doGet (JSON data API). Shipped.',
             },
             {
@@ -248,7 +248,7 @@ function InventorySection() {
             },
             {
               name: 'A live customer site',
-              detail: 'A real estate wholesaler\'s site was built. Real rgforms endpoints, real data schema (RGContent, RGGallery), real contact form. This is the closest thing to a validated product you have.',
+              detail: 'A real estate wholesaler\'s site was built. Real sheetspin endpoints, real data schema (RGContent, RGGallery), real contact form. This is the closest thing to a validated product you have.',
             },
             {
               name: 'Apps Script as JSON API',
@@ -295,7 +295,7 @@ function InventorySection() {
 
       <Warn>
         <span className="font-semibold" style={{ color: C.amber }}>The honest diagnosis: </span>
-        You have excellent infrastructure (rgforms provisioning + the build skill) and one unvalidated customer.
+        You have excellent infrastructure (sheetspin provisioning + the build skill) and one unvalidated customer.
         The infrastructure is genuinely impressive — the build skill generating a production agency site from a brief
         is not something most teams have. But infrastructure without a sales motion and distribution is a project, not a business.
         Everything in this plan is about closing that gap.
@@ -322,7 +322,7 @@ function InsightSection() {
       <div className="flex flex-col gap-3">
         <Code>{`The stack you've built:
 
-  rgforms                    → Apps Script + Sheets provisioned in 90s
+  sheetspin                    → Apps Script + Sheets provisioned in 90s
   + build skill              → complete production site from a design brief in ~45 min
   + vertical knowledge       → real estate intake forms, specific field names,
                                how a wholesaler thinks about leads
@@ -410,8 +410,8 @@ function ModelsSection() {
             </div>
           </div>
           <CardBody>
-            Add a paid proxy layer on top of rgforms. Short URLs, webhooks, submission inbox, server-side email.
-            Customers are developers already using rgforms. No new distribution needed.
+            Add a paid proxy layer on top of sheetspin. Short URLs, webhooks, submission inbox, server-side email.
+            Customers are developers already using sheetspin. No new distribution needed.
           </CardBody>
           <Table
             headers={['Metric', 'Reality']}
@@ -475,7 +475,7 @@ function ModelsSection() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <CardLabel>Model 3</CardLabel>
-              <CardTitle>Agency licensing — B2B, skill + rgforms</CardTitle>
+              <CardTitle>Agency licensing — B2B, skill + sheetspin</CardTitle>
             </div>
             <div className="flex flex-col items-end gap-1">
               <Tag type="insight">Stage 2 opportunity</Tag>
@@ -483,18 +483,18 @@ function ModelsSection() {
             </div>
           </div>
           <CardBody>
-            License the build skill + rgforms backend to small agencies ($250-500/mo). They use it to
-            deliver sites faster to their existing clients. Every site they build adds a $12/mo rgforms customer.
+            License the build skill + sheetspin backend to small agencies ($250-500/mo). They use it to
+            deliver sites faster to their existing clients. Every site they build adds a $12/mo sheetspin customer.
             Agencies are the distribution channel you currently lack.
           </CardBody>
           <Table
             headers={['Metric', 'Reality']}
             rows={[
               ['Customer', 'Small web agencies (1-5 people), already have clients in target verticals'],
-              ['Price point', '$299/mo license + $5/mo per live rgforms site'],
+              ['Price point', '$299/mo license + $5/mo per live sheetspin site'],
               ['Distribution', 'Agencies find you — LinkedIn, agency communities, referrals from your sites'],
-              ['LTV', '$299/mo × 12 = $3,588/yr + rgforms recurring from their sites'],
-              ['10 agencies, 5 sites avg', '$2,990/mo license + $600/mo rgforms = $3,590/mo from 10 customers'],
+              ['LTV', '$299/mo × 12 = $3,588/yr + sheetspin recurring from their sites'],
+              ['10 agencies, 5 sites avg', '$2,990/mo license + $600/mo sheetspin = $3,590/mo from 10 customers'],
               ['What they get', 'A production site builder they can resell. You\'ve done the hardest part.'],
             ]}
             highlightLast
@@ -559,7 +559,7 @@ function PathSection() {
               <CardBody>Will a stranger (not a friend) pay $1,500-$3,000 for a website built with the skill?</CardBody>
             </Card>
             <Bullets items={[
-              'Do NOT build any new infrastructure. The skill + rgforms + existing provisioning is enough to deliver.',
+              'Do NOT build any new infrastructure. The skill + sheetspin + existing provisioning is enough to deliver.',
               'Post in BiggerPockets, local REI Facebook groups: the origin story — what you built your friend, what it cost, what it does.',
               'Price at $1,500 minimum. If it feels scary, you\'re pricing it right. $299 says "template." $1,500 says "agency alternative."',
               'Spend 0 hours on the gateway, 0 hours on consumer UI, 0 hours on Stripe. Sell first. Invoice via Venmo/PayPal/Stripe Checkout manually.',
@@ -600,19 +600,19 @@ function PathSection() {
           <div className="pl-4 flex flex-col gap-3" style={{ borderLeft: `2px solid ${C.violetA(0.30)}` }}>
             <Card>
               <CardTitle>The question this stage must answer</CardTitle>
-              <CardBody>Will an agency pay $299-500/mo for the build skill + rgforms backend so they can offer their own clients faster, cheaper sites?</CardBody>
+              <CardBody>Will an agency pay $299-500/mo for the build skill + sheetspin backend so they can offer their own clients faster, cheaper sites?</CardBody>
             </Card>
             <Bullets items={[
               'Package the skill as a product: a zip file + documentation + video walkthrough. Not a SaaS — just a license.',
               'Target: 1-3 person agencies in real estate, legal, or local services. They already have clients. You give them a superpower.',
-              'Price: $299/mo for skill access + $5/mo per live rgforms site. Agency with 20 clients = $299 + $100 = $399/mo.',
-              'Build the rgforms agency dashboard (multi-project, multi-client). This is 4 weeks of real work.',
+              'Price: $299/mo for skill access + $5/mo per live sheetspin site. Agency with 20 clients = $299 + $100 = $399/mo.',
+              'Build the sheetspin agency dashboard (multi-project, multi-client). This is 4 weeks of real work.',
               'The agency model solves your distribution problem. Each agency brings 5-20 sites you didn\'t have to find.',
-              'At 10 agencies × $399/mo average = $3,990/mo. Plus rgforms recurring from all their client sites.',
+              'At 10 agencies × $399/mo average = $3,990/mo. Plus sheetspin recurring from all their client sites.',
             ]} color={C.violet} />
             <Gate title="Exit criteria for Stage 3">
               3 paying agencies, each with 5+ active client sites. At least one came from a referral.
-              Monthly rgforms recurring from agency sites &gt; direct client recurring.
+              Monthly sheetspin recurring from agency sites &gt; direct client recurring.
               You have evidence of whether agencies need the consumer platform or would rather keep using the skill directly.
             </Gate>
           </div>
@@ -629,7 +629,7 @@ function PathSection() {
               'The build skill becomes the backend. The consumer platform is a UI: describe your business → confirmation screen → live site.',
               'Build estimate (revised down from 40-50 weeks): 12-16 weeks. The skill replaces most of the AI provisioning work.',
               'The 50 done-for-you builds from Stages 1-2 are the training data for the AI prompt system. Don\'t skip those.',
-              'This is where the brand decision matters: separate brand (sitecraft.app, gridsite.co) vs. rgforms expansion.',
+              'This is where the brand decision matters: separate brand (sitecraft.app, gridsite.co) vs. sheetspin expansion.',
               'At this stage you have: proof of demand, 50+ live sites, 3+ agencies, community presence, case studies.',
               'ONLY build this if Stage 3 showed agencies hitting their limits and requesting self-serve for their end-clients.',
             ]} color={C.green} />
@@ -695,9 +695,9 @@ function EconomicsSection() {
             rows={[
               ['License fee / agency', '$299/mo', '$299/mo', '$299/mo'],
               ['Avg sites / agency', '8', '10', '12'],
-              ['rgforms / site', '$5/mo', '$5/mo', '$5/mo'],
+              ['sheetspin / site', '$5/mo', '$5/mo', '$5/mo'],
               ['License revenue', '$1,495/mo', '$2,990/mo', '$5,980/mo'],
-              ['rgforms revenue', '$200/mo', '$500/mo', '$1,200/mo'],
+              ['sheetspin revenue', '$200/mo', '$500/mo', '$1,200/mo'],
               ['Total MRR', '$1,695/mo', '$3,490/mo', '$7,180/mo'],
               ['Infra cost', '~$40/mo', '~$75/mo', '~$150/mo'],
               ['Net margin', '~97.6%', '~97.9%', '~97.9%'],
@@ -715,12 +715,12 @@ function EconomicsSection() {
             headers={['Revenue stream', 'Monthly amount', 'Source']}
             rows={[
               ['Done-for-you setup fees (5/mo)', '$10,000–15,000', 'Referrals from existing customers'],
-              ['Direct rgforms recurring (25 sites)', '$300/mo', '$12/mo × 25 direct clients'],
+              ['Direct sheetspin recurring (25 sites)', '$300/mo', '$12/mo × 25 direct clients'],
               ['Agency licensing (5 agencies)', '$1,495/mo', '$299/mo × 5 agencies'],
-              ['Agency rgforms (5 × 10 sites)', '$250/mo', '$5/mo × 50 agency sites'],
+              ['Agency sheetspin (5 × 10 sites)', '$250/mo', '$5/mo × 50 agency sites'],
               ['Total MRR (recurring only)', '$2,045/mo', 'Growing monthly without new sales'],
               ['Total revenue (incl. setup fees)', '$12,000–17,000/mo', 'Target for month 10'],
-              ['Infra cost', '~$80/mo', 'Firebase + Firestore + rgforms compute'],
+              ['Infra cost', '~$80/mo', 'Firebase + Firestore + sheetspin compute'],
             ]}
             highlightLast
           />
@@ -929,7 +929,7 @@ function BuildPlanSection() {
             { n: 1, item: 'The sales page', why: 'Before any code: a single page with the friend\'s site screenshot, the origin story, pricing ($1,500 setup + $12/mo), and a contact form. Needs to exist before the first REIA meeting.' },
             { n: 2, item: 'Stripe + manual billing', why: 'Accept payment. Not a Stripe integration — a Stripe Checkout link for $1,500 or $12/mo. 30 minutes of setup. Do this before your second customer.' },
             { n: 3, item: 'Gateway Phase 1 (short URLs only)', why: 'Remove the script.google.com URL from client embed code. This is the #1 upgrade trigger and unlocks the $12/mo pitch. 1 week of focused work.' },
-            { n: 4, item: 'rgforms billing enforcement', why: 'Firestore user + Stripe webhook → unlock/lock features. Required before agency licensing. 1 week.' },
+            { n: 4, item: 'sheetspin billing enforcement', why: 'Firestore user + Stripe webhook → unlock/lock features. Required before agency licensing. 1 week.' },
             { n: 5, item: 'Agency dashboard (multi-project)', why: 'The seat at the table for B2B licensing. Shows all client sites, last-edit times, module toggles per client. 2-3 weeks.' },
             { n: 6, item: 'Consumer provisioning UI', why: 'Only after 50 done-for-you builds have told you exactly what the UI needs to handle. Not before.' },
           ].map(({ n, item, why }) => (
@@ -1127,14 +1127,14 @@ export default function ComprehensivePlan() {
             Comprehensive Business Plan
           </h1>
           <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)', maxWidth: '70ch' }}>
-            A ground-up synthesis incorporating the rgforms provisioning stack, the frontend-dev-skill
+            A ground-up synthesis incorporating the sheetspin provisioning stack, the frontend-dev-skill
             multi-agent build system, and the real estate wholesaler as the origin customer. Includes
             honest pushback on previous assumptions, revised pricing, revised sequencing, and specific
             tactics for the distribution problem.
           </p>
           <div className="flex items-center gap-4 pt-2 flex-wrap" style={{ borderTop: '1px solid var(--color-border)' }}>
             {[
-              { label: 'rgforms provisioning', status: 'Shipped' },
+              { label: 'sheetspin provisioning', status: 'Shipped' },
               { label: 'Build skill', status: 'Working' },
               { label: 'Live customer site', status: '1 site' },
               { label: 'Paying customers', status: '0' },

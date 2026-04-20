@@ -1,8 +1,8 @@
-# 🚀 rgforms Setup Guide
+# 🚀 sheetspin Setup Guide
 
-A step-by-step guide to getting rgforms running locally and deploying it to production.
+A step-by-step guide to getting sheetspin running locally and deploying it to production.
 
-rgforms is a **zero-backend** static Next.js app. There is no server to configure, no database to provision, and no subscription required. The only setup is a one-time Google Cloud project so the app can make OAuth-authenticated API calls on behalf of your users.
+sheetspin is a **zero-backend** static Next.js app. There is no server to configure, no database to provision, and no subscription required. The only setup is a one-time Google Cloud project so the app can make OAuth-authenticated API calls on behalf of your users.
 
 ---
 
@@ -37,8 +37,8 @@ Before you begin, make sure you have the following:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/rgforms.git
-cd rgforms
+git clone https://github.com/your-org/sheetspin.git
+cd sheetspin
 
 # Install dependencies
 npm install
@@ -57,7 +57,7 @@ This is the most involved part of the setup. Follow each step carefully — the 
 1. Go to [console.cloud.google.com](https://console.cloud.google.com)
 2. Click the **project selector** dropdown at the top of the page (it may say "Select a project")
 3. Click **"NEW PROJECT"** in the top-right of the modal
-4. Enter a project name — `rgforms` works well
+4. Enter a project name — `sheetspin` works well
 5. Leave the organization as-is (or select yours if applicable)
 6. Click **"CREATE"**
 7. Wait a few seconds, then select your new project from the dropdown
@@ -94,7 +94,7 @@ The OAuth consent screen is what users see when they click "Sign in with Google"
 
 | Field | Value |
 |---|---|
-| App name | `rgforms` |
+| App name | `sheetspin` |
 | User support email | Your email address |
 | App logo | Optional — skip for now |
 | App domain / Homepage URL | `http://localhost:3000` (update later for production) |
@@ -135,7 +135,7 @@ The OAuth consent screen is what users see when they click "Sign in with Google"
 2. Click **"+ CREATE CREDENTIALS"** at the top
 3. Select **"OAuth client ID"**
 4. For **Application type**, select **"Web application"**
-5. For **Name**, enter `rgforms web`
+5. For **Name**, enter `sheetspin web`
 
 **Add Authorized JavaScript Origins:**
 
@@ -153,7 +153,7 @@ https://yourdomain.com
 
 > ⚠️ **Do not add a trailing slash.** Google rejects origins with trailing slashes.
 
-6. Leave "Authorized redirect URIs" empty — rgforms uses the implicit token flow, not redirect-based OAuth
+6. Leave "Authorized redirect URIs" empty — sheetspin uses the implicit token flow, not redirect-based OAuth
 7. Click **"CREATE"**
 
 **Copy your Client ID:**
@@ -182,7 +182,7 @@ Replace `your-client-id.apps.googleusercontent.com` with the Client ID you copie
 **Notes:**
 - The `NEXT_PUBLIC_` prefix is intentional and required — it causes Next.js to embed the value in the client-side bundle, which is correct for OAuth client IDs
 - OAuth client IDs are not secrets; they are safe to expose in client-side code
-- Never put a Client Secret here — rgforms does not use one
+- Never put a Client Secret here — sheetspin does not use one
 
 > 🔒 `.env.local` is already in `.gitignore`. Never commit this file.
 
@@ -196,7 +196,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You should see the rgforms landing page with a "Sign in with Google" button. Click it and sign in with one of the test user emails you added in step 3.3.
+You should see the sheetspin landing page with a "Sign in with Google" button. Click it and sign in with one of the test user emails you added in step 3.3.
 
 **Other useful commands:**
 
@@ -215,7 +215,7 @@ npm run build
 
 ## 6. Production Deployment (Vercel)
 
-rgforms is a Next.js static export (`output: 'export'` in `next.config.ts`). It has no server-side code and deploys as a purely static site.
+sheetspin is a Next.js static export (`output: 'export'` in `next.config.ts`). It has no server-side code and deploys as a purely static site.
 
 ### 6.1 Deploy to Vercel
 
@@ -248,12 +248,12 @@ Follow the prompts. On first deploy, Vercel will ask you to link or create a pro
 
 ### 6.3 Update Authorized JavaScript Origins
 
-After Vercel assigns you a domain (e.g., `rgforms.vercel.app` or your custom domain):
+After Vercel assigns you a domain (e.g., `sheetspin.vercel.app` or your custom domain):
 
 1. Return to the Google Cloud Console → **"APIs & Services"** → **"Credentials"**
-2. Click on your `rgforms web` OAuth client
+2. Click on your `sheetspin web` OAuth client
 3. Under "Authorized JavaScript origins", click **"+ ADD URI"**
-4. Add your production URL: `https://rgforms.vercel.app` (no trailing slash)
+4. Add your production URL: `https://sheetspin.vercel.app` (no trailing slash)
 5. Click **"SAVE"**
 
 > ⏱️ OAuth credential changes can take a few minutes to propagate.
@@ -276,7 +276,7 @@ When your app requests "sensitive" OAuth scopes (which `script.projects` is), Go
 
 ### What Happens Without Verification?
 
-Users who are **not** on your test user list will see a warning screen: _"Google hasn't verified this app"_. They can still proceed by clicking "Advanced" → "Go to rgforms (unsafe)", but most non-technical users will not do this.
+Users who are **not** on your test user list will see a warning screen: _"Google hasn't verified this app"_. They can still proceed by clicking "Advanced" → "Go to sheetspin (unsafe)", but most non-technical users will not do this.
 
 ### How to Submit for Verification
 
@@ -308,7 +308,7 @@ For full details, see: [https://support.google.com/cloud/answer/9110914](https:/
 - Double-check the value in `.env.local`
 - Make sure you restarted `npm run dev` after creating `.env.local`
 
-### "Access blocked: rgforms has not completed the Google verification process"
+### "Access blocked: sheetspin has not completed the Google verification process"
 
 - You are signed in with an account that is **not** on the test users list
 - Go to Google Cloud Console → OAuth consent screen → Test users → add your email

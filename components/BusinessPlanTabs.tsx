@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Plan A — rgforms Gateway
+// Plan A — sheetspin Gateway
 // Visual identity: Steel blue, technical, developer-documentation feel.
 // Dense information, monospace labels, left-bordered section headers.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -117,7 +117,7 @@ function PlanATab() {
       <div className="flex flex-col gap-3">
         <div className="flex items-start gap-3">
           <div className="flex flex-col gap-0.5 flex-1">
-            <p className="text-lg font-bold font-mono" style={{ color: 'var(--color-text)' }}>Plan A — rgforms Gateway</p>
+            <p className="text-lg font-bold font-mono" style={{ color: 'var(--color-text)' }}>Plan A — sheetspin Gateway</p>
             <p className="text-xs" style={{ color: 'var(--color-subtle)' }}>Monetize the existing product. Same users, same brand, same distribution. No pivot.</p>
           </div>
           <div className="flex flex-col items-end gap-1 shrink-0">
@@ -136,7 +136,7 @@ function PlanATab() {
           Add a paid proxy layer on top of the provisioning-only product you already shipped.
           Free-tier users get a 90-character Google URL. Paying users get{' '}
           <code className="text-xs px-1 rounded" style={{ background: blueAlpha(0.12), color: blue }}>rg.fm/acme/contact</code>,
-          a submission inbox, webhooks, and server-side emails — without ever giving rgforms access to their data at rest.
+          a submission inbox, webhooks, and server-side emails — without ever giving sheetspin access to their data at rest.
         </ACallout>
         <div className="grid grid-cols-3 gap-2">
           {[
@@ -167,12 +167,12 @@ function PlanATab() {
         <ACard>
           <ALabel>Free tier (already shipped) — provisioning only</ALabel>
           <ACode>{`Provisioning (one-time, user's OAuth token):
-  rgforms → Google APIs → creates Sheet + Apps Script → deploys → done
+  sheetspin → Google APIs → creates Sheet + Apps Script → deploys → done
 
-Runtime (every submission — rgforms NOT involved):
+Runtime (every submission — sheetspin NOT involved):
   Browser → POST script.google.com/.../exec
           → Apps Script doPost() → appends row to Sheet → sends email
-          → rgforms never sees the submission payload. Ever.`}
+          → sheetspin never sees the submission payload. Ever.`}
           </ACode>
           <p className="text-xs" style={{ color: 'var(--color-subtle)' }}>
             "Architecturally incapable of accessing your data" is a sentence no competitor can say.
@@ -181,14 +181,14 @@ Runtime (every submission — rgforms NOT involved):
         </ACard>
         <ACard>
           <ALabel>Gateway tier — the proxy layer that unlocks paid features</ALabel>
-          <ACode>{`Runtime (paid tiers — rgforms in the path):
+          <ACode>{`Runtime (paid tiers — sheetspin in the path):
   Browser → POST rg.fm/acme/contact
           → Next.js middleware: rate limit · billing check · CORS
           → Gateway route: look up slug → { scriptId, userId, refreshToken }
           → Mint fresh access token from stored refresh token
           → POST googleapis.com/v1/scripts/{scriptId}:run { function: 'doPost' }
           → Script runs in user's account → appends to their Sheet
-          → rgforms logs metadata only (timestamp, moduleId, status)
+          → sheetspin logs metadata only (timestamp, moduleId, status)
           → fire webhooks → store payload (paid tiers) → return to browser
 
 Key unlock: scripts deployed as "Only myself" — never reachable via public URL.
@@ -199,8 +199,8 @@ No "visit this URL once" step. No 90-character Google URL in embed code.`}
         <ACard>
           <ALabel>HIPAA — real advantage, narrow scope</ALabel>
           <ABullet items={[
-            'Free tier: rgforms never in the data path at runtime. If user has Google Workspace BAA, entire data flow is covered.',
-            'Gateway tier: rgforms stores a refresh token and logs submission metadata — this requires a BAA with rgforms.',
+            'Free tier: sheetspin never in the data path at runtime. If user has Google Workspace BAA, entire data flow is covered.',
+            'Gateway tier: sheetspin stores a refresh token and logs submission metadata — this requires a BAA with sheetspin.',
             'Free tier = no BAA needed. Gateway tier = BAA needed, planned for Enterprise.',
             '"Architecturally incapable of accessing your PHI" applies to free tier only — be precise.',
           ]} />
@@ -279,7 +279,7 @@ No "visit this URL once" step. No 90-character Google URL in embed code.`}
             { t: 'Second credit pack friction', d: "User buys their second credit pack ($15). They've now spent $15 on provisions alone. Builder at $9/mo is obviously better value. Show the comparison at checkout." },
             { t: 'Submission count curiosity', d: '"Your contact form got 847 submissions this month." Count visible, contents aren\'t. The desire to see who submitted drives upgrades. Surface this prominently.' },
             { t: 'Manual authorization', d: 'The "visit this URL once in your browser" step breaks on client handoffs. Documented as a free-tier limitation. Gateway removes it.' },
-            { t: 'Badge on client deliverable', d: '"Powered by rgforms" on a form confirmation page. Any agency building for a paying client will upgrade to remove it.' },
+            { t: 'Badge on client deliverable', d: '"Powered by sheetspin" on a form confirmation page. Any agency building for a paying client will upgrade to remove it.' },
             { t: 'Email quota hit', d: 'Free Gmail: 100 notification emails/day. Gateway sends server-side via Resend/Nodemailer — bypasses Apps Script quotas entirely.' },
           ].map(({ t, d }) => (
             <div key={t} className="flex items-start gap-3 rounded p-3"
@@ -510,8 +510,8 @@ function PlanBTab() {
               'Google Apps Script deployed in their own Google account',
               'A Google Sheet in their own Drive collecting every lead',
               "The sheet is their CMS — but they don't know it as a CMS, they just open it like a spreadsheet",
-              'rgforms provisioned it all in 90 seconds; the customer never touched any of it',
-              "If rgforms disappears tomorrow, their site keeps working and their leads keep coming in",
+              'sheetspin provisioned it all in 90 seconds; the customer never touched any of it',
+              "If sheetspin disappears tomorrow, their site keeps working and their leads keep coming in",
             ]} />
           </BCard>
         </div>
@@ -534,7 +534,7 @@ function PlanBTab() {
           <BCard>
             <BLabel>Free — lead magnet only</BLabel>
             <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-              Subdomain (acmewholesale.rgforms.app), rgforms badge, 1 lead form.
+              Subdomain (acmewholesale.sheetspin.app), sheetspin badge, 1 lead form.
               Lets people try it. Not a real product — just enough to feel the value
               and feel the friction (the ugly URL, the badge).
             </p>
@@ -944,7 +944,7 @@ function PlanCTab() {
         <CAlert type="warn">
           <span className="font-bold" style={{ color: warn }}>Prerequisites before starting Plan C: </span>
           50+ paying customers from Plan B. Real data on what the AI needs to generate (from 50 done-for-you builds).
-          A decision on the brand (rgforms or a new brand — see below).
+          A decision on the brand (sheetspin or a new brand — see below).
           This is a 40–50 week build for one person. Starting it before Plan B validates demand
           is how promising pivots run out of runway.
         </CAlert>
@@ -962,10 +962,10 @@ function PlanCTab() {
       {/* Architecture */}
       <div className="flex flex-col gap-3">
         <CSection title="System Architecture"
-          sub="rgforms hosts the website. Apps Script is a JSON data API. One Cloudflare Worker deployment serves every user." />
+          sub="sheetspin hosts the website. Apps Script is a JSON data API. One Cloudflare Worker deployment serves every user." />
         <CCard dark>
           <CLabel>Runtime flow — how a page visit works</CLabel>
-          <CCode>{`Visitor → yourdomain.com (or username.rgforms.app)
+          <CCode>{`Visitor → yourdomain.com (or username.sheetspin.app)
         → Cloudflare CDN: cache hit → serve HTML instantly (~15ms, worldwide)
         → cache miss → invoke Cloudflare Worker
 
@@ -1154,12 +1154,12 @@ Step 4 — User confirms → 90-second provision → site is live`}
           sub="Two paths. Path 1 requires zero DNS knowledge from the user." />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <CCard dark>
-            <CLabel>Path 1 — Buy through rgforms (push this)</CLabel>
+            <CLabel>Path 1 — Buy through sheetspin (push this)</CLabel>
             <CCode>{`User types "chicagoreibuys.com"
-→ rgforms checks availability (Namecheap API)
+→ sheetspin checks availability (Namecheap API)
 → "Available — $12.99/yr"
 → User pays in Stripe Checkout
-→ rgforms registers domain (Namecheap API)
+→ sheetspin registers domain (Namecheap API)
 → Sets nameservers to Cloudflare
 → Adds CNAME record for www
 → SSL provisioned automatically
@@ -1171,7 +1171,7 @@ Step 4 — User confirms → 90-second provision → site is live`}
             <CLabel>Path 2 — Bring your own (guided)</CLabel>
             <CBullet items={[
               'User enters existing domain',
-              'rgforms shows step-by-step with copy-paste DNS records',
+              'sheetspin shows step-by-step with copy-paste DNS records',
               'Live propagation checker turns green when DNS resolves (~15 min avg)',
               'SSL auto-provisioned by Cloudflare once DNS resolves',
               'Visual screenshots for GoDaddy, Namecheap, Google Domains',
@@ -1214,7 +1214,7 @@ lib/sheets.ts (pre-configured):
       {/* SEO */}
       <div className="flex flex-col gap-3">
         <CSection title="SEO — complete, automatic"
-          sub="Because rgforms hosts the site (not Apps Script), every SEO capability is available." />
+          sub="Because sheetspin hosts the site (not Apps Script), every SEO capability is available." />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
             { t: 'Clean URLs', d: '/blog/my-post, /services, /team — not ?page= query strings. Proper path-based routing from the Cloudflare Worker.' },
@@ -1276,19 +1276,19 @@ lib/sheets.ts (pre-configured):
             <CLabel>Option A — Separate brand (recommended)</CLabel>
             <CBullet items={[
               'New domain: something like sitecraft.app, sheetsite.co, gridsite.io — domain that says "website" not "form"',
-              'rgforms becomes the form backend product (Plan A), separate from the website product',
+              'sheetspin becomes the form backend product (Plan A), separate from the website product',
               'Plan B and Plan C live under the new brand',
               'Advantages: cleaner messaging, different SEO keywords, different customer expectations',
               'Real cost: you split your marketing attention — only do this if Plan B shows real pull',
             ]} />
           </CCard>
           <CCard>
-            <CLabel>Option B — Hard pivot from rgforms</CLabel>
+            <CLabel>Option B — Hard pivot from sheetspin</CLabel>
             <CBullet items={[
-              'rgforms becomes a website builder. Form backend is one feature.',
+              'sheetspin becomes a website builder. Form backend is one feature.',
               'Pro: keep existing user base, existing SEO equity, existing brand awareness',
-              'Con: confuses existing developer users. "rgforms" says nothing about websites.',
-              'Viable if rgforms has minimal traction and you want a clean break',
+              'Con: confuses existing developer users. "sheetspin" says nothing about websites.',
+              'Viable if sheetspin has minimal traction and you want a clean break',
               "Not viable if Plan A is generating meaningful MRR — don't abandon paying customers",
             ]} />
           </CCard>
@@ -1303,7 +1303,7 @@ lib/sheets.ts (pre-configured):
           {[
             {
               name: 'Free', price: 'Free', dark: false,
-              features: ['username.sitecraft.app', '5 modules', '1 site', 'All styles', 'rgforms badge', '3 credits included'],
+              features: ['username.sitecraft.app', '5 modules', '1 site', 'All styles', 'sheetspin badge', '3 credits included'],
               gate: 'Custom domain + badge removal = upgrade.',
             },
             {

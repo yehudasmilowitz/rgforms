@@ -3,7 +3,7 @@ import type { Project } from '@/types';
 const DRIVE_API  = 'https://www.googleapis.com/drive/v3/files';
 const SHEETS_API = 'https://sheets.googleapis.com/v4/spreadsheets';
 
-const REGISTRY_SHEET_NAME = 'RGForms — Projects';
+const REGISTRY_SHEET_NAME = 'Sheetspin — Projects';
 const REGISTRY_COLUMNS    = ['project_id', 'project_name', 'template', 'created_at', 'modules_json'];
 
 function authHeaders(token: string): HeadersInit {
@@ -21,7 +21,7 @@ async function apiCall<T>(url: string, options: RequestInit): Promise<T> {
   return res.json() as T;
 }
 
-// ─── Find or create the "RGForms — Projects" registry spreadsheet ─────────────
+// ─── Find or create the "Sheetspin — Projects" registry spreadsheet ─────────────
 
 export async function getOrCreateRegistry(token: string): Promise<string> {
   // Search for an existing sheet with the registry name

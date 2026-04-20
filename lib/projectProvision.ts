@@ -63,7 +63,7 @@ async function createProjectSheet(token: string, projectName: string): Promise<{
   await fetch(`${DRIVE_API}/${sheetId}?fields=id`, {
     method: 'PATCH',
     headers: authHeaders(token),
-    body: JSON.stringify({ appProperties: { rgforms_type: 'project' } }),
+    body: JSON.stringify({ appProperties: { sheetspin_type: 'project' } }),
   }).catch(() => {}); // best-effort — provisioning still succeeds without it
 
   return { sheetId, sheetUrl: result.spreadsheetUrl };
@@ -139,7 +139,7 @@ async function uploadScriptCode(token: string, scriptId: string, projectId: stri
 async function deployWebApp(token: string, scriptId: string): Promise<string> {
   const version = await apiCall<{ versionNumber: number }>(
     `${SCRIPT_API}/${scriptId}/versions`,
-    { method: 'POST', headers: authHeaders(token), body: JSON.stringify({ description: 'rgforms project initial version' }) },
+    { method: 'POST', headers: authHeaders(token), body: JSON.stringify({ description: 'sheetspin project initial version' }) },
   );
 
   const result = await apiCall<{
@@ -150,7 +150,7 @@ async function deployWebApp(token: string, scriptId: string): Promise<string> {
     body: JSON.stringify({
       versionNumber: version.versionNumber,
       manifestFileName: 'appsscript',
-      description: 'rgforms project API',
+      description: 'sheetspin project API',
     }),
   });
 

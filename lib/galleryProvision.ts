@@ -126,7 +126,7 @@ async function deployWebApp(token: string, scriptId: string): Promise<string> {
   const version = await apiCall<{ versionNumber: number }>(`${SCRIPT_API}/${scriptId}/versions`, {
     method: 'POST',
     headers: authHeaders(token),
-    body: JSON.stringify({ description: 'rgforms gallery initial version' }),
+    body: JSON.stringify({ description: 'sheetspin gallery initial version' }),
   });
   const result = await apiCall<{ entryPoints: Array<{ entryPointType: string; webApp: { url: string } }> }>(
     `${SCRIPT_API}/${scriptId}/deployments`,
@@ -136,7 +136,7 @@ async function deployWebApp(token: string, scriptId: string): Promise<string> {
       body: JSON.stringify({
         versionNumber: version.versionNumber,
         manifestFileName: 'appsscript',
-        description: 'rgforms gallery API',
+        description: 'sheetspin gallery API',
       }),
     },
   );
