@@ -5,7 +5,7 @@ import { GoogleSheetsIcon, GoogleAppsScriptIcon, GoogleDriveIcon } from '@/compo
 export const metadata: Metadata = {
   title: 'How It Works',
   description:
-    'Sheetspin uses AI to design your site\'s full backend structure, then provisions it as a single Google Sheet + Apps Script in your Drive — no server, no subscription.',
+    'Give Sheetspin your pitch. AI spins your site\'s full backend into a single Google Sheet + Apps Script in your Drive — no server, no subscription.',
   alternates: { canonical: 'https://sheetspin.com/how-it-works/' },
   openGraph: {
     title: 'How Sheetspin Works — AI-Powered Site Backends',
@@ -85,7 +85,7 @@ export default function HowItWorksPage() {
             How Sheetspin works
           </h1>
           <p className="text-base sm:text-lg leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            Sheetspin uses AI to design your website&apos;s full data backend — forms, content, gallery, calendar, newsletter, and more — then provisions it entirely inside your Google Drive. No server, no subscription, no lock-in.
+            Give Sheetspin your pitch. AI spins your website&apos;s full data backend into existence — forms, content, gallery, calendar, newsletter, and more — entirely inside your Google Drive. No server, no subscription, no lock-in.
           </p>
         </header>
 
@@ -167,7 +167,7 @@ Visitor's Browser / Your Claude agent
 
           <StepCard
             number={4}
-            title="Google Drive is provisioned"
+            title="Your Drive gets the full spin"
             description="A Drive folder is created for your site. Inside it: a Google Sheet with one tab per module plus a _manifest tab, and an asset subfolder for any file storage modules. All columns are pre-populated based on the module type and your field definitions."
           />
 
@@ -332,7 +332,7 @@ Visitor's Browser / Your Claude agent
             className="px-6 py-3 rounded-lg text-sm font-semibold"
             style={{ background: 'var(--color-accent)', color: '#fff' }}
           >
-            Build your site backend →
+            Spin up your site →
           </Link>
         </div>
 

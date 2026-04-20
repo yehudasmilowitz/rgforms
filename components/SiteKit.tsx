@@ -661,7 +661,7 @@ export default function SiteKit() {
               {m.project_slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
             </h1>
             <p className="text-sm" style={{ color: 'var(--color-muted)' }}>
-              {m.tabs.length} module{m.tabs.length !== 1 ? 's' : ''} · provisioned {date}
+              {m.tabs.length} module{m.tabs.length !== 1 ? 's' : ''} · spun {date}
             </p>
           </div>
           <button type="button"

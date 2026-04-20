@@ -338,7 +338,7 @@ export default function SiteStarter() {
             </p>
           )}
           <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
-            Set up your site backend
+            Spin up your site backend
           </h1>
         </div>
 
@@ -371,7 +371,7 @@ export default function SiteStarter() {
                     <p className="text-sm font-bold" style={{ color: 'var(--color-accent)' }}>AI — Custom</p>
                   </div>
                   <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-                    Describe your business in a sentence. AI proposes the right tabs and columns — tailored to your specific needs.
+                    Give us your pitch. AI spins the right tabs and columns from a single sentence — tailored to exactly what you need.
                   </p>
                   <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--color-accent)' }}>
                     Recommended →
@@ -543,8 +543,8 @@ export default function SiteStarter() {
                 style={{ background: 'var(--color-accent)', color: '#fff' }}
               >
                 {launching
-                  ? 'Provisioning…'
-                  : `Provision ${enabledTabs.length} tab${enabledTabs.length !== 1 ? 's' : ''} →`}
+                  ? 'Spinning up…'
+                  : `Spin up ${enabledTabs.length} tab${enabledTabs.length !== 1 ? 's' : ''} →`}
               </button>
             </motion.div>
           )}
@@ -619,7 +619,7 @@ export default function SiteStarter() {
                 className="py-3 rounded-xl text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ background: 'var(--color-accent)', color: '#fff' }}
               >
-                {launching ? 'Provisioning…' : 'Provision Site →'}
+                {launching ? 'Spinning up…' : 'Spin it up →'}
               </button>
             </motion.div>
           )}
