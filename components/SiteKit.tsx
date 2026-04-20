@@ -409,6 +409,100 @@ function ModuleRow({
   );
 }
 
+// ─── Preview modal ────────────────────────────────────────────────────────────
+
+interface PreviewEntry {
+  title:    string;
+  content:  string;
+  filename: string;
+}
+
+function PreviewModal({ entry, onClose }: { entry: PreviewEntry; onClose: () => void }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopy() {
+    await navigator.clipboard.writeText(entry.content).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  }
+
+  function handleDownload() {
+    const blob = new Blob([entry.content], { type: 'text/plain' });
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement('a'), { href: url, download: entry.filename });
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <motion.div
+        className="w-full max-w-3xl max-h-[85vh] flex flex-col rounded-2xl overflow-hidden"
+        style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}
+        initial={{ opacity: 0, scale: 0.96, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96, y: 12 }}
+        transition={{ duration: 0.18 }}
+      >
+        {/* Header */}
+        <div className="flex items-center gap-3 px-5 py-3.5 shrink-0"
+          style={{ borderBottom: '1px solid var(--color-border)' }}>
+          <span className="flex-1 text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+            {entry.title}
+          </span>
+          <button
+            type="button" onClick={handleCopy}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+            style={{
+              background: copied ? 'oklch(0.25 0.05 150 / 0.6)' : 'var(--color-surface-2)',
+              color:      copied ? 'var(--color-success)' : 'var(--color-muted)',
+              border:     '1px solid var(--color-border)',
+            }}
+          >
+            <CopyIcon copied={copied} />
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
+          <button
+            type="button" onClick={handleDownload}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+            style={{ background: 'var(--color-surface-2)', color: 'var(--color-muted)', border: '1px solid var(--color-border)' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-text)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-muted)'; }}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M6 1v7M3.5 5.5 6 8l2.5-2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M1 9v1.5A1.5 1.5 0 0 0 2.5 12h7A1.5 1.5 0 0 0 11 10.5V9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            Download
+          </button>
+          <button
+            type="button" onClick={onClose}
+            className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors"
+            style={{ color: 'var(--color-subtle)' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-text)'; (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-surface-2)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-subtle)'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M2 2l8 8M10 2L2 10" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="overflow-auto flex-1 p-5">
+          <pre className="text-[12px] font-mono leading-relaxed whitespace-pre-wrap break-words"
+            style={{ color: 'var(--color-text)' }}>
+            {entry.content}
+          </pre>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function SiteKit() {
@@ -430,8 +524,9 @@ export default function SiteKit() {
   const [addModuleLabel,  setAddModuleLabel]  = useState('');
   const [addFormConfig,   setAddFormConfig]   = useState<SiteTabFormConfig>({ ...DEFAULT_FORM_CONFIG });
 
-  const [saving, setSaving] = useState(false);
-  const [error,  setError]  = useState('');
+  const [saving,  setSaving]  = useState(false);
+  const [error,   setError]   = useState('');
+  const [preview, setPreview] = useState<PreviewEntry | null>(null);
 
   if (!manifest) return null;
   const m: SiteManifest = manifest;
@@ -533,20 +628,15 @@ export default function SiteKit() {
     finally { setSaving(false); }
   }
 
-  function handleDownloadManifest() {
-    const guide = buildManifestGuide(m);
-    const blob  = new Blob([JSON.stringify({ ...m, ...guide }, null, 2)], { type: 'application/json' });
-    const url   = URL.createObjectURL(blob);
-    const a     = Object.assign(document.createElement('a'), { href: url, download: `${m.project_slug}-manifest.json` });
-    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  function handlePreviewManifest() {
+    const guide    = buildManifestGuide(m);
+    const content  = JSON.stringify({ ...m, ...guide }, null, 2);
+    setPreview({ title: `${m.project_slug}-manifest.json`, content, filename: `${m.project_slug}-manifest.json` });
   }
 
-  function handleExportClaudeMd() {
+  function handlePreviewClaudeMd() {
     const content = generateClaudeMd(m, date);
-    const blob    = new Blob([content], { type: 'text/markdown' });
-    const url     = URL.createObjectURL(blob);
-    const a       = Object.assign(document.createElement('a'), { href: url, download: 'CLAUDE.md' });
-    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    setPreview({ title: 'CLAUDE.md — AI Skill instructions', content, filename: 'CLAUDE.md' });
   }
 
   const addIsForm = addModuleType === 'form' || addModuleType === 'newsletter';
@@ -838,31 +928,38 @@ export default function SiteKit() {
 
         {/* Actions */}
         <div className="flex gap-3 flex-wrap">
-          <button type="button" onClick={handleExportClaudeMd}
+          <button type="button" onClick={handlePreviewClaudeMd}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl border text-sm font-semibold transition-colors focus:outline-none"
             style={{ background: 'var(--color-accent-subtle)', borderColor: 'var(--color-accent-border)', color: 'var(--color-accent)' }}
             onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent)'; (e.currentTarget as HTMLButtonElement).style.color = '#fff'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-accent)'; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-accent-subtle)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-accent)'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-accent-border)'; }}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M7 1v8M4 6l3 3 3-3" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M1 10v2a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-2" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
+              <path d="M1 3h12M1 7h8M1 11h5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
             </svg>
-            Export AI Skill (CLAUDE.md)
+            AI Skill (CLAUDE.md)
           </button>
-          <button type="button" onClick={handleDownloadManifest}
+          <button type="button" onClick={handlePreviewManifest}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl border text-sm font-medium transition-colors focus:outline-none"
             style={{ background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}
             onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-accent)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-accent)'; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-border)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-muted)'; }}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M7 1v8M4 6l3 3 3-3" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M1 10v2a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-2" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
+              <rect x="2" y="1" width="10" height="12" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M4 5h6M4 8h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
-            Download Manifest (JSON)
+            Manifest (JSON)
           </button>
         </div>
 
       </div>
+
+      {/* Preview modal */}
+      <AnimatePresence>
+        {preview && (
+          <PreviewModal entry={preview} onClose={() => setPreview(null)} />
+        )}
+      </AnimatePresence>
+
     </motion.main>
   );
 }
