@@ -6,6 +6,12 @@
 
 ---
 
+## ⚠️ TODO — Setup required
+
+- [ ] **Create Firebase project named `sheetspin`** — go to [console.firebase.google.com](https://console.firebase.google.com), create a new project with ID `sheetspin`, enable Hosting, then run `firebase login` and `firebase use sheetspin`. Until this is done the GitHub Actions deploy workflow will fail.
+
+---
+
 ## What it does
 
 Sheetspin provisions your entire website's data backend inside your own Google Drive in under two minutes:

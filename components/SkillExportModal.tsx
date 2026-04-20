@@ -66,7 +66,7 @@ const FORMAT_OPTIONS: { value: Format; label: string; filename: string; descript
   {
     value: 'generic',
     label: 'Generic reference',
-    filename: 'rg-forms-reference.md',
+    filename: 'sheetspin-reference.md',
     description: 'Framework-agnostic Markdown reference — paste into any AI or docs system.',
   },
 ];

@@ -265,7 +265,7 @@ After all 5 provisioning steps complete, `lib/snippetTemplate.ts` generates the 
 The snippet is a self-contained block of HTML and JavaScript. Here is the structure:
 
 ```html
-<form class="sheetspin-form" id="rg-form"
+<form class="sheetspin-form" id="sheetspin"
       action="DEPLOYMENT_URL"
       method="POST">
   <!-- One input element per field, matching type and label -->
@@ -278,13 +278,13 @@ The snippet is a self-contained block of HTML and JavaScript. Here is the struct
   </div>
 </form>
 <script>
-  document.getElementById('rg-form').addEventListener('submit', function(e) {
+  document.getElementById('sheetspin').addEventListener('submit', function(e) {
     e.preventDefault();
     var data = new FormData(this);
     fetch(this.action, { method: 'POST', body: data })
       .then(function() {
         document.getElementById('rg-success').style.display = 'block';
-        document.getElementById('rg-form').reset();
+        document.getElementById('sheetspin').reset();
       });
   });
 </script>

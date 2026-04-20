@@ -148,7 +148,7 @@ export function generateEmbedSnippet(config: FormConfig, deploymentUrl: string):
   const honeypotField = hpName
     ? `\n  <input type="text" name="${hpName}" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;" />`
     : '';
-  const formId = `rg-form-${Math.random().toString(36).slice(2, 7)}`;
+  const formId = `sheetspin-${Math.random().toString(36).slice(2, 7)}`;
 
   return `<style>
 ${EMBED_CSS}

@@ -114,7 +114,7 @@ function doPost(e) {
 ## Generated Embed Snippet
 
 ```html
-<form class="sheetspin-form" id="rg-form"
+<form class="sheetspin-form" id="sheetspin"
       action="SCRIPT_DEPLOYMENT_URL"
       method="POST">
   <input type="text" name="name" placeholder="Name" required />
@@ -126,13 +126,13 @@ function doPost(e) {
   </div>
 </form>
 <script>
-  document.getElementById('rg-form').addEventListener('submit', function(e) {
+  document.getElementById('sheetspin').addEventListener('submit', function(e) {
     e.preventDefault();
     var data = new FormData(this);
     fetch(this.action, { method:'POST', body: data })
       .then(function() {
         document.getElementById('rg-success').style.display = 'block';
-        document.getElementById('rg-form').reset();
+        document.getElementById('sheetspin').reset();
       });
   });
 </script>

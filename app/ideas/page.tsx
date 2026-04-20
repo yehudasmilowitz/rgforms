@@ -352,7 +352,7 @@ export default function IdeasPage() {
           <IdeaCard
             title="Web Component snippet"
             status="idea"
-            summary="A framework-agnostic custom element (<rg-form endpoint='...'></rg-form>) that works in any HTML page without a build step. Defined as a class extending HTMLElement using the CustomElements API."
+            summary="A framework-agnostic custom element (<sheetspin endpoint='...'></sheetspin>) that works in any HTML page without a build step. Defined as a class extending HTMLElement using the CustomElements API."
           />
 
           <IdeaCard
