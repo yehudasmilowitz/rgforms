@@ -456,12 +456,17 @@ onEdit(e)
             <p className="text-xs font-bold" style={{ color: green }}>In the POC</p>
             <Check items={[
               'Multi-tab Sheet provisioning (one per project)',
+              'Multiple sites per account — each project = its own Sheet + Script, listed in dashboard',
               'Unified Apps Script — fully dynamic, reads tab columns generically',
               '_config tab as module registry (modules row = active tab list + order)',
               'addTab() function — dashboard can add new module tabs without reprovisioning',
               'CacheService per tab, 5-min TTL — fast repeat fetches',
               '/preview renderer — reads _config.modules, renders sections in order',
-              '4 CSS templates stored in _config tab, changeable anytime',
+              'Blog module — title, slug, content (Markdown), date, published columns. Listing + detail view.',
+              'SEO from _config — meta_description, og_title, og_image, ga_id injected into renderer <head>',
+              'Sitemap.xml — generated at /preview?url=…&sitemap=1 from active modules + blog slugs',
+              'JSON-LD — LocalBusiness on home, BlogPosting on blog posts, FAQPage on faq module',
+              '6 CSS templates in _config tab, changeable anytime',
               'Template picker in the rgforms dashboard',
               'Any form tab routed through doPost → append row + email notification',
               'onEdit cache invalidation (near-real-time content updates)',
@@ -475,10 +480,9 @@ onEdit(e)
               'Stripe / billing — charge manually for now',
               'Short URLs / gateway — not needed until there\'s something to monetize',
               'User accounts for site visitors — not relevant',
-              'Blog / dynamic content — add after POC ships',
-              'SEO / sitemap / JSON-LD — real, but not blocking',
               'Visual site editor — the Sheet IS the editor',
-              'Multiple sites per account — one site per user for POC',
+              'Cloudflare Workers hosting — comes in post-POC once custom domains are needed',
+              'AI provisioning (Gemini) — comes in post-POC once the module system is stable',
             ]} />
           </div>
         </div>
@@ -490,42 +494,203 @@ onEdit(e)
       <section className="flex flex-col gap-4">
         <Label>After POC — what to charge and what to build next</Label>
         <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-          If the POC works for your friend and one or two strangers, the next three additions unlock revenue:
+          If the POC works for your friend and one or two strangers, the next additions unlock revenue — and then scale. Ordered by impact per week of build time.
         </p>
         <div className="flex flex-col gap-2">
           {[
             {
               n: '1', label: 'Custom domain connection',
-              detail: 'Guided CNAME setup + a Next.js middleware that reads a Firestore mapping of domain → scriptUrl. The renderer already exists — this just makes the URL prettier.',
+              detail: 'Guided CNAME setup + a Next.js middleware that reads a Firestore mapping of domain → scriptUrl. The renderer already exists — this just makes the URL yours.',
               unlocks: 'The $12/mo pitch. Hard to charge for a preview link. Easy to charge for yourname.com.',
               effort: '1 week',
+              color: green,
+              colorA: greenA,
             },
             {
               n: '2', label: 'Stripe $12/mo subscription',
-              detail: 'Stripe Checkout link, webhook updates a "plan" field in Firestore. Enforce: if no active subscription, show "upgrade" banner on the preview page.',
+              detail: 'Stripe Checkout link, webhook updates a plan field in Firestore. Enforce: if no active subscription, show upgrade banner on the preview page.',
               unlocks: 'First recurring revenue. Without this you have a product but no business.',
               effort: '3–4 days',
+              color: green,
+              colorA: greenA,
             },
             {
-              n: '3', label: 'Done-for-you tier ($500-$1,500)',
+              n: '3', label: 'Done-for-you tier ($500–$1,500)',
               detail: 'Offer to provision the Sheet, fill in the content, connect the domain, and hand them a working site. Use the build skill for content quality. 90 minutes of work at most.',
               unlocks: 'Lump-sum revenue that funds the next 6 months of development.',
-              effort: 'No code — just a pricing page and a calendar link',
+              effort: 'No code needed',
+              color: green,
+              colorA: greenA,
             },
-          ].map(({ n, label, detail, unlocks, effort }) => (
+            {
+              n: '4', label: 'Cloudflare Workers + KV — real hosting',
+              detail: '',
+              unlocks: '',
+              effort: '1–2 weeks',
+              color: violet,
+              colorA: violetA,
+              isCloudflare: true,
+            },
+            {
+              n: '5', label: 'Gemini AI provisioning',
+              detail: '',
+              unlocks: '',
+              effort: '1 week',
+              color: amber,
+              colorA: amberA,
+              isGemini: true,
+            },
+            {
+              n: '6', label: 'Premium template library',
+              detail: '',
+              unlocks: '',
+              effort: '2–3 weeks',
+              color: violet,
+              colorA: violetA,
+              isTemplates: true,
+            },
+          ].map(({ n, label, detail, unlocks, effort, color, colorA, isCloudflare, isGemini, isTemplates }) => (
             <div key={n} className="rounded-xl p-4 flex flex-col gap-2"
-              style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderLeft: `3px solid ${green}` }}>
+              style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderLeft: `3px solid ${color}` }}>
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{n}. {label}</p>
                 <span className="text-[10px] px-2 py-0.5 rounded font-semibold shrink-0"
-                  style={{ color: green, background: greenA(0.10), border: `1px solid ${greenA(0.28)}` }}>
+                  style={{ color, background: colorA(0.10), border: `1px solid ${colorA(0.28)}` }}>
                   {effort}
                 </span>
               </div>
-              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{detail}</p>
-              <p className="text-xs" style={{ color: green }}>
-                <span className="font-semibold">Unlocks: </span>{unlocks}
-              </p>
+              {!isCloudflare && !isGemini && !isTemplates && (
+                <>
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{detail}</p>
+                  <p className="text-xs" style={{ color }}>
+                    <span className="font-semibold">Unlocks: </span>{unlocks}
+                  </p>
+                </>
+              )}
+              {isCloudflare && (
+                <div className="flex flex-col gap-2">
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                    The preview renderer runs inside rgforms.app. That works for the POC but has three problems
+                    at scale: the URL isn&apos;t the user&apos;s domain, every page load hits your Next.js server,
+                    and there&apos;s no edge caching. Cloudflare Workers fixes all three.
+                  </p>
+                  <Code>{`How it works:
+  Visitor → acmewholesale.com (their domain)
+          → Cloudflare CDN: cache hit → HTML served in ~15ms worldwide
+          → cache miss → Cloudflare Worker invoked
+
+  Worker (one deployment, serves ALL user sites):
+    1. Read hostname → KV lookup → { scriptUrl, template, siteId }
+    2. Parse path: /blog/my-post → fetch blog tab, filter by slug
+    3. Fetch data: GET scriptUrl?tab=all (or just the needed tab)
+    4. Render full HTML with the right template + SEO tags
+    5. Set Cache-Control: s-maxage=300 → CDN caches for 5 min
+    6. Return complete HTML to visitor
+
+  onEdit in Apps Script → POST /purge?siteId=xxx
+    → Worker clears that site from CDN cache
+    → next visitor gets fresh HTML in ~1 second
+
+Cost at 1,000 sites:
+  Cloudflare Workers Paid plan:  $5/mo flat
+  Cloudflare KV reads:           ~$0.50/mo
+  Egress fees:                   $0 (Cloudflare never charges egress)
+  Total:                         ~$5.50/mo for 1,000 sites`}
+                  </Code>
+                  <p className="text-xs" style={{ color }}>
+                    <span className="font-semibold">Unlocks: </span>
+                    Custom domains with automatic SSL, worldwide edge performance, proper HTTP status codes (404 returns 404),
+                    clean URLs (/blog/my-post instead of ?tab=blog&amp;slug=my-post), and zero load on your Next.js server.
+                    This is what makes the product feel like a real hosting platform rather than a preview tool.
+                  </p>
+                </div>
+              )}
+              {isGemini && (
+                <div className="flex flex-col gap-2">
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                    Instead of the user manually filling in their Sheet, they describe their business in one sentence.
+                    Gemini generates the complete site spec — module list, seed content for every tab, _config values —
+                    and the provisioning flow creates the Sheet with real content already in it.
+                  </p>
+                  <Code>{`Provisioning flow with Gemini:
+
+  Step 1 — User types:
+    "I'm a real estate wholesaler in Chicago. I buy houses
+     as-is, fast close, any condition."
+
+  Step 2 — Gemini 1.5 Flash generates site spec:
+    Input:  system prompt + business description  (~800 tokens)
+    Output: JSON site spec                        (~3,000 tokens)
+    Cost:   ~$0.002/provision (Gemini Flash pricing)
+    Time:   ~1.5 seconds
+
+    Spec includes:
+    • _config: site_name, tagline, modules list, template suggestion
+    • hero tab: headline, subtitle, CTA text seeded for real estate
+    • services tab: 3 seed services (Cash Offers, Fast Close, As-Is)
+    • faq tab:  4 common seller questions pre-filled
+    • testimonials tab: 2 placeholder testimonials (user replaces)
+    • contact_form: seller intake fields pre-configured
+
+  Step 3 — Confirmation screen (editable before committing):
+    Site name: Chicago REI Solutions
+    Template: Professional
+    Modules: hero · services · faq · testimonials · contact_form
+    Seed rows: 3 services, 4 FAQs, 2 testimonials
+    [ Edit ] [ Confirm & Provision ]
+
+  Step 4 — User confirms → 90-second provisioning → site live`}
+                  </Code>
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                    Why Gemini specifically: Google AI Studio gives free API access during development.
+                    Gemini Flash is extremely cheap at production scale (~$0.002/site). And staying in the Google
+                    ecosystem (Sheets + Script + Gemini) makes the whole story coherent — Google infrastructure all the way down.
+                  </p>
+                  <p className="text-xs" style={{ color }}>
+                    <span className="font-semibold">Unlocks: </span>
+                    Non-technical users who would never fill in a spreadsheet themselves can go from zero to live site
+                    in 90 seconds. This is the consumer product. Without it, the target customer is someone comfortable
+                    editing a Sheet. With it, the target customer is anyone.
+                  </p>
+                </div>
+              )}
+              {isTemplates && (
+                <div className="flex flex-col gap-2">
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                    The POC has 6 CSS themes — different colors, fonts, spacing. Good enough to prove the concept.
+                    The premium template library goes further: distinct layouts per template, not just different colors.
+                    Each template is a completely different visual experience.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {[
+                      { name: 'Editorial', desc: 'Magazine-style. Giant display type, asymmetric grid, serif headings, full-bleed image blocks. Think Squarespace\'s best templates.', target: 'Creatives, agencies, photographers' },
+                      { name: 'Professional', desc: 'Clean navy + white. Card-based services, tight grid, trust signals prominent. Looks like a $5,000 agency build.', target: 'Real estate, legal, finance, consulting' },
+                      { name: 'Local', desc: 'Warm, approachable, neighborhood feel. Large photos, handwritten-style accent, review stars. Works for any local business.', target: 'Restaurants, cleaners, landscapers, gyms' },
+                      { name: 'Bold', desc: 'Dark background, high contrast, large type, amber/neon accents. Immediately eye-catching.', target: 'Contractors, trades, movers, security' },
+                      { name: 'Minimal', desc: 'White space, monochrome, tight typography. Every element earns its place.', target: 'Consultants, architects, therapists, coaches' },
+                      { name: 'Vibrant', desc: 'Colorful gradients, rounded everything, playful. Energetic and modern without being chaotic.', target: 'Beauty, wellness, studios, youth brands' },
+                    ].map(({ name, desc, target }) => (
+                      <div key={name} className="rounded-lg p-3 flex flex-col gap-1"
+                        style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
+                        <p className="text-xs font-bold" style={{ color: 'var(--color-text)' }}>{name}</p>
+                        <p className="text-xs leading-snug" style={{ color: 'var(--color-muted)' }}>{desc}</p>
+                        <p className="text-[10px]" style={{ color: 'var(--color-subtle)' }}>{target}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                    Each template defines: section layout (hero centered vs. split vs. full-bleed), card style,
+                    typography pairing, motion behavior, color system. The same Sheet data renders completely
+                    differently across templates. Switching template is one click — the Sheet doesn&apos;t change.
+                  </p>
+                  <p className="text-xs" style={{ color }}>
+                    <span className="font-semibold">Unlocks: </span>
+                    Higher perceived value (better-looking sites justify higher pricing). Gemini can suggest
+                    the right template based on business type. Premium templates become a paid feature — free
+                    tier gets 2, paid tiers get all 6+.
+                  </p>
+                </div>
+              )}
             </div>
           ))}
         </div>
