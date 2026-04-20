@@ -162,6 +162,90 @@ export default function SimplePlan() {
 
       <Rule />
 
+      {/* Module taxonomy */}
+      <section className="flex flex-col gap-4">
+        <Label>Module taxonomy — what a &quot;module&quot; actually is</Label>
+        <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+          rgforms already knows how to provision several module types. In the POC, every one of those types becomes
+          a tab in the project Sheet. There are three families, plus site config:
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {[
+            {
+              family: 'Content modules',
+              color: green,
+              note: 'Read via doGet. Rendered as sections.',
+              types: [
+                { name: 'hero', cols: 'headline, subtitle, cta_text, cta_url, image_url' },
+                { name: 'services', cols: 'title, description, price, icon, slug' },
+                { name: 'blog', cols: 'title, slug, body (Markdown), date, published' },
+                { name: 'faq', cols: 'question, answer, category, order' },
+                { name: 'testimonials', cols: 'name, quote, rating, company, photo_url' },
+                { name: 'team', cols: 'name, role, bio, photo_url, linkedin' },
+                { name: 'events', cols: 'title, date, location, description, slug' },
+              ],
+            },
+            {
+              family: 'Asset modules',
+              color: violet,
+              note: 'Read via doGet. Rendered as grids or media sections.',
+              types: [
+                { name: 'gallery', cols: 'image_url, caption, alt, category, featured, order' },
+                { name: 'portfolio', cols: 'title, image_url, tags, client, url' },
+                { name: 'menu', cols: 'name, description, price, category, image_url' },
+                { name: 'calendar', cols: 'title, start_date, end_date, location, notes' },
+              ],
+            },
+            {
+              family: 'Form modules',
+              color: amber,
+              note: 'Write via doPost. Submissions append to the tab.',
+              types: [
+                { name: 'contact_form', cols: 'name, email, message, submitted_at' },
+                { name: 'booking', cols: 'name, email, phone, preferred_date, notes' },
+                { name: 'quote_request', cols: 'name, email, service, details, budget' },
+                { name: 'newsletter', cols: 'email, subscribed_at, source' },
+                { name: 'intake', cols: 'any custom fields — added as columns' },
+              ],
+            },
+            {
+              family: 'Site config',
+              color: 'var(--color-subtle)',
+              note: 'Key-value tab. Controls renderer + SEO.',
+              types: [
+                { name: '_config', cols: 'site_name, template, modules, meta_description, og_title, og_image, ga_id, …' },
+              ],
+            },
+          ].map(({ family, color, note, types }) => (
+            <div key={family} className="rounded-xl p-4 flex flex-col gap-2"
+              style={{ background: 'var(--color-surface)', border: `1px solid var(--color-border)`, borderTop: `3px solid ${color}` }}>
+              <div className="flex flex-col gap-0.5">
+                <p className="text-xs font-bold" style={{ color }}>{family}</p>
+                <p className="text-[10px]" style={{ color: 'var(--color-subtle)' }}>{note}</p>
+              </div>
+              <div className="flex flex-col gap-1 mt-1">
+                {types.map(({ name, cols }) => (
+                  <div key={name} className="rounded px-2 py-1.5" style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
+                    <p className="text-[10px] font-bold font-mono" style={{ color: 'var(--color-text)' }}>{name}</p>
+                    <p className="text-[10px] leading-snug mt-0.5 font-mono" style={{ color: 'var(--color-subtle)' }}>{cols}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <Note>
+          <span className="font-semibold" style={{ color: violet }}>Blog is not a special case. </span>
+          Blog is a content module — the same infrastructure that renders a services section also renders a
+          blog listing and detail view. The difference is column schema and render logic, not a different
+          system. Any row-based tab with a <code className="text-xs px-1 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>slug</code> column
+          gets a detail route automatically. This is why adding a new content type (events, resources,
+          case studies) costs nothing in infrastructure — it&apos;s just a new tab with appropriate columns.
+        </Note>
+      </section>
+
+      <Rule />
+
       {/* Dynamic modules */}
       <section className="flex flex-col gap-4">
         <Label>Adding + updating modules after provisioning</Label>
