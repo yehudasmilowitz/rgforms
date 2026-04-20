@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import ApiPlan from '@/components/ApiPlan';
 
 export const metadata: Metadata = {
-  title: 'Business Plan v4 — RG Forms',
+  title: 'Business Plan v4 — Sheetspin',
   description: 'API-as-a-service pivot — Google Sheets as a typed REST backend.',
   robots: { index: false, follow: false },
 };

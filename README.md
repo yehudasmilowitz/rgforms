@@ -1,14 +1,14 @@
-# RG Forms
+# Sheetspin
 
 > AI-powered website backends in your Google Drive. Describe your site, get a fully provisioned Google Sheet + Apps Script API — forms, content, gallery, newsletter, and more. No server, no subscription, yours forever.
 
-**Live site**: [rgforms.com](https://rgforms.com)
+**Live site**: [sheetspin.com](https://sheetspin.com)
 
 ---
 
 ## What it does
 
-RG Forms provisions your entire website's data backend inside your own Google Drive in under two minutes:
+Sheetspin provisions your entire website's data backend inside your own Google Drive in under two minutes:
 
 1. **Describe your site** — tell the AI what you're building; Gemini proposes a full module structure
 2. **Review and customize** — edit field labels, types, email settings, and spam protection per module
@@ -16,7 +16,7 @@ RG Forms provisions your entire website's data backend inside your own Google Dr
 4. **Manage post-launch** — add/remove modules, edit form fields, seed AI data, all without redeploying
 5. **Export CLAUDE.md** — a skill file that makes Claude Code an agent for your site's API
 
-No RG Forms server is ever involved in provisioning or in serving your site's data. Every API call is made from your browser using your own OAuth token. Everything belongs entirely to you.
+No Sheetspin server is ever involved in provisioning or in serving your site's data. Every API call is made from your browser using your own OAuth token. Everything belongs entirely to you.
 
 ---
 
@@ -30,7 +30,7 @@ Your Browser
     ├─── Google Drive API       ──▶  Creates Sheet + Drive folder
     └─── Apps Script API        ──▶  Creates & deploys doPost/doGet handler
 
-  * The only RG Forms server route: /api/propose-manifest and /api/seed-data — 
+  * The only Sheetspin server route: /api/propose-manifest and /api/seed-data — 
     forwards prompt to Gemini, returns response, logs nothing.
 
 Your site's live API (after provisioning):
@@ -195,7 +195,7 @@ The generated script (`lib/siteScript.ts`) is a single JS file uploaded to the u
 
 - **`doPost(e)`** — reads `_manifest` tab, finds the matching form tab, appends a row, sends email via `GmailApp.sendEmail` (supports CC, BCC, custom subject, sender name, reply-to, honeypot)
 - **`doGet(e)`** — reads `_manifest` tab, returns tab data as JSON (rows array, key-value object, or asset file list)
-- **`_manifest` tab** — live JSON config, updated by RG Forms when you add/remove modules; no script redeploy needed
+- **`_manifest` tab** — live JSON config, updated by Sheetspin when you add/remove modules; no script redeploy needed
 - **Response format** — always `{ result: 'success' }` or `{ result: 'error', error: '...' }`
 
 Scopes declared in `appsscript.json`: `spreadsheets.currentonly`, `gmail.send`, `drive.readonly`.

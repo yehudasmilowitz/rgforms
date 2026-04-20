@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import BusinessPlanTabs from '@/components/BusinessPlanTabs';
 
 export const metadata: Metadata = {
-  title: 'Business Plan — RG Forms',
-  description: 'Internal business plan and go-to-market strategy for RG Forms.',
+  title: 'Business Plan — Sheetspin',
+  description: 'Internal business plan and go-to-market strategy for Sheetspin.',
   robots: { index: false, follow: false },
 };
 

@@ -53,7 +53,7 @@ function doGet() {
     '<!DOCTYPE html><html lang="en"><head>',
     '<meta charset="utf-8">',
     '<meta name="viewport" content="width=device-width,initial-scale=1">',
-    '<title>Form Active \u2014 RG Forms</title>',
+    '<title>Form Active \u2014 Sheetspin</title>',
     '<style>',
     '*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}',
     'body{min-height:100vh;display:flex;align-items:center;justify-content:center;',
@@ -88,7 +88,7 @@ function doGet() {
     '<span class="badge"><span class="dot"></span>Listening for submissions</span>',
     '<div class="footer">Powered by<br>',
     '<span style="display:inline-flex;align-items:center;gap:5px;margin-top:6px;">',
-    '<img src="https://rgforms.com/icon-192.png" alt="" width="20" height="20" style="display:inline-block;border-radius:4px;vertical-align:middle;">',
+    '<img src="https://sheetspin.com/icon-192.png" alt="" width="20" height="20" style="display:inline-block;border-radius:4px;vertical-align:middle;">',
     '<strong style="vertical-align:middle;">Forms</strong>',
     '</span></div>',
     '</div>',
@@ -96,7 +96,7 @@ function doGet() {
   ].join('');
   return HtmlService
     .createHtmlOutput(html)
-    .setTitle('Form Active \u2014 RG Forms');
+    .setTitle('Form Active \u2014 Sheetspin');
 }
 
 function buildEmailHtml(headers, params, formName, timestamp) {
@@ -161,7 +161,7 @@ function buildEmailHtml(headers, params, formName, timestamp) {
     + '<div class="footer">'
     + '<p class="footer-text">Powered by</p>'
     + '<div style="display:inline-flex;align-items:center;gap:6px;margin-top:6px;">'
-    + '<img src="https://rgforms.com/icon-192.png" alt="" width="20" height="20" style="display:inline-block;border-radius:4px;vertical-align:middle;">'
+    + '<img src="https://sheetspin.com/icon-192.png" alt="" width="20" height="20" style="display:inline-block;border-radius:4px;vertical-align:middle;">'
     + '<span style="font-size:13px;font-weight:600;color:#71717a;vertical-align:middle;">Forms</span>'
     + '</div>'
     + '</div>'

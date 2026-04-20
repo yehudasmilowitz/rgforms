@@ -5,12 +5,12 @@ import { GoogleSheetsIcon, GoogleAppsScriptIcon, GoogleDriveIcon } from '@/compo
 export const metadata: Metadata = {
   title: 'How It Works',
   description:
-    'RG Forms uses AI to design your site\'s full backend structure, then provisions it as a single Google Sheet + Apps Script in your Drive — no server, no subscription.',
-  alternates: { canonical: 'https://rgforms.com/how-it-works/' },
+    'Sheetspin uses AI to design your site\'s full backend structure, then provisions it as a single Google Sheet + Apps Script in your Drive — no server, no subscription.',
+  alternates: { canonical: 'https://sheetspin.com/how-it-works/' },
   openGraph: {
-    title: 'How RG Forms Works — AI-Powered Site Backends',
+    title: 'How Sheetspin Works — AI-Powered Site Backends',
     description: 'Describe your site. AI designs the structure. Everything provisions in your Google Drive in under two minutes.',
-    url: 'https://rgforms.com/how-it-works/',
+    url: 'https://sheetspin.com/how-it-works/',
   },
 };
 
@@ -82,10 +82,10 @@ export default function HowItWorksPage() {
             Documentation
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight" style={{ color: 'var(--color-text)' }}>
-            How RG Forms works
+            How Sheetspin works
           </h1>
           <p className="text-base sm:text-lg leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            RG Forms uses AI to design your website&apos;s full data backend — forms, content, gallery, calendar, newsletter, and more — then provisions it entirely inside your Google Drive. No server, no subscription, no lock-in.
+            Sheetspin uses AI to design your website&apos;s full data backend — forms, content, gallery, calendar, newsletter, and more — then provisions it entirely inside your Google Drive. No server, no subscription, no lock-in.
           </p>
         </header>
 
@@ -96,7 +96,7 @@ export default function HowItWorksPage() {
             Most websites need a backend the moment they add a contact form, a blog, or a newsletter signup. The options are either a paid SaaS (that owns your data), a DIY server (that requires ongoing maintenance), or a patchwork of separate tools that don&apos;t talk to each other.
           </P>
           <P>
-            RG Forms takes a different approach: your entire site&apos;s backend lives in a single Google Sheet that you already own. A single Google Apps Script acts as the API layer, reading a live configuration tab on every request. There&apos;s nothing to maintain and nothing to pay for.
+            Sheetspin takes a different approach: your entire site&apos;s backend lives in a single Google Sheet that you already own. A single Google Apps Script acts as the API layer, reading a live configuration tab on every request. There&apos;s nothing to maintain and nothing to pay for.
           </P>
         </Section>
 
@@ -104,7 +104,7 @@ export default function HowItWorksPage() {
         <Section>
           <H2>Architecture overview</H2>
           <P>
-            RG Forms is a fully static web app — there is no RG Forms server, no database, and no third-party storage. Every API call is made directly from your browser using your own Google OAuth access token. The resources created belong entirely to you.
+            Sheetspin is a fully static web app — there is no Sheetspin server, no database, and no third-party storage. Every API call is made directly from your browser using your own Google OAuth access token. The resources created belong entirely to you.
           </P>
           <div
             className="rounded-xl border p-5 font-mono text-xs leading-loose overflow-x-auto"
@@ -116,7 +116,7 @@ export default function HowItWorksPage() {
     ├─── Gemini API (Google)   ──▶  AI proposes site module structure
     ├─── Google Drive API      ──▶  Creates Sheet + Drive folder
     ├─── Apps Script API       ──▶  Creates & deploys API handler
-    └─── (no RG Forms server involved)
+    └─── (no Sheetspin server involved)
 
 Your site's live API (after provisioning):
 
@@ -150,7 +150,7 @@ Visitor's Browser / Your Claude agent
           <StepCard
             number={1}
             title="Sign in with Google"
-            description="You grant RG Forms a temporary OAuth access token. This token lives only in browser memory — it's never sent to any RG Forms server, never written to disk, and is gone the moment you close the tab."
+            description="You grant Sheetspin a temporary OAuth access token. This token lives only in browser memory — it's never sent to any Sheetspin server, never written to disk, and is gone the moment you close the tab."
           />
 
           <StepCard
@@ -293,7 +293,7 @@ Visitor's Browser / Your Claude agent
               },
               {
                 title: 'Apps Script API must be enabled',
-                body: 'The Google Apps Script API must be enabled in your Google account before provisioning. If it isn\'t, RG Forms will detect this and show a direct link to enable it — it\'s a single toggle.',
+                body: 'The Google Apps Script API must be enabled in your Google account before provisioning. If it isn\'t, Sheetspin will detect this and show a direct link to enable it — it\'s a single toggle.',
               },
               {
                 title: 'No file uploads via the form endpoint',
@@ -319,7 +319,7 @@ Visitor's Browser / Your Claude agent
         {/* Trust */}
         <CalloutBox>
           <strong style={{ color: 'var(--color-text)' }}>No data leaves your Google account.</strong>{' '}
-          RG Forms is a static site that makes API calls on your behalf using a short-lived access token that never touches our servers. Submissions and data go directly from the browser to your own Apps Script endpoint and land in your own Google Sheet. The AI seed feature sends only column names and module types to Gemini — no personal information.{' '}
+          Sheetspin is a static site that makes API calls on your behalf using a short-lived access token that never touches our servers. Submissions and data go directly from the browser to your own Apps Script endpoint and land in your own Google Sheet. The AI seed feature sends only column names and module types to Gemini — no personal information.{' '}
           <Link href="/privacy" style={{ color: 'var(--color-accent)' }} className="underline hover:no-underline">
             Read our privacy policy.
           </Link>
@@ -338,7 +338,7 @@ Visitor's Browser / Your Claude agent
 
         {/* Footer nav */}
         <div className="pt-4 border-t flex items-center gap-4" style={{ borderColor: 'var(--color-border)' }}>
-          <Link href="/" className="text-sm" style={{ color: 'var(--color-accent)' }}>← Back to RG Forms</Link>
+          <Link href="/" className="text-sm" style={{ color: 'var(--color-accent)' }}>← Back to Sheetspin</Link>
           <Link href="/privacy" className="text-sm nav-link">Privacy Policy</Link>
           <Link href="/terms" className="text-sm nav-link">Terms of Service</Link>
         </div>

@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Terms of Service',
-  description: 'RG Forms terms of service. Free to use, no warranty, no liability. Plain-English terms for an AI-powered, zero-backend website backend builder.',
+  description: 'Sheetspin terms of service. Free to use, no warranty, no liability. Plain-English terms for an AI-powered, zero-backend website backend builder.',
 
   robots: { index: false, follow: false },
 };
@@ -71,16 +71,16 @@ export default function TermsPage() {
             Short version
           </p>
           <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            RG Forms is free to use. We provide the service as-is with no warranties. You are
+            Sheetspin is free to use. We provide the service as-is with no warranties. You are
             responsible for the site modules you create, the data collected through them, and
-            any content generated with AI features. Don&apos;t use RG Forms for anything illegal or harmful.
+            any content generated with AI features. Don&apos;t use Sheetspin for anything illegal or harmful.
           </p>
         </div>
 
         <Section>
           <H2>1. Acceptance of terms</H2>
           <P>
-            By accessing or using RG Forms (&ldquo;the Service&rdquo;), you agree to be bound by
+            By accessing or using Sheetspin (&ldquo;the Service&rdquo;), you agree to be bound by
             these Terms of Service. If you do not agree to these terms, do not use the Service.
           </P>
         </Section>
@@ -88,7 +88,7 @@ export default function TermsPage() {
         <Section>
           <H2>2. Description of the service</H2>
           <P>
-            RG Forms is a free web application that uses AI to design and provision complete website backends — forms, content modules, galleries, newsletters, and more — backed by your own Google Drive infrastructure. A single Google Sheet and Google Apps Script deployment serve as your site&apos;s live API. Most operations run entirely in your browser; AI-powered features (site structure proposals and data seeding) route through a lightweight server-side endpoint that forwards requests to Google&apos;s Gemini API and returns the response without storing anything.
+            Sheetspin is a free web application that uses AI to design and provision complete website backends — forms, content modules, galleries, newsletters, and more — backed by your own Google Drive infrastructure. A single Google Sheet and Google Apps Script deployment serve as your site&apos;s live API. Most operations run entirely in your browser; AI-powered features (site structure proposals and data seeding) route through a lightweight server-side endpoint that forwards requests to Google&apos;s Gemini API and returns the response without storing anything.
           </P>
           <P>
             The resources created by the Service (Google Sheets, Apps Script projects) are
@@ -99,8 +99,8 @@ export default function TermsPage() {
         <Section>
           <H2>3. Google account and OAuth</H2>
           <P>
-            Using RG Forms requires you to authenticate with a Google account via OAuth 2.0.
-            By signing in, you authorize RG Forms to act on your behalf to create and manage
+            Using Sheetspin requires you to authenticate with a Google account via OAuth 2.0.
+            By signing in, you authorize Sheetspin to act on your behalf to create and manage
             specific Google Drive resources. The exact permissions requested are described in
             our{' '}
             <Link
@@ -140,7 +140,7 @@ export default function TermsPage() {
         <Section>
           <H2>4. Acceptable use</H2>
           <P>
-            You agree not to use RG Forms to:
+            You agree not to use Sheetspin to:
           </P>
           <ul className="flex flex-col gap-2 list-none">
             {[
@@ -169,14 +169,14 @@ export default function TermsPage() {
         <Section>
           <H2>4a. AI-generated content</H2>
           <P>
-            RG Forms offers AI-powered features (site structure proposals and data seeding) powered by Google&apos;s Gemini API. You are responsible for reviewing AI-generated content before use. RG Forms makes no guarantees about the accuracy, completeness, or suitability of AI-generated module structures or sample data. You must not rely on AI-generated data as a substitute for real data in production contexts.
+            Sheetspin offers AI-powered features (site structure proposals and data seeding) powered by Google&apos;s Gemini API. You are responsible for reviewing AI-generated content before use. Sheetspin makes no guarantees about the accuracy, completeness, or suitability of AI-generated module structures or sample data. You must not rely on AI-generated data as a substitute for real data in production contexts.
           </P>
         </Section>
 
         <Section>
           <H2>5. Your responsibilities</H2>
           <P>
-            You are solely responsible for the forms you create using RG Forms, the content of
+            You are solely responsible for the forms you create using Sheetspin, the content of
             those forms, and any data collected through them. If your forms collect personal
             information from visitors, you are responsible for complying with applicable privacy
             laws (such as GDPR, CCPA, or other regulations) and for maintaining an accurate
@@ -184,7 +184,7 @@ export default function TermsPage() {
           </P>
           <P>
             You are also responsible for the security of the Google Drive resources created
-            on your behalf. RG Forms cannot access or manage these resources after they are
+            on your behalf. Sheetspin cannot access or manage these resources after they are
             created, except through actions you initiate while signed in.
           </P>
         </Section>
@@ -193,7 +193,7 @@ export default function TermsPage() {
           <H2>6. No warranty</H2>
           <P>
             The Service is provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo; without
-            warranties of any kind, either express or implied. RG Forms makes no warranty that
+            warranties of any kind, either express or implied. Sheetspin makes no warranty that
             the Service will be uninterrupted, error-free, or that defects will be corrected.
             We do not warrant that the Service will meet your requirements.
           </P>
@@ -202,7 +202,7 @@ export default function TermsPage() {
         <Section>
           <H2>7. Limitation of liability</H2>
           <P>
-            To the fullest extent permitted by law, RG Forms and its operators shall not be
+            To the fullest extent permitted by law, Sheetspin and its operators shall not be
             liable for any indirect, incidental, special, consequential, or punitive damages
             arising out of or related to your use of the Service, including but not limited to
             loss of data, loss of revenue, or service interruptions — even if advised of the
@@ -213,7 +213,7 @@ export default function TermsPage() {
         <Section>
           <H2>8. Intellectual property</H2>
           <P>
-            The RG Forms name, logo, and branding are the property of RG Marketing Group. Forms
+            The Sheetspin name, logo, and branding are the property of RG Marketing Group. Forms
             and content you create using the Service belong to you.
           </P>
         </Section>
@@ -254,7 +254,7 @@ export default function TermsPage() {
             className="text-sm"
             style={{ color: 'var(--color-accent)' }}
           >
-            ← Back to RG Forms
+            ← Back to Sheetspin
           </Link>
           <Link
             href="/privacy"

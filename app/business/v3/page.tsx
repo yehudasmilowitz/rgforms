@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import SimplePlan from '@/components/SimplePlan';
 
 export const metadata: Metadata = {
-  title: 'Business Plan v3 — RG Forms',
+  title: 'Business Plan v3 — Sheetspin',
   description: 'Simple POC plan — multi-tab Sheet + renderer.',
   robots: { index: false, follow: false },
 };

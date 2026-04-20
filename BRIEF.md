@@ -1,6 +1,6 @@
 # rgforms — Project Brief
 
-**Domain:** rgforms.com
+**Domain:** sheetspin.com
 **Version:** 1.0
 **Status:** Draft
 **Date:** March 2026
@@ -299,7 +299,7 @@ This is the only environment variable. It is `NEXT_PUBLIC_` (embedded in client 
 1. Create project at console.cloud.google.com
 2. Enable: Google Sheets API, Apps Script API, Google Drive API
 3. Create OAuth 2.0 Client ID (Web application type)
-4. Add authorized JavaScript origins: `http://localhost:3000` and `https://rgforms.com`
+4. Add authorized JavaScript origins: `http://localhost:3000` and `https://sheetspin.com`
 5. Configure OAuth consent screen (External) with the three scopes
 6. For production: submit for Google OAuth verification (1–4 weeks, requires privacy policy)
 
@@ -351,7 +351,7 @@ This is the only environment variable. It is `NEXT_PUBLIC_` (embedded in client 
 | M3 — Provisioning | All 5 Google API calls in `lib/provision.ts`, step progress UI, error handling + retry |
 | M4 — Result Screen | Snippet generator, instructions, copy-to-clipboard, Sheet/Script links |
 | M5 — Polish | Loading/empty/error states, responsive layout, accessibility audit, performance audit |
-| M6 — Launch Prep | OAuth verification submitted, privacy policy at rgforms.com/privacy, production deploy to Vercel |
+| M6 — Launch Prep | OAuth verification submitted, privacy policy at sheetspin.com/privacy, production deploy to Vercel |
 
 ---
 

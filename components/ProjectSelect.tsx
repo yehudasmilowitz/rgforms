@@ -463,7 +463,7 @@ export default function ProjectSelect() {
             <div>
               <p className="font-semibold text-sm" style={{ color: 'var(--color-text)' }}>Revoke Google permissions?</p>
               <p className="text-xs mt-1.5 leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-                This signs you out and removes RG Forms' access token from Google's servers.
+                This signs you out and removes Sheetspin' access token from Google's servers.
               </p>
             </div>
 

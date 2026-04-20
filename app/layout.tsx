@@ -27,32 +27,32 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 });
 
-const siteUrl = 'https://rgforms.com';
+const siteUrl = 'https://sheetspin.com';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'RG Forms — HTML Contact Forms in 2 Minutes',
-    template: '%s — RG Forms',
+    default: 'Sheetspin — AI-Powered Website Backends in Your Google Drive',
+    template: '%s — Sheetspin',
   },
   description:
-    'Create fully functional HTML contact forms in under 2 minutes. Zero backend, no subscription — form submissions go straight to your Google Drive.',
-  keywords: ['contact form', 'HTML form', 'Google Sheets form', 'serverless form', 'no backend form', 'free contact form', 'embed form'],
-  authors: [{ name: 'RG Forms' }],
-  creator: 'RG Forms',
+    'Describe your site to AI. Get a fully provisioned Google Sheet + Apps Script backend — forms, content, gallery, newsletter, and more. No server, no subscription.',
+  keywords: ['website backend', 'Google Sheets CMS', 'serverless backend', 'AI site builder', 'Google Drive backend', 'no backend', 'contact form', 'Google Apps Script'],
+  authors: [{ name: 'Sheetspin' }],
+  creator: 'Sheetspin',
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: siteUrl,
-    siteName: 'RG Forms',
-    title: 'RG Forms — HTML Contact Forms in 2 Minutes',
+    siteName: 'Sheetspin',
+    title: 'Sheetspin — AI-Powered Website Backends in Your Google Drive',
     description:
-      'Zero-backend contact forms powered by your own Google Drive. No subscription, no server — just sign in and get a copy-paste embed snippet.',
+      'Describe your site. AI designs the structure. Everything provisions in your Google Drive — forms, content, gallery, and more. No server, no subscription.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'RG Forms — HTML Contact Forms in 2 Minutes',
-    description: 'Zero-backend contact forms powered by Google Drive. Free forever.',
+    title: 'Sheetspin — AI-Powered Website Backends in Your Google Drive',
+    description: 'Your website\'s entire backend, in your Google Drive. AI-powered, zero server, free forever.',
   },
   icons: {
     icon: '/favicon.svg',
@@ -92,13 +92,13 @@ export default function RootLayout({
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'SoftwareApplication',
-              name: 'RG Forms',
+              name: 'Sheetspin',
               url: siteUrl,
               applicationCategory: 'DeveloperApplication',
               operatingSystem: 'Web',
               offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
               description:
-                'Create fully functional HTML contact forms in under 2 minutes. Zero backend, no subscription — form submissions go straight to your Google Drive.',
+                'Describe your site to AI. Get a fully provisioned Google Sheet + Apps Script backend — forms, content, gallery, newsletter, and more. No server, no subscription.',
               logo: { '@type': 'ImageObject', url: `${siteUrl}/logo.svg` },
             }),
           }}
@@ -109,7 +109,7 @@ export default function RootLayout({
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'WebSite',
-              name: 'RG Forms',
+              name: 'Sheetspin',
               url: siteUrl,
             }),
           }}
@@ -133,11 +133,11 @@ export default function RootLayout({
             <Link
               href="/"
               className="flex items-center gap-2"
-              aria-label="RG Forms home"
+              aria-label="Sheetspin home"
             >
               <Image
                 src="/favicon.svg"
-                alt="RG Forms logo"
+                alt="Sheetspin logo"
                 width={28}
                 height={28}
                 priority
@@ -146,7 +146,7 @@ export default function RootLayout({
                 className="font-bold tracking-tight text-base"
                 style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-display)' }}
               >
-                Forms
+                Sheetspin
               </span>
             </Link>
             <nav className="flex items-center gap-6" aria-label="Main navigation">
@@ -178,7 +178,7 @@ export default function RootLayout({
           className="mt-auto py-6 text-center text-xs"
         >
           <span style={{ color: 'var(--color-text-muted)' }}>
-            RG Forms is a project of{' '}
+            Sheetspin is a project of{' '}
             <a
               href="https://rgmarketinggroup.com/"
               target="_blank"

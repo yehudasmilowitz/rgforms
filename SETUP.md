@@ -281,7 +281,7 @@ Users who are **not** on your test user list will see a warning screen: _"Google
 ### How to Submit for Verification
 
 1. Complete your production deployment first
-2. Publish a privacy policy at a public URL (e.g., `https://rgforms.com/privacy`)
+2. Publish a privacy policy at a public URL (e.g., `https://sheetspin.com/privacy`)
 3. Go to Google Cloud Console → **"APIs & Services"** → **"OAuth consent screen"**
 4. Click **"PUBLISH APP"** to move from Testing to In Production status
 5. Click **"PREPARE FOR VERIFICATION"**

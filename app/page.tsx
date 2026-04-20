@@ -145,7 +145,7 @@ export default function Page() {
           style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-display)' }}
           variants={fadeUp}
         >
-          RG Forms
+          Sheetspin
         </motion.h1>
 
         {/* Tagline */}
@@ -211,7 +211,7 @@ export default function Page() {
           </p>
           <div className="flex flex-col gap-3">
             {[
-              { n: '1', label: 'Sign in with Google', body: 'A short-lived OAuth token is used entirely in your browser. Nothing is sent to RG Forms servers.' },
+              { n: '1', label: 'Sign in with Google', body: 'A short-lived OAuth token is used entirely in your browser. Nothing is sent to Sheetspin servers.' },
               { n: '2', label: 'Describe your site', body: 'Tell the AI what kind of site you\'re building. It proposes modules, field names, and types. You tweak and confirm.' },
               { n: '3', label: 'We provision everything', body: 'One Google Sheet, one Drive folder, one Apps Script web app with a live HTTPS endpoint — all in your account.' },
               { n: '4', label: 'Manage and evolve', body: 'Add modules, edit form fields, seed AI data, and export your CLAUDE.md skill file — all without touching code or redeploying.' },

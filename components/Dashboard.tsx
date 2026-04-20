@@ -317,7 +317,7 @@ function RevokeConfirmDialog({ onConfirm, onCancel, revoking, result }: RevokeCo
           </h2>
           {result === 'idle' && (
             <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-              This will immediately revoke RG Forms&apos; access to your Google account — Drive, Sheets, and Apps Script. Your existing forms will remain in your Drive, but you&apos;ll need to sign in again to use them here.{' '}
+              This will immediately revoke Sheetspin&apos; access to your Google account — Drive, Sheets, and Apps Script. Your existing forms will remain in your Drive, but you&apos;ll need to sign in again to use them here.{' '}
               You can also do this any time at{' '}
               <a
                 href="https://myaccount.google.com/permissions"
@@ -333,12 +333,12 @@ function RevokeConfirmDialog({ onConfirm, onCancel, revoking, result }: RevokeCo
           )}
           {result === 'success' && (
             <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-              RG Forms no longer has access to your Google account. Signing you out…
+              Sheetspin no longer has access to your Google account. Signing you out…
             </p>
           )}
           {result === 'error' && (
             <p className="text-sm leading-relaxed" style={{ color: 'var(--color-error)' }}>
-              The revocation request failed — Google may be temporarily unavailable. You can try again, or manually remove RG Forms at{' '}
+              The revocation request failed — Google may be temporarily unavailable. You can try again, or manually remove Sheetspin at{' '}
               <a
                 href="https://myaccount.google.com/permissions"
                 target="_blank"

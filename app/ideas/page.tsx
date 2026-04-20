@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Ideas & Roadmap — RG Forms',
-  description: 'Developer brainstorm: planned features, content modules, and security improvements for RG Forms.',
+  title: 'Ideas & Roadmap — Sheetspin',
+  description: 'Developer brainstorm: planned features, content modules, and security improvements for Sheetspin.',
   robots: { index: false, follow: false },
 };
 
@@ -139,7 +139,7 @@ export default function IdeasPage() {
             Ideas & Roadmap
           </h1>
           <p className="text-base leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            Brainstorm checklist for RG Forms. Each idea is grounded in what the codebase can
+            Brainstorm checklist for Sheetspin. Each idea is grounded in what the codebase can
             actually support, with notes on feasibility, implementation approach, and known
             limitations. This page is not indexed and not in the nav.
           </p>
@@ -147,7 +147,7 @@ export default function IdeasPage() {
             className="rounded-xl border p-4 text-sm leading-relaxed"
             style={{ background: 'oklch(0.65 0.22 285 / 0.06)', borderColor: 'oklch(0.65 0.22 285 / 0.25)', color: 'var(--color-muted)' }}
           >
-            <strong style={{ color: 'var(--color-text)' }}>The core insight</strong> — RG Forms
+            <strong style={{ color: 'var(--color-text)' }}>The core insight</strong> — Sheetspin
             already turns a Google account into a serverless backend via Apps Script. Every idea
             here is an extension of that pattern: deploy a new script type, expose a new endpoint,
             or build a new provisioning flow on top of the existing 5-step pipeline.
@@ -340,7 +340,7 @@ export default function IdeasPage() {
           <SectionHeader
             emoji="🛠"
             title="Developer Experience"
-            subtitle="Better tooling and output for developers integrating RG Forms into projects."
+            subtitle="Better tooling and output for developers integrating Sheetspin into projects."
           />
 
           <IdeaCard
@@ -382,7 +382,7 @@ export default function IdeasPage() {
           <SectionHeader
             emoji="🚀"
             title="Platform & Distribution"
-            subtitle="Ways to grow, monetize, or distribute RG Forms."
+            subtitle="Ways to grow, monetize, or distribute Sheetspin."
           />
 
           <IdeaCard
@@ -407,7 +407,7 @@ export default function IdeasPage() {
           <IdeaCard
             title="Open source the script templates separately"
             status="idea"
-            summary="Publish the Apps Script templates (scriptTemplate.ts, and future module templates) as a standalone repo or npm package. Developers can use them directly without the RG Forms UI. RG Forms becomes the easiest way to use them, not the only way."
+            summary="Publish the Apps Script templates (scriptTemplate.ts, and future module templates) as a standalone repo or npm package. Developers can use them directly without the Sheetspin UI. Sheetspin becomes the easiest way to use them, not the only way."
           />
         </section>
 

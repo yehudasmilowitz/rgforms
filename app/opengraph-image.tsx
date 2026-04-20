@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 export const dynamic = 'force-static';
-export const alt = 'RG Forms — HTML Contact Forms in 2 Minutes';
+export const alt = 'Sheetspin — AI-Powered Website Backends in Your Google Drive';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -48,7 +48,7 @@ export default function OGImage() {
           width={52}
           height={52}
           style={{ borderRadius: '12px' }}
-          alt="RG Forms logo"
+          alt="Sheetspin logo"
         />
         <span
           style={{
@@ -58,14 +58,14 @@ export default function OGImage() {
             letterSpacing: '-0.5px',
           }}
         >
-          Forms
+          Sheetspin
         </span>
       </div>
 
       {/* Headline */}
       <div
         style={{
-          fontSize: '68px',
+          fontSize: '62px',
           fontWeight: '800',
           color: '#f0ecff',
           textAlign: 'center',
@@ -75,13 +75,13 @@ export default function OGImage() {
           maxWidth: '960px',
         }}
       >
-        HTML Contact Forms in 2 Minutes
+        Your website&apos;s backend, in your Google Drive
       </div>
 
       {/* Subline */}
       <div
         style={{
-          fontSize: '26px',
+          fontSize: '24px',
           color: '#8b7fb8',
           textAlign: 'center',
           maxWidth: '720px',
@@ -89,12 +89,12 @@ export default function OGImage() {
           marginBottom: '52px',
         }}
       >
-        Zero backend. No subscription. Submissions go straight to your Google Drive.
+        AI designs the structure. We provision it. Forms, content, gallery, and more — yours forever.
       </div>
 
       {/* Pill tags */}
       <div style={{ display: 'flex', gap: '14px' }}>
-        {['Free Forever', 'Google Drive', 'Copy-Paste Embed'].map((tag) => (
+        {['AI-Powered', 'Google Drive', 'Zero Server'].map((tag) => (
           <div
             key={tag}
             style={{

@@ -1270,7 +1270,7 @@ lib/sheets.ts (pre-configured):
       {/* Brand decision */}
       <div className="flex flex-col gap-3">
         <CSection title="The brand decision — separate brand or hard pivot?"
-          sub="rgforms.com positions as form backends. This product is a website builder. They attract different customers." />
+          sub="sheetspin.com positions as form backends. This product is a website builder. They attract different customers." />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <CCard dark>
             <CLabel>Option A — Separate brand (recommended)</CLabel>

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import FoundationPlan from '@/components/FoundationPlan';
 
 export const metadata: Metadata = {
-  title: 'Business Plan v5 — RG Forms',
+  title: 'Business Plan v5 — Sheetspin',
   description: 'The real answer — provisioning utility + productized service.',
   robots: { index: false, follow: false },
 };
