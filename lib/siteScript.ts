@@ -4,27 +4,16 @@
  * Reads its own configuration from the hidden _manifest tab at runtime.
  */
 
-export function generateAppsScriptJson(hasAssetTabs: boolean, hasFormTabs: boolean) {
-  const oauthScopes = [
-    // Only the spreadsheet this script is bound to — not all spreadsheets
-    'https://www.googleapis.com/auth/spreadsheets.currentonly',
-  ];
-
-  if (hasAssetTabs) {
-    // Read files from the provisioned Drive asset folders (read-only)
-    oauthScopes.push('https://www.googleapis.com/auth/drive.readonly');
-  }
-
-  if (hasFormTabs) {
-    // Send notification emails on form submission (send-only, not full Gmail access)
-    oauthScopes.push('https://www.googleapis.com/auth/gmail.send');
-  }
-
+export function generateAppsScriptJson() {
   return {
     timeZone: 'America/New_York',
     exceptionLogging: 'STACKDRIVER',
     runtimeVersion: 'V8',
-    oauthScopes,
+    oauthScopes: [
+      'https://www.googleapis.com/auth/spreadsheets.currentonly',
+      'https://www.googleapis.com/auth/drive.readonly',
+      'https://www.googleapis.com/auth/gmail.send',
+    ],
     webapp: {
       executeAs: 'USER_DEPLOYING',
       access: 'ANYONE_ANONYMOUS',
@@ -50,24 +39,24 @@ var CONFIG = (function () {
 function doGet(e) {
   var token = e.parameter.token;
 
-  // No token at all — friendly health-check (e.g. after authorization redirect)
+  // No token — friendly health-check (shown after authorization redirect)
   if (!token) {
     return jsonResponse({ status: 'ok', message: 'API is live. Pass token and tab parameters to query data.' });
   }
 
   if (token !== CONFIG.script_token) {
-    return jsonResponse({ error: 'Unauthorized' });
+    return jsonResponse({ result: 'error', error: 'Unauthorized' });
   }
 
   var tabName = e.parameter.tab;
-  if (!tabName) return jsonResponse({ error: 'tab parameter required' });
+  if (!tabName) return jsonResponse({ result: 'error', error: 'tab parameter required' });
 
   var tabDef = findTab(tabName);
-  if (!tabDef) return jsonResponse({ error: 'Unknown tab: ' + tabName });
+  if (!tabDef) return jsonResponse({ result: 'error', error: 'Unknown tab: ' + tabName });
 
   // Asset tab — serve files from Drive subfolder
   if (tabDef.type === 'asset') {
-    if (!tabDef.drive_folder_id) return jsonResponse({ error: 'No Drive folder for: ' + tabName });
+    if (!tabDef.drive_folder_id) return jsonResponse({ result: 'error', error: 'No Drive folder for: ' + tabName });
     var folder = DriveApp.getFolderById(tabDef.drive_folder_id);
     var files = [];
     var it = folder.getFiles();
@@ -90,7 +79,7 @@ function doGet(e) {
   }
 
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(tabName);
-  if (!sheet) return jsonResponse({ error: 'Tab not found: ' + tabName });
+  if (!sheet) return jsonResponse({ result: 'error', error: 'Tab not found: ' + tabName });
 
   var values = sheet.getDataRange().getValues();
   if (values.length === 0) return jsonResponse(tabDef.type === 'key_value' ? {} : []);
@@ -104,13 +93,15 @@ function doGet(e) {
     return jsonResponse(obj);
   }
 
-  // Row-based tab
+  // Row-based tab (rows or form — read-only GET, strips internal _hp col)
   var headers = values[0];
   var rows = [];
   for (var k = 1; k < values.length; k++) {
     var row = {};
     for (var l = 0; l < headers.length; l++) {
-      row[String(headers[l])] = values[k][l];
+      if (String(headers[l]) !== '_hp') {
+        row[String(headers[l])] = values[k][l];
+      }
     }
     rows.push(row);
   }
@@ -121,33 +112,61 @@ function doPost(e) {
   try {
     var body = JSON.parse(e.postData.contents);
     if (!body.token || body.token !== CONFIG.script_token) {
-      return jsonResponse({ error: 'Unauthorized' });
+      return jsonResponse({ result: 'error', error: 'Unauthorized' });
     }
 
     var tabDef = findTab(body.tab);
     if (!tabDef || tabDef.type !== 'form') {
-      return jsonResponse({ error: 'Invalid form tab: ' + body.tab });
+      return jsonResponse({ result: 'error', error: 'Invalid form tab: ' + body.tab });
+    }
+
+    // Honeypot check — silently accept (looks like success) to confuse bots
+    var formConf = tabDef.formConfig || {};
+    var fields = body.fields || {};
+    if (formConf.enableHoneypot && fields['_hp']) {
+      return jsonResponse({ result: 'success' });
     }
 
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(body.tab);
-    if (!sheet) return jsonResponse({ error: 'Tab not found: ' + body.tab });
+    if (!sheet) return jsonResponse({ result: 'error', error: 'Tab not found: ' + body.tab });
 
+    // Append row
     var headers = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), 1)).getValues()[0];
     var rowData = headers.map(function (h) {
-      if (String(h) === 'submitted_at') return new Date().toISOString();
-      return body.fields ? (body.fields[String(h)] || '') : '';
+      var key = String(h);
+      if (key === 'submitted_at') return new Date().toISOString();
+      if (key === '_hp') return '';
+      return fields[key] !== undefined ? String(fields[key]) : '';
     });
     sheet.appendRow(rowData);
 
-    if (CONFIG.notification_email) {
-      var fields = body.fields || {};
-      var lines = Object.keys(fields).map(function (k) { return k + ': ' + fields[k]; }).join('\\n');
-      MailApp.sendEmail(CONFIG.notification_email, 'New ' + tabDef.label + ' submission', lines);
+    // Email notification
+    var toEmail = (formConf.notifyEmail) || CONFIG.notification_email;
+    if (toEmail) {
+      var displayKeys = Object.keys(fields).filter(function (k) { return k !== '_hp'; });
+      var lines = displayKeys.map(function (k) { return k + ': ' + fields[k]; }).join('\\n');
+      var subject = formConf.emailSubject || ('New ' + tabDef.label + ' submission');
+      var opts = {};
+      if (formConf.ccEmails && formConf.ccEmails.length) opts.cc = formConf.ccEmails.join(',');
+      if (formConf.bccEmails && formConf.bccEmails.length) opts.bcc = formConf.bccEmails.join(',');
+      if (formConf.senderName) opts.name = formConf.senderName;
+      if (formConf.replyToField && fields[formConf.replyToField]) {
+        opts.replyTo = String(fields[formConf.replyToField]);
+      }
+      try {
+        if (Object.keys(opts).length > 0) {
+          GmailApp.sendEmail(toEmail, subject, lines, opts);
+        } else {
+          MailApp.sendEmail(toEmail, subject, lines);
+        }
+      } catch (emailErr) {
+        // don't fail the submission if email fails
+      }
     }
 
-    return jsonResponse({ success: true });
+    return jsonResponse({ result: 'success' });
   } catch (err) {
-    return jsonResponse({ error: err.message });
+    return jsonResponse({ result: 'error', error: err.message });
   }
 }
 

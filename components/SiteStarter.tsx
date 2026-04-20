@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '@/context/AppContext';
 import { createSite, SITE_PROVISION_STEPS } from '@/lib/createSite';
 import type { CreateSiteInput } from '@/lib/createSite';
-import type { ProjectTemplate, SiteStarterModuleProgress } from '@/types';
+import type { ProjectTemplate, SiteStarterModuleProgress, SiteTabFormConfig } from '@/types';
+import FormFieldEditor, { DEFAULT_FORM_CONFIG, DEFAULT_NEWSLETTER_CONFIG } from '@/components/FormFieldEditor';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -16,6 +17,7 @@ interface ProposedTab {
   nameSuffix: string;
   description: string;
   enabled: boolean;
+  formConfig?: SiteTabFormConfig;
 }
 
 type FlowStep =
@@ -123,46 +125,82 @@ function BackButton({ label, onClick }: { label?: string; onClick: () => void })
   );
 }
 
-function TabCard({ tab, onToggle }: { tab: ProposedTab; onToggle: () => void }) {
+function TabCard({
+  tab, onToggle, onFormConfigChange,
+}: {
+  tab: ProposedTab;
+  onToggle: () => void;
+  onFormConfigChange: (cfg: SiteTabFormConfig) => void;
+}) {
+  const [showFields, setShowFields] = useState(false);
   const color  = colorFor(tab.moduleType);
   const locked = tab.moduleType === 'siteconfig';
+  const isForm = tab.moduleType === 'form' || tab.moduleType === 'newsletter';
 
   return (
-    <button
-      type="button"
-      onClick={locked ? undefined : onToggle}
-      disabled={locked}
-      className="text-left w-full rounded-xl p-4 flex items-start gap-4 transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+    <div
+      className="rounded-xl overflow-hidden"
       style={{
-        background: tab.enabled ? 'var(--color-surface)' : 'var(--color-surface-2)',
-        border:     `1px solid ${tab.enabled ? 'var(--color-border)' : 'transparent'}`,
-        opacity:    tab.enabled ? 1 : 0.45,
-        cursor:     locked ? 'default' : 'pointer',
+        background:   tab.enabled ? 'var(--color-surface)' : 'var(--color-surface-2)',
+        border:       `1px solid ${tab.enabled ? 'var(--color-border)' : 'transparent'}`,
+        opacity:      tab.enabled ? 1 : 0.45,
       }}
     >
-      <div
-        className="shrink-0 mt-0.5 w-10 h-5 rounded-full relative transition-colors"
-        style={{ background: tab.enabled ? color : 'var(--color-border)' }}
-      >
-        <div
-          className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all"
-          style={{ left: tab.enabled ? 'calc(100% - 1.1rem)' : '0.125rem' }}
-        />
-      </div>
-      <div className="flex flex-col gap-1 flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{tab.label}</p>
-          <span
-            className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide"
-            style={{ color, background: alpha(color, 0.10), border: `1px solid ${alpha(color, 0.28)}` }}
-          >
-            {tab.moduleType}
-          </span>
-          {locked && <span className="text-[10px]" style={{ color: 'var(--color-subtle)' }}>required</span>}
+      <div className="flex items-start gap-4 p-4">
+        {/* Toggle */}
+        <button
+          type="button"
+          onClick={locked ? undefined : onToggle}
+          disabled={locked}
+          className="shrink-0 mt-0.5 w-10 h-5 rounded-full relative transition-colors focus:outline-none"
+          style={{ background: tab.enabled ? color : 'var(--color-border)', cursor: locked ? 'default' : 'pointer' }}
+        >
+          <div
+            className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all"
+            style={{ left: tab.enabled ? 'calc(100% - 1.1rem)' : '0.125rem' }}
+          />
+        </button>
+        <div className="flex flex-col gap-1 flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{tab.label}</p>
+            <span
+              className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide"
+              style={{ color, background: alpha(color, 0.10), border: `1px solid ${alpha(color, 0.28)}` }}
+            >
+              {tab.moduleType}
+            </span>
+            {locked && <span className="text-[10px]" style={{ color: 'var(--color-subtle)' }}>required</span>}
+          </div>
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{tab.description}</p>
         </div>
-        <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{tab.description}</p>
+        {/* Edit fields button for form tabs */}
+        {isForm && tab.enabled && (
+          <button
+            type="button"
+            onClick={() => setShowFields((v) => !v)}
+            className="shrink-0 text-[10px] font-semibold uppercase tracking-wide px-2 py-1 rounded transition-colors"
+            style={{
+              color:      showFields ? 'var(--color-accent)' : 'var(--color-muted)',
+              background: showFields ? 'var(--color-accent-subtle)' : 'transparent',
+              border:     `1px solid ${showFields ? 'var(--color-accent-border)' : 'var(--color-border)'}`,
+            }}
+          >
+            Fields
+          </button>
+        )}
       </div>
-    </button>
+      {/* Form field editor */}
+      {isForm && tab.enabled && showFields && tab.formConfig && (
+        <div
+          className="px-4 pb-4 pt-0"
+          style={{ borderTop: '1px solid var(--color-border)' }}
+        >
+          <div className="pt-3">
+            <FormFieldEditor config={tab.formConfig} onChange={onFormConfigChange} />
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -220,7 +258,13 @@ export default function SiteStarter() {
         return;
       }
 
-      setTabs((data.tabs ?? []).map((t) => ({ ...t, enabled: true })));
+      setTabs((data.tabs ?? []).map((t) => ({
+        ...t,
+        enabled: true,
+        formConfig: (t.moduleType === 'form' || t.moduleType === 'newsletter')
+          ? (t.moduleType === 'newsletter' ? { ...DEFAULT_NEWSLETTER_CONFIG } : { ...DEFAULT_FORM_CONFIG })
+          : undefined,
+      })));
       setStep('review');
     } catch {
       setErrorMsg('Network error — please check your connection and try again.');
@@ -478,6 +522,9 @@ export default function SiteStarter() {
                     onToggle={() =>
                       setTabs((prev) => prev.map((t) => t.name === tab.name ? { ...t, enabled: !t.enabled } : t))
                     }
+                    onFormConfigChange={(cfg) =>
+                      setTabs((prev) => prev.map((t) => t.name === tab.name ? { ...t, formConfig: cfg } : t))
+                    }
                   />
                 ))}
               </div>
@@ -489,6 +536,7 @@ export default function SiteStarter() {
                   label:      t.label,
                   moduleType: t.moduleType,
                   nameSuffix: t.nameSuffix,
+                  formConfig: t.formConfig,
                 })))}
                 disabled={enabledTabs.length === 0 || launching}
                 className="py-3 rounded-xl text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-40 disabled:cursor-not-allowed"

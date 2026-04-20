@@ -341,6 +341,16 @@ export interface SiteStarterResult {
 
 // ─── Site Manifest Types (v5 one-Sheet architecture) ─────────────────────────
 
+export interface SiteTabFormConfig {
+  fields: FormField[];
+  ccEmails?: string[];
+  bccEmails?: string[];
+  emailSubject?: string;
+  senderName?: string;
+  replyToField?: string;
+  enableHoneypot?: boolean;
+}
+
 export interface SiteTab {
   name:           string;
   label:          string;
@@ -348,6 +358,7 @@ export interface SiteTab {
   moduleType:     string;
   nameSuffix:     string;
   drive_folder_id?: string;
+  formConfig?:    SiteTabFormConfig;
 }
 
 export interface SiteManifest {
@@ -489,6 +500,7 @@ export type AppAction =
   | { type: 'SET_SITE_MANIFEST'; payload: SiteManifest }
   | { type: 'SITE_MANIFEST_ERROR'; payload: string }
   | { type: 'OPEN_SITE'; payload: SiteManifest }
+  | { type: 'UPDATE_SITE_MANIFEST'; payload: SiteManifest }
   // Project actions
   | { type: 'SELECT_PROJECT'; payload: ProjectSummary }
   | { type: 'BACK_TO_PROJECTS' }

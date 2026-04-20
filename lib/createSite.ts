@@ -20,11 +20,15 @@ import {
   styleHeaderRow,
 } from '@/lib/core/provisionHelpers';
 import { generateSiteScript, generateAppsScriptJson } from './siteScript';
-import type { SiteManifest, SiteTab } from '@/types';
+import type { SiteManifest, SiteTab, SiteTabFormConfig } from '@/types';
+
+function toFieldKey(label: string): string {
+  return label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'field';
+}
 
 // ─── Tab type mapping ─────────────────────────────────────────────────────────
 
-const TAB_TYPE_MAP: Record<string, SiteTab['type']> = {
+export const TAB_TYPE_MAP: Record<string, SiteTab['type']> = {
   siteconfig:  'key_value',
   content:     'rows',
   testimonial: 'rows',
@@ -38,11 +42,11 @@ const TAB_TYPE_MAP: Record<string, SiteTab['type']> = {
 
 // ─── Default column / field definitions ──────────────────────────────────────
 
-const KEY_VALUE_FIELDS: Record<string, string[]> = {
+export const KEY_VALUE_FIELDS: Record<string, string[]> = {
   siteconfig: ['site_name', 'tagline', 'phone', 'email', 'address', 'hours_weekday', 'hours_weekend', 'about'],
 };
 
-const ROW_COLUMNS: Record<string, string[]> = {
+export const ROW_COLUMNS: Record<string, string[]> = {
   content:     ['title', 'description', 'tags', 'link', 'slug', 'published'],
   testimonial: ['name', 'quote', 'role', 'company', 'rating', 'featured'],
   calendar:    ['title', 'date', 'location', 'description', 'slug'],
@@ -50,7 +54,7 @@ const ROW_COLUMNS: Record<string, string[]> = {
   menu:        ['name', 'description', 'price', 'category', 'image_url'],
 };
 
-const FORM_COLUMNS: Record<string, string[]> = {
+export const FORM_COLUMNS: Record<string, string[]> = {
   form:       ['submitted_at', 'name', 'email', 'phone', 'message'],
   newsletter: ['submitted_at', 'email', 'source'],
 };
@@ -158,10 +162,11 @@ export interface CreateSiteInput {
   notifyEmail:   string;
   googleAccount: string;
   tabs: Array<{
-    name:       string;
-    label:      string;
-    moduleType: string;
-    nameSuffix: string;
+    name:        string;
+    label:       string;
+    moduleType:  string;
+    nameSuffix:  string;
+    formConfig?: SiteTabFormConfig;
   }>;
 }
 
@@ -201,6 +206,7 @@ export async function createSite(
     const type = TAB_TYPE_MAP[t.moduleType] ?? 'rows';
     const tab: SiteTab = { name: t.name, label: t.label, type, moduleType: t.moduleType, nameSuffix: t.nameSuffix };
     if (type === 'asset' && assetFolderIds[t.name]) tab.drive_folder_id = assetFolderIds[t.name];
+    if (type === 'form' && t.formConfig) tab.formConfig = t.formConfig;
     return tab;
   });
 
@@ -236,7 +242,11 @@ export async function createSite(
       } else if (tab.type === 'rows') {
         rows = [ROW_COLUMNS[tab.moduleType] ?? ['title', 'description']];
       } else if (tab.type === 'form') {
-        rows = [FORM_COLUMNS[tab.moduleType] ?? ['submitted_at', 'name', 'email', 'message']];
+        if (tab.formConfig?.fields?.length) {
+          rows = [['submitted_at', ...tab.formConfig.fields.map((f) => toFieldKey(f.label))]];
+        } else {
+          rows = [FORM_COLUMNS[tab.moduleType] ?? ['submitted_at', 'name', 'email', 'message']];
+        }
       }
 
       await writeTabData(token, sheetId, tab.name, rows);
@@ -271,9 +281,7 @@ export async function createSite(
 
   try {
     ({ scriptId } = await createScriptProject(token, `${siteName} — Website API`, sheetId));
-    const hasAssetTabs = resolvedTabs.some((t) => t.type === 'asset');
-    const hasFormTabs  = resolvedTabs.some((t) => t.type === 'form');
-    await uploadCode(token, scriptId, generateSiteScript(), generateAppsScriptJson(hasAssetTabs, hasFormTabs));
+    await uploadCode(token, scriptId, generateSiteScript(), generateAppsScriptJson());
     onStep('script', 'complete');
   } catch (err) {
     if (err instanceof AppsScriptApiDisabledError) {

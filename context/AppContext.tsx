@@ -373,6 +373,8 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'OPEN_SITE':
     case 'SET_SITE_MANIFEST':
       return { ...state, screen: 'site-kit', siteManifest: action.payload, siteManifestError: null };
+    case 'UPDATE_SITE_MANIFEST':
+      return { ...state, siteManifest: action.payload };
     case 'SITE_MANIFEST_ERROR':
       return { ...state, screen: 'site-starter', siteManifestError: action.payload };
 
