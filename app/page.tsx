@@ -27,6 +27,7 @@ import SiteKit from '@/components/SiteKit'
 import SiteSelect from '@/components/SiteSelect'
 import Link from 'next/link'
 import { GoogleSheetsIcon, GoogleAppsScriptIcon, GoogleDriveIcon } from '@/components/google-icons'
+import { Sparkles, Layers, Bot, LogIn, MessageSquare, Rocket, RefreshCw } from 'lucide-react'
 
 export default function Page() {
   const { state } = useApp()
@@ -73,8 +74,8 @@ export default function Page() {
         className="absolute inset-0 pointer-events-none"
         style={{
           background: `
-            radial-gradient(ellipse at 50% 100%, oklch(0.07 0.015 285 / 0.9) 0%, transparent 60%),
-            radial-gradient(ellipse at 50% 0%, oklch(0.07 0.015 285 / 0.6) 0%, transparent 50%)
+            radial-gradient(ellipse 80% 50% at 50% 110%, oklch(0.65 0.22 285 / 0.07) 0%, transparent 70%),
+            radial-gradient(ellipse at 50% 0%, oklch(0.07 0.015 285 / 0.7) 0%, transparent 50%)
           `,
         }}
         aria-hidden="true"
@@ -82,7 +83,7 @@ export default function Page() {
       <div className="absolute inset-0 hero-grid pointer-events-none" aria-hidden="true" />
 
       <motion.section
-        className="relative z-10 w-full max-w-xl flex flex-col items-center text-center gap-8"
+        className="relative z-10 w-full max-w-xl flex flex-col items-center text-center gap-10"
         variants={heroContainer}
         initial="hidden"
         animate="visible"
@@ -97,6 +98,7 @@ export default function Page() {
               borderColor: 'var(--color-accent-border)',
               color: 'var(--color-accent)',
               fontFamily: 'var(--font-mono)',
+              letterSpacing: '0.04em',
             }}
           >
             <span className="w-1.5 h-1.5 rounded-full animate-glow-pulse" style={{ background: 'var(--color-accent)' }} />
@@ -111,80 +113,110 @@ export default function Page() {
           </h1>
 
           <p className="text-xl sm:text-2xl font-semibold leading-snug" style={{ color: 'var(--color-text)' }}>
-            Your website&apos;s backend,{' '}
-            <span style={{ color: 'var(--color-muted)' }}>spun up in minutes</span>
+            Spin up your website&apos;s backend.{' '}
+            <span style={{ color: 'var(--color-muted)' }}>In minutes.</span>
           </p>
 
           <p className="text-base leading-relaxed max-w-md" style={{ color: 'var(--color-muted)' }}>
             Describe your site. AI spins a complete Google Sheet + live API into your Drive —
-            forms, content, gallery, newsletter, and more. No server, no subscription, no lock-in.
+            forms, content, gallery, newsletter, and more. No server. No subscription. No lock-in.
           </p>
         </motion.div>
 
         {/* ── CTA ──────────────────────────────────────────────────────────── */}
-        <motion.div variants={scaleIn}>
+        <motion.div variants={scaleIn} className="-mt-2">
           <AuthButton />
         </motion.div>
 
         {/* ── Built on ─────────────────────────────────────────────────────── */}
-        <motion.div variants={fadeUp} className="flex items-center gap-4">
-          <span className="text-xs" style={{ color: 'var(--color-subtle)' }}>Built on</span>
-          <div className="flex items-center gap-3">
-            <span title="Google Sheets"><GoogleSheetsIcon /></span>
-            <span title="Google Drive"><GoogleDriveIcon /></span>
-            <span title="Google Apps Script"><GoogleAppsScriptIcon /></span>
+        <motion.div variants={fadeUp} className="flex items-center gap-3 -mt-4">
+          <span className="text-xs tracking-wide" style={{ color: 'var(--color-subtle)' }}>Built on</span>
+          <div
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg border"
+            style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+          >
+            <span title="Google Sheets" className="opacity-80 hover:opacity-100 transition-opacity"><GoogleSheetsIcon /></span>
+            <span className="mx-1.5 text-[10px]" style={{ color: 'var(--color-border)' }}>·</span>
+            <span title="Google Drive" className="opacity-80 hover:opacity-100 transition-opacity"><GoogleDriveIcon /></span>
+            <span className="mx-1.5 text-[10px]" style={{ color: 'var(--color-border)' }}>·</span>
+            <span title="Google Apps Script" className="opacity-80 hover:opacity-100 transition-opacity"><GoogleAppsScriptIcon /></span>
           </div>
-          <span className="text-xs" style={{ color: 'var(--color-subtle)' }}>— entirely yours</span>
+          <span className="text-xs tracking-wide" style={{ color: 'var(--color-subtle)' }}>— entirely yours</span>
         </motion.div>
 
         {/* ── Feature trio ─────────────────────────────────────────────────── */}
         <motion.div variants={fadeUp} className="w-full grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
-          {[
-            { icon: '🤖', title: 'AI designs the structure', body: 'Describe in a sentence. Get modules, fields, and settings — reviewed and launched in minutes.' },
-            { icon: '⚡', title: 'Live without redeploying', body: 'Edit modules any time. The script reads a live manifest — your endpoint never moves.' },
-            { icon: '🧠', title: 'Your AI gets the whole sheet', body: 'Export a CLAUDE.md. Your Claude agent instantly knows your full schema and API.' },
-          ].map(({ icon, title, body }) => (
+          {([
+            {
+              icon: <Sparkles size={18} />,
+              title: 'AI designs the structure',
+              body: 'Describe in a sentence. Get modules, fields, and settings — reviewed and ready to launch.',
+            },
+            {
+              icon: <Layers size={18} />,
+              title: 'Live without redeploying',
+              body: 'Edit modules any time. The script reads a live manifest — your endpoint never moves.',
+            },
+            {
+              icon: <Bot size={18} />,
+              title: 'Your AI knows the whole sheet',
+              body: 'Export a CLAUDE.md. Your Claude agent gets the full schema and API instantly.',
+            },
+          ] as const).map(({ icon, title, body }) => (
             <div
               key={title}
-              className="flex flex-col gap-2 rounded-xl border p-4"
+              className="flex flex-col gap-3 rounded-xl border p-5"
               style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
             >
-              <span className="text-xl leading-none">{icon}</span>
-              <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{title}</p>
+              <div
+                className="flex items-center justify-center w-9 h-9 rounded-lg shrink-0"
+                style={{
+                  background: 'var(--color-accent-subtle)',
+                  border: '1px solid var(--color-accent-border)',
+                  color: 'var(--color-accent)',
+                  boxShadow: '0 0 16px var(--color-accent-glow)',
+                }}
+              >
+                {icon}
+              </div>
+              <p className="text-sm font-semibold leading-snug" style={{ color: 'var(--color-text)' }}>{title}</p>
               <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{body}</p>
             </div>
           ))}
         </motion.div>
 
         {/* ── How it works ─────────────────────────────────────────────────── */}
-        <motion.div variants={fadeUp} className="w-full flex flex-col gap-3 text-left">
+        <motion.div variants={fadeUp} className="w-full flex flex-col gap-4">
           <p className="text-xs font-semibold uppercase tracking-widest text-center" style={{ color: 'var(--color-subtle)' }}>
             How it works
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {[
-              { n: '1', label: 'Sign in', sub: 'Google OAuth — token stays in memory only' },
-              { n: '2', label: 'Describe your site', sub: 'AI proposes modules and fields' },
-              { n: '3', label: 'We spin it up', sub: 'Sheet + folder + live API endpoint' },
-              { n: '4', label: 'Keep spinning', sub: 'Add modules, seed data, no redeploy' },
-            ].map(({ n, label, sub }) => (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            {([
+              { n: 1, icon: <LogIn size={14} />, label: 'Sign in', sub: 'Google OAuth — token stays in memory only' },
+              { n: 2, icon: <MessageSquare size={14} />, label: 'Describe your site', sub: 'AI proposes the modules and fields' },
+              { n: 3, icon: <Rocket size={14} />, label: 'We spin it up', sub: 'Sheet, folder, and live API endpoint' },
+              { n: 4, icon: <RefreshCw size={14} />, label: 'Keep spinning', sub: 'Add modules, seed data, no redeploy ever' },
+            ] as const).map(({ n, icon, label, sub }) => (
               <div
                 key={n}
-                className="flex flex-col gap-1.5 rounded-xl border p-3"
+                className="relative flex flex-col gap-2 rounded-xl border p-4 overflow-hidden"
                 style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
               >
-                <span
-                  className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold self-start"
-                  style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-accent)' }}
-                >
-                  {n}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span
+                    className="flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold shrink-0"
+                    style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-accent)' }}
+                  >
+                    {n}
+                  </span>
+                  <span style={{ color: 'var(--color-accent)', opacity: 0.7 }}>{icon}</span>
+                </div>
                 <p className="text-xs font-semibold leading-snug" style={{ color: 'var(--color-text)' }}>{label}</p>
                 <p className="text-[11px] leading-relaxed" style={{ color: 'var(--color-muted)' }}>{sub}</p>
               </div>
             ))}
           </div>
-          <Link href="/how-it-works" className="self-center text-xs font-medium mt-1" style={{ color: 'var(--color-accent)' }}>
+          <Link href="/how-it-works" className="self-center text-xs font-medium mt-0.5 hover:underline transition-colors" style={{ color: 'var(--color-accent)' }}>
             Full walkthrough →
           </Link>
         </motion.div>
@@ -208,13 +240,14 @@ export default function Page() {
         </motion.div>
 
         {/* ── Trust note ───────────────────────────────────────────────────── */}
-        <motion.p className="text-xs" style={{ color: 'var(--color-subtle)' }} variants={fadeUp}>
-          Your data stays in your Drive. We see nothing. Tokens live in memory only.
+        <motion.p className="text-xs leading-relaxed max-w-xs" style={{ color: 'var(--color-subtle)' }} variants={fadeUp}>
+          Your data stays in your Drive. We see nothing.{' '}
+          OAuth tokens live in memory only and vanish when you close the tab.
         </motion.p>
 
         {/* ── Footer nav ───────────────────────────────────────────────────── */}
         <motion.div
-          className="flex items-center gap-5 flex-wrap justify-center text-xs"
+          className="flex items-center gap-5 flex-wrap justify-center text-xs pb-2"
           variants={fadeUp}
         >
           {[
