@@ -323,12 +323,15 @@ export default function SiteKit() {
               One-time authorization required
             </p>
             <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-              Visit the script URL below once in your browser to authorize the web app. After authorizing you&apos;ll see{' '}
-              <code className="font-mono px-1 rounded text-[11px]" style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
-                {'{'}status: &quot;ok&quot;{'}'}
-              </code>
-              {' '}— that means the API is live and ready.
+              Visit the script URL once in your browser to authorize. You&apos;ll see this response — that means the API is live:
             </p>
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg mt-1"
+              style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--color-success)' }} />
+              <code className="text-[11px] font-mono flex-1" style={{ color: 'var(--color-success)' }}>
+                {`{ "status": "ok", "message": "API is live…" }`}
+              </code>
+            </div>
           </div>
         </div>
 

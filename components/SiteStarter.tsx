@@ -180,7 +180,7 @@ export default function SiteStarter() {
   const [launching, setLaunching]         = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ProjectTemplate | null>(null);
 
-  const siteName    = state.selectedProject?.projectName ?? '';
+  const siteName    = state.siteStarterConfig.siteName;
   const enabledTabs = tabs.filter((t) => t.enabled);
 
   // ── AI flow: propose manifest ──────────────────────────────────────────────
@@ -197,6 +197,7 @@ export default function SiteStarter() {
           description:   description.trim(),
           siteName,
           clarification: extra?.clarification ?? undefined,
+          existingTabs:  state.siteManifest?.tabs ?? undefined,
         }),
       });
 
@@ -281,8 +282,8 @@ export default function SiteStarter() {
       <div className="w-full max-w-2xl flex flex-col gap-8">
 
         <BackButton
-          label="Dashboard"
-          onClick={() => dispatch({ type: 'RESET' })}
+          label="All sites"
+          onClick={() => dispatch({ type: 'RESET_SITE_STARTER' })}
         />
 
         {/* Header */}

@@ -68,10 +68,7 @@ export interface FormSummary {
 
 export type AppScreen =
   | 'landing'
-  // Project layer — shown after sign-in before the dashboard
-  | 'project-select'
-  | 'project-provisioning'
-  | 'dashboard'
+  | 'site-select'
   | 'builder'
   | 'provisioning'
   | 'result'
@@ -491,6 +488,7 @@ export type AppAction =
   | { type: 'RESET_SITE_STARTER' }
   | { type: 'SET_SITE_MANIFEST'; payload: SiteManifest }
   | { type: 'SITE_MANIFEST_ERROR'; payload: string }
+  | { type: 'OPEN_SITE'; payload: SiteManifest }
   // Project actions
   | { type: 'SELECT_PROJECT'; payload: ProjectSummary }
   | { type: 'BACK_TO_PROJECTS' }

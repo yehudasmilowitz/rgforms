@@ -41,6 +41,7 @@ interface RequestBody {
   description: string;
   siteName?: string;
   clarification?: string;
+  existingTabs?: Array<{ name: string; label: string; moduleType: string; nameSuffix: string }>;
 }
 
 export async function POST(req: NextRequest) {
@@ -52,13 +53,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { description, siteName, clarification } = (await req.json()) as RequestBody;
+  const { description, siteName, clarification, existingTabs } = (await req.json()) as RequestBody;
 
   if (!description?.trim()) {
     return NextResponse.json({ error: 'description is required' }, { status: 400 });
   }
 
   let userMessage = `Business: ${description.trim()}\nSite name: ${siteName ?? 'My Business'}`;
+  if (existingTabs && existingTabs.length > 0) {
+    userMessage += `\nExisting tabs already provisioned: ${existingTabs.map((t) => `${t.name} (${t.moduleType})`).join(', ')}`;
+    userMessage += `\nNote: you can suggest keeping, replacing, or adding to these tabs.`;
+  }
   if (clarification?.trim()) {
     userMessage += `\nClarification: ${clarification.trim()}`;
   }

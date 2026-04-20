@@ -247,6 +247,13 @@ export async function createSite(
       }
     }
 
+    // Tag the sheet so we can discover it later without a project registry
+    await fetch(`${DRIVE_API}/${sheetId}`, {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: JSON.stringify({ appProperties: { rgforms_type: 'site', project_slug: projectSlug } }),
+    }).catch(() => {});
+
     onStep('sheet', 'complete');
   } catch (err) {
     await fetch(`${DRIVE_API}/${rootFolderId}?supportsAllDrives=true`, {

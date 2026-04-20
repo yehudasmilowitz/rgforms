@@ -108,7 +108,7 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'SIGN_IN':
       return {
         ...state,
-        screen: 'project-select',
+        screen: 'site-select',
         auth: { user: action.payload.user, accessToken: action.payload.accessToken },
         formConfig: { ...state.formConfig, notifyEmail: action.payload.user.email },
         siteStarterConfig: { ...state.siteStarterConfig, notifyEmail: action.payload.user.email },
@@ -149,7 +149,7 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'RESET':
       return {
         ...initialState,
-        screen: 'dashboard',
+        screen: 'site-select',
         auth: state.auth,
         formConfig: { ...DEFAULT_FORM_CONFIG, notifyEmail: state.auth.user?.email ?? '' },
         siteStarterConfig: { ...DEFAULT_SITE_STARTER_CONFIG, notifyEmail: state.auth.user?.email ?? '' },
@@ -189,7 +189,7 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'RESET_CONTENT':
       return {
         ...state,
-        screen: 'dashboard',
+        screen: 'site-select',
         contentModuleConfig: { ...DEFAULT_CONTENT_CONFIG },
         contentResult: null,
         contentProvisionError: null,
@@ -208,7 +208,7 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'ASSET_PROVISION_ERROR':
       return { ...state, screen: 'asset-builder', assetProvisionError: action.payload };
     case 'RESET_ASSET':
-      return { ...state, screen: 'dashboard', assetBuilderName: '', assetResult: null, assetProvisionError: null };
+      return { ...state, screen: 'site-select', assetBuilderName: '', assetResult: null, assetProvisionError: null };
 
     // ── Site Config modules ───────────────────────────────────────────────────
     case 'GO_TO_SITECONFIG_BUILDER':
@@ -222,7 +222,7 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'SITECONFIG_PROVISION_ERROR':
       return { ...state, screen: 'siteconfig-builder', siteConfigProvisionError: action.payload };
     case 'RESET_SITECONFIG':
-      return { ...state, screen: 'dashboard', siteConfigBuilderName: '', siteConfigResult: null, siteConfigProvisionError: null };
+      return { ...state, screen: 'site-select', siteConfigBuilderName: '', siteConfigResult: null, siteConfigProvisionError: null };
 
     // ── Calendar modules ──────────────────────────────────────────────────────
     case 'GO_TO_CALENDAR_BUILDER':
@@ -236,7 +236,7 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'CALENDAR_PROVISION_ERROR':
       return { ...state, screen: 'calendar-builder', calendarProvisionError: action.payload };
     case 'RESET_CALENDAR':
-      return { ...state, screen: 'dashboard', calendarBuilderName: '', calendarResult: null, calendarProvisionError: null };
+      return { ...state, screen: 'site-select', calendarBuilderName: '', calendarResult: null, calendarProvisionError: null };
 
     // ── Gallery modules ───────────────────────────────────────────────────────
     case 'GO_TO_GALLERY_BUILDER':
@@ -250,7 +250,7 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'GALLERY_PROVISION_ERROR':
       return { ...state, screen: 'gallery-builder', galleryProvisionError: action.payload };
     case 'RESET_GALLERY':
-      return { ...state, screen: 'dashboard', galleryBuilderName: '', galleryResult: null, galleryProvisionError: null };
+      return { ...state, screen: 'site-select', galleryBuilderName: '', galleryResult: null, galleryProvisionError: null };
 
     // ── Generic module actions ────────────────────────────────────────────────
     case 'GO_TO_MODULE_BUILDER':
@@ -318,7 +318,7 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'RESET_MODULE':
       return {
         ...state,
-        screen: 'dashboard',
+        screen: 'site-select',
         activeModuleType: null,
         modules: {
           ...state.modules,
@@ -365,12 +365,13 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'RESET_SITE_STARTER':
       return {
         ...state,
-        screen: 'dashboard',
+        screen: 'site-select',
         siteStarterConfig: { ...DEFAULT_SITE_STARTER_CONFIG, notifyEmail: state.auth.user?.email ?? '' },
         siteStarterProgress: [],
         siteStarterResult: null,
         siteStarterError: null,
       };
+    case 'OPEN_SITE':
     case 'SET_SITE_MANIFEST':
       return { ...state, screen: 'site-kit', siteManifest: action.payload, siteManifestError: null };
     case 'SITE_MANIFEST_ERROR':
@@ -380,32 +381,32 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'SELECT_PROJECT':
       return {
         ...state,
-        screen: 'dashboard',
+        screen: 'site-select',
         selectedProject: action.payload,
         projectCreateName: '',
         projectProvisionError: null,
       };
     case 'BACK_TO_PROJECTS':
-      return { ...state, screen: 'project-select', selectedProject: null };
+      return { ...state, screen: 'site-select', selectedProject: null };
     case 'SET_PROJECT_CREATE_NAME':
       return { ...state, projectCreateName: action.payload };
     case 'START_PROJECT_PROVISIONING':
       return {
         ...state,
-        screen: 'project-provisioning',
+        screen: 'site-select',
         steps: PROJECT_PROVISIONING_STEPS.map(s => ({ ...s, status: 'pending' as const })),
         projectProvisionError: null,
       };
     case 'SET_PROJECT_RESULT':
       return {
         ...state,
-        screen: 'dashboard',
+        screen: 'site-select',
         selectedProject: action.payload,
         projectCreateName: '',
         projectProvisionError: null,
       };
     case 'PROJECT_PROVISION_ERROR':
-      return { ...state, screen: 'project-select', projectProvisionError: action.payload };
+      return { ...state, screen: 'site-select', projectProvisionError: action.payload };
 
     default:
       return state;
