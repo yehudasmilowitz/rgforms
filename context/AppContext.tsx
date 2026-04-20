@@ -335,7 +335,6 @@ function reducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         screen: 'site-starter',
-        siteStarterConfig: { ...DEFAULT_SITE_STARTER_CONFIG, notifyEmail: state.auth.user?.email ?? '' },
         siteStarterProgress: [],
         siteStarterResult: null,
         siteStarterError: null,

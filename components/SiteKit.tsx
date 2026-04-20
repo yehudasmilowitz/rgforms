@@ -312,29 +312,6 @@ export default function SiteKit() {
           </p>
         </div>
 
-        {/* Authorization notice */}
-        <div
-          className="rounded-xl border px-4 py-3 flex items-start gap-3"
-          style={{ background: 'oklch(0.78 0.18 75 / 0.06)', borderColor: 'oklch(0.78 0.18 75 / 0.25)' }}
-        >
-          <span className="text-base shrink-0 mt-0.5">⚠️</span>
-          <div className="flex flex-col gap-0.5">
-            <p className="text-sm font-semibold" style={{ color: 'oklch(0.78 0.18 75)' }}>
-              One-time authorization required
-            </p>
-            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-              Visit the script URL once in your browser to authorize. You&apos;ll see this response — that means the API is live:
-            </p>
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg mt-1"
-              style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
-              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--color-success)' }} />
-              <code className="text-[11px] font-mono flex-1" style={{ color: 'var(--color-success)' }}>
-                {`{ "status": "ok", "message": "API is live…" }`}
-              </code>
-            </div>
-          </div>
-        </div>
-
         {/* API endpoint */}
         <div className="flex flex-col gap-3 p-4 rounded-xl border"
           style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
@@ -358,11 +335,6 @@ export default function SiteKit() {
             <CopyButton text={manifest.script_token} />
           </div>
           <div className="flex items-center gap-4 flex-wrap">
-            <a href={manifest.script_url} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-medium"
-              style={{ color: 'var(--color-accent)' }}>
-              <ExternalLinkIcon /> Open Script (authorize)
-            </a>
             <a href={manifest.sheet_url} target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-xs font-medium"
               style={{ color: 'var(--color-muted)' }}
@@ -389,6 +361,55 @@ export default function SiteKit() {
             {manifest.tabs.map((tab) => (
               <TabPill key={tab.name} tab={tab} />
             ))}
+          </div>
+        </div>
+
+        {/* Authorization step */}
+        <div className="rounded-xl overflow-hidden border" style={{ borderColor: 'oklch(0.78 0.18 75 / 0.30)' }}>
+          {/* Header bar */}
+          <div className="flex items-center gap-3 px-4 py-2.5"
+            style={{ background: 'oklch(0.78 0.18 75 / 0.08)', borderBottom: '1px solid oklch(0.78 0.18 75 / 0.20)' }}>
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'oklch(0.78 0.18 75)' }} />
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'oklch(0.78 0.18 75)' }}>
+              One-time authorization required
+            </p>
+          </div>
+          {/* Body */}
+          <div className="flex flex-col gap-3 px-4 py-4" style={{ background: 'var(--color-surface)' }}>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+              Click the link below to open the script in your browser. Google will ask you to authorize it once.
+              After approving you&apos;ll land on:
+            </p>
+            {/* Simulated browser response */}
+            <div className="rounded-lg overflow-hidden border" style={{ borderColor: 'var(--color-border)' }}>
+              <div className="flex items-center gap-2 px-3 py-1.5" style={{ background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)' }}>
+                <div className="flex gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: 'oklch(0.65 0.20 25)' }} />
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: 'oklch(0.78 0.18 75)' }} />
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: 'oklch(0.72 0.18 145)' }} />
+                </div>
+                <span className="text-[10px] font-mono truncate flex-1" style={{ color: 'var(--color-subtle)' }}>
+                  {manifest.script_url.slice(0, 60)}…
+                </span>
+              </div>
+              <div className="px-4 py-3" style={{ background: 'var(--color-bg)' }}>
+                <pre className="text-[11px] font-mono leading-relaxed" style={{ color: 'var(--color-success)' }}>
+{`{
+  "status": "ok",
+  "message": "API is live. Pass token and tab parameters to query data."
+}`}
+                </pre>
+              </div>
+            </div>
+            <a
+              href={manifest.script_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="self-start inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-colors"
+              style={{ background: 'oklch(0.78 0.18 75 / 0.12)', color: 'oklch(0.78 0.18 75)', border: '1px solid oklch(0.78 0.18 75 / 0.30)' }}
+            >
+              <ExternalLinkIcon /> Open Script to Authorize
+            </a>
           </div>
         </div>
 
