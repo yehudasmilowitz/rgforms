@@ -5,7 +5,7 @@ import { GoogleDriveIcon, GoogleAppsScriptIcon, GoogleProfileIcon } from '@/comp
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'RG Forms collects no user data, runs no backend, and stores nothing. Your OAuth token lives only in browser memory. AI seed data sends column names only. Plain-English privacy policy.',
+  description: 'RG Forms collects no user data, runs no backend, and stores nothing. Your OAuth token lives only in browser memory. Plain-English privacy policy.',
   alternates: { canonical: 'https://rgforms.com/privacy/' },
   robots: { index: false, follow: false },
 };
@@ -206,38 +206,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section>
-          <H2>5. Gemini features</H2>
-          <P>
-            RG Forms offers two optional features that communicate with Google&apos;s Gemini API:
-          </P>
-          <ul className="flex flex-col gap-2 list-none">
-            {[
-              'Site structure proposal: your plain-English site description is sent to Gemini to propose a module layout. This text is entered by you and contains no personal data unless you choose to include it.',
-              'Data seeding: when you request AI-generated sample rows, only the tab\'s column names, module type, and site slug are sent — no actual data, no form submissions, no personal information.',
-            ].map((item) => (
-              <li key={item} className="flex items-start gap-2">
-                <span className="mt-1 shrink-0 text-xs" style={{ color: 'var(--color-accent)' }} aria-hidden="true">▸</span>
-                <span className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>{item}</span>
-              </li>
-            ))}
-          </ul>
-          <P>
-            These requests are made via a server-side API route hosted on the RG Forms domain — the only instance where any data passes through RG Forms infrastructure. The route forwards the prompt to Gemini and returns the response; nothing is logged or stored. Your use of these features is also subject to{' '}
-            <a
-              href="https://policies.google.com/privacy"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: 'var(--color-accent)' }}
-              className="underline hover:no-underline"
-            >
-              Google&apos;s privacy policy
-            </a>
-            .
-          </P>
-        </Section>
-
-        <Section>
-          <H2>6. Your site submissions and data</H2>
+          <H2>5. Your site submissions and data</H2>
           <P>
             After provisioning, visitors who submit forms or query your site&apos;s API do so directly
             from their browser to your Google Apps Script deployment URL. That data goes directly
@@ -252,7 +221,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section>
-          <H2>6. Google&apos;s privacy policy</H2>
+          <H2>6. Google&apos;s Privacy Policy</H2>
           <P>
             By signing in with Google, you are also subject to Google&apos;s own privacy policy and
             terms of service. The resources created in your Google Drive (Sheets, Apps Script)
@@ -274,7 +243,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section>
-          <H2>7. Cookies and tracking</H2>
+          <H2>7. Cookies and Tracking</H2>
           <P>
             RG Forms does not use cookies, local storage, session storage, or any tracking
             pixels. There are no analytics scripts or external sign-in SDKs loaded on this

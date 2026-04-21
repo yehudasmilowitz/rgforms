@@ -72,8 +72,8 @@ export default function TermsPage() {
           </p>
           <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
             RG Forms is free to use. We provide the service as-is with no warranties. You are
-            responsible for the site modules you create, the data collected through them, and
-            any content generated with AI features. Don&apos;t use RG Forms for anything illegal or harmful.
+            responsible for the forms you create and the data collected through them.
+            Don&apos;t use RG Forms for anything illegal or harmful.
           </p>
         </div>
 
@@ -88,7 +88,7 @@ export default function TermsPage() {
         <Section>
           <H2>2. Description of the service</H2>
           <P>
-            RG Forms is a free web application that provisions form backends backed by your own Google Drive infrastructure. A Google Sheet and Google Apps Script deployment serve as your form&apos;s live endpoint. Most operations run entirely in your browser; the site structure proposal and data seeding features route through a lightweight server-side endpoint that forwards requests to Google&apos;s Gemini API and returns the response without storing anything.
+            RG Forms is a free web application that provisions form backends backed by your own Google Drive infrastructure. A Google Sheet and Google Apps Script deployment serve as your form&apos;s live endpoint. All operations run entirely in your browser using your own OAuth token — no data passes through RG Forms servers.
           </P>
           <P>
             The resources created by the Service (Google Sheets, Apps Script projects) are
@@ -164,13 +164,6 @@ export default function TermsPage() {
               </li>
             ))}
           </ul>
-        </Section>
-
-        <Section>
-          <H2>4a. Generated content</H2>
-          <P>
-            RG Forms offers optional features (form structure proposals and data seeding) powered by Google&apos;s Gemini API. You are responsible for reviewing generated content before use. RG Forms makes no guarantees about the accuracy, completeness, or suitability of generated form structures or sample data. You must not rely on generated data as a substitute for real data in production contexts.
-          </P>
         </Section>
 
         <Section>
