@@ -176,6 +176,9 @@ export async function createSite(
 
     onStep('sheet', 'complete');
   } catch (err) {
+    if (sheetId) {
+      await fetch(`${DRIVE_API}/${sheetId}`, { method: 'DELETE', headers: authHeaders(token) }).catch(() => {});
+    }
     await fetch(`${DRIVE_API}/${rootFolderId}?supportsAllDrives=true`, {
       method: 'DELETE', headers: authHeaders(token),
     }).catch(() => {});
