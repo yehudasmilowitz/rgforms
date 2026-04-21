@@ -61,12 +61,11 @@ export default function Page() {
           </h1>
 
           <p className="text-xl sm:text-2xl font-semibold leading-snug" style={{ color: 'var(--color-text)' }}>
-            Contact forms backed by your Google Sheet.{' '}
-            <span style={{ color: 'var(--color-muted)' }}>You get notified by email on every submission.</span>
+            Contact forms straight to your Google Sheet.
           </p>
 
-          <p className="text-sm leading-relaxed max-w-md" style={{ color: 'var(--color-muted)' }}>
-            Live endpoint in under 2 minutes. No server, no monthly fees, no third-party storage — submissions go straight to a Sheet you own.
+          <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+            You get an email on every submission. No server, no monthly fees.
           </p>
         </motion.div>
 
