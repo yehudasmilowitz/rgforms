@@ -1,5 +1,5 @@
 /**
- * Generates all logo/icon variants from sheetspin-new-logo/sheetspin-logo.svg.
+ * Generates all logo/icon variants from rgforms-new-logo/rgforms-logo.svg.
  * Run with: node scripts/generate-logos.mjs
  */
 
@@ -10,7 +10,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
-const src = join(root, 'sheetspin-new-logo', 'sheetspin-logo.svg');
+const src = join(root, 'rgforms-new-logo', 'rgforms-logo.svg');
 const pub = join(root, 'public');
 
 // Copy SVG variants
@@ -42,4 +42,4 @@ await sharp(svgBuffer)
   .toFile(join(pub, 'logo-initial.webp'));
 console.log('✓ public/logo-initial.webp (192x192)');
 
-console.log('\nAll logo assets generated from sheetspin-logo.svg');
+console.log('\nAll logo assets generated from rgforms-logo.svg');

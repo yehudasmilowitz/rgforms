@@ -12,7 +12,7 @@ import SiteKit from '@/components/SiteKit'
 import SiteSelect from '@/components/SiteSelect'
 import Link from 'next/link'
 import { GoogleSheetsIcon, GoogleAppsScriptIcon, GoogleDriveIcon } from '@/components/google-icons'
-import { Sparkles, Layers, Bot, LogIn, MessageSquare, Rocket, RefreshCw } from 'lucide-react'
+import { Shield, Zap, Code2, LogIn, Settings, Rocket, CheckCircle2 } from 'lucide-react'
 
 export default function Page() {
   const { state } = useApp()
@@ -66,24 +66,24 @@ export default function Page() {
             }}
           >
             <span className="w-1.5 h-1.5 rounded-full animate-glow-pulse" style={{ background: 'var(--color-accent)' }} />
-            Zero server · Yours forever
+            Zero server · No monthly fees
           </span>
 
           <h1
             className="text-[var(--text-hero)] font-extrabold tracking-tight leading-none"
             style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-display)' }}
           >
-            Sheetspin
+            RG Forms
           </h1>
 
           <p className="text-xl sm:text-2xl font-semibold leading-snug" style={{ color: 'var(--color-text)' }}>
-            Spin up your website&apos;s backend.{' '}
-            <span style={{ color: 'var(--color-muted)' }}>In minutes.</span>
+            Contact forms that go straight{' '}
+            <span style={{ color: 'var(--color-muted)' }}>to your Google Sheet.</span>
           </p>
 
           <p className="text-base leading-relaxed max-w-lg" style={{ color: 'var(--color-muted)' }}>
-            Describe your site. AI spins a complete Google Sheet + live API into your Drive —
-            forms, content, gallery, newsletter, and more. No server. No subscription. No lock-in.
+            Set up your fields, connect your Google account, and get a live form endpoint in under 2 minutes.
+            Submissions land in a Google Sheet you own — no monthly fees, no third-party storage.
           </p>
         </motion.div>
 
@@ -112,19 +112,19 @@ export default function Page() {
         <motion.div variants={fadeUp} className="w-full grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
           {([
             {
-              icon: <Sparkles size={18} />,
-              title: 'AI designs the structure',
-              body: 'Describe in a sentence. Get modules, fields, and settings — reviewed and ready to launch.',
+              icon: <Zap size={18} />,
+              title: 'Live in 2 minutes',
+              body: 'Sign in, name your form, configure your fields. You get a working API endpoint before you close this tab.',
             },
             {
-              icon: <Layers size={18} />,
-              title: 'Live without redeploying',
-              body: 'Edit modules any time. The script reads a live manifest — your endpoint never moves.',
+              icon: <Shield size={18} />,
+              title: 'Your data, your Drive',
+              body: 'Every submission goes directly to a Google Sheet in your account. We never touch your data.',
             },
             {
-              icon: <Bot size={18} />,
-              title: 'Your AI knows the whole sheet',
-              body: 'Export a CLAUDE.md. Your Claude agent gets the full schema and API instantly.',
+              icon: <Code2 size={18} />,
+              title: 'Drop-in anywhere',
+              body: 'A standard POST endpoint. Works with any framework — Next.js, plain HTML, no-code tools, all of it.',
             },
           ] as const).map(({ icon, title, body }) => (
             <div
@@ -156,10 +156,10 @@ export default function Page() {
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             {([
-              { n: 1, icon: <LogIn size={14} />, label: 'Sign in', sub: 'Google OAuth — token stays in memory only' },
-              { n: 2, icon: <MessageSquare size={14} />, label: 'Describe your site', sub: 'AI proposes the modules and fields' },
-              { n: 3, icon: <Rocket size={14} />, label: 'We spin it up', sub: 'Sheet, folder, and live API endpoint' },
-              { n: 4, icon: <RefreshCw size={14} />, label: 'Keep spinning', sub: 'Add modules, seed data, no redeploy ever' },
+              { n: 1, icon: <LogIn size={14} />, label: 'Sign in with Google', sub: 'OAuth only — token stays in memory, never stored' },
+              { n: 2, icon: <Settings size={14} />, label: 'Configure your form', sub: 'Name your fields and set a notification email' },
+              { n: 3, icon: <Rocket size={14} />, label: 'We provision it', sub: 'Sheet, Drive folder, and live API endpoint' },
+              { n: 4, icon: <CheckCircle2 size={14} />, label: 'Start receiving', sub: 'POST to your endpoint — submissions go to the Sheet' },
             ] as const).map(({ n, icon, label, sub }) => (
               <div
                 key={n}
@@ -185,19 +185,19 @@ export default function Page() {
           </Link>
         </motion.div>
 
-        {/* ── Module types ─────────────────────────────────────────────────── */}
+        {/* ── What you get ─────────────────────────────────────────────────── */}
         <motion.div variants={fadeUp} className="flex flex-col items-center gap-3">
           <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--color-muted)' }}>
-            What you can build
+            What you get
           </p>
           <div className="flex flex-wrap justify-center gap-2">
-            {['Contact Form', 'Newsletter', 'Blog / Content', 'Gallery', 'Calendar', 'Asset Storage', 'Site Config', 'Custom Rows'].map((m) => (
+            {['Email notifications', 'Spam honeypot', 'CC / BCC support', 'Custom fields', 'Multiple forms', 'Submissions in Sheets', 'Apps Script API', 'CLAUDE.md export'].map((item) => (
               <span
-                key={m}
+                key={item}
                 className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border"
                 style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}
               >
-                {m}
+                {item}
               </span>
             ))}
           </div>

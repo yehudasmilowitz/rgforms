@@ -1,12 +1,3 @@
-/**
- * Provisions a complete website backend in the customer's Google account:
- *   - One Google Sheet with a tab per module + hidden _manifest tab
- *   - One Drive root folder; one subfolder per asset tab
- *   - One Apps Script (generic — reads _manifest at runtime, no per-site code)
- *
- * Returns a SiteManifest JSON the customer downloads as their handoff document.
- */
-
 import {
   SHEETS_API,
   SCRIPT_API,
@@ -22,42 +13,9 @@ import {
 import { generateSiteScript, generateAppsScriptJson } from './siteScript';
 import type { SiteManifest, SiteTab, SiteTabFormConfig } from '@/types';
 
-function toFieldKey(label: string): string {
+export function toFieldKey(label: string): string {
   return label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'field';
 }
-
-// ─── Tab type mapping ─────────────────────────────────────────────────────────
-
-export const TAB_TYPE_MAP: Record<string, SiteTab['type']> = {
-  siteconfig:  'key_value',
-  content:     'rows',
-  testimonial: 'rows',
-  gallery:     'asset',
-  form:        'form',
-  calendar:    'rows',
-  faq:         'rows',
-  newsletter:  'form',
-  menu:        'rows',
-};
-
-// ─── Default column / field definitions ──────────────────────────────────────
-
-export const KEY_VALUE_FIELDS: Record<string, string[]> = {
-  siteconfig: ['site_name', 'tagline', 'phone', 'email', 'address', 'hours_weekday', 'hours_weekend', 'about'],
-};
-
-export const ROW_COLUMNS: Record<string, string[]> = {
-  content:     ['title', 'description', 'tags', 'link', 'slug', 'published'],
-  testimonial: ['name', 'quote', 'role', 'company', 'rating', 'featured'],
-  calendar:    ['title', 'date', 'location', 'description', 'slug'],
-  faq:         ['question', 'answer', 'category', 'order'],
-  menu:        ['name', 'description', 'price', 'category', 'image_url'],
-};
-
-export const FORM_COLUMNS: Record<string, string[]> = {
-  form:       ['submitted_at', 'name', 'email', 'phone', 'message'],
-  newsletter: ['submitted_at', 'email', 'source'],
-};
 
 // ─── Progress callback ────────────────────────────────────────────────────────
 
@@ -70,8 +28,8 @@ export type SiteProvisionCallback = (
 ) => void;
 
 export const SITE_PROVISION_STEPS: Array<{ id: SiteProvisionStep; label: string }> = [
-  { id: 'drive',    label: 'Drive folder + asset storage' },
-  { id: 'sheet',    label: 'Google Sheet + tabs' },
+  { id: 'drive',    label: 'Drive folder' },
+  { id: 'sheet',    label: 'Google Sheet' },
   { id: 'script',   label: 'Apps Script project' },
   { id: 'deploy',   label: 'Web app deployment' },
   { id: 'manifest', label: 'Manifest + configuration' },
@@ -161,13 +119,8 @@ export interface CreateSiteInput {
   siteName:      string;
   notifyEmail:   string;
   googleAccount: string;
-  tabs: Array<{
-    name:        string;
-    label:       string;
-    moduleType:  string;
-    nameSuffix:  string;
-    formConfig?: SiteTabFormConfig;
-  }>;
+  formLabel:     string;
+  formConfig:    SiteTabFormConfig;
 }
 
 export async function createSite(
@@ -175,42 +128,26 @@ export async function createSite(
   input: CreateSiteInput,
   onStep: SiteProvisionCallback,
 ): Promise<SiteManifest> {
-  const { siteName, notifyEmail, googleAccount, tabs: inputTabs } = input;
+  const { siteName, notifyEmail, googleAccount, formLabel, formConfig } = input;
   const scriptToken = generateToken();
   const createdAt   = new Date().toISOString();
   const projectSlug = siteName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const tabName     = 'contact';
 
-  // ── 1. Drive: root folder + subfolders for asset tabs ────────────────────
+  // ── 1. Drive: root folder ─────────────────────────────────────────────────
 
   onStep('drive', 'running');
   let rootFolderId = '';
-  const assetFolderIds: Record<string, string> = {};
 
   try {
-    rootFolderId = await createDriveFolder(token, `${siteName} — Assets`);
-
-    for (const tab of inputTabs) {
-      if (TAB_TYPE_MAP[tab.moduleType] === 'asset') {
-        assetFolderIds[tab.name] = await createDriveFolder(token, tab.name, rootFolderId);
-      }
-    }
+    rootFolderId = await createDriveFolder(token, `${siteName} — RG Forms`);
     onStep('drive', 'complete');
   } catch (err) {
     onStep('drive', 'error', (err as Error).message);
     throw err;
   }
 
-  // ── 2. Resolve final tab list ─────────────────────────────────────────────
-
-  const resolvedTabs: SiteTab[] = inputTabs.map((t) => {
-    const type = TAB_TYPE_MAP[t.moduleType] ?? 'rows';
-    const tab: SiteTab = { name: t.name, label: t.label, type, moduleType: t.moduleType, nameSuffix: t.nameSuffix };
-    if (type === 'asset' && assetFolderIds[t.name]) tab.drive_folder_id = assetFolderIds[t.name];
-    if (type === 'form' && t.formConfig) tab.formConfig = t.formConfig;
-    return tab;
-  });
-
-  // ── 3. Sheet: create with all tabs + write seed data ─────────────────────
+  // ── 2. Sheet: one form tab + hidden _manifest ─────────────────────────────
 
   onStep('sheet', 'running');
   let sheetId  = '';
@@ -218,50 +155,25 @@ export async function createSite(
   let tabGids: Record<string, number> = {};
 
   try {
-    const sheetTabs = [
-      ...resolvedTabs
-        .filter((t) => t.type !== 'asset')
-        .map((t) => ({ title: t.name })),
-      { title: '_manifest', hidden: true },
-    ];
-
     ({ sheetId, sheetUrl, tabGids } = await createMultiTabSheet(
       token,
-      `${siteName} — Website Data`,
-      sheetTabs,
+      `${siteName} — Contact Form`,
+      [{ title: tabName }, { title: '_manifest', hidden: true }],
     ));
 
-    for (const tab of resolvedTabs) {
-      if (tab.type === 'asset') continue;
+    const headerCols = formConfig.fields?.length
+      ? ['submitted_at', ...formConfig.fields.map((f) => toFieldKey(f.label))]
+      : ['submitted_at', 'name', 'email', 'phone', 'message'];
 
-      let rows: (string | number | boolean)[][] = [];
+    await writeTabData(token, sheetId, tabName, [headerCols]);
 
-      if (tab.type === 'key_value') {
-        const fields = KEY_VALUE_FIELDS[tab.moduleType] ?? ['name', 'value'];
-        rows = fields.map((f) => [f, '']);
-      } else if (tab.type === 'rows') {
-        rows = [ROW_COLUMNS[tab.moduleType] ?? ['title', 'description']];
-      } else if (tab.type === 'form') {
-        if (tab.formConfig?.fields?.length) {
-          rows = [['submitted_at', ...tab.formConfig.fields.map((f) => toFieldKey(f.label))]];
-        } else {
-          rows = [FORM_COLUMNS[tab.moduleType] ?? ['submitted_at', 'name', 'email', 'message']];
-        }
-      }
+    const gid = tabGids[tabName];
+    if (gid !== undefined) await styleHeaderRow(token, sheetId, gid);
 
-      await writeTabData(token, sheetId, tab.name, rows);
-
-      const gid = tabGids[tab.name];
-      if (gid !== undefined && (tab.type === 'rows' || tab.type === 'form')) {
-        await styleHeaderRow(token, sheetId, gid);
-      }
-    }
-
-    // Tag the sheet so we can discover it later without a project registry
     await fetch(`${DRIVE_API}/${sheetId}`, {
       method: 'PATCH',
       headers: authHeaders(token),
-      body: JSON.stringify({ appProperties: { sheetspin_type: 'site', project_slug: projectSlug } }),
+      body: JSON.stringify({ appProperties: { rgforms_type: 'site', project_slug: projectSlug } }),
     }).catch(() => {});
 
     onStep('sheet', 'complete');
@@ -273,14 +185,14 @@ export async function createSite(
     throw err;
   }
 
-  // ── 4. Script: create project + upload generic code ───────────────────────
+  // ── 3. Script: create project + upload code ───────────────────────────────
 
   onStep('script', 'running');
   let scriptId      = '';
   let deploymentUrl = '';
 
   try {
-    ({ scriptId } = await createScriptProject(token, `${siteName} — Website API`, sheetId));
+    ({ scriptId } = await createScriptProject(token, `${siteName} — Contact Form API`, sheetId));
     await uploadCode(token, scriptId, generateSiteScript(), generateAppsScriptJson());
     onStep('script', 'complete');
   } catch (err) {
@@ -294,16 +206,25 @@ export async function createSite(
 
   onStep('deploy', 'running');
   try {
-    deploymentUrl = await deployWebApp(token, scriptId, `${siteName} Website API`);
+    deploymentUrl = await deployWebApp(token, scriptId, `${siteName} Contact Form API`);
     onStep('deploy', 'complete');
   } catch (err) {
     onStep('deploy', 'error', (err as Error).message);
     throw err;
   }
 
-  // ── 5. Manifest: write to _manifest tab + return ──────────────────────────
+  // ── 4. Manifest: write to _manifest tab ───────────────────────────────────
 
   onStep('manifest', 'running');
+
+  const tab: SiteTab = {
+    name:       tabName,
+    label:      formLabel,
+    type:       'form',
+    moduleType: 'form',
+    nameSuffix: formLabel,
+    formConfig,
+  };
 
   const manifest: SiteManifest = {
     project_slug:          projectSlug,
@@ -316,7 +237,7 @@ export async function createSite(
     drive_root_folder_id:  rootFolderId,
     drive_root_folder_url: `https://drive.google.com/drive/folders/${rootFolderId}`,
     notification_email:    notifyEmail,
-    tabs:                  resolvedTabs,
+    tabs:                  [tab],
   };
 
   try {

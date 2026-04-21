@@ -1,6 +1,6 @@
 # 🔐 Google OAuth Setup Guide
 
-A focused guide to configuring the OAuth consent screen and scopes for sheetspin. This is the part of setup most likely to cause confusion — this document explains exactly what to do and why.
+A focused guide to configuring the OAuth consent screen and scopes for rgforms. This is the part of setup most likely to cause confusion — this document explains exactly what to do and why.
 
 ---
 
@@ -17,33 +17,33 @@ A focused guide to configuring the OAuth consent screen and scopes for sheetspin
 
 ## 1. Why These Scopes Are Needed
 
-sheetspin makes Google API calls directly from the browser using the signed-in user's OAuth token. It needs five OAuth scopes to do its job. Here is what each one does in plain English:
+rgforms makes Google API calls directly from the browser using the signed-in user's OAuth token. It needs five OAuth scopes to do its job. Here is what each one does in plain English:
 
 ### `https://www.googleapis.com/auth/spreadsheets`
 
 **"Create the Google Sheet that stores form submissions."**
 
-When the user clicks "Generate my form", sheetspin creates a new Google Sheet in their Drive with columns matching the form fields they configured. Every future form submission is appended as a new row in that Sheet. This scope is what allows sheetspin to create that spreadsheet and write the initial headers.
+When the user clicks "Generate my form", rgforms creates a new Google Sheet in their Drive with columns matching the form fields they configured. Every future form submission is appended as a new row in that Sheet. This scope is what allows rgforms to create that spreadsheet and write the initial headers.
 
 ### `https://www.googleapis.com/auth/script.projects`
 
 **"Create and deploy the Apps Script that handles form submissions."**
 
-The contact form embed works by posting data to a Google Apps Script web app, which is a small JavaScript function hosted by Google. sheetspin programmatically creates that Apps Script project, uploads the form handler code (`doPost()`), and publishes it as a web app — all via API. This scope grants access to the Apps Script API to do that.
+The contact form embed works by posting data to a Google Apps Script web app, which is a small JavaScript function hosted by Google. rgforms programmatically creates that Apps Script project, uploads the form handler code (`doPost()`), and publishes it as a web app — all via API. This scope grants access to the Apps Script API to do that.
 
 > ⚠️ This scope is classified as **"sensitive"** by Google and requires OAuth verification before non-test users can authorize it. See [Section 5](#5-oauth-verification).
 
 ### `https://www.googleapis.com/auth/drive.file`
 
-**"Create a folder in your Drive to organize form assets. Only sees files sheetspin creates — nothing else."**
+**"Create a folder in your Drive to organize form assets. Only sees files rgforms creates — nothing else."**
 
-sheetspin creates a folder in the user's Google Drive to keep the Sheet and Script organized. The `drive.file` scope is the most limited Drive scope available — it only grants access to files and folders that sheetspin itself created. It cannot read, list, or modify any existing files in the user's Drive.
+rgforms creates a folder in the user's Google Drive to keep the Sheet and Script organized. The `drive.file` scope is the most limited Drive scope available — it only grants access to files and folders that rgforms itself created. It cannot read, list, or modify any existing files in the user's Drive.
 
 ### `https://www.googleapis.com/auth/userinfo.email`
 
 **"Read your email address to pre-fill the notification field."**
 
-When the user signs in, sheetspin fetches their email address from Google and pre-fills the "notification email" field in the form builder. This means the user receives email alerts for form submissions by default, without having to type their own address.
+When the user signs in, rgforms fetches their email address from Google and pre-fills the "notification email" field in the form builder. This means the user receives email alerts for form submissions by default, without having to type their own address.
 
 ### `https://www.googleapis.com/auth/userinfo.profile`
 
@@ -86,7 +86,7 @@ const SCOPES = [
 ### Step-by-Step
 
 1. Go to [console.cloud.google.com](https://console.cloud.google.com)
-2. Select your sheetspin project from the dropdown
+2. Select your rgforms project from the dropdown
 3. Navigate to **APIs & Services** → **OAuth consent screen**
 
 #### App Information Tab
@@ -94,7 +94,7 @@ const SCOPES = [
 | Field | Value |
 |---|---|
 | User Type | **External** (required for non-Workspace users) |
-| App name | `sheetspin` |
+| App name | `rgforms` |
 | User support email | Your email |
 | App logo | Optional |
 | App domain | Your production domain (or `http://localhost:3000` for dev) |
@@ -145,7 +145,7 @@ While your app's publishing status is **"Testing"** (the default), only email ad
 
 > _"Google hasn't verified this app. The app is requesting access to sensitive info in your Google Account."_
 
-Non-test users can still proceed by clicking "Advanced" → "Go to sheetspin (unsafe)", but most people will not do this.
+Non-test users can still proceed by clicking "Advanced" → "Go to rgforms (unsafe)", but most people will not do this.
 
 ### How to Add Test Users
 
@@ -182,7 +182,7 @@ Once you complete OAuth verification (see [Section 5](#5-oauth-verification)) an
 
 Google requires any app that requests "sensitive" or "restricted" OAuth scopes to go through a manual review process before it can be used by the general public. This is to prevent malicious apps from abusing Google APIs.
 
-sheetspin requests `script.projects` (sensitive), which triggers this requirement.
+rgforms requests `script.projects` (sensitive), which triggers this requirement.
 
 ### When Do You Need It?
 
@@ -202,7 +202,7 @@ Your app stays in "Testing" status. Users not on your test list will hit the "Go
 Before submitting:
 - [ ] Your app is deployed to a public URL (production)
 - [ ] You have a privacy policy published at a public URL
-- [ ] Your privacy policy explains that sheetspin does not store user data
+- [ ] Your privacy policy explains that rgforms does not store user data
 - [ ] Your OAuth consent screen has accurate app name, logo, and domain info
 
 **Submission steps:**
@@ -223,10 +223,10 @@ Before submitting:
 **Suggested scope justification text:**
 
 For `https://www.googleapis.com/auth/script.projects`:
-> "sheetspin creates a Google Apps Script web app on behalf of the user to handle HTML form submissions. The Apps Script serves as the serverless backend for the user's contact form — it receives POST requests, appends data to a Google Sheet, and sends email notifications. This scope is required to create, upload code to, and deploy that Apps Script project via the Apps Script API."
+> "rgforms creates a Google Apps Script web app on behalf of the user to handle HTML form submissions. The Apps Script serves as the serverless backend for the user's contact form — it receives POST requests, appends data to a Google Sheet, and sends email notifications. This scope is required to create, upload code to, and deploy that Apps Script project via the Apps Script API."
 
 For `https://www.googleapis.com/auth/spreadsheets`:
-> "sheetspin creates a Google Sheet that stores contact form submissions for the user. The Sheet is created in the user's own Drive and the user has full ownership. This scope is required to create the spreadsheet and write the initial column headers."
+> "rgforms creates a Google Sheet that stores contact form submissions for the user. The Sheet is created in the user's own Drive and the user has full ownership. This scope is required to create the spreadsheet and write the initial column headers."
 
 5. Submit the form and watch for email responses from Google
 6. Respond promptly to any follow-up questions from the review team
@@ -264,7 +264,7 @@ Regardless of verification status, the following is always true:
 - OAuth tokens expire after approximately **1 hour**
 - Tokens are stored **only in browser memory** — never in localStorage, cookies, or sent to any server
 - On page refresh or tab close, the token is discarded and the user must re-authenticate
-- sheetspin never stores any user credentials, tokens, or personal data anywhere
+- rgforms never stores any user credentials, tokens, or personal data anywhere
 - All created assets (Sheets, Scripts, Drive folders) belong to the user in their own Google account
 
-This behavior is by design. sheetspin has zero ongoing access to a user's account after the session ends.
+This behavior is by design. rgforms has zero ongoing access to a user's account after the session ends.

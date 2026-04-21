@@ -27,32 +27,32 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 });
 
-const siteUrl = 'https://sheetspin.com';
+const siteUrl = 'https://rgforms.com';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'Sheetspin — AI-Powered Website Backends in Your Google Drive',
-    template: '%s — Sheetspin',
+    default: 'RG Forms — Contact Forms Backed by Your Google Sheet',
+    template: '%s — RG Forms',
   },
   description:
-    'Describe your site to AI. Get a fully provisioned Google Sheet + Apps Script backend — forms, content, gallery, newsletter, and more. No server, no subscription.',
-  keywords: ['website backend', 'Google Sheets CMS', 'serverless backend', 'AI site builder', 'Google Drive backend', 'no backend', 'contact form', 'Google Apps Script'],
-  authors: [{ name: 'Sheetspin' }],
-  creator: 'Sheetspin',
+    'Create a contact form in minutes. Submissions go directly to a Google Sheet you own — email notifications, spam protection, no monthly fees, no third-party storage.',
+  keywords: ['contact form', 'Google Sheets form', 'form to spreadsheet', 'Google Apps Script form', 'free contact form', 'serverless form backend'],
+  authors: [{ name: 'RG Forms' }],
+  creator: 'RG Forms',
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: siteUrl,
-    siteName: 'Sheetspin',
-    title: 'Sheetspin — AI-Powered Website Backends in Your Google Drive',
+    siteName: 'RG Forms',
+    title: 'RG Forms — Contact Forms Backed by Your Google Sheet',
     description:
-      'Describe your site. AI designs the structure. Everything provisions in your Google Drive — forms, content, gallery, and more. No server, no subscription.',
+      'Set up your fields, connect your Google account, get a live form endpoint. Submissions go straight to a Google Sheet you own. No monthly fees.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sheetspin — AI-Powered Website Backends in Your Google Drive',
-    description: 'Your website\'s entire backend, in your Google Drive. AI-powered, zero server, free forever.',
+    title: 'RG Forms — Contact Forms Backed by Your Google Sheet',
+    description: 'Contact forms that store submissions in your own Google Sheet. Free, no server, zero lock-in.',
   },
   icons: {
     icon: '/favicon.svg',
@@ -92,7 +92,7 @@ export default function RootLayout({
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'SoftwareApplication',
-              name: 'Sheetspin',
+              name: 'RG Forms',
               url: siteUrl,
               applicationCategory: 'DeveloperApplication',
               operatingSystem: 'Web',
@@ -109,7 +109,7 @@ export default function RootLayout({
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'WebSite',
-              name: 'Sheetspin',
+              name: 'RG Forms',
               url: siteUrl,
             }),
           }}
@@ -133,11 +133,11 @@ export default function RootLayout({
             <Link
               href="/"
               className="flex items-center gap-2"
-              aria-label="Sheetspin home"
+              aria-label="RG Forms home"
             >
               <Image
                 src="/favicon.svg"
-                alt="Sheetspin logo"
+                alt="RG Forms logo"
                 width={28}
                 height={28}
                 priority
@@ -146,7 +146,7 @@ export default function RootLayout({
                 className="font-bold tracking-tight text-base"
                 style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-display)' }}
               >
-                Sheetspin
+                RG Forms
               </span>
             </Link>
             <nav className="flex items-center gap-6" aria-label="Main navigation">
@@ -178,7 +178,7 @@ export default function RootLayout({
           className="mt-auto py-6 text-center text-xs"
         >
           <span style={{ color: 'var(--color-text-muted)' }}>
-            Sheetspin is a project of{' '}
+            RG Forms is a project of{' '}
             <a
               href="https://rgmarketinggroup.com/"
               target="_blank"

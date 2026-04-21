@@ -91,7 +91,7 @@ export async function uploadCode(
 export async function deployWebApp(
   token: string,
   scriptId: string,
-  description = 'sheetspin API',
+  description = 'rgforms API',
 ): Promise<string> {
   const version = await apiCall<{ versionNumber: number }>(`${SCRIPT_API}/${scriptId}/versions`, {
     method: 'POST',

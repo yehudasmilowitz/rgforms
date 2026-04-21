@@ -9,7 +9,7 @@ export interface SiteSummary {
 }
 
 export async function listSites(token: string, signal?: AbortSignal): Promise<SiteSummary[]> {
-  const query  = encodeURIComponent("appProperties has { key='sheetspin_type' and value='site' } and trashed=false");
+  const query  = encodeURIComponent("appProperties has { key='rgforms_type' and value='site' } and trashed=false");
   const fields = encodeURIComponent('files(id,name,createdTime,webViewLink)');
   const res = await fetch(
     `${DRIVE_API}?q=${query}&fields=${fields}&orderBy=createdTime desc`,

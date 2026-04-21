@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 export const dynamic = 'force-static';
-export const alt = 'Sheetspin — AI-Powered Website Backends in Your Google Drive';
+export const alt = 'RG Forms — Contact Forms Backed by Your Google Sheet';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -48,7 +48,7 @@ export default function OGImage() {
           width={52}
           height={52}
           style={{ borderRadius: '12px' }}
-          alt="Sheetspin logo"
+          alt="RG Forms logo"
         />
         <span
           style={{
@@ -58,7 +58,7 @@ export default function OGImage() {
             letterSpacing: '-0.5px',
           }}
         >
-          Sheetspin
+          RG Forms
         </span>
       </div>
 
@@ -75,7 +75,7 @@ export default function OGImage() {
           maxWidth: '960px',
         }}
       >
-        Your website&apos;s backend, in your Google Drive
+        Contact forms that go straight to your Google Sheet
       </div>
 
       {/* Subline */}
@@ -89,12 +89,12 @@ export default function OGImage() {
           marginBottom: '52px',
         }}
       >
-        AI designs the structure. We provision it. Forms, content, gallery, and more — yours forever.
+        Live endpoint in 2 minutes. No server, no monthly fees. Submissions go to your Drive.
       </div>
 
       {/* Pill tags */}
       <div style={{ display: 'flex', gap: '14px' }}>
-        {['AI-Powered', 'Google Drive', 'Zero Server'].map((tag) => (
+        {['Google Sheets', 'Email Notifications', 'Zero Server'].map((tag) => (
           <div
             key={tag}
             style={{

@@ -169,7 +169,7 @@ export default function SiteSelect() {
               {state.auth.user?.email}
             </p>
             <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
-              Your sites
+              Your forms
             </h1>
           </div>
           <button
@@ -195,7 +195,7 @@ export default function SiteSelect() {
         {loading ? (
           <div className="flex items-center gap-3 py-8 justify-center">
             <SpinnerIcon />
-            <p className="text-sm" style={{ color: 'var(--color-muted)' }}>Loading your sites…</p>
+            <p className="text-sm" style={{ color: 'var(--color-muted)' }}>Loading your forms…</p>
           </div>
         ) : sites.length > 0 ? (
           <div className="flex flex-col gap-2">
@@ -215,9 +215,9 @@ export default function SiteSelect() {
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2 py-10 text-center">
-            <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>Nothing spinning yet</p>
+            <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>No forms yet</p>
             <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
-              Spin up your first site below.
+              Create your first contact form below.
             </p>
           </div>
         )}
@@ -230,7 +230,7 @@ export default function SiteSelect() {
             className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
             style={{ background: 'var(--color-accent-subtle)', borderColor: 'var(--color-accent-border)', color: 'var(--color-accent)' }}
           >
-            + New Site
+            + New Form
           </button>
         ) : (
           <motion.div
@@ -239,13 +239,13 @@ export default function SiteSelect() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>New site</p>
+            <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>New form</p>
             <input
               type="text"
               value={newSiteName}
               onChange={(e) => setNewSiteName(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleNewSite(); }}
-              placeholder="e.g. Acme Real Estate"
+              placeholder="e.g. Acme Corp"
               autoFocus
               className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
               style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}

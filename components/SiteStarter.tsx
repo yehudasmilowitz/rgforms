@@ -1,113 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { useApp } from '@/context/AppContext';
 import { createSite, SITE_PROVISION_STEPS } from '@/lib/createSite';
-import type { CreateSiteInput } from '@/lib/createSite';
-import type { ProjectTemplate, SiteStarterModuleProgress, SiteTabFormConfig } from '@/types';
-import FormFieldEditor, { DEFAULT_FORM_CONFIG, DEFAULT_NEWSLETTER_CONFIG } from '@/components/FormFieldEditor';
+import type { SiteStarterModuleProgress, SiteTabFormConfig } from '@/types';
+import FormFieldEditor, { DEFAULT_FORM_CONFIG } from '@/components/FormFieldEditor';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface ProposedTab {
-  name: string;
-  label: string;
-  moduleType: string;
-  nameSuffix: string;
-  description: string;
-  enabled: boolean;
-  formConfig?: SiteTabFormConfig;
-}
-
-type FlowStep =
-  | 'choose'
-  | 'describe'
-  | 'generating'
-  | 'clarify'
-  | 'review'
-  | 'templates'
-  | 'error';
-
-// ─── Template data ────────────────────────────────────────────────────────────
-
-interface TemplateCard {
-  id: ProjectTemplate;
-  label: string;
-  description: string;
-  modules: string;
-}
-
-const TEMPLATES: TemplateCard[] = [
-  { id: 'portfolio',  label: 'Portfolio',          description: 'Showcase your work with a gallery, project list, and contact form',          modules: 'Config · Gallery · Projects · Contact Form' },
-  { id: 'restaurant', label: 'Restaurant',          description: 'Menu, photo gallery, event calendar, and reservation form',                  modules: 'Config · Menu · Photos · Events · Reservations' },
-  { id: 'saas',       label: 'SaaS / Landing',      description: 'Testimonials, FAQ, waitlist signup, and contact form for product launches',  modules: 'Config · Testimonials · FAQ · Waitlist · Contact' },
-  { id: 'nonprofit',  label: 'Non-profit / Church', description: 'Blog, event calendar, photo gallery, and volunteer signup form',            modules: 'Config · Blog · Events · Gallery · Volunteer' },
-  { id: 'agency',     label: 'Agency',              description: 'Services, case studies, work gallery, and inquiry form for agencies',        modules: 'Config · Services · Case Studies · Work · Inquiry' },
-];
-
-const TEMPLATE_TABS: Record<ProjectTemplate, CreateSiteInput['tabs']> = {
-  portfolio: [
-    { name: 'config',   label: 'Site Config', moduleType: 'siteconfig', nameSuffix: 'Config' },
-    { name: 'gallery',  label: 'Gallery',     moduleType: 'gallery',    nameSuffix: 'Gallery' },
-    { name: 'projects', label: 'Projects',    moduleType: 'content',    nameSuffix: 'Projects' },
-    { name: 'contact',  label: 'Contact',     moduleType: 'form',       nameSuffix: 'Contact Form' },
-  ],
-  restaurant: [
-    { name: 'config',       label: 'Site Config',  moduleType: 'siteconfig', nameSuffix: 'Config' },
-    { name: 'menu',         label: 'Menu',         moduleType: 'menu',       nameSuffix: 'Menu' },
-    { name: 'gallery',      label: 'Photos',       moduleType: 'gallery',    nameSuffix: 'Photos' },
-    { name: 'events',       label: 'Events',       moduleType: 'calendar',   nameSuffix: 'Events' },
-    { name: 'reservations', label: 'Reservations', moduleType: 'form',       nameSuffix: 'Reservations' },
-  ],
-  saas: [
-    { name: 'config',      label: 'Site Config',  moduleType: 'siteconfig',  nameSuffix: 'Config' },
-    { name: 'testimonials',label: 'Testimonials', moduleType: 'testimonial', nameSuffix: 'Testimonials' },
-    { name: 'faq',         label: 'FAQ',          moduleType: 'faq',         nameSuffix: 'FAQ' },
-    { name: 'waitlist',    label: 'Waitlist',     moduleType: 'newsletter',  nameSuffix: 'Waitlist' },
-    { name: 'contact',     label: 'Contact',      moduleType: 'form',        nameSuffix: 'Contact' },
-  ],
-  nonprofit: [
-    { name: 'config',  label: 'Site Config', moduleType: 'siteconfig', nameSuffix: 'Config' },
-    { name: 'blog',    label: 'Blog',        moduleType: 'content',    nameSuffix: 'Blog' },
-    { name: 'events',  label: 'Events',      moduleType: 'calendar',   nameSuffix: 'Events' },
-    { name: 'gallery', label: 'Gallery',     moduleType: 'gallery',    nameSuffix: 'Gallery' },
-    { name: 'volunteer',label: 'Volunteer',  moduleType: 'form',       nameSuffix: 'Volunteer' },
-  ],
-  agency: [
-    { name: 'config',       label: 'Site Config',  moduleType: 'siteconfig', nameSuffix: 'Config' },
-    { name: 'services',     label: 'Services',     moduleType: 'content',    nameSuffix: 'Services' },
-    { name: 'casestudies',  label: 'Case Studies', moduleType: 'content',    nameSuffix: 'Case Studies' },
-    { name: 'work',         label: 'Work',         moduleType: 'gallery',    nameSuffix: 'Work' },
-    { name: 'inquiry',      label: 'Inquiry',      moduleType: 'form',       nameSuffix: 'Inquiry' },
-  ],
-};
-
-// ─── Color helpers ────────────────────────────────────────────────────────────
-
-const MODULE_COLORS: Record<string, string> = {
-  siteconfig:  'oklch(0.65 0.22 285)',
-  content:     'oklch(0.60 0.20 240)',
-  testimonial: 'oklch(0.72 0.18 145)',
-  gallery:     'oklch(0.73 0.10 75)',
-  form:        'oklch(0.73 0.17 65)',
-  calendar:    'oklch(0.67 0.18 200)',
-  faq:         'oklch(0.65 0.15 30)',
-  newsletter:  'oklch(0.63 0.24 295)',
-  menu:        'oklch(0.70 0.15 100)',
-};
-
-function colorFor(moduleType: string) {
-  return MODULE_COLORS[moduleType] ?? 'var(--color-muted)';
-}
-
-function alpha(color: string, a: number) {
-  return color.replace(')', ` / ${a})`);
-}
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function BackButton({ label, onClick }: { label?: string; onClick: () => void }) {
+function BackButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       type="button"
@@ -120,164 +20,30 @@ function BackButton({ label, onClick }: { label?: string; onClick: () => void })
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
         <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
-      {label ?? 'Back'}
+      All forms
     </button>
   );
 }
 
-function TabCard({
-  tab, onToggle, onFormConfigChange,
-}: {
-  tab: ProposedTab;
-  onToggle: () => void;
-  onFormConfigChange: (cfg: SiteTabFormConfig) => void;
-}) {
-  const [showFields, setShowFields] = useState(false);
-  const color  = colorFor(tab.moduleType);
-  const locked = tab.moduleType === 'siteconfig';
-  const isForm = tab.moduleType === 'form' || tab.moduleType === 'newsletter';
-
-  return (
-    <div
-      className="rounded-xl overflow-hidden"
-      style={{
-        background:   tab.enabled ? 'var(--color-surface)' : 'var(--color-surface-2)',
-        border:       `1px solid ${tab.enabled ? 'var(--color-border)' : 'transparent'}`,
-        opacity:      tab.enabled ? 1 : 0.45,
-      }}
-    >
-      <div className="flex items-start gap-4 p-4">
-        {/* Toggle */}
-        <button
-          type="button"
-          onClick={locked ? undefined : onToggle}
-          disabled={locked}
-          className="shrink-0 mt-0.5 w-10 h-5 rounded-full relative transition-colors focus:outline-none"
-          style={{ background: tab.enabled ? color : 'var(--color-border)', cursor: locked ? 'default' : 'pointer' }}
-        >
-          <div
-            className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all"
-            style={{ left: tab.enabled ? 'calc(100% - 1.1rem)' : '0.125rem' }}
-          />
-        </button>
-        <div className="flex flex-col gap-1 flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{tab.label}</p>
-            <span
-              className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide"
-              style={{ color, background: alpha(color, 0.10), border: `1px solid ${alpha(color, 0.28)}` }}
-            >
-              {tab.moduleType}
-            </span>
-            {locked && <span className="text-[10px]" style={{ color: 'var(--color-subtle)' }}>required</span>}
-          </div>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>{tab.description}</p>
-        </div>
-        {/* Edit fields button for form tabs */}
-        {isForm && tab.enabled && (
-          <button
-            type="button"
-            onClick={() => setShowFields((v) => !v)}
-            className="shrink-0 text-[10px] font-semibold uppercase tracking-wide px-2 py-1 rounded transition-colors"
-            style={{
-              color:      showFields ? 'var(--color-accent)' : 'var(--color-muted)',
-              background: showFields ? 'var(--color-accent-subtle)' : 'transparent',
-              border:     `1px solid ${showFields ? 'var(--color-accent-border)' : 'var(--color-border)'}`,
-            }}
-          >
-            Fields
-          </button>
-        )}
-      </div>
-      {/* Form field editor */}
-      {isForm && tab.enabled && showFields && tab.formConfig && (
-        <div
-          className="px-4 pb-4 pt-0"
-          style={{ borderTop: '1px solid var(--color-border)' }}
-        >
-          <div className="pt-3">
-            <FormFieldEditor config={tab.formConfig} onChange={onFormConfigChange} />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Main component ───────────────────────────────────────────────────────────
-
 export default function SiteStarter() {
   const { state, dispatch } = useApp();
 
-  const [step, setStep]                   = useState<FlowStep>('choose');
-  const [description, setDescription]    = useState('');
-  const [clarifyQuestion, setClarifyQuestion] = useState('');
-  const [clarification, setClarification] = useState('');
-  const [tabs, setTabs]                   = useState<ProposedTab[]>([]);
-  const [errorMsg, setErrorMsg]           = useState('');
-  const [launching, setLaunching]         = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<ProjectTemplate | null>(null);
-
   const siteName    = state.siteStarterConfig.siteName;
-  const enabledTabs = tabs.filter((t) => t.enabled);
+  const defaultEmail = state.auth.user?.email ?? '';
 
-  // ── AI flow: propose manifest ──────────────────────────────────────────────
+  const [formLabel,    setFormLabel]    = useState('Contact Form');
+  const [notifyEmail,  setNotifyEmail]  = useState(defaultEmail);
+  const [formConfig,   setFormConfig]   = useState<SiteTabFormConfig>({ ...DEFAULT_FORM_CONFIG });
+  const [launching,    setLaunching]    = useState(false);
+  const [errorMsg,     setErrorMsg]     = useState('');
 
-  async function callPropose(extra?: { clarification: string }) {
-    setStep('generating');
-    setErrorMsg('');
+  const canLaunch = siteName.trim().length >= 2 && notifyEmail.trim().includes('@') && !launching;
 
-    try {
-      const res  = await fetch('/api/propose-manifest', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
-          description:   description.trim(),
-          siteName,
-          clarification: extra?.clarification ?? undefined,
-          existingTabs:  state.siteManifest?.tabs ?? undefined,
-        }),
-      });
-
-      const data = (await res.json()) as {
-        tabs?:     Omit<ProposedTab, 'enabled'>[];
-        question?: string;
-        error?:    string;
-      };
-
-      if (!res.ok || data.error) {
-        setErrorMsg(data.error ?? 'Failed to generate structure — please try again.');
-        setStep('error');
-        return;
-      }
-
-      if (data.question) {
-        setClarifyQuestion(data.question);
-        setClarification('');
-        setStep('clarify');
-        return;
-      }
-
-      setTabs((data.tabs ?? []).map((t) => ({
-        ...t,
-        enabled: true,
-        formConfig: (t.moduleType === 'form' || t.moduleType === 'newsletter')
-          ? (t.moduleType === 'newsletter' ? { ...DEFAULT_NEWSLETTER_CONFIG } : { ...DEFAULT_FORM_CONFIG })
-          : undefined,
-      })));
-      setStep('review');
-    } catch {
-      setErrorMsg('Network error — please check your connection and try again.');
-      setStep('error');
-    }
-  }
-
-  // ── Launch (both paths) ────────────────────────────────────────────────────
-
-  async function handleLaunch(inputTabs: CreateSiteInput['tabs']) {
-    if (!state.auth.accessToken) return;
+  async function handleLaunch() {
+    if (!state.auth.accessToken || !canLaunch) return;
 
     setLaunching(true);
+    setErrorMsg('');
 
     const initialProgress: SiteStarterModuleProgress[] = SITE_PROVISION_STEPS.map((s) => ({
       moduleType: s.id,
@@ -292,9 +58,10 @@ export default function SiteStarter() {
         state.auth.accessToken,
         {
           siteName,
-          notifyEmail:   state.auth.user?.email ?? '',
+          notifyEmail:   notifyEmail.trim(),
           googleAccount: state.auth.user?.email ?? '',
-          tabs:          inputTabs,
+          formLabel:     formLabel.trim() || 'Contact Form',
+          formConfig,
         },
         (step, status, error) => {
           const label = SITE_PROVISION_STEPS.find((s) => s.id === step)?.label ?? step;
@@ -307,13 +74,12 @@ export default function SiteStarter() {
 
       dispatch({ type: 'SET_SITE_MANIFEST', payload: manifest });
     } catch (err) {
+      setErrorMsg((err as Error).message);
       dispatch({ type: 'SITE_MANIFEST_ERROR', payload: (err as Error).message });
     } finally {
       setLaunching(false);
     }
   }
-
-  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <motion.main
@@ -325,10 +91,7 @@ export default function SiteStarter() {
     >
       <div className="w-full max-w-2xl flex flex-col gap-8">
 
-        <BackButton
-          label="All sites"
-          onClick={() => dispatch({ type: 'RESET_SITE_STARTER' })}
-        />
+        <BackButton onClick={() => dispatch({ type: 'RESET_SITE_STARTER' })} />
 
         {/* Header */}
         <div className="flex flex-col gap-1.5">
@@ -338,293 +101,75 @@ export default function SiteStarter() {
             </p>
           )}
           <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
-            Spin up your site backend
+            Set up your contact form
           </h1>
+          <p className="text-sm" style={{ color: 'var(--color-muted)' }}>
+            Configure your fields and notification email. We&apos;ll create the Google Sheet and endpoint.
+          </p>
         </div>
 
-        {state.siteManifestError && (
+        {(state.siteManifestError || errorMsg) && (
           <div className="rounded-xl border px-4 py-3 text-sm"
             style={{ background: 'oklch(0.40 0.18 25 / 0.10)', borderColor: 'oklch(0.55 0.20 25 / 0.30)', color: 'var(--color-error)' }}>
-            {state.siteManifestError}
+            {state.siteManifestError || errorMsg}
           </div>
         )}
 
-        <AnimatePresence mode="wait">
+        {/* Form label */}
+        <div className="flex flex-col gap-2">
+          <label htmlFor="form-label" className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+            Form name
+          </label>
+          <input
+            id="form-label"
+            type="text"
+            value={formLabel}
+            onChange={(e) => setFormLabel(e.target.value)}
+            placeholder="e.g. Contact Form"
+            className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+            style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
+          />
+        </div>
 
-          {/* ── Choose path ──────────────────────────────────────────── */}
-          {step === 'choose' && (
-            <motion.div key="choose" className="flex flex-col gap-4"
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
-              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-                Build a custom structure with AI, or start from a ready-made template.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* AI card */}
-                <button
-                  type="button"
-                  onClick={() => setStep('describe')}
-                  className="text-left p-5 rounded-xl border flex flex-col gap-3 transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-                  style={{ background: 'var(--color-surface)', borderColor: 'var(--color-accent)', boxShadow: '0 0 0 1px var(--color-accent)' }}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">✦</span>
-                    <p className="text-sm font-bold" style={{ color: 'var(--color-accent)' }}>AI — Custom</p>
-                  </div>
-                  <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-                    Give us your pitch. AI spins the right tabs and columns from a single sentence — tailored to exactly what you need.
-                  </p>
-                  <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--color-accent)' }}>
-                    Recommended →
-                  </p>
-                </button>
+        {/* Notification email */}
+        <div className="flex flex-col gap-2">
+          <label htmlFor="notify-email" className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+            Send notifications to
+          </label>
+          <input
+            id="notify-email"
+            type="email"
+            value={notifyEmail}
+            onChange={(e) => setNotifyEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+            style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
+          />
+          <p className="text-xs" style={{ color: 'var(--color-subtle)' }}>
+            You&apos;ll get an email every time someone submits the form.
+          </p>
+        </div>
 
-                {/* Template card */}
-                <button
-                  type="button"
-                  onClick={() => setStep('templates')}
-                  className="text-left p-5 rounded-xl border flex flex-col gap-3 transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-                  style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">▦</span>
-                    <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>Templates</p>
-                  </div>
-                  <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-                    Pick from 5 pre-built structures: Portfolio, Restaurant, SaaS, Non-profit, or Agency.
-                  </p>
-                  <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--color-muted)' }}>
-                    5 templates →
-                  </p>
-                </button>
-              </div>
-            </motion.div>
-          )}
+        {/* Fields */}
+        <div className="flex flex-col gap-3 p-4 rounded-xl border"
+          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-muted)' }}>
+            Form fields
+          </p>
+          <FormFieldEditor config={formConfig} onChange={setFormConfig} />
+        </div>
 
-          {/* ── Describe ─────────────────────────────────────────────── */}
-          {step === 'describe' && (
-            <motion.div key="describe" className="flex flex-col gap-6"
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
-              <BackButton onClick={() => setStep('choose')} />
-              <div className="flex flex-col gap-2">
-                <label htmlFor="biz-desc" className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
-                  What does your business do?
-                </label>
-                <textarea
-                  id="biz-desc"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={4}
-                  placeholder="e.g. I run a kosher catering company in Monsey. We do weddings, bar mitzvahs, and corporate events. We have a menu and photos from past events."
-                  className="w-full rounded-xl px-4 py-3 text-sm leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-                  style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
-                />
-                <p className="text-xs" style={{ color: 'var(--color-subtle)' }}>
-                  Be specific — mention your services, what you sell, and who your customers are.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => callPropose()}
-                disabled={description.trim().length < 10}
-                className="py-3 rounded-xl text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ background: 'var(--color-accent)', color: '#fff' }}
-              >
-                Generate Structure →
-              </button>
-            </motion.div>
-          )}
+        {/* Launch */}
+        <button
+          type="button"
+          onClick={handleLaunch}
+          disabled={!canLaunch}
+          className="py-3.5 rounded-xl text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{ background: 'var(--color-accent)', color: '#fff' }}
+        >
+          {launching ? 'Creating…' : 'Create form →'}
+        </button>
 
-          {/* ── Generating ───────────────────────────────────────────── */}
-          {step === 'generating' && (
-            <motion.div key="generating" className="flex flex-col items-center gap-4 py-16"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <div className="w-8 h-8 rounded-full border-2 animate-spin"
-                style={{ borderColor: 'var(--color-accent)', borderTopColor: 'transparent' }} />
-              <p className="text-sm" style={{ color: 'var(--color-muted)' }}>
-                Proposing structure for <span style={{ color: 'var(--color-text)' }}>{siteName}</span>…
-              </p>
-            </motion.div>
-          )}
-
-          {/* ── Clarify ──────────────────────────────────────────────── */}
-          {step === 'clarify' && (
-            <motion.div key="clarify" className="flex flex-col gap-6"
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
-              <BackButton onClick={() => setStep('describe')} />
-              <div className="rounded-xl p-4 flex flex-col gap-2"
-                style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderLeft: '3px solid var(--color-accent)' }}>
-                <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--color-accent)' }}>
-                  One question
-                </p>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text)' }}>
-                  {clarifyQuestion}
-                </p>
-              </div>
-              <div className="flex flex-col gap-2">
-                <textarea
-                  value={clarification}
-                  onChange={(e) => setClarification(e.target.value)}
-                  rows={2}
-                  placeholder="Your answer…"
-                  className="w-full rounded-xl px-4 py-3 text-sm leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-                  style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => callPropose({ clarification })}
-                disabled={clarification.trim().length < 2}
-                className="py-3 rounded-xl text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ background: 'var(--color-accent)', color: '#fff' }}
-              >
-                Continue →
-              </button>
-            </motion.div>
-          )}
-
-          {/* ── Error ────────────────────────────────────────────────── */}
-          {step === 'error' && (
-            <motion.div key="error" className="flex flex-col gap-4"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <div className="rounded-xl border px-4 py-3 text-sm"
-                style={{ background: 'oklch(0.40 0.18 25 / 0.10)', borderColor: 'oklch(0.55 0.20 25 / 0.30)', color: 'var(--color-error)' }}>
-                {errorMsg}
-              </div>
-              <button type="button" onClick={() => setStep('describe')}
-                className="self-start text-sm font-medium" style={{ color: 'var(--color-accent)' }}>
-                ← Try again
-              </button>
-            </motion.div>
-          )}
-
-          {/* ── Review (AI result) ───────────────────────────────────── */}
-          {step === 'review' && (
-            <motion.div key="review" className="flex flex-col gap-6"
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex flex-col gap-0.5">
-                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>Proposed structure</p>
-                  <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
-                    Toggle off any modules you don&apos;t need.
-                  </p>
-                </div>
-                <button type="button" onClick={() => setStep('describe')}
-                  className="text-xs font-medium shrink-0" style={{ color: 'var(--color-muted)' }}>
-                  ← Redesign
-                </button>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                {tabs.map((tab) => (
-                  <TabCard
-                    key={tab.name}
-                    tab={tab}
-                    onToggle={() =>
-                      setTabs((prev) => prev.map((t) => t.name === tab.name ? { ...t, enabled: !t.enabled } : t))
-                    }
-                    onFormConfigChange={(cfg) =>
-                      setTabs((prev) => prev.map((t) => t.name === tab.name ? { ...t, formConfig: cfg } : t))
-                    }
-                  />
-                ))}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => handleLaunch(enabledTabs.map((t) => ({
-                  name:       t.name,
-                  label:      t.label,
-                  moduleType: t.moduleType,
-                  nameSuffix: t.nameSuffix,
-                  formConfig: t.formConfig,
-                })))}
-                disabled={enabledTabs.length === 0 || launching}
-                className="py-3 rounded-xl text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ background: 'var(--color-accent)', color: '#fff' }}
-              >
-                {launching
-                  ? 'Spinning up…'
-                  : `Spin up ${enabledTabs.length} tab${enabledTabs.length !== 1 ? 's' : ''} →`}
-              </button>
-            </motion.div>
-          )}
-
-          {/* ── Templates ────────────────────────────────────────────── */}
-          {step === 'templates' && (
-            <motion.div key="templates" className="flex flex-col gap-6"
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
-              <BackButton onClick={() => setStep('choose')} />
-
-              <div className="flex flex-col gap-2">
-                <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>Choose a template</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {TEMPLATES.map((tpl) => {
-                    const active = selectedTemplate === tpl.id;
-                    return (
-                      <button
-                        key={tpl.id}
-                        type="button"
-                        onClick={() => setSelectedTemplate(tpl.id)}
-                        className="text-left p-4 rounded-xl border transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-                        style={{
-                          background:  active ? 'var(--color-accent-subtle)' : 'var(--color-surface)',
-                          borderColor: active ? 'var(--color-accent)' : 'var(--color-border)',
-                          boxShadow:   active ? '0 0 0 1px var(--color-accent)' : undefined,
-                        }}
-                      >
-                        <p className="text-sm font-semibold mb-1"
-                          style={{ color: active ? 'var(--color-accent)' : 'var(--color-text)' }}>
-                          {tpl.label}
-                        </p>
-                        <p className="text-xs leading-relaxed mb-2" style={{ color: 'var(--color-muted)' }}>
-                          {tpl.description}
-                        </p>
-                        <p className="text-[11px] font-mono"
-                          style={{ color: active ? 'var(--color-accent)' : 'var(--color-muted)' }}>
-                          {tpl.modules}
-                        </p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {selectedTemplate && (
-                <motion.div
-                  className="rounded-xl border p-4 flex flex-col gap-2"
-                  style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}
-                >
-                  <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--color-muted)' }}>
-                    What gets created
-                  </p>
-                  {TEMPLATE_TABS[selectedTemplate].map((tab) => (
-                    <div key={tab.name} className="flex items-center gap-2">
-                      <span className="shrink-0 w-1.5 h-1.5 rounded-full" style={{ background: 'var(--color-accent)' }} />
-                      <span className="text-sm" style={{ color: 'var(--color-text)' }}>
-                        {tab.label}
-                      </span>
-                      <span className="text-xs" style={{ color: 'var(--color-muted)' }}>
-                        ({tab.moduleType})
-                      </span>
-                    </div>
-                  ))}
-                </motion.div>
-              )}
-
-              <button
-                type="button"
-                onClick={() => selectedTemplate && handleLaunch(TEMPLATE_TABS[selectedTemplate])}
-                disabled={!selectedTemplate || launching}
-                className="py-3 rounded-xl text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ background: 'var(--color-accent)', color: '#fff' }}
-              >
-                {launching ? 'Spinning up…' : 'Spin it up →'}
-              </button>
-            </motion.div>
-          )}
-
-        </AnimatePresence>
       </div>
     </motion.main>
   );

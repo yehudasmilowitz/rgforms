@@ -160,10 +160,10 @@ export default function SiteStarterProgress() {
         {/* Header */}
         <div className="flex flex-col items-center text-center gap-2">
           <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
-            Spinning up your site kit…
+            Creating your contact form…
           </h1>
           <p className="text-sm" style={{ color: 'var(--color-muted)' }}>
-            {siteStarterConfig.siteName ?? 'Setting up your site backend…'}
+            {siteStarterConfig.siteName ?? 'Setting up your form…'}
           </p>
           <div
             className="mt-1 px-3 py-1 rounded-full text-xs font-semibold"
@@ -201,7 +201,7 @@ export default function SiteStarterProgress() {
               <path d="M3 8.5l3.5 3.5 6.5-7" stroke="var(--color-success)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             <span className="text-sm font-medium" style={{ color: 'var(--color-success)' }}>
-              All done! Loading your site kit…
+              All done! Loading your dashboard…
             </span>
           </motion.div>
         )}
