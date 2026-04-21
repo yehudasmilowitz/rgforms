@@ -83,7 +83,7 @@ export default function PrivacyPage() {
         <Section>
           <H2>1. Who we are</H2>
           <P>
-            RG Forms is a static web application that uses AI to design and provision complete website backends — forms, content modules, galleries, newsletters, and more — entirely within your own Google Drive. The service is provided as-is with no warranty.
+            RG Forms is a web application that provisions form backends — Google Sheet + Apps Script — entirely within your own Google Drive. The service is provided as-is with no warranty.
           </P>
         </Section>
 
@@ -206,9 +206,9 @@ export default function PrivacyPage() {
         </Section>
 
         <Section>
-          <H2>5. AI-powered features (Gemini)</H2>
+          <H2>5. Gemini features</H2>
           <P>
-            RG Forms offers two AI-powered features that communicate with Google&apos;s Gemini API:
+            RG Forms offers two optional features that communicate with Google&apos;s Gemini API:
           </P>
           <ul className="flex flex-col gap-2 list-none">
             {[

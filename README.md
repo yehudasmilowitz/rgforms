@@ -1,6 +1,6 @@
 # RG Forms
 
-> AI-powered website backends in your Google Drive. Describe your site, get a fully provisioned Google Sheet + Apps Script API — forms, content, gallery, newsletter, and more. No server, no subscription, yours forever.
+> Form backends in your Google Drive. Describe your forms, get a fully provisioned Google Sheet + Apps Script API — ready to accept submissions in under 2 minutes. No server, no subscription, yours forever.
 
 **Live site**: [rgforms.com](https://rgforms.com)
 
@@ -53,14 +53,9 @@ Visitor's Browser / Claude agent / your frontend
 
 | Module | Tab type | What it stores |
 |---|---|---|
-| Contact Form | form | Submissions → sheet rows + email notification |
-| Newsletter | form | Email subscriber addresses |
-| Blog / Content | rows | Posts with title, body, slug, published flag |
-| Gallery | rows | Image captions + Drive file IDs |
-| Calendar / Events | rows | Date-structured events with start/end times |
-| Asset Storage | asset | Drive subfolder; doGet lists files as JSON |
-| Site Config | key-value | Flat key-value pairs (tagline, social links, etc.) |
-| Custom Rows | rows | Any column structure you define |
+| Form | form | Submissions → sheet rows + optional email notification |
+
+Each form module gets its own tab in the Google Sheet. You define the fields (labels, types, required, email settings) and the Apps Script handler appends a row on every submission.
 
 ---
 
@@ -77,11 +72,10 @@ This means adding, removing, or editing modules only requires updating the sheet
 The Site Kit generates a `CLAUDE.md` file you can drop into any project. It gives Claude Code full knowledge of:
 
 - Your API endpoint URL and auth token
-- Every module, tab name, type, and column schema
-- Exact calling conventions for GET and POST
+- Every form module, tab name, and field schema
+- Exact calling conventions for POST submissions
 - Response format: `{ result: 'success' }` / `{ result: 'error', error: '...' }`
-- Form field names, types, and honeypot conventions
-- Drive folder URLs for asset modules
+- Form field names, types, required flags, and honeypot conventions
 
 ---
 
@@ -194,11 +188,10 @@ When you launch a site, `lib/createSite.ts` runs these steps in sequence using y
 The generated script (`lib/siteScript.ts`) is a single JS file uploaded to the user's Apps Script project:
 
 - **`doPost(e)`** — reads `_manifest` tab, finds the matching form tab, appends a row, sends email via `GmailApp.sendEmail` (supports CC, BCC, custom subject, sender name, reply-to, honeypot)
-- **`doGet(e)`** — reads `_manifest` tab, returns tab data as JSON (rows array, key-value object, or asset file list)
-- **`_manifest` tab** — live JSON config, updated by RG Forms when you add/remove modules; no script redeploy needed
+- **`_manifest` tab** — live JSON config, updated by RG Forms when you add/remove form modules; no script redeploy needed
 - **Response format** — always `{ result: 'success' }` or `{ result: 'error', error: '...' }`
 
-Scopes declared in `appsscript.json`: `spreadsheets.currentonly`, `gmail.send`, `drive.readonly`.
+Scopes declared in `appsscript.json`: `spreadsheets.currentonly`, `gmail.send`.
 
 ---
 
@@ -220,7 +213,7 @@ Scopes declared in `appsscript.json`: `spreadsheets.currentonly`, `gmail.send`, 
 ## Limitations
 
 - **Email quota**: ~100 emails/day on free Google accounts (Google-imposed)
-- **No file uploads via API**: endpoint handles URL-encoded data; assets use Drive directly
+- **No file uploads**: endpoint handles URL-encoded form data only
 - **Script authorization**: after provisioning, user must visit the script URL once to authorize (Google requirement)
 - **Apps Script API**: must be enabled in the user's Google account before provisioning
 - **Token expiry**: OAuth tokens last ~1 hour; re-auth required (provisioning is one-time)

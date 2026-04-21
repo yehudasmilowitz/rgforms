@@ -98,7 +98,7 @@ export default function RootLayout({
               operatingSystem: 'Web',
               offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
               description:
-                'Describe your site to AI. Get a fully provisioned Google Sheet + Apps Script backend — forms, content, gallery, newsletter, and more. No server, no subscription.',
+                'Describe your forms and get a fully provisioned Google Sheet + Apps Script backend — ready to accept submissions in under 2 minutes. No server, no subscription.',
               logo: { '@type': 'ImageObject', url: `${siteUrl}/logo.svg` },
             }),
           }}

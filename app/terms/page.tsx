@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Terms of Service',
-  description: 'RG Forms terms of service. Free to use, no warranty, no liability. Plain-English terms for an AI-powered, zero-backend website backend builder.',
+  description: 'RG Forms terms of service. Free to use, no warranty, no liability. Plain-English terms for a zero-backend form builder.',
 
   robots: { index: false, follow: false },
 };
@@ -88,7 +88,7 @@ export default function TermsPage() {
         <Section>
           <H2>2. Description of the service</H2>
           <P>
-            RG Forms is a free web application that uses AI to design and provision complete website backends — forms, content modules, galleries, newsletters, and more — backed by your own Google Drive infrastructure. A single Google Sheet and Google Apps Script deployment serve as your site&apos;s live API. Most operations run entirely in your browser; AI-powered features (site structure proposals and data seeding) route through a lightweight server-side endpoint that forwards requests to Google&apos;s Gemini API and returns the response without storing anything.
+            RG Forms is a free web application that provisions form backends backed by your own Google Drive infrastructure. A Google Sheet and Google Apps Script deployment serve as your form&apos;s live endpoint. Most operations run entirely in your browser; the site structure proposal and data seeding features route through a lightweight server-side endpoint that forwards requests to Google&apos;s Gemini API and returns the response without storing anything.
           </P>
           <P>
             The resources created by the Service (Google Sheets, Apps Script projects) are
@@ -167,9 +167,9 @@ export default function TermsPage() {
         </Section>
 
         <Section>
-          <H2>4a. AI-generated content</H2>
+          <H2>4a. Generated content</H2>
           <P>
-            RG Forms offers AI-powered features (site structure proposals and data seeding) powered by Google&apos;s Gemini API. You are responsible for reviewing AI-generated content before use. RG Forms makes no guarantees about the accuracy, completeness, or suitability of AI-generated module structures or sample data. You must not rely on AI-generated data as a substitute for real data in production contexts.
+            RG Forms offers optional features (form structure proposals and data seeding) powered by Google&apos;s Gemini API. You are responsible for reviewing generated content before use. RG Forms makes no guarantees about the accuracy, completeness, or suitability of generated form structures or sample data. You must not rely on generated data as a substitute for real data in production contexts.
           </P>
         </Section>
 
