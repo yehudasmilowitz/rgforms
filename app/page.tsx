@@ -61,11 +61,11 @@ export default function Page() {
           </h1>
 
           <p className="text-xl sm:text-2xl font-semibold leading-snug" style={{ color: 'var(--color-text)' }}>
-            Your contact form. Your design. Your website.
+            A live contact form endpoint in under 2 minutes — no backend required.
           </p>
 
           <p className="text-sm leading-relaxed max-w-sm" style={{ color: 'var(--color-muted)' }}>
-            Not a Google Form embed — a real POST endpoint you drop into any site or framework. Submissions go to your Sheet and hit your inbox instantly.
+            Sign in with Google, configure your fields, and get a POST endpoint you can drop into any site. Submissions land in your Google Sheet and hit your inbox instantly.
           </p>
         </motion.div>
 
@@ -77,9 +77,9 @@ export default function Page() {
         {/* ── Benefits ─────────────────────────────────────────────────────── */}
         <motion.div variants={fadeUp} className="w-full flex flex-col gap-2">
           {([
+            { icon: <Zap size={15} />, text: 'Live POST endpoint in under 2 minutes — no server, no backend, no monthly fee' },
             { icon: <Mail size={15} />, text: 'Email notification on every submission — straight to your inbox, instantly' },
-            { icon: <Zap size={15} />, text: 'No backend to build — live endpoint in under 2 minutes, no server, no subscription' },
-            { icon: <ShieldCheck size={15} />, text: 'Your HTML, your design — drop into any site or framework, not a Google Form embed' },
+            { icon: <ShieldCheck size={15} />, text: 'Your own HTML and design — works in any site or framework, submissions go to your Google Sheet' },
           ] as const).map(({ icon, text }) => (
             <div
               key={text}
