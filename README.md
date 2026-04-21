@@ -6,12 +6,6 @@
 
 ---
 
-## ⚠️ TODO — Setup required
-
-- [ ] **Create Firebase project named `rgforms`** — go to [console.firebase.google.com](https://console.firebase.google.com), create a new project with ID `rgforms`, enable Hosting, then run `firebase login` and `firebase use rgforms`. Until this is done the GitHub Actions deploy workflow will fail.
-
----
-
 ## What it does
 
 RG Forms provisions your entire website's data backend inside your own Google Drive in under two minutes:
