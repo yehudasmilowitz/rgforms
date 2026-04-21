@@ -168,6 +168,12 @@ export async function createSite(
       body: JSON.stringify({ appProperties: { rgforms_type: 'site', project_slug: projectSlug } }),
     }).catch(() => {});
 
+    await fetch(`${DRIVE_API}/${sheetId}?addParents=${rootFolderId}&removeParents=root`, {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: JSON.stringify({}),
+    }).catch(() => {});
+
     onStep('sheet', 'complete');
   } catch (err) {
     await fetch(`${DRIVE_API}/${rootFolderId}?supportsAllDrives=true`, {
