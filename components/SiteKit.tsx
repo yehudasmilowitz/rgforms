@@ -504,7 +504,7 @@ export default function SiteKit() {
             onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-text)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-muted)'; }}
           >
-            ← All forms
+            ← All projects
           </button>
         </div>
 

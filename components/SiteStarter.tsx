@@ -20,7 +20,7 @@ function BackButton({ onClick }: { onClick: () => void }) {
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
         <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
-      All forms
+      All projects
     </button>
   );
 }
@@ -101,10 +101,10 @@ export default function SiteStarter() {
             </p>
           )}
           <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
-            Set up your contact form
+            Set up your project
           </h1>
           <p className="text-sm" style={{ color: 'var(--color-muted)' }}>
-            Configure your fields and notification email. We&apos;ll create the Google Sheet and endpoint.
+            Configure your first form&apos;s fields and notification email. You can add more forms to this project later.
           </p>
         </div>
 
