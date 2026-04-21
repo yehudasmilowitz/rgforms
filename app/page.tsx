@@ -209,6 +209,31 @@ export default function Page() {
           OAuth tokens live in memory only and vanish when you close the tab.
         </motion.p>
 
+        {/* ── Sheetspin CTA ────────────────────────────────────────────────── */}
+        <motion.a
+          href="https://sheetspin.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          variants={fadeUp}
+          className="w-full flex items-center justify-between gap-4 rounded-xl border px-5 py-4 text-left transition-colors group"
+          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-accent-border)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; }}
+        >
+          <div className="flex flex-col gap-0.5">
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-subtle)' }}>
+              From the makers of RG Forms
+            </p>
+            <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+              Need a full site backend? Try Sheetspin →
+            </p>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+              AI provisions a complete Google Sheet backend — blog, gallery, events, newsletter, and more — in under 2 minutes.
+            </p>
+          </div>
+          <span className="text-xl shrink-0" style={{ color: 'var(--color-accent)' }}>✦</span>
+        </motion.a>
+
         {/* ── Footer nav ───────────────────────────────────────────────────── */}
         <motion.div
           className="flex items-center gap-5 flex-wrap justify-center text-xs pb-2"

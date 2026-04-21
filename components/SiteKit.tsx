@@ -719,6 +719,30 @@ export default function SiteKit() {
           </button>
         </div>
 
+        {/* Sheetspin CTA */}
+        <a
+          href="https://sheetspin.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-between gap-4 rounded-xl border px-5 py-4 transition-colors"
+          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-accent-border)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--color-border)'; }}
+        >
+          <div className="flex flex-col gap-0.5">
+            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--color-subtle)' }}>
+              From the makers of RG Forms
+            </p>
+            <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+              Need more than a contact form?
+            </p>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+              Sheetspin provisions a full site backend — blog, gallery, events, newsletter — all in your Google Drive.
+            </p>
+          </div>
+          <span className="text-lg shrink-0" style={{ color: 'var(--color-accent)' }}>✦</span>
+        </a>
+
       </div>
 
       {/* Preview modal */}
