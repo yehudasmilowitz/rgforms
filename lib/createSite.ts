@@ -229,6 +229,7 @@ export async function createSite(
 
   const manifest: SiteManifest = {
     project_slug:          projectSlug,
+    site_name:             siteName,
     created_at:            createdAt,
     google_account:        googleAccount,
     script_url:            deploymentUrl,

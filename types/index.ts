@@ -54,6 +54,7 @@ export interface SiteTab {
 
 export interface SiteManifest {
   project_slug:          string;
+  site_name:             string;
   created_at:            string;
   google_account:        string;
   script_url:            string;

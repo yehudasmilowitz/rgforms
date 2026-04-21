@@ -89,9 +89,11 @@ function doPost(e) {
 
     var toEmail = (formConf.notifyEmail) || CONFIG.notification_email;
     if (toEmail) {
+      var siteName = CONFIG.site_name || CONFIG.project_slug || '';
       var displayKeys = Object.keys(fields).filter(function (k) { return k !== '_hp'; });
-      var lines = displayKeys.map(function (k) { return k + ': ' + fields[k]; }).join('\\n');
-      var subject = formConf.emailSubject || ('New ' + tabDef.label + ' submission');
+      var subject = formConf.emailSubject || ('New ' + tabDef.label + ' submission' + (siteName ? ' — ' + siteName : ''));
+      var bodyHeader = subject + '\\n' + new Array(subject.length + 1).join('-') + '\\n\\n';
+      var lines = bodyHeader + displayKeys.map(function (k) { return k + ': ' + fields[k]; }).join('\\n');
       var opts = {};
       if (formConf.ccEmails && formConf.ccEmails.length) opts.cc = formConf.ccEmails.join(',');
       if (formConf.bccEmails && formConf.bccEmails.length) opts.bcc = formConf.bccEmails.join(',');
