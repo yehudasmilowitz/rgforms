@@ -5,7 +5,7 @@ export function generateAppsScriptJson() {
     runtimeVersion: 'V8',
     oauthScopes: [
       'https://www.googleapis.com/auth/spreadsheets.currentonly',
-      'https://www.googleapis.com/auth/gmail.send',
+      'https://www.googleapis.com/auth/script.send_mail',
     ],
     webapp: {
       executeAs: 'USER_DEPLOYING',
@@ -122,7 +122,7 @@ function doPost(e) {
         opts.replyTo = String(fields[formConf.replyToField]);
       }
       try {
-        GmailApp.sendEmail(toEmail, subject, lines, opts);
+        MailApp.sendEmail(toEmail, subject, lines, opts);
       } catch (emailErr) {
         // don't fail the submission if email fails
       }
