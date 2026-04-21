@@ -86,7 +86,7 @@ function makeTabName(label: string, existing: string[]): string {
 // ─── CLAUDE.md generator ──────────────────────────────────────────────────────
 
 function generateClaudeMd(manifest: SiteManifest, date: string): string {
-  const { project_slug, script_url, script_token, sheet_url, drive_root_folder_url, tabs } = manifest;
+  const { project_slug, script_url, sheet_url, drive_root_folder_url, tabs } = manifest;
 
   const tabDocs = tabs
     .filter((tab) => tab.type === 'form')
@@ -119,24 +119,20 @@ One Google Sheet · One Apps Script web app · All submissions in your Google Dr
 - **Sheet**: ${sheet_url}
 - **Drive folder**: ${drive_root_folder_url}
 - **API endpoint**: \`${script_url}\`
-- **Token**: \`${script_token}\` — keep server-side only, never expose to browser
 
 ---
 
-## Next.js proxy (keeps token server-side)
+## Submitting to the endpoint
 
 \`\`\`typescript
-// app/api/form/submit/route.ts
-export async function POST(req: Request) {
-  const { tab, fields } = await req.json();
-  const res = await fetch(process.env.FORM_SCRIPT_URL!, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token: process.env.FORM_TOKEN, tab, fields }),
-  });
-  const data = await res.json();
-  return Response.json(data);
-}
+// POST directly from your site — no proxy needed
+const res = await fetch('${script_url}', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ tab: 'contact', fields }),
+});
+const data = await res.json();
+// { result: 'success' } or { result: 'error', error: '...' }
 \`\`\`
 
 ---
@@ -145,7 +141,6 @@ export async function POST(req: Request) {
 
 \`\`\`
 FORM_SCRIPT_URL=${script_url}
-FORM_TOKEN=${script_token}
 \`\`\`
 
 ---
@@ -159,7 +154,7 @@ ${tabDocs}
 ## Usage notes
 
 1. **Authorization**: Visit the script URL once in your browser as the account owner to authorize before first use.
-2. **Cold starts**: Apps Script takes ~800ms–2s cold. Always submit server-side.
+2. **Cold starts**: Apps Script takes ~800ms–2s cold. Consider a server-side proxy for production.
 3. **Form responses**: \`{ result: "success" }\` on success, \`{ result: "error", error: "..." }\` on failure.
 ${anyHoneypot ? `4. **Spam protection**: Honeypot-enabled — include \`<input type="text" name="_hp" style="display:none" tabindex="-1" />\`. Script silently discards submissions where this is filled.` : ''}
 
@@ -168,37 +163,28 @@ ${anyHoneypot ? `4. **Spam protection**: Honeypot-enabled — include \`<input t
 ## Instructions for Claude
 
 When building UI for this form:
-1. Use the proxy route above — never call the script URL directly from the browser.
-2. POST \`{ tab, fields }\` to \`/api/form/submit\`; check \`data.result === "success"\`.
-3. Never hardcode the script URL or token in client-side code.
+1. POST \`{ tab, fields }\` directly to \`${script_url}\`; check \`data.result === "success"\`.
+2. The endpoint is public — no token required.
 `;
 }
 
 // ─── Manifest guide ───────────────────────────────────────────────────────────
 
 function buildManifestGuide(manifest: SiteManifest) {
-  const { script_url, script_token } = manifest;
+  const { script_url } = manifest;
   return {
     _readme: 'Implementation guide — safe to delete once your form is wired up.',
-    security: {
-      note: 'Keep script_url and script_token in server-side env vars only. Never expose to the browser.',
-      env_example: `FORM_SCRIPT_URL=${script_url}\nFORM_TOKEN=${script_token}`,
-    },
     form_submissions: {
-      note: 'POST { tab, fields } to your proxy. Proxy adds token and forwards to Apps Script.',
+      note: 'POST { tab, fields } directly to script_url — no token required.',
       response_success: '{ result: "success" }',
       response_error:   '{ result: "error", error: "..." }',
       example: [
-        '// app/api/form/submit/route.ts',
-        'export async function POST(req) {',
-        '  const { tab, fields } = await req.json();',
-        '  const res = await fetch(process.env.FORM_SCRIPT_URL, {',
-        '    method: "POST", headers: { "Content-Type": "application/json" },',
-        '    body: JSON.stringify({ token: process.env.FORM_TOKEN, tab, fields }),',
-        '  });',
-        '  return Response.json(await res.json());',
-        '}',
+        'const res = await fetch(FORM_SCRIPT_URL, {',
+        '  method: "POST", headers: { "Content-Type": "application/json" },',
+        '  body: JSON.stringify({ tab: "contact", fields }),',
+        '});',
       ].join('\n'),
+      env_example: `FORM_SCRIPT_URL=${script_url}`,
     },
     authorization: 'Visit script_url once in your browser as the Google account owner to authorize.',
   };
@@ -527,15 +513,6 @@ export default function SiteKit() {
               {m.script_url}
             </span>
             <CopyButton text={m.script_url} />
-          </div>
-          <div className="flex items-center gap-2">
-            <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
-              Token: <code className="font-mono px-1.5 py-0.5 rounded text-[11px]"
-                style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
-                {m.script_token}
-              </code>
-            </p>
-            <CopyButton text={m.script_token} />
           </div>
           <div className="flex items-center gap-4 flex-wrap">
             {[

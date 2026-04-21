@@ -18,29 +18,23 @@ export function generateSiteScript(): string {
   return `
 var CONFIG = (function () {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('_manifest');
-  if (!sheet) return { tabs: [], script_token: '' };
+  if (!sheet) return { tabs: [] };
   var data = sheet.getDataRange().getValues();
   for (var i = 0; i < data.length; i++) {
     if (data[i][0] === 'manifest_json') {
-      try { return JSON.parse(data[i][1]); } catch (e) { return { tabs: [], script_token: '' }; }
+      try { return JSON.parse(data[i][1]); } catch (e) { return { tabs: [] }; }
     }
   }
-  return { tabs: [], script_token: '' };
+  return { tabs: [] };
 })();
 
 function doGet(e) {
-  var token = e.parameter.token;
+  var tabName = e.parameter.tab;
 
-  if (!token) {
+  if (!tabName) {
     return jsonResponse({ status: 'ok', message: 'RG Forms API is live.' });
   }
 
-  if (token !== CONFIG.script_token) {
-    return jsonResponse({ result: 'error', error: 'Unauthorized' });
-  }
-
-  var tabName = e.parameter.tab;
-  if (!tabName) return jsonResponse({ result: 'error', error: 'tab parameter required' });
 
   var tabDef = findTab(tabName);
   if (!tabDef) return jsonResponse({ result: 'error', error: 'Unknown tab: ' + tabName });
@@ -68,9 +62,6 @@ function doGet(e) {
 function doPost(e) {
   try {
     var body = JSON.parse(e.postData.contents);
-    if (!body.token || body.token !== CONFIG.script_token) {
-      return jsonResponse({ result: 'error', error: 'Unauthorized' });
-    }
 
     var tabDef = findTab(body.tab);
     if (!tabDef || tabDef.type !== 'form') {

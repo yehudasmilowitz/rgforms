@@ -57,7 +57,6 @@ export interface SiteManifest {
   created_at:            string;
   google_account:        string;
   script_url:            string;
-  script_token:          string;
   sheet_id:              string;
   sheet_url:             string;
   drive_root_folder_id:  string;

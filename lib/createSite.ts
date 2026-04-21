@@ -37,13 +37,6 @@ export const SITE_PROVISION_STEPS: Array<{ id: SiteProvisionStep; label: string 
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function generateToken(): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let t = 'rgf_';
-  for (let i = 0; i < 24; i++) t += chars[Math.floor(Math.random() * chars.length)];
-  return t;
-}
-
 function colLetter(n: number): string {
   let s = '';
   while (n > 0) {
@@ -129,7 +122,6 @@ export async function createSite(
   onStep: SiteProvisionCallback,
 ): Promise<SiteManifest> {
   const { siteName, notifyEmail, googleAccount, formLabel, formConfig } = input;
-  const scriptToken = generateToken();
   const createdAt   = new Date().toISOString();
   const projectSlug = siteName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const tabName     = 'contact';
@@ -231,7 +223,6 @@ export async function createSite(
     created_at:            createdAt,
     google_account:        googleAccount,
     script_url:            deploymentUrl,
-    script_token:          scriptToken,
     sheet_id:              sheetId,
     sheet_url:             sheetUrl,
     drive_root_folder_id:  rootFolderId,

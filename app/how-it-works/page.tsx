@@ -204,29 +204,23 @@ Live endpoint (after provisioning):
         <Section>
           <H2>Submitting to your endpoint</H2>
           <P>
-            Your endpoint accepts a JSON POST with a <code className="text-xs px-1 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>token</code>, <code className="text-xs px-1 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>tab</code>, and <code className="text-xs px-1 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>fields</code> object. Keep the token on the server side.
+            Your endpoint accepts a JSON POST with a <code className="text-xs px-1 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>tab</code> and <code className="text-xs px-1 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>fields</code> object. The endpoint is public — no token required, which means you can POST directly from a static site without a server proxy.
           </P>
           <div
             className="rounded-xl border p-5 font-mono text-xs leading-loose overflow-x-auto"
             style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}
           >
-            <pre>{`// Next.js server-side proxy (keeps token out of browser)
-// app/api/contact/route.ts
-
-export async function POST(req: Request) {
-  const { fields } = await req.json();
-  const res = await fetch(process.env.FORM_SCRIPT_URL!, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      token: process.env.FORM_TOKEN,
-      tab: 'contact',
-      fields,          // { name, email, phone, message, ... }
-    }),
-  });
-  return Response.json(await res.json());
-  // { result: 'success' } or { result: 'error', error: '...' }
-}`}</pre>
+            <pre>{`// POST directly from your site — no server proxy needed
+const res = await fetch(FORM_SCRIPT_URL, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    tab: 'contact',
+    fields,          // { name, email, phone, message, ... }
+  }),
+});
+const data = await res.json();
+// { result: 'success' } or { result: 'error', error: '...' }`}</pre>
           </div>
           <P>
             The CLAUDE.md export from your dashboard gives your Claude Code agent the exact field names, tab name, and endpoint URL — so it can wire up the form for you automatically.
