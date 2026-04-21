@@ -94,7 +94,27 @@ function doPost(e) {
       var subject = formConf.emailSubject || ('New ' + tabDef.label + ' submission' + (siteName ? ' — ' + siteName : ''));
       var bodyHeader = subject + '\\n' + new Array(subject.length + 1).join('-') + '\\n\\n';
       var lines = bodyHeader + displayKeys.map(function (k) { return k + ': ' + fields[k]; }).join('\\n');
-      var opts = {};
+      var htmlParts = displayKeys.map(function (k) {
+        var val = String(fields[k] !== undefined ? fields[k] : '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        return '<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #f3f4f6;">'
+          + '<p style="margin:0 0 3px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;">' + k + '</p>'
+          + '<p style="margin:0;font-size:14px;color:#111827;white-space:pre-wrap;">' + val + '</p>'
+          + '</div>';
+      });
+      var htmlBody = '<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;">'
+        + '<div style="background:#6c5ce7;padding:20px 24px;border-radius:8px 8px 0 0;">'
+        + '<p style="margin:0 0 2px;color:rgba(255,255,255,.65);font-size:11px;text-transform:uppercase;letter-spacing:.08em;">New submission</p>'
+        + '<h2 style="margin:0;color:#fff;font-size:18px;font-weight:600;">' + tabDef.label + '</h2>'
+        + (siteName ? '<p style="margin:4px 0 0;color:rgba(255,255,255,.65);font-size:13px;">' + siteName + '</p>' : '')
+        + '</div>'
+        + '<div style="padding:24px;background:#fff;border:1px solid #e5e7eb;border-top:none;">'
+        + htmlParts.join('')
+        + '</div>'
+        + '<div style="padding:12px 24px;background:#f9fafb;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px;">'
+        + '<p style="margin:0;font-size:11px;color:#9ca3af;">Sent via RG Forms</p>'
+        + '</div>'
+        + '</div>';
+      var opts = { htmlBody: htmlBody };
       if (formConf.ccEmails && formConf.ccEmails.length) opts.cc = formConf.ccEmails.join(',');
       if (formConf.bccEmails && formConf.bccEmails.length) opts.bcc = formConf.bccEmails.join(',');
       if (formConf.senderName) opts.name = formConf.senderName;
@@ -102,11 +122,7 @@ function doPost(e) {
         opts.replyTo = String(fields[formConf.replyToField]);
       }
       try {
-        if (Object.keys(opts).length > 0) {
-          GmailApp.sendEmail(toEmail, subject, lines, opts);
-        } else {
-          MailApp.sendEmail(toEmail, subject, lines);
-        }
+        GmailApp.sendEmail(toEmail, subject, lines, opts);
       } catch (emailErr) {
         // don't fail the submission if email fails
       }
