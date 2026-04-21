@@ -61,11 +61,11 @@ export default function Page() {
           </h1>
 
           <p className="text-xl sm:text-2xl font-semibold leading-snug" style={{ color: 'var(--color-text)' }}>
-            Contact forms straight to your Google Sheet.
+            Your contact form. Your design. Your website.
           </p>
 
-          <p className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            You get an email on every submission. No server, no monthly fees.
+          <p className="text-sm leading-relaxed max-w-sm" style={{ color: 'var(--color-muted)' }}>
+            Not a Google Form embed — a real POST endpoint you drop into any site or framework. Submissions go to your Sheet and hit your inbox instantly.
           </p>
         </motion.div>
 
@@ -77,9 +77,9 @@ export default function Page() {
         {/* ── Benefits ─────────────────────────────────────────────────────── */}
         <motion.div variants={fadeUp} className="w-full flex flex-col gap-2">
           {([
-            { icon: <Mail size={15} />, text: 'Email notification on every submission — instant, straight to your inbox' },
-            { icon: <ShieldCheck size={15} />, text: 'Your data stays in your own Google Drive — we never see it' },
-            { icon: <Zap size={15} />, text: 'Set up in 2 minutes — configure fields, connect Google, done' },
+            { icon: <Mail size={15} />, text: 'Email notification on every submission — straight to your inbox, instantly' },
+            { icon: <Zap size={15} />, text: 'Fully styled by you — it\'s your HTML, not an embedded Google Form' },
+            { icon: <ShieldCheck size={15} />, text: 'Works in any framework — Next.js, plain HTML, Webflow, no-code tools' },
           ] as const).map(({ icon, text }) => (
             <div
               key={text}
