@@ -204,16 +204,18 @@ Live endpoint (after provisioning):
         <Section>
           <H2>Submitting to your endpoint</H2>
           <P>
-            Your endpoint accepts a JSON POST with a <code className="text-xs px-1 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>tab</code> and <code className="text-xs px-1 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>fields</code> object. The endpoint is public — no token required, which means you can POST directly from a static site without a server proxy.
+            Your endpoint accepts a JSON POST with a <code className="text-xs px-1 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>tab</code> and <code className="text-xs px-1 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>fields</code> object. Use <code className="text-xs px-1 rounded font-mono" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>Content-Type: text/plain</code> — this avoids a CORS preflight that Apps Script cannot respond to, while the body is still parsed as JSON.
           </P>
           <div
             className="rounded-xl border p-5 font-mono text-xs leading-loose overflow-x-auto"
             style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-muted)' }}
           >
-            <pre>{`// POST directly from your site — no server proxy needed
+            <pre>{`// POST directly from your site — no server proxy needed.
+// Use Content-Type: text/plain to avoid a CORS preflight.
+// Apps Script reads e.postData.contents as JSON regardless.
 const res = await fetch(FORM_SCRIPT_URL, {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+  headers: { 'Content-Type': 'text/plain' },
   body: JSON.stringify({
     tab: 'contact',
     fields,          // { name, email, phone, message, ... }

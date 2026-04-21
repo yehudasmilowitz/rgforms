@@ -125,10 +125,13 @@ One Google Sheet · One Apps Script web app · All submissions in your Google Dr
 ## Submitting to the endpoint
 
 \`\`\`typescript
-// POST directly from your site — no proxy needed
+// POST directly from your site — no server proxy needed.
+// IMPORTANT: use Content-Type: text/plain to avoid a CORS preflight.
+// Apps Script ignores OPTIONS requests, so application/json will be
+// blocked by the browser. The body is still JSON; the script parses it fine.
 const res = await fetch('${script_url}', {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+  headers: { 'Content-Type': 'text/plain' },
   body: JSON.stringify({ tab: 'contact', fields }),
 });
 const data = await res.json();
@@ -154,17 +157,20 @@ ${tabDocs}
 ## Usage notes
 
 1. **Authorization**: Visit the script URL once in your browser as the account owner to authorize before first use.
-2. **Cold starts**: Apps Script takes ~800ms–2s cold. Consider a server-side proxy for production.
-3. **Form responses**: \`{ result: "success" }\` on success, \`{ result: "error", error: "..." }\` on failure.
-${anyHoneypot ? `4. **Spam protection**: Honeypot-enabled — include \`<input type="text" name="_hp" style="display:none" tabindex="-1" />\`. Script silently discards submissions where this is filled.` : ''}
+2. **CORS**: Always use \`Content-Type: text/plain\` — never \`application/json\`. Apps Script cannot respond to the CORS preflight that \`application/json\` triggers, which causes the browser to block the request. The body is still JSON; the script parses it correctly.
+3. **Cold starts**: Apps Script takes ~800ms–2s on the first request after inactivity. Normal after that.
+4. **Form responses**: \`{ result: "success" }\` on success, \`{ result: "error", error: "..." }\` on failure.
+${anyHoneypot ? `5. **Spam protection**: Honeypot-enabled — include \`<input type="text" name="_hp" style="display:none" tabindex="-1" />\`. Script silently discards submissions where this is filled.` : ''}
 
 ---
 
 ## Instructions for Claude
 
 When building UI for this form:
-1. POST \`{ tab, fields }\` directly to \`${script_url}\`; check \`data.result === "success"\`.
-2. The endpoint is public — no token required.
+1. POST \`{ tab, fields }\` directly to \`${script_url}\`.
+2. Set \`Content-Type: text/plain\` — NOT \`application/json\`. This prevents a CORS preflight that Apps Script cannot handle.
+3. The endpoint is public — no token required.
+4. Check \`data.result === "success"\` for the response.
 `;
 }
 
@@ -179,8 +185,9 @@ function buildManifestGuide(manifest: SiteManifest) {
       response_success: '{ result: "success" }',
       response_error:   '{ result: "error", error: "..." }',
       example: [
+        '// Use text/plain to avoid CORS preflight — body is still JSON',
         'const res = await fetch(FORM_SCRIPT_URL, {',
-        '  method: "POST", headers: { "Content-Type": "application/json" },',
+        '  method: "POST", headers: { "Content-Type": "text/plain" },',
         '  body: JSON.stringify({ tab: "contact", fields }),',
         '});',
       ].join('\n'),

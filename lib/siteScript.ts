@@ -35,7 +35,6 @@ function doGet(e) {
     return jsonResponse({ status: 'ok', message: 'RG Forms API is live.' });
   }
 
-
   var tabDef = findTab(tabName);
   if (!tabDef) return jsonResponse({ result: 'error', error: 'Unknown tab: ' + tabName });
 
