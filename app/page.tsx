@@ -6,21 +6,6 @@ import { motion } from 'motion/react'
 import { heroContainer, fadeUp, scaleIn } from '@/lib/animations'
 import { HeroScene } from '@/components/three/HeroScene'
 import AuthButton from '@/components/AuthButton'
-import FormBuilderScreen from '@/components/FormBuilder'
-import ProvisioningSteps from '@/components/ProvisioningSteps'
-import ResultPanel from '@/components/ResultPanel'
-import ContentBuilder from '@/components/ContentBuilder'
-import ContentResultPanel from '@/components/ContentResultPanel'
-import AssetBuilder from '@/components/AssetBuilder'
-import AssetResultPanel from '@/components/AssetResultPanel'
-import SiteConfigBuilder from '@/components/SiteConfigBuilder'
-import SiteConfigResultPanel from '@/components/SiteConfigResultPanel'
-import CalendarBuilder from '@/components/CalendarBuilder'
-import CalendarResultPanel from '@/components/CalendarResultPanel'
-import GalleryBuilder from '@/components/GalleryBuilder'
-import GalleryResultPanel from '@/components/GalleryResultPanel'
-import DynamicModuleBuilder from '@/components/DynamicModuleBuilder'
-import DynamicResultPanel from '@/components/DynamicResultPanel'
 import SiteStarter from '@/components/SiteStarter'
 import SiteStarterProgress from '@/components/SiteStarterProgress'
 import SiteKit from '@/components/SiteKit'
@@ -37,27 +22,6 @@ export default function Page() {
   }, [state.screen])
 
   if (state.screen === 'site-select') return <SiteSelect />
-  if (state.screen === 'builder') return <FormBuilderScreen />
-  if (state.screen === 'provisioning') return <ProvisioningSteps />
-  if (state.screen === 'result') return <ResultPanel />
-  if (state.screen === 'content-builder') return <ContentBuilder />
-  if (state.screen === 'content-provisioning') return <ProvisioningSteps />
-  if (state.screen === 'content-result') return <ContentResultPanel />
-  if (state.screen === 'asset-builder') return <AssetBuilder />
-  if (state.screen === 'asset-provisioning') return <ProvisioningSteps />
-  if (state.screen === 'asset-result') return <AssetResultPanel />
-  if (state.screen === 'siteconfig-builder') return <SiteConfigBuilder />
-  if (state.screen === 'siteconfig-provisioning') return <ProvisioningSteps />
-  if (state.screen === 'siteconfig-result') return <SiteConfigResultPanel />
-  if (state.screen === 'calendar-builder') return <CalendarBuilder />
-  if (state.screen === 'calendar-provisioning') return <ProvisioningSteps />
-  if (state.screen === 'calendar-result') return <CalendarResultPanel />
-  if (state.screen === 'gallery-builder') return <GalleryBuilder />
-  if (state.screen === 'gallery-provisioning') return <ProvisioningSteps />
-  if (state.screen === 'gallery-result') return <GalleryResultPanel />
-  if (state.screen === 'module-builder') return <DynamicModuleBuilder />
-  if (state.screen === 'module-provisioning') return <ProvisioningSteps />
-  if (state.screen === 'module-result') return <DynamicResultPanel />
   if (state.screen === 'site-starter') return <SiteStarter />
   if (state.screen === 'site-starter-provisioning') return <SiteStarterProgress />
   if (state.screen === 'site-kit') return <SiteKit />

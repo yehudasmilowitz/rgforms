@@ -215,9 +215,9 @@ export default function SiteSelect() {
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2 py-10 text-center">
-            <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>No sites yet</p>
+            <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>Nothing spinning yet</p>
             <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
-              Create your first site to get started.
+              Spin up your first site below.
             </p>
           </div>
         )}
