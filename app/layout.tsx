@@ -168,6 +168,12 @@ export default function RootLayout({
               >
                 Terms
               </Link>
+              <Link
+                href="/contact"
+                className="text-sm font-medium nav-link"
+              >
+                Contact
+              </Link>
             </nav>
           </div>
         </header>

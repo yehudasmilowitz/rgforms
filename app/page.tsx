@@ -142,6 +142,7 @@ export default function Page() {
             { href: '/how-it-works', label: 'How it works' },
             { href: '/privacy', label: 'Privacy' },
             { href: '/terms', label: 'Terms' },
+            { href: '/contact', label: 'Contact' },
           ].map(({ href, label }) => (
             <Link key={href} href={href} className="hover:underline transition-colors" style={{ color: 'var(--color-muted)' }}>
               {label}

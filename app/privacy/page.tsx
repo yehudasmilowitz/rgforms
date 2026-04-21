@@ -263,16 +263,14 @@ export default function PrivacyPage() {
         <Section>
           <H2>9. Contact</H2>
           <P>
-            Questions about this privacy policy? Contact us at{' '}
-            <a
-              href="https://rgmarketinggroup.com/"
-              target="_blank"
-              rel="noopener noreferrer"
+            Questions about this privacy policy?{' '}
+            <Link
+              href="/contact"
               style={{ color: 'var(--color-accent)' }}
               className="underline hover:no-underline"
             >
-              RG Marketing Group
-            </a>
+              Contact us
+            </Link>
             .
           </P>
         </Section>
