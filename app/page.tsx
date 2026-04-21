@@ -78,8 +78,8 @@ export default function Page() {
         <motion.div variants={fadeUp} className="w-full flex flex-col gap-2">
           {([
             { icon: <Mail size={15} />, text: 'Email notification on every submission — straight to your inbox, instantly' },
-            { icon: <Zap size={15} />, text: 'Fully styled by you — it\'s your HTML, not an embedded Google Form' },
-            { icon: <ShieldCheck size={15} />, text: 'Works in any framework — Next.js, plain HTML, Webflow, no-code tools' },
+            { icon: <Zap size={15} />, text: 'No backend to build — live endpoint in under 2 minutes, no server, no subscription' },
+            { icon: <ShieldCheck size={15} />, text: 'Your HTML, your design — drop into any site or framework, not a Google Form embed' },
           ] as const).map(({ icon, text }) => (
             <div
               key={text}
