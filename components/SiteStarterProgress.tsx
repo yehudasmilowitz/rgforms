@@ -7,22 +7,11 @@ import type { SiteStarterModuleProgress } from '@/types';
 // ─── Step / module type → human label map ────────────────────────────────────
 
 const STEP_LABELS: Record<string, string> = {
-  // v5 provision steps
   drive:    'Drive folder + asset storage',
   sheet:    'Google Sheet + tabs',
   script:   'Apps Script project',
   deploy:   'Web app deployment',
   manifest: 'Manifest + configuration',
-  // legacy module types (kept for backward compat)
-  siteconfig:  'Site Config',
-  gallery:     'Gallery',
-  content:     'Content',
-  calendar:    'Calendar',
-  testimonial: 'Testimonials',
-  faq:         'FAQ',
-  menu:        'Menu',
-  newsletter:  'Newsletter',
-  form:        'Form',
 };
 
 // ─── Status icons ─────────────────────────────────────────────────────────────

@@ -1,21 +1,12 @@
 'use client';
 
 import { createContext, useContext, useReducer, ReactNode } from 'react';
-import type {
-  AppState,
-  AppAction,
-  GoogleUser,
-  SiteStarterConfig,
-  SiteManifest,
-  SiteStarterModuleProgress,
-  SiteStarterResult,
-} from '@/types';
+import type { AppState, AppAction, SiteStarterConfig } from '@/types';
 
 const DEFAULT_SITE_STARTER_CONFIG: SiteStarterConfig = {
   template: null,
   siteName: '',
   notifyEmail: '',
-  projectId: '',
 };
 
 // ─── Initial state ────────────────────────────────────────────────────────────
@@ -23,12 +14,9 @@ const DEFAULT_SITE_STARTER_CONFIG: SiteStarterConfig = {
 const initialState: AppState = {
   screen: 'landing',
   auth: { user: null, accessToken: null },
-  // Site Starter
   siteStarterConfig: DEFAULT_SITE_STARTER_CONFIG,
   siteStarterProgress: [],
-  siteStarterResult: null,
   siteStarterError: null,
-  // Site manifest (v5)
   siteManifest: null,
   siteManifestError: null,
 };
@@ -38,7 +26,6 @@ const initialState: AppState = {
 function reducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
 
-    // ── Auth ──────────────────────────────────────────────────────────────────
     case 'SIGN_IN':
       return {
         ...state,
@@ -49,13 +36,11 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'SIGN_OUT':
       return { ...initialState };
 
-    // ── Site Starter ──────────────────────────────────────────────────────────
     case 'GO_TO_SITE_STARTER':
       return {
         ...state,
         screen: 'site-starter',
         siteStarterProgress: [],
-        siteStarterResult: null,
         siteStarterError: null,
       };
     case 'SET_SITE_STARTER_CONFIG':
@@ -76,8 +61,6 @@ function reducer(state: AppState, action: AppAction): AppState {
             : m,
         ),
       };
-    case 'SET_SITE_STARTER_RESULT':
-      return { ...state, screen: 'site-kit', siteStarterResult: action.payload };
     case 'SITE_STARTER_ERROR':
       return { ...state, screen: 'site-starter', siteStarterError: action.payload };
     case 'RESET_SITE_STARTER':
@@ -86,11 +69,9 @@ function reducer(state: AppState, action: AppAction): AppState {
         screen: 'site-select',
         siteStarterConfig: { ...DEFAULT_SITE_STARTER_CONFIG, notifyEmail: state.auth.user?.email ?? '' },
         siteStarterProgress: [],
-        siteStarterResult: null,
         siteStarterError: null,
       };
 
-    // ── Site manifest ─────────────────────────────────────────────────────────
     case 'OPEN_SITE':
     case 'SET_SITE_MANIFEST':
       return { ...state, screen: 'site-kit', siteManifest: action.payload, siteManifestError: null };
@@ -106,20 +87,11 @@ function reducer(state: AppState, action: AppAction): AppState {
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
-interface AppContextValue {
-  state: AppState;
-  dispatch: React.Dispatch<AppAction>;
-}
-
-const AppContext = createContext<AppContextValue | null>(null);
+const AppContext = createContext<{ state: AppState; dispatch: React.Dispatch<AppAction> } | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  return (
-    <AppContext.Provider value={{ state, dispatch }}>
-      {children}
-    </AppContext.Provider>
-  );
+  return <AppContext.Provider value={{ state, dispatch }}>{children}</AppContext.Provider>;
 }
 
 export function useApp() {

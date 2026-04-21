@@ -75,7 +75,6 @@ export interface SiteStarterConfig {
   customModules?: Array<{ moduleType: string; nameSuffix: string }>;
   siteName: string;
   notifyEmail: string;
-  projectId: string;
 }
 
 export interface SiteStarterModuleProgress {
@@ -88,13 +87,6 @@ export interface SiteStarterModuleProgress {
   error?: string;
 }
 
-export interface SiteStarterResult {
-  projectId: string;
-  projectName: string;
-  template: string;
-  modules: SiteStarterModuleProgress[];
-}
-
 // ─── App State ───────────────────────────────────────────────────────────────
 
 export interface AppState {
@@ -102,7 +94,6 @@ export interface AppState {
   auth: AuthState;
   siteStarterConfig: SiteStarterConfig;
   siteStarterProgress: SiteStarterModuleProgress[];
-  siteStarterResult: SiteStarterResult | null;
   siteStarterError: string | null;
   siteManifest: SiteManifest | null;
   siteManifestError: string | null;
@@ -115,7 +106,6 @@ export type AppAction =
   | { type: 'SET_SITE_STARTER_CONFIG'; payload: Partial<SiteStarterConfig> }
   | { type: 'START_SITE_STARTER_PROVISIONING'; payload: SiteStarterModuleProgress[] }
   | { type: 'UPDATE_SITE_STARTER_MODULE'; payload: Partial<SiteStarterModuleProgress> & { moduleType: string; moduleName: string } }
-  | { type: 'SET_SITE_STARTER_RESULT'; payload: SiteStarterResult }
   | { type: 'SITE_STARTER_ERROR'; payload: string }
   | { type: 'RESET_SITE_STARTER' }
   | { type: 'SET_SITE_MANIFEST'; payload: SiteManifest }
