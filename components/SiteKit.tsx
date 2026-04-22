@@ -697,48 +697,6 @@ export default function SiteKit() {
           )}
         </div>
 
-        {/* Authorization */}
-        <div className="rounded-xl overflow-hidden border" style={{ borderColor: 'oklch(0.78 0.18 75 / 0.30)' }}>
-          <div className="flex items-center gap-3 px-4 py-2.5"
-            style={{ background: 'oklch(0.78 0.18 75 / 0.08)', borderBottom: '1px solid oklch(0.78 0.18 75 / 0.20)' }}>
-            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'oklch(0.78 0.18 75)' }} />
-            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'oklch(0.78 0.18 75)' }}>
-              One-time authorization required
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 px-4 py-4" style={{ background: 'var(--color-surface)' }}>
-            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-              Open the script in your browser. Google will ask you to authorize it once. After approving you&apos;ll see:
-            </p>
-            <div className="rounded-lg overflow-hidden border" style={{ borderColor: 'var(--color-border)' }}>
-              <div className="flex items-center gap-2 px-3 py-1.5"
-                style={{ background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)' }}>
-                <div className="flex gap-1.5">
-                  {['oklch(0.65 0.20 25)', 'oklch(0.78 0.18 75)', 'oklch(0.72 0.18 145)'].map((c) => (
-                    <span key={c} className="w-2.5 h-2.5 rounded-full" style={{ background: c }} />
-                  ))}
-                </div>
-                <span className="text-[10px] font-mono truncate flex-1" style={{ color: 'var(--color-subtle)' }}>
-                  {m.script_url.slice(0, 60)}…
-                </span>
-              </div>
-              <div className="px-4 py-3" style={{ background: 'var(--color-bg)' }}>
-                <pre className="text-[11px] font-mono leading-relaxed" style={{ color: 'var(--color-success)' }}>
-{`{
-  "status": "ok",
-  "message": "RG Forms API is live."
-}`}
-                </pre>
-              </div>
-            </div>
-            <a href={m.script_url} target="_blank" rel="noopener noreferrer"
-              className="self-start inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold"
-              style={{ background: 'oklch(0.78 0.18 75 / 0.12)', color: 'oklch(0.78 0.18 75)', border: '1px solid oklch(0.78 0.18 75 / 0.30)' }}>
-              <ExternalLinkIcon /> Open Script to Authorize
-            </a>
-          </div>
-        </div>
-
         {/* Actions */}
         <div className="flex gap-3 flex-wrap">
           <button type="button" onClick={handlePreviewClaudeMd}
