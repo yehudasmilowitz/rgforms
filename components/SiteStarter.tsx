@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { useApp } from '@/context/AppContext';
 import { createSite, SITE_PROVISION_STEPS } from '@/lib/createSite';
+import { AppsScriptUserSettingError } from '@/lib/core/provisionHelpers';
 import type { SiteStarterModuleProgress, SiteTabFormConfig } from '@/types';
 import FormFieldEditor, { DEFAULT_FORM_CONFIG } from '@/components/FormFieldEditor';
 
@@ -74,8 +75,12 @@ export default function SiteStarter() {
 
       dispatch({ type: 'SET_SITE_MANIFEST', payload: manifest });
     } catch (err) {
-      setErrorMsg((err as Error).message);
-      dispatch({ type: 'SITE_MANIFEST_ERROR', payload: (err as Error).message });
+      if (err instanceof AppsScriptUserSettingError) {
+        // Stay on the provisioning screen — the dedicated callout is shown there
+      } else {
+        setErrorMsg((err as Error).message);
+        dispatch({ type: 'SITE_MANIFEST_ERROR', payload: (err as Error).message });
+      }
     } finally {
       setLaunching(false);
     }
