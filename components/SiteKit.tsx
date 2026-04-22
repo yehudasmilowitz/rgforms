@@ -47,6 +47,62 @@ function SpinnerIcon() {
   );
 }
 
+function InfoIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.4"/>
+      <path d="M6 5.5v3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+      <circle cx="6" cy="3.75" r="0.6" fill="currentColor"/>
+    </svg>
+  );
+}
+
+// ─── Tooltip link ─────────────────────────────────────────────────────────────
+
+function TooltipLink({ href, label, tooltip }: { href: string; label: string; tooltip: string }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative inline-flex items-center gap-1">
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 text-xs font-medium"
+        style={{ color: 'var(--color-muted)' }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-muted)'; }}
+      >
+        <ExternalLinkIcon /> {label}
+      </a>
+      <button
+        type="button"
+        aria-label="More info"
+        className="flex items-center"
+        style={{ color: 'var(--color-muted)' }}
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+        onFocus={() => setShow(true)}
+        onBlur={() => setShow(false)}
+      >
+        <InfoIcon />
+      </button>
+      {show && (
+        <div
+          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 rounded-lg px-3 py-2 text-xs leading-relaxed shadow-lg z-10 pointer-events-none"
+          style={{
+            background:  'var(--color-surface-2)',
+            border:      '1px solid var(--color-border)',
+            color:       'var(--color-text)',
+          }}
+          role="tooltip"
+        >
+          {tooltip}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Copy button ──────────────────────────────────────────────────────────────
 
 function CopyButton({ text }: { text: string }) {
@@ -523,8 +579,8 @@ export default function SiteKit() {
           </div>
           <div className="flex items-center gap-4 flex-wrap">
             {[
-              { label: 'Open Google Sheet',  href: m.sheet_url },
-              { label: 'Open Drive Folder',  href: m.drive_root_folder_url },
+              { label: 'Open Google Sheet', href: m.sheet_url },
+              { label: 'Open Drive Folder', href: m.drive_root_folder_url },
             ].map((link) => (
               <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs font-medium"
@@ -534,6 +590,11 @@ export default function SiteKit() {
                 <ExternalLinkIcon /> {link.label}
               </a>
             ))}
+            <TooltipLink
+              href={m.script_url}
+              label="Open Script to Authorize"
+              tooltip="Google requires a one-time authorization after your script is deployed. Click to open the script in your browser, then approve the permissions dialog when prompted. You only need to do this once."
+            />
           </div>
         </div>
 
