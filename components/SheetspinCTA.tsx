@@ -19,7 +19,7 @@ export default function SheetspinCTA() {
           Need a full website backend? Try Sheetspin →
         </p>
         <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-          AI provisions a complete multi-tab Google Sheet backend — blog, gallery, events, newsletter, site config, and more — in under 2 minutes.
+          Instantly provision a complete multi-tab Google Sheet backend — blog, gallery, events, newsletter, site config, and more — in under 2 minutes.
         </p>
       </div>
       <span className="text-xl shrink-0" style={{ color: 'var(--color-accent)' }}>✦</span>

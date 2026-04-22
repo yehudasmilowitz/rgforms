@@ -127,7 +127,7 @@ export default function Page() {
               Need a full site backend? Try Sheetspin →
             </p>
             <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-              AI provisions a complete Google Sheet backend — blog, gallery, events, newsletter, and more — in under 2 minutes.
+              Instantly provision a complete Google Sheet backend — blog, gallery, events, newsletter, and more — in under 2 minutes.
             </p>
           </div>
           <span className="text-xl shrink-0" style={{ color: 'var(--color-accent)' }}>✦</span>
