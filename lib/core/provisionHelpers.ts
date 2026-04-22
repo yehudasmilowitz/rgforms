@@ -15,12 +15,12 @@ export const SHEETS_API = 'https://sheets.googleapis.com/v4/spreadsheets';
 export const SCRIPT_API = 'https://script.googleapis.com/v1/projects';
 export const DRIVE_API  = 'https://www.googleapis.com/drive/v3/files';
 
-// ─── Error class ──────────────────────────────────────────────────────────────
+// ─── Error classes ────────────────────────────────────────────────────────────
 
-export class AppsScriptApiDisabledError extends Error {
+export class AppsScriptUserSettingError extends Error {
   constructor() {
-    super('AppsScriptApiDisabledError');
-    this.name = 'AppsScriptApiDisabledError';
+    super('Apps Script access needs to be enabled in your Google account settings.');
+    this.name = 'AppsScriptUserSettingError';
   }
 }
 
@@ -44,7 +44,7 @@ export async function apiCall<T>(url: string, options: RequestInit): Promise<T> 
     if (res.status === 403 && body.error?.status === 'PERMISSION_DENIED') {
       const details = (body.error.details ?? []) as Array<{ reason?: string }>;
       if (!details.some((d) => d.reason === 'ACCESS_TOKEN_SCOPE_INSUFFICIENT')) {
-        throw new AppsScriptApiDisabledError();
+        throw new AppsScriptUserSettingError();
       }
     }
     throw new Error(body.error?.message ?? `API error: ${res.status}`);

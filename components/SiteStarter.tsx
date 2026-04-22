@@ -63,11 +63,11 @@ export default function SiteStarter() {
           formLabel:     formLabel.trim() || 'Contact Form',
           formConfig,
         },
-        (step, status, error) => {
+        (step, status, error, errorCode) => {
           const label = SITE_PROVISION_STEPS.find((s) => s.id === step)?.label ?? step;
           dispatch({
             type:    'UPDATE_SITE_STARTER_MODULE',
-            payload: { moduleType: step, moduleName: label, status, error },
+            payload: { moduleType: step, moduleName: label, status, error, errorCode },
           });
         },
       );

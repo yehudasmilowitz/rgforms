@@ -125,7 +125,34 @@ function ModuleRow({ mod, index }: { mod: SiteStarterModuleProgress; index: numb
           </span>
         )}
 
-        {mod.status === 'error' && mod.error && (
+        {mod.status === 'error' && mod.errorCode === 'apps-script-user-setting' && (
+          <div
+            className="mt-2 flex flex-col gap-2 p-3 rounded-lg text-xs leading-relaxed"
+            style={{ background: 'oklch(0.40 0.18 25 / 0.08)', border: '1px solid oklch(0.55 0.20 25 / 0.25)' }}
+            role="alert"
+          >
+            <p style={{ color: 'var(--color-text)' }}>
+              Google requires you to opt in to Apps Script access once in your account settings. This is a one-time step — it only takes a few seconds.
+            </p>
+            <a
+              href="https://script.google.com/home/usersettings"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="self-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold text-xs transition-opacity hover:opacity-80"
+              style={{ background: 'var(--color-accent)', color: 'white' }}
+            >
+              Open Google Account Settings
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                <path d="M2 8L8 2M8 2H4M8 2v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </a>
+            <p style={{ color: 'var(--color-muted)' }}>
+              After enabling Apps Script API, come back and try again.
+            </p>
+          </div>
+        )}
+
+        {mod.status === 'error' && !mod.errorCode && mod.error && (
           <span className="text-xs leading-relaxed" style={{ color: 'var(--color-error)' }} role="alert">
             {mod.error}
           </span>
@@ -207,22 +234,33 @@ export default function SiteStarterProgress() {
         )}
 
         {/* Partial success / error */}
-        {allDone && hasError && (
-          <motion.div
-            className="flex flex-col gap-1 py-3 px-4 rounded-xl"
-            style={{ background: 'oklch(0.40 0.18 25 / 0.10)', border: '1px solid oklch(0.55 0.20 25 / 0.30)' }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            role="alert"
-          >
-            <p className="text-sm font-medium" style={{ color: 'var(--color-error)' }}>
-              Some modules failed to provision
-            </p>
-            <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
-              {complete} of {total} modules succeeded. The result screen will show what&apos;s available.
-            </p>
-          </motion.div>
-        )}
+        {allDone && hasError && (() => {
+          const userSettingFailed = siteStarterProgress.some((m) => m.errorCode === 'apps-script-user-setting');
+          return (
+            <motion.div
+              className="flex flex-col gap-1 py-3 px-4 rounded-xl"
+              style={{ background: 'oklch(0.40 0.18 25 / 0.10)', border: '1px solid oklch(0.55 0.20 25 / 0.30)' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              role="alert"
+            >
+              {userSettingFailed ? (
+                <p className="text-sm font-medium" style={{ color: 'var(--color-error)' }}>
+                  Enable Apps Script in your Google account settings, then try again.
+                </p>
+              ) : (
+                <>
+                  <p className="text-sm font-medium" style={{ color: 'var(--color-error)' }}>
+                    Some steps failed to complete
+                  </p>
+                  <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
+                    {complete} of {total} steps succeeded. Please try again.
+                  </p>
+                </>
+              )}
+            </motion.div>
+          );
+        })()}
       </motion.div>
     </main>
   );

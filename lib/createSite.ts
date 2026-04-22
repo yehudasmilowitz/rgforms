@@ -4,7 +4,7 @@ import {
   DRIVE_API,
   authHeaders,
   apiCall,
-  AppsScriptApiDisabledError,
+  AppsScriptUserSettingError,
   createScriptProject,
   uploadCode,
   deployWebApp,
@@ -25,6 +25,7 @@ export type SiteProvisionCallback = (
   step: SiteProvisionStep,
   status: SiteProvisionStatus,
   error?: string,
+  errorCode?: string,
 ) => void;
 
 export const SITE_PROVISION_STEPS: Array<{ id: SiteProvisionStep; label: string }> = [
@@ -197,9 +198,11 @@ export async function createSite(
     await uploadCode(token, scriptId, generateSiteScript(), generateAppsScriptJson());
     onStep('script', 'complete');
   } catch (err) {
-    if (err instanceof AppsScriptApiDisabledError) {
+    if (err instanceof AppsScriptUserSettingError) {
       await fetch(`${DRIVE_API}/${sheetId}`, { method: 'DELETE', headers: authHeaders(token) }).catch(() => {});
-      await fetch(`${DRIVE_API}/${rootFolderId}?supportsAllDrives=true`, { method: 'DELETE', headers: authHeaders(token) }).catch(() => {});
+      await fetch(`${DRIVE_API}/${rootFolderId}`, { method: 'DELETE', headers: authHeaders(token) }).catch(() => {});
+      onStep('script', 'error', (err as Error).message, 'apps-script-user-setting');
+      throw err;
     }
     onStep('script', 'error', (err as Error).message);
     throw err;

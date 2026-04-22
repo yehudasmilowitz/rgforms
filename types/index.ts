@@ -85,6 +85,7 @@ export interface SiteStarterModuleProgress {
   sheetId?: string;
   sheetUrl?: string;
   error?: string;
+  errorCode?: string;
 }
 
 // ─── App State ───────────────────────────────────────────────────────────────
