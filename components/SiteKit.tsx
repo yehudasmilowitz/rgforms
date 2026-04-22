@@ -59,26 +59,55 @@ function InfoIcon() {
 
 // ─── Tooltip link ─────────────────────────────────────────────────────────────
 
-function TooltipLink({ href, label, tooltip }: { href: string; label: string; tooltip: string }) {
+function WarningIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M6 1L11.2 10H.8L6 1z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+      <path d="M6 5v2.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+      <circle cx="6" cy="9" r="0.6" fill="currentColor"/>
+    </svg>
+  );
+}
+
+function TooltipLink({ href, label, tooltip, variant = 'default' }: {
+  href: string;
+  label: string;
+  tooltip: string;
+  variant?: 'default' | 'warning';
+}) {
   const [show, setShow] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
+  const isWarning = variant === 'warning';
+  const amber = 'oklch(0.78 0.18 75)';
+
   return (
     <div className="relative inline-flex items-center gap-1">
       <a
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 text-xs font-medium"
-        style={{ color: 'var(--color-muted)' }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-muted)'; }}
+        className="inline-flex items-center gap-1.5 text-xs font-semibold transition-colors"
+        style={isWarning ? {
+          background:   hovered ? 'oklch(0.78 0.18 75 / 0.18)' : 'oklch(0.78 0.18 75 / 0.10)',
+          border:       `1px solid oklch(0.78 0.18 75 / 0.40)`,
+          color:        amber,
+          borderRadius: '999px',
+          padding:      '3px 10px 3px 8px',
+        } : {
+          color: hovered ? 'var(--color-accent)' : 'var(--color-muted)',
+        }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
       >
-        <ExternalLinkIcon /> {label}
+        {isWarning ? <WarningIcon /> : <ExternalLinkIcon />}
+        {label}
       </a>
       <button
         type="button"
         aria-label="More info"
         className="flex items-center"
-        style={{ color: 'var(--color-muted)' }}
+        style={{ color: isWarning ? amber : 'var(--color-muted)' }}
         onMouseEnter={() => setShow(true)}
         onMouseLeave={() => setShow(false)}
         onFocus={() => setShow(true)}
@@ -90,9 +119,9 @@ function TooltipLink({ href, label, tooltip }: { href: string; label: string; to
         <div
           className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 rounded-lg px-3 py-2 text-xs leading-relaxed shadow-lg z-10 pointer-events-none"
           style={{
-            background:  'var(--color-surface-2)',
-            border:      '1px solid var(--color-border)',
-            color:       'var(--color-text)',
+            background: 'var(--color-surface-2)',
+            border:     '1px solid var(--color-border)',
+            color:      'var(--color-text)',
           }}
           role="tooltip"
         >
@@ -594,6 +623,7 @@ export default function SiteKit() {
               href={m.script_url}
               label="Open Script to Authorize"
               tooltip="Google requires a one-time authorization after your script is deployed. Click to open the script in your browser, then approve the permissions dialog when prompted. You only need to do this once."
+              variant="warning"
             />
           </div>
         </div>
