@@ -150,7 +150,7 @@ export async function createSite(
   try {
     ({ sheetId, sheetUrl, tabGids } = await createMultiTabSheet(
       token,
-      `${siteName} — Contact Form`,
+      `${siteName} — Forms`,
       [{ title: tabName }, { title: '_manifest', hidden: true }],
     ));
 
@@ -194,7 +194,7 @@ export async function createSite(
   let deploymentUrl = '';
 
   try {
-    ({ scriptId } = await createScriptProject(token, `${siteName} — Contact Form API`, sheetId));
+    ({ scriptId } = await createScriptProject(token, `${siteName} — Forms API`, sheetId));
     await uploadCode(token, scriptId, generateSiteScript(), generateAppsScriptJson());
     onStep('script', 'complete');
   } catch (err) {
@@ -210,7 +210,7 @@ export async function createSite(
 
   onStep('deploy', 'running');
   try {
-    deploymentUrl = await deployWebApp(token, scriptId, `${siteName} Contact Form API`);
+    deploymentUrl = await deployWebApp(token, scriptId, `${siteName} — Forms API`);
     onStep('deploy', 'complete');
   } catch (err) {
     onStep('deploy', 'error', (err as Error).message);

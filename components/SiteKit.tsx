@@ -8,6 +8,7 @@ import {
   addTabToSheet,
   removeTabFromSheet,
   updateTabHeaders,
+  renameSite,
 } from '@/lib/siteTabHelpers';
 import { toFieldKey } from '@/lib/createSite';
 import FormFieldEditor, { DEFAULT_FORM_CONFIG } from '@/components/FormFieldEditor';
@@ -471,9 +472,13 @@ export default function SiteKit() {
   const [addFormLabel,   setAddFormLabel]   = useState('');
   const [addFormConfig,  setAddFormConfig]  = useState<SiteTabFormConfig>({ ...DEFAULT_FORM_CONFIG });
 
-  const [saving,  setSaving]  = useState(false);
-  const [error,   setError]   = useState('');
-  const [preview, setPreview] = useState<PreviewEntry | null>(null);
+  const [saving,         setSaving]         = useState(false);
+  const [error,          setError]          = useState('');
+  const [preview,        setPreview]        = useState<PreviewEntry | null>(null);
+
+  const [renamingProject, setRenamingProject] = useState(false);
+  const [renameValue,     setRenameValue]     = useState('');
+  const [renameSaving,    setRenameSaving]    = useState(false);
 
   if (!manifest) return null;
   const m: SiteManifest = manifest;
@@ -552,6 +557,26 @@ export default function SiteKit() {
     setPreview({ title: 'CLAUDE.md — AI instructions', content, filename: 'CLAUDE.md' });
   }
 
+  function startRename() {
+    setRenameValue(m.site_name);
+    setRenamingProject(true);
+  }
+
+  async function handleRenameProject() {
+    const newName = renameValue.trim();
+    if (!newName || newName === m.site_name) { setRenamingProject(false); return; }
+    setRenameSaving(true); setError('');
+    try {
+      await renameSite(token, m.sheet_id, m.drive_root_folder_id, newName);
+      const newSlug     = newName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const newManifest = { ...m, site_name: newName, project_slug: newSlug };
+      await updateManifestInSheet(token, m.sheet_id, newManifest);
+      dispatch({ type: 'UPDATE_SITE_MANIFEST', payload: newManifest });
+      setRenamingProject(false);
+    } catch (err) { setError((err as Error).message); }
+    finally { setRenameSaving(false); }
+  }
+
   return (
     <motion.main
       className="min-h-screen flex flex-col px-4 py-10"
@@ -568,9 +593,44 @@ export default function SiteKit() {
             <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-subtle)' }}>
               {m.google_account}
             </p>
-            <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
-              {m.project_slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
-            </h1>
+            {renamingProject ? (
+              <div className="flex items-center gap-2">
+                <input
+                  autoFocus
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleRenameProject(); if (e.key === 'Escape') setRenamingProject(false); }}
+                  disabled={renameSaving}
+                  className="text-2xl sm:text-3xl font-bold bg-transparent border-b-2 outline-none w-full"
+                  style={{ color: 'var(--color-text)', borderColor: 'var(--color-accent)' }}
+                />
+                <button type="button" onClick={handleRenameProject} disabled={renameSaving}
+                  className="shrink-0 text-xs font-semibold px-3 py-1 rounded-lg transition-colors disabled:opacity-50"
+                  style={{ background: 'var(--color-accent)', color: '#fff' }}>
+                  {renameSaving ? <SpinnerIcon /> : 'Save'}
+                </button>
+                <button type="button" onClick={() => setRenamingProject(false)} disabled={renameSaving}
+                  className="shrink-0 text-xs font-medium px-2 py-1 rounded-lg transition-colors"
+                  style={{ color: 'var(--color-muted)', background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 group">
+                <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
+                  {m.site_name}
+                </h1>
+                <button type="button" onClick={startRename} title="Rename project"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded"
+                  style={{ color: 'var(--color-muted)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-text)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-muted)'; }}>
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                    <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5zM8.5 3.5l2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            )}
             <p className="text-sm" style={{ color: 'var(--color-muted)' }}>
               {m.tabs.length} form{m.tabs.length !== 1 ? 's' : ''} · created {date}
             </p>

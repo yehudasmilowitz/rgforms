@@ -133,6 +133,27 @@ export async function appendTabRows(
   );
 }
 
+export async function renameSite(
+  token: string,
+  sheetId: string,
+  folderId: string,
+  newName: string,
+): Promise<void> {
+  await fetch(`${SHEETS_API}/${sheetId}:batchUpdate`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({
+      requests: [{ updateSpreadsheetProperties: { properties: { title: `${newName} — Forms` }, fields: 'title' } }],
+    }),
+  });
+
+  await fetch(`${DRIVE_API}/${folderId}`, {
+    method: 'PATCH',
+    headers: authHeaders(token),
+    body: JSON.stringify({ name: `${newName} — RG Forms` }),
+  });
+}
+
 export async function createAssetFolder(
   token: string,
   folderName: string,
