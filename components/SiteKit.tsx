@@ -170,7 +170,7 @@ function makeTabName(label: string, existing: string[]): string {
   return `${base}${n}`;
 }
 
-// ─── CLAUDE.md generator ──────────────────────────────────────────────────────
+// ─── RGFORMS.md generator ─────────────────────────────────────────────────────
 
 function generateClaudeMd(manifest: SiteManifest, date: string): string {
   const { project_slug, script_url, sheet_url, drive_root_folder_url, tabs } = manifest;
@@ -251,7 +251,7 @@ ${anyHoneypot ? `5. **Spam protection**: Honeypot-enabled — include \`<input t
 
 ---
 
-## Instructions for Claude
+## Instructions for AI assistants
 
 When building UI for this form:
 1. POST \`{ tab, fields }\` directly to \`${script_url}\`.
@@ -565,7 +565,7 @@ export default function SiteKit() {
 
   function handlePreviewClaudeMd() {
     const content = generateClaudeMd(m, date);
-    setPreview({ title: 'CLAUDE.md — AI instructions', content, filename: 'CLAUDE.md' });
+    setPreview({ title: 'RGFORMS.md — AI skill', content, filename: 'RGFORMS.md' });
   }
 
   function startRename() {
@@ -809,7 +809,7 @@ export default function SiteKit() {
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M1 3h12M1 7h8M1 11h5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
             </svg>
-            AI Skill (CLAUDE.md)
+            AI Skill (RGFORMS.md)
           </button>
           <button type="button" onClick={handlePreviewManifest}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl border text-sm font-medium transition-colors focus:outline-none"
