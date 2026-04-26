@@ -225,7 +225,7 @@ const data = await res.json();
 // { result: 'success' } or { result: 'error', error: '...' }`}</pre>
           </div>
           <P>
-            The CLAUDE.md export from your dashboard gives your Claude Code agent the exact field names, tab name, and endpoint URL — so it can wire up the form for you automatically.
+            The RGFORMS.md export from your dashboard gives any AI assistant the exact field names, tab name, and endpoint URL — so it can wire up the form for you automatically.
           </P>
         </Section>
 
@@ -240,7 +240,7 @@ const data = await res.json();
               { title: 'Honeypot spam protection', desc: 'A hidden field bots fill out; the script silently discards those submissions.' },
               { title: 'Multiple forms', desc: 'Add more form tabs to the same sheet from the dashboard — separate tabs, same endpoint.' },
               { title: 'Edit fields any time', desc: 'Update labels, add fields, remove fields — no reprovisioning or redeployment needed.' },
-              { title: 'CLAUDE.md export', desc: 'Export an AI skill file so Claude Code can wire up your form in a new project instantly.' },
+              { title: 'RGFORMS.md export', desc: 'Export an AI skill file compatible with any AI IDE — Claude Code, Cursor, Copilot, Windsurf, and more.' },
               { title: 'Manifest JSON', desc: 'Download your full configuration as JSON for your own records or tooling.' },
             ].map(({ title, desc }) => (
               <div

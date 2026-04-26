@@ -14,7 +14,7 @@ RG Forms provisions your entire website's data backend inside your own Google Dr
 2. **Review and customize** — edit field labels, types, email settings, and spam protection per module
 3. **Provision everything** — one Google Sheet, one Drive folder, one Apps Script web app
 4. **Manage post-launch** — add/remove modules, edit form fields, seed AI data, all without redeploying
-5. **Export CLAUDE.md** — a skill file that makes Claude Code an agent for your site's API
+5. **Export RGFORMS.md** — an AI skill file that works with Claude Code, Cursor, Copilot, Windsurf, and any other AI IDE
 
 No RG Forms server is ever involved in provisioning or in serving your site's data. Every API call is made from your browser using your own OAuth token. Everything belongs entirely to you.
 
@@ -67,9 +67,9 @@ This means adding, removing, or editing modules only requires updating the sheet
 
 ---
 
-## CLAUDE.md skill export
+## RGFORMS.md skill export
 
-The Site Kit generates a `CLAUDE.md` file you can drop into any project. It gives Claude Code full knowledge of:
+The Site Kit generates a `RGFORMS.md` file you can drop into any project. It gives any AI IDE full knowledge of:
 
 - Your API endpoint URL and auth token
 - Every form module, tab name, and field schema
@@ -158,7 +158,7 @@ lib/
 
 components/
   SiteStarter.tsx       AI site builder — describe → propose → customize → provision
-  SiteKit.tsx           Site management — modules, form editor, AI seed, CLAUDE.md export
+  SiteKit.tsx           Site management — modules, form editor, AI seed, RGFORMS.md export
   SiteSelect.tsx        Site list — open, create, delete sites
   FormFieldEditor.tsx   Per-form field config (labels, types, required, email settings)
 

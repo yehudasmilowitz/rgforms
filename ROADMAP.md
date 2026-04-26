@@ -9,7 +9,7 @@ Instead of provisioning modules one at a time, the user picks a website template
 2. User enters one site name (used as prefix for all module names)
 3. Provision all modules in **parallel** with a combined progress view ("Creating 5 modules… 3 of 5 done")
 4. Show a final **Site Kit** screen — all endpoints organized by module in one place
-5. One-click export of a fully-populated CLAUDE.md / `.cursorrules` that teaches an AI the full site setup
+5. One-click export of a fully-populated RGFORMS.md that teaches any AI IDE the full site setup
 
 ### Templates
 
