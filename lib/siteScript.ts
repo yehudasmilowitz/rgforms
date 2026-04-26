@@ -1,12 +1,11 @@
-export function generateAppsScriptJson() {
+export function generateAppsScriptJson(notificationsEnabled = true) {
+  const scopes = ['https://www.googleapis.com/auth/spreadsheets.currentonly'];
+  if (notificationsEnabled) scopes.push('https://www.googleapis.com/auth/script.send_mail');
   return {
     timeZone: 'America/New_York',
     exceptionLogging: 'STACKDRIVER',
     runtimeVersion: 'V8',
-    oauthScopes: [
-      'https://www.googleapis.com/auth/spreadsheets.currentonly',
-      'https://www.googleapis.com/auth/script.send_mail',
-    ],
+    oauthScopes: scopes,
     webapp: {
       executeAs: 'USER_DEPLOYING',
       access: 'ANYONE_ANONYMOUS',
@@ -14,7 +13,7 @@ export function generateAppsScriptJson() {
   };
 }
 
-export function generateSiteScript(): string {
+export function generateSiteScript(notificationsEnabled = true): string {
   return `
 var CONFIG = (function () {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('_manifest');
@@ -87,7 +86,7 @@ function doPost(e) {
     });
     sheet.appendRow(rowData);
 
-    var toEmail = (formConf.notifyEmail) || CONFIG.notification_email;
+    ${notificationsEnabled ? `var toEmail = (formConf.notifyEmail) || CONFIG.notification_email;
     if (toEmail) {
       var siteName = CONFIG.site_name || CONFIG.project_slug || '';
       var displayKeys = Object.keys(fields).filter(function (k) { return k !== '_hp'; });
@@ -126,7 +125,7 @@ function doPost(e) {
       } catch (emailErr) {
         // don't fail the submission if email fails
       }
-    }
+    }` : ''}
 
     return jsonResponse({ result: 'success' });
   } catch (err) {

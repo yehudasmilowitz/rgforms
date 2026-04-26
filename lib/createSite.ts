@@ -110,11 +110,12 @@ async function writeTabData(
 // ─── Main provisioner ─────────────────────────────────────────────────────────
 
 export interface CreateSiteInput {
-  siteName:      string;
-  notifyEmail:   string;
-  googleAccount: string;
-  formLabel:     string;
-  formConfig:    SiteTabFormConfig;
+  siteName:              string;
+  notifyEmail:           string;
+  googleAccount:         string;
+  formLabel:             string;
+  formConfig:            SiteTabFormConfig;
+  notificationsEnabled:  boolean;
 }
 
 export async function createSite(
@@ -122,7 +123,7 @@ export async function createSite(
   input: CreateSiteInput,
   onStep: SiteProvisionCallback,
 ): Promise<SiteManifest> {
-  const { siteName, notifyEmail, googleAccount, formLabel, formConfig } = input;
+  const { siteName, notifyEmail, googleAccount, formLabel, formConfig, notificationsEnabled } = input;
   const createdAt   = new Date().toISOString();
   const projectSlug = siteName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const tabName     = 'contact';
@@ -195,7 +196,7 @@ export async function createSite(
 
   try {
     ({ scriptId } = await createScriptProject(token, `${siteName} — Forms API`, sheetId));
-    await uploadCode(token, scriptId, generateSiteScript(), generateAppsScriptJson());
+    await uploadCode(token, scriptId, generateSiteScript(notificationsEnabled), generateAppsScriptJson(notificationsEnabled));
     onStep('script', 'complete');
   } catch (err) {
     if (err instanceof AppsScriptUserSettingError) {

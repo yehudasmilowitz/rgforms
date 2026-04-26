@@ -12,6 +12,7 @@ import {
 } from '@/lib/siteTabHelpers';
 import { toFieldKey } from '@/lib/createSite';
 import FormFieldEditor, { DEFAULT_FORM_CONFIG } from '@/components/FormFieldEditor';
+import TestFormDialog from '@/components/TestFormDialog';
 import type { SiteTab, SiteTabFormConfig, SiteManifest } from '@/types';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -286,11 +287,12 @@ function buildManifestGuide(manifest: SiteManifest) {
 // ─── Form row ─────────────────────────────────────────────────────────────────
 
 function FormRow({
-  tab, onEdit, onConfirmRemove, onCancelRemove, onRemove,
+  tab, onEdit, onTest, onConfirmRemove, onCancelRemove, onRemove,
   isEditing, isConfirmingRemove, saving,
 }: {
   tab: SiteTab;
   onEdit: () => void;
+  onTest: () => void;
   onConfirmRemove: () => void;
   onCancelRemove: () => void;
   onRemove: () => void;
@@ -319,6 +321,14 @@ function FormRow({
           </p>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
+          <button type="button" onClick={onTest} disabled={saving}
+            className="px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors disabled:opacity-40"
+            style={{ background: 'var(--color-surface-2)', color: 'var(--color-muted)', border: '1px solid var(--color-border)' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-text)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-muted)'; }}
+          >
+            Test
+          </button>
           <button type="button" onClick={onEdit} disabled={saving}
             className="px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors disabled:opacity-40"
             style={{
@@ -475,6 +485,7 @@ export default function SiteKit() {
   const [saving,         setSaving]         = useState(false);
   const [error,          setError]          = useState('');
   const [preview,        setPreview]        = useState<PreviewEntry | null>(null);
+  const [testingTab,     setTestingTab]     = useState<SiteTab | null>(null);
 
   const [renamingProject, setRenamingProject] = useState(false);
   const [renameValue,     setRenameValue]     = useState('');
@@ -700,6 +711,7 @@ export default function SiteKit() {
                 <FormRow
                   tab={tab}
                   onEdit={() => openEdit(tab)}
+                  onTest={() => setTestingTab(tab)}
                   onConfirmRemove={() => { setRemovingTab(tab.name); setEditingTab(null); }}
                   onCancelRemove={() => setRemovingTab(null)}
                   onRemove={() => handleRemoveTab(tab.name)}
@@ -844,6 +856,15 @@ export default function SiteKit() {
           <PreviewModal entry={preview} onClose={() => setPreview(null)} />
         )}
       </AnimatePresence>
+
+      {/* Test form dialog */}
+      {testingTab && manifest && (
+        <TestFormDialog
+          tab={testingTab}
+          scriptUrl={manifest.script_url}
+          onClose={() => setTestingTab(null)}
+        />
+      )}
 
     </motion.main>
   );

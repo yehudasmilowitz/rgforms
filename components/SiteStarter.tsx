@@ -29,16 +29,18 @@ function BackButton({ onClick }: { onClick: () => void }) {
 export default function SiteStarter() {
   const { state, dispatch } = useApp();
 
-  const siteName    = state.siteStarterConfig.siteName;
+  const siteName     = state.siteStarterConfig.siteName;
   const defaultEmail = state.auth.user?.email ?? '';
 
-  const [formLabel,    setFormLabel]    = useState('Contact Form');
-  const [notifyEmail,  setNotifyEmail]  = useState(defaultEmail);
-  const [formConfig,   setFormConfig]   = useState<SiteTabFormConfig>({ ...DEFAULT_FORM_CONFIG });
-  const [launching,    setLaunching]    = useState(false);
-  const [errorMsg,     setErrorMsg]     = useState('');
+  const [formLabel,              setFormLabel]              = useState('Contact Form');
+  const [notificationsEnabled,   setNotificationsEnabled]   = useState(false);
+  const [notifyEmail,            setNotifyEmail]            = useState(defaultEmail);
+  const [formConfig,             setFormConfig]             = useState<SiteTabFormConfig>({ ...DEFAULT_FORM_CONFIG });
+  const [launching,              setLaunching]              = useState(false);
+  const [errorMsg,               setErrorMsg]               = useState('');
 
-  const canLaunch = siteName.trim().length >= 2 && notifyEmail.trim().includes('@') && !launching;
+  const emailValid = !notificationsEnabled || notifyEmail.trim().includes('@');
+  const canLaunch  = siteName.trim().length >= 2 && emailValid && !launching;
 
   async function handleLaunch() {
     if (!state.auth.accessToken || !canLaunch) return;
@@ -59,10 +61,11 @@ export default function SiteStarter() {
         state.auth.accessToken,
         {
           siteName,
-          notifyEmail:   notifyEmail.trim(),
-          googleAccount: state.auth.user?.email ?? '',
-          formLabel:     formLabel.trim() || 'Contact Form',
+          notifyEmail:          notificationsEnabled ? notifyEmail.trim() : '',
+          googleAccount:        state.auth.user?.email ?? '',
+          formLabel:            formLabel.trim() || 'Contact Form',
           formConfig,
+          notificationsEnabled,
         },
         (step, status, error, errorCode) => {
           const label = SITE_PROVISION_STEPS.find((s) => s.id === step)?.label ?? step;
@@ -136,23 +139,90 @@ export default function SiteStarter() {
           />
         </div>
 
-        {/* Notification email */}
-        <div className="flex flex-col gap-2">
-          <label htmlFor="notify-email" className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
-            Send notifications to
-          </label>
-          <input
-            id="notify-email"
-            type="email"
-            value={notifyEmail}
-            onChange={(e) => setNotifyEmail(e.target.value)}
-            placeholder="you@example.com"
-            className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-            style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
-          />
-          <p className="text-xs" style={{ color: 'var(--color-subtle)' }}>
-            You&apos;ll get an email every time someone submits the form.
-          </p>
+        {/* Email notifications toggle */}
+        <div className="flex flex-col gap-3">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={notificationsEnabled}
+            onClick={() => setNotificationsEnabled((v) => !v)}
+            className="flex items-center gap-3 self-start group"
+          >
+            {/* Track */}
+            <span
+              className="relative inline-flex h-5 w-9 shrink-0 rounded-full border transition-colors duration-200"
+              style={{
+                background:   notificationsEnabled ? 'var(--color-accent)' : 'var(--color-surface-2)',
+                borderColor:  notificationsEnabled ? 'var(--color-accent)' : 'var(--color-border)',
+              }}
+            >
+              {/* Thumb */}
+              <span
+                className="pointer-events-none absolute top-0.5 h-4 w-4 rounded-full shadow transition-transform duration-200"
+                style={{
+                  background: '#fff',
+                  transform:  notificationsEnabled ? 'translateX(16px)' : 'translateX(2px)',
+                }}
+              />
+            </span>
+            <span className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+              Send email notifications on form submission
+            </span>
+          </button>
+
+          {notificationsEnabled && (
+            <motion.div
+              className="flex flex-col gap-3"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {/* Email input */}
+              <div className="flex flex-col gap-2">
+                <label htmlFor="notify-email" className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+                  Send notifications to
+                </label>
+                <input
+                  id="notify-email"
+                  type="email"
+                  value={notifyEmail}
+                  onChange={(e) => setNotifyEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                  style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
+                />
+              </div>
+
+              {/* Sensitive scope info box */}
+              <div
+                className="flex gap-3 rounded-xl p-4 text-xs leading-relaxed"
+                style={{ background: 'oklch(0.25 0.08 250 / 0.25)', border: '1px solid oklch(0.55 0.15 250 / 0.35)' }}
+              >
+                <svg className="shrink-0 mt-0.5" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <circle cx="7" cy="7" r="6" stroke="oklch(0.70 0.15 250)" strokeWidth="1.4"/>
+                  <path d="M7 6v4" stroke="oklch(0.70 0.15 250)" strokeWidth="1.4" strokeLinecap="round"/>
+                  <circle cx="7" cy="4.5" r="0.6" fill="oklch(0.70 0.15 250)"/>
+                </svg>
+                <div className="flex flex-col gap-1.5" style={{ color: 'oklch(0.80 0.10 250)' }}>
+                  <p className="font-semibold" style={{ color: 'oklch(0.88 0.12 250)' }}>
+                    Apps Script authorization required
+                  </p>
+                  <p>
+                    Email notifications use the{' '}
+                    <code className="px-1 py-0.5 rounded text-[11px]" style={{ background: 'oklch(0.20 0.08 250 / 0.5)', color: 'oklch(0.90 0.12 250)' }}>
+                      script.send_mail
+                    </code>{' '}
+                    scope. After provisioning, you&apos;ll need to open the Apps Script and authorize it.
+                  </p>
+                  <p>
+                    Because this is a sensitive scope, Google may show an &ldquo;App isn&apos;t verified&rdquo; warning.
+                    Click <strong style={{ color: 'oklch(0.88 0.12 250)' }}>Advanced → Continue</strong> to proceed.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </div>
 
         {/* Fields */}

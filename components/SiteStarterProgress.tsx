@@ -14,6 +14,32 @@ const STEP_LABELS: Record<string, string> = {
   manifest: 'Manifest + configuration',
 };
 
+const STEP_SCOPES: Record<string, string[]> = {
+  drive:  ['drive.file'],
+  sheet:  ['drive.file'],
+  script: ['script.projects'],
+  deploy: ['script.deployments'],
+};
+
+function ScopeBadge({ scope }: { scope: string }) {
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold"
+      style={{
+        background:  'oklch(0.25 0.12 250 / 0.35)',
+        border:      '1px solid oklch(0.55 0.15 250 / 0.40)',
+        color:       'oklch(0.78 0.14 250)',
+      }}
+    >
+      <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+        <circle cx="5" cy="3.5" r="2" stroke="currentColor" strokeWidth="1.3"/>
+        <rect x="2" y="5" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="1.3"/>
+      </svg>
+      {scope}
+    </span>
+  );
+}
+
 // ─── Status icons ─────────────────────────────────────────────────────────────
 
 function SpinnerIcon() {
@@ -81,6 +107,7 @@ function StatusIcon({ status }: { status: SiteStarterModuleProgress['status'] })
 function ModuleRow({ mod, index }: { mod: SiteStarterModuleProgress; index: number }) {
   const isRunning = mod.status === 'running';
   const typeLabel = STEP_LABELS[mod.moduleType] ?? mod.moduleType;
+  const scopes    = STEP_SCOPES[mod.moduleType] ?? [];
   const truncUrl  = mod.deploymentUrl
     ? mod.deploymentUrl.replace('https://script.google.com/macros/s/', '…/s/').slice(0, 60) + (mod.deploymentUrl.length > 60 ? '…' : '')
     : null;
@@ -117,6 +144,9 @@ function ModuleRow({ mod, index }: { mod: SiteStarterModuleProgress; index: numb
           >
             {typeLabel}
           </span>
+          {(isRunning || mod.status === 'complete') && scopes.map((s) => (
+            <ScopeBadge key={s} scope={s} />
+          ))}
         </div>
 
         {mod.status === 'complete' && truncUrl && (
