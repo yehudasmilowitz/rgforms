@@ -3,9 +3,8 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { useApp } from '@/context/AppContext';
-import { createSite, SITE_PROVISION_STEPS } from '@/lib/createSite';
-import { AppsScriptUserSettingError } from '@/lib/core/provisionHelpers';
-import type { SiteStarterModuleProgress, SiteTabFormConfig } from '@/types';
+import { useSiteProvisioning } from '@/hooks/useSiteProvisioning';
+import type { SiteTabFormConfig } from '@/types';
 import FormFieldEditor, { DEFAULT_FORM_CONFIG } from '@/components/FormFieldEditor';
 
 function BackButton({ onClick }: { onClick: () => void }) {
@@ -28,6 +27,7 @@ function BackButton({ onClick }: { onClick: () => void }) {
 
 export default function SiteStarter() {
   const { state, dispatch } = useApp();
+  const provision = useSiteProvisioning();
 
   const siteName     = state.siteStarterConfig.siteName;
   const defaultEmail = state.auth.user?.email ?? '';
@@ -37,7 +37,6 @@ export default function SiteStarter() {
   const [notifyEmail,            setNotifyEmail]            = useState(defaultEmail);
   const [formConfig,             setFormConfig]             = useState<SiteTabFormConfig>({ ...DEFAULT_FORM_CONFIG });
   const [launching,              setLaunching]              = useState(false);
-  const [errorMsg,               setErrorMsg]               = useState('');
 
   const emailValid = !notificationsEnabled || notifyEmail.trim().includes('@');
   const canLaunch  = siteName.trim().length >= 2 && emailValid && !launching;
@@ -46,44 +45,16 @@ export default function SiteStarter() {
     if (!state.auth.accessToken || !canLaunch) return;
 
     setLaunching(true);
-    setErrorMsg('');
-
-    const initialProgress: SiteStarterModuleProgress[] = SITE_PROVISION_STEPS.map((s) => ({
-      moduleType: s.id,
-      moduleName: s.label,
-      status:     'pending' as const,
-    }));
-
-    dispatch({ type: 'START_SITE_STARTER_PROVISIONING', payload: initialProgress });
 
     try {
-      const manifest = await createSite(
-        state.auth.accessToken,
-        {
-          siteName,
-          notifyEmail:          notificationsEnabled ? notifyEmail.trim() : '',
-          googleAccount:        state.auth.user?.email ?? '',
-          formLabel:            formLabel.trim() || 'Contact Form',
-          formConfig,
-          notificationsEnabled,
-        },
-        (step, status, error, errorCode) => {
-          const label = SITE_PROVISION_STEPS.find((s) => s.id === step)?.label ?? step;
-          dispatch({
-            type:    'UPDATE_SITE_STARTER_MODULE',
-            payload: { moduleType: step, moduleName: label, status, error, errorCode },
-          });
-        },
-      );
-
-      dispatch({ type: 'SET_SITE_MANIFEST', payload: manifest });
-    } catch (err) {
-      if (err instanceof AppsScriptUserSettingError) {
-        // Stay on the provisioning screen — the dedicated callout is shown there
-      } else {
-        setErrorMsg((err as Error).message);
-        dispatch({ type: 'SITE_MANIFEST_ERROR', payload: (err as Error).message });
-      }
+      await provision({
+        siteName,
+        notifyEmail:          notificationsEnabled ? notifyEmail.trim() : '',
+        googleAccount:        state.auth.user?.email ?? '',
+        formLabel:            formLabel.trim() || 'Contact Form',
+        formConfig,
+        notificationsEnabled,
+      });
     } finally {
       setLaunching(false);
     }
@@ -116,10 +87,10 @@ export default function SiteStarter() {
           </p>
         </div>
 
-        {(state.siteManifestError || errorMsg) && (
+        {state.siteManifestError && (
           <div className="rounded-xl border px-4 py-3 text-sm"
             style={{ background: 'oklch(0.40 0.18 25 / 0.10)', borderColor: 'oklch(0.55 0.20 25 / 0.30)', color: 'var(--color-error)' }}>
-            {state.siteManifestError || errorMsg}
+            {state.siteManifestError}
           </div>
         )}
 

@@ -78,45 +78,41 @@ function TooltipLink({ href, label, tooltip, variant = 'default' }: {
   variant?: 'default' | 'warning';
 }) {
   const [show, setShow] = useState(false);
-  const [hovered, setHovered] = useState(false);
 
   const isWarning = variant === 'warning';
   const amber = 'oklch(0.78 0.18 75)';
 
   return (
-    <div className="relative inline-flex items-center gap-1">
+    <div className="relative inline-flex">
       <a
         href={href}
         target="_blank"
         rel="noopener noreferrer"
+        aria-description={tooltip}
         className="inline-flex items-center gap-1.5 text-xs font-semibold transition-colors"
         style={isWarning ? {
-          background:   hovered ? 'oklch(0.78 0.18 75 / 0.18)' : 'oklch(0.78 0.18 75 / 0.10)',
+          background:   show ? 'oklch(0.78 0.18 75 / 0.18)' : 'oklch(0.78 0.18 75 / 0.10)',
           border:       `1px solid oklch(0.78 0.18 75 / 0.40)`,
           color:        amber,
           borderRadius: '999px',
-          padding:      '3px 10px 3px 8px',
+          padding:      '3px 9px 3px 8px',
         } : {
-          color: hovered ? 'var(--color-accent)' : 'var(--color-muted)',
+          color: show ? 'var(--color-accent)' : 'var(--color-muted)',
         }}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-      >
-        {isWarning ? <WarningIcon /> : <ExternalLinkIcon />}
-        {label}
-      </a>
-      <button
-        type="button"
-        aria-label="More info"
-        className="flex items-center"
-        style={{ color: isWarning ? amber : 'var(--color-muted)' }}
         onMouseEnter={() => setShow(true)}
         onMouseLeave={() => setShow(false)}
         onFocus={() => setShow(true)}
         onBlur={() => setShow(false)}
       >
-        <InfoIcon />
-      </button>
+        {isWarning ? <WarningIcon /> : <ExternalLinkIcon />}
+        {label}
+        {isWarning && (
+          <>
+            <span aria-hidden className="self-stretch w-px my-0.5" style={{ background: 'oklch(0.78 0.18 75 / 0.35)' }} />
+            <InfoIcon />
+          </>
+        )}
+      </a>
       {show && (
         <div
           className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 rounded-lg px-3 py-2 text-xs leading-relaxed shadow-lg z-10 pointer-events-none"

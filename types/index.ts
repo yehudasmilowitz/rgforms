@@ -88,6 +88,15 @@ export interface SiteStarterModuleProgress {
   errorCode?: string;
 }
 
+export interface CreateSiteInput {
+  siteName:              string;
+  notifyEmail:           string;
+  googleAccount:         string;
+  formLabel:             string;
+  formConfig:            SiteTabFormConfig;
+  notificationsEnabled:  boolean;
+}
+
 // ─── App State ───────────────────────────────────────────────────────────────
 
 export interface AppState {
@@ -95,6 +104,7 @@ export interface AppState {
   auth: AuthState;
   siteStarterConfig: SiteStarterConfig;
   siteStarterProgress: SiteStarterModuleProgress[];
+  siteStarterLaunchInput: CreateSiteInput | null;
   siteStarterError: string | null;
   siteManifest: SiteManifest | null;
   siteManifestError: string | null;
@@ -105,7 +115,7 @@ export type AppAction =
   | { type: 'SIGN_OUT' }
   | { type: 'GO_TO_SITE_STARTER' }
   | { type: 'SET_SITE_STARTER_CONFIG'; payload: Partial<SiteStarterConfig> }
-  | { type: 'START_SITE_STARTER_PROVISIONING'; payload: SiteStarterModuleProgress[] }
+  | { type: 'START_SITE_STARTER_PROVISIONING'; payload: { progress: SiteStarterModuleProgress[]; input: CreateSiteInput } }
   | { type: 'UPDATE_SITE_STARTER_MODULE'; payload: Partial<SiteStarterModuleProgress> & { moduleType: string; moduleName: string } }
   | { type: 'SITE_STARTER_ERROR'; payload: string }
   | { type: 'RESET_SITE_STARTER' }

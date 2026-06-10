@@ -16,6 +16,7 @@ const initialState: AppState = {
   auth: { user: null, accessToken: null },
   siteStarterConfig: DEFAULT_SITE_STARTER_CONFIG,
   siteStarterProgress: [],
+  siteStarterLaunchInput: null,
   siteStarterError: null,
   siteManifest: null,
   siteManifestError: null,
@@ -41,6 +42,7 @@ function reducer(state: AppState, action: AppAction): AppState {
         ...state,
         screen: 'site-starter',
         siteStarterProgress: [],
+        siteStarterLaunchInput: null,
         siteStarterError: null,
       };
     case 'SET_SITE_STARTER_CONFIG':
@@ -49,7 +51,8 @@ function reducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         screen: 'site-starter-provisioning',
-        siteStarterProgress: action.payload,
+        siteStarterProgress: action.payload.progress,
+        siteStarterLaunchInput: action.payload.input,
         siteStarterError: null,
       };
     case 'UPDATE_SITE_STARTER_MODULE':
@@ -69,6 +72,7 @@ function reducer(state: AppState, action: AppAction): AppState {
         screen: 'site-select',
         siteStarterConfig: { ...DEFAULT_SITE_STARTER_CONFIG, notifyEmail: state.auth.user?.email ?? '' },
         siteStarterProgress: [],
+        siteStarterLaunchInput: null,
         siteStarterError: null,
       };
 

@@ -11,7 +11,9 @@ import {
   styleHeaderRow,
 } from '@/lib/core/provisionHelpers';
 import { generateSiteScript, generateAppsScriptJson } from './siteScript';
-import type { SiteManifest, SiteTab, SiteTabFormConfig } from '@/types';
+import type { CreateSiteInput, SiteManifest, SiteTab } from '@/types';
+
+export type { CreateSiteInput };
 
 export function toFieldKey(label: string): string {
   return label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'field';
@@ -108,15 +110,6 @@ async function writeTabData(
 }
 
 // ─── Main provisioner ─────────────────────────────────────────────────────────
-
-export interface CreateSiteInput {
-  siteName:              string;
-  notifyEmail:           string;
-  googleAccount:         string;
-  formLabel:             string;
-  formConfig:            SiteTabFormConfig;
-  notificationsEnabled:  boolean;
-}
 
 export async function createSite(
   token: string,

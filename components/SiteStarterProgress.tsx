@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react';
 import { useApp } from '@/context/AppContext';
+import { useSiteProvisioning } from '@/hooks/useSiteProvisioning';
 import type { SiteStarterModuleProgress } from '@/types';
 
 // ─── Step / module type → human label map ────────────────────────────────────
@@ -104,7 +105,15 @@ function StatusIcon({ status }: { status: SiteStarterModuleProgress['status'] })
 
 // ─── Module row ───────────────────────────────────────────────────────────────
 
-function ModuleRow({ mod, index }: { mod: SiteStarterModuleProgress; index: number }) {
+function RetryIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M10.5 6a4.5 4.5 0 1 1-1.3-3.2M10.5 1v2.5H8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function ModuleRow({ mod, index, onRetry }: { mod: SiteStarterModuleProgress; index: number; onRetry?: () => void }) {
   const isRunning = mod.status === 'running';
   const typeLabel = STEP_LABELS[mod.moduleType] ?? mod.moduleType;
   const scopes    = STEP_SCOPES[mod.moduleType] ?? [];
@@ -164,20 +173,33 @@ function ModuleRow({ mod, index }: { mod: SiteStarterModuleProgress; index: numb
             <p style={{ color: 'var(--color-text)' }}>
               Google requires you to opt in to Apps Script access once in your account settings. This is a one-time step — it only takes a few seconds.
             </p>
-            <a
-              href="https://script.google.com/home/usersettings"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="self-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold text-xs transition-opacity hover:opacity-80"
-              style={{ background: 'var(--color-accent)', color: 'white' }}
-            >
-              Open Google Account Settings
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-                <path d="M2 8L8 2M8 2H4M8 2v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </a>
+            <div className="flex items-center gap-2 flex-wrap">
+              <a
+                href="https://script.google.com/home/usersettings"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold text-xs transition-opacity hover:opacity-80"
+                style={{ background: 'var(--color-accent)', color: 'white' }}
+              >
+                Open Google Account Settings
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                  <path d="M2 8L8 2M8 2H4M8 2v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </a>
+              {onRetry && (
+                <button
+                  type="button"
+                  onClick={onRetry}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold text-xs transition-colors hover:opacity-80"
+                  style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
+                >
+                  <RetryIcon />
+                  I&apos;ve enabled it — try again
+                </button>
+              )}
+            </div>
             <p style={{ color: 'var(--color-muted)' }}>
-              After enabling Apps Script API, come back and try again.
+              Turn on &ldquo;Google Apps Script API&rdquo; there, then come back to this tab and hit try again.
             </p>
           </div>
         )}
@@ -196,7 +218,12 @@ function ModuleRow({ mod, index }: { mod: SiteStarterModuleProgress; index: numb
 
 export default function SiteStarterProgress() {
   const { state } = useApp();
-  const { siteStarterProgress, siteStarterConfig } = state;
+  const provision = useSiteProvisioning();
+  const { siteStarterProgress, siteStarterConfig, siteStarterLaunchInput } = state;
+
+  const handleRetry = siteStarterLaunchInput
+    ? () => { void provision(siteStarterLaunchInput); }
+    : undefined;
 
   const total    = siteStarterProgress.length;
   const complete = siteStarterProgress.filter((m) => m.status === 'complete').length;
@@ -238,7 +265,7 @@ export default function SiteStarterProgress() {
         <div className="flex flex-col gap-2" role="list" aria-label="Module provisioning status">
           {siteStarterProgress.map((mod, i) => (
             <div key={`${mod.moduleType}-${mod.moduleName}`} role="listitem">
-              <ModuleRow mod={mod} index={i} />
+              <ModuleRow mod={mod} index={i} onRetry={handleRetry} />
             </div>
           ))}
         </div>
@@ -287,6 +314,17 @@ export default function SiteStarterProgress() {
                     {complete} of {total} steps succeeded. Please try again.
                   </p>
                 </>
+              )}
+              {handleRetry && (
+                <button
+                  type="button"
+                  onClick={handleRetry}
+                  className="self-start mt-1 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg font-semibold text-xs transition-opacity hover:opacity-80"
+                  style={{ background: 'var(--color-accent)', color: 'white' }}
+                >
+                  <RetryIcon />
+                  Try again
+                </button>
               )}
             </motion.div>
           );
