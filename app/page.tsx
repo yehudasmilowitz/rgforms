@@ -70,22 +70,8 @@ export default function Page() {
         </motion.div>
 
         {/* ── CTA ──────────────────────────────────────────────────────────── */}
-        <motion.div variants={scaleIn} className="flex flex-col items-center gap-4">
+        <motion.div variants={scaleIn}>
           <AuthButton />
-          <a
-            href="https://www.producthunt.com/products/rg-forms?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-rg-forms"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:opacity-90 transition-opacity"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              alt="RG Forms - Add a contact form to any static site without a backend | Product Hunt"
-              width={250}
-              height={54}
-              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1168947&theme=dark&t=1781144858758"
-            />
-          </a>
         </motion.div>
 
         {/* ── Benefits ─────────────────────────────────────────────────────── */}
