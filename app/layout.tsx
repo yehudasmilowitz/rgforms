@@ -181,8 +181,22 @@ export default function RootLayout({
         <AppProvider>{children}</AppProvider>
         <footer
           style={{ borderTop: '1px solid var(--color-border)' }}
-          className="mt-auto py-6 text-center text-xs"
+          className="mt-auto py-6 flex flex-col items-center gap-4 text-center text-xs"
         >
+          <a
+            href="https://www.producthunt.com/products/rg-forms?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-rg-forms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:opacity-90 transition-opacity"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              alt="RG Forms - Add a contact form to any static site without a backend | Product Hunt"
+              width={250}
+              height={54}
+              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1168947&theme=dark&t=1781144858758"
+            />
+          </a>
           <span style={{ color: 'var(--color-text-muted)' }}>
             RG Forms is a project of{' '}
             <a
