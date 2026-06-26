@@ -1,9 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { GitHubIcon } from '@/components/GitHubIcon';
 import { GoogleSheetsIcon, GoogleAppsScriptIcon, GoogleDriveIcon } from '@/components/google-icons';
-
-const GITHUB_URL = 'https://github.com/yehudasmilowitz/rgforms';
 
 type FooterLink = { label: string; href: string; external?: boolean };
 
@@ -26,7 +23,6 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
   {
     title: 'More from us',
     links: [
-      { label: 'Source on GitHub', href: GITHUB_URL, external: true },
       { label: 'Sheetspin', href: 'https://sheetspin.com', external: true },
       { label: 'RG Marketing Group', href: 'https://rgmarketinggroup.com/', external: true },
     ],
@@ -93,18 +89,6 @@ export default function SiteFooter() {
                 src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1168947&theme=light&t=1781144858758"
               />
             </a>
-            <div className="flex items-center gap-2">
-              <a
-                href={GITHUB_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="RG Forms on GitHub"
-                className="inline-flex items-center justify-center w-10 h-10 rounded-full border transition-all hover:shadow-md hover:-translate-y-0.5"
-                style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface)', color: 'var(--color-heading)' }}
-              >
-                <GitHubIcon size={18} />
-              </a>
-            </div>
           </div>
 
           {/* Link columns */}

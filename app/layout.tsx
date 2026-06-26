@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from 'next';
 import { Bricolage_Grotesque, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import Image from 'next/image';
 import Link from 'next/link';
-import { GitHubIcon } from '@/components/GitHubIcon';
 import { AppProvider } from '@/context/AppContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import ScrollToTop from '@/components/ScrollToTop';
@@ -183,16 +182,6 @@ export default function RootLayout({
                 aria-hidden="true"
               />
               <div className="flex items-center gap-1">
-                <a
-                  href="https://github.com/yehudasmilowitz/rgforms"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="RG Forms on GitHub"
-                  className="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors hover:bg-[var(--color-surface-2)]"
-                  style={{ color: 'var(--color-muted)' }}
-                >
-                  <GitHubIcon size={19} />
-                </a>
                 <ThemeToggle />
               </div>
               <NavAuthButton />
