@@ -63,8 +63,8 @@ export default function TermsPage() {
         <div
           className="rounded-xl border p-5 flex flex-col gap-2"
           style={{
-            background: 'rgba(108,99,255,0.06)',
-            borderColor: 'rgba(108,99,255,0.25)',
+            background: 'var(--color-accent-subtle)',
+            borderColor: 'var(--color-accent-border)',
           }}
         >
           <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>

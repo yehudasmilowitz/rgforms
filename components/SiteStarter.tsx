@@ -89,7 +89,7 @@ export default function SiteStarter() {
 
         {state.siteManifestError && (
           <div className="rounded-xl border px-4 py-3 text-sm"
-            style={{ background: 'oklch(0.40 0.18 25 / 0.10)', borderColor: 'oklch(0.55 0.20 25 / 0.30)', color: 'var(--color-error)' }}>
+            style={{ background: 'var(--color-error-bg)', borderColor: 'var(--color-error-border)', color: 'var(--color-error)' }}>
             {state.siteManifestError}
           </div>
         )}
@@ -168,27 +168,27 @@ export default function SiteStarter() {
               {/* Sensitive scope info box */}
               <div
                 className="flex gap-3 rounded-xl p-4 text-xs leading-relaxed"
-                style={{ background: 'oklch(0.25 0.08 250 / 0.25)', border: '1px solid oklch(0.55 0.15 250 / 0.35)' }}
+                style={{ background: 'var(--color-info-bg)', border: '1px solid var(--color-info-border)' }}
               >
                 <svg className="shrink-0 mt-0.5" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                  <circle cx="7" cy="7" r="6" stroke="oklch(0.70 0.15 250)" strokeWidth="1.4"/>
-                  <path d="M7 6v4" stroke="oklch(0.70 0.15 250)" strokeWidth="1.4" strokeLinecap="round"/>
-                  <circle cx="7" cy="4.5" r="0.6" fill="oklch(0.70 0.15 250)"/>
+                  <circle cx="7" cy="7" r="6" stroke="var(--color-info)" strokeWidth="1.4"/>
+                  <path d="M7 6v4" stroke="var(--color-info)" strokeWidth="1.4" strokeLinecap="round"/>
+                  <circle cx="7" cy="4.5" r="0.6" fill="var(--color-info)"/>
                 </svg>
-                <div className="flex flex-col gap-1.5" style={{ color: 'oklch(0.80 0.10 250)' }}>
-                  <p className="font-semibold" style={{ color: 'oklch(0.88 0.12 250)' }}>
+                <div className="flex flex-col gap-1.5" style={{ color: 'var(--color-info)' }}>
+                  <p className="font-semibold" style={{ color: 'var(--color-info)' }}>
                     Apps Script authorization required
                   </p>
                   <p>
                     Email notifications use the{' '}
-                    <code className="px-1 py-0.5 rounded text-[11px]" style={{ background: 'oklch(0.20 0.08 250 / 0.5)', color: 'oklch(0.90 0.12 250)' }}>
+                    <code className="px-1 py-0.5 rounded text-[11px]" style={{ background: 'var(--color-info-bg)', color: 'var(--color-info)' }}>
                       script.send_mail
                     </code>{' '}
                     scope. After provisioning, you&apos;ll need to open the Apps Script and authorize it.
                   </p>
                   <p>
                     Because this is a sensitive scope, Google may show an &ldquo;App isn&apos;t verified&rdquo; warning.
-                    Click <strong style={{ color: 'oklch(0.88 0.12 250)' }}>Advanced → Continue</strong> to proceed.
+                    Click <strong style={{ color: 'var(--color-info)' }}>Advanced → Continue</strong> to proceed.
                   </p>
                 </div>
               </div>

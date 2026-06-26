@@ -10,11 +10,10 @@
 
 RG Forms provisions your entire website's data backend inside your own Google Drive in under two minutes:
 
-1. **Describe your site** — tell the AI what you're building; Gemini proposes a full module structure
-2. **Review and customize** — edit field labels, types, email settings, and spam protection per module
-3. **Provision everything** — one Google Sheet, one Drive folder, one Apps Script web app
-4. **Manage post-launch** — add/remove modules, edit form fields, seed AI data, all without redeploying
-5. **Export RGFORMS.md** — an AI skill file that works with Claude Code, Cursor, Copilot, Windsurf, and any other AI IDE
+1. **Define your forms** — set up your modules, field labels, types, email settings, and spam protection
+2. **Provision everything** — one Google Sheet, one Drive folder, one Apps Script web app
+3. **Manage post-launch** — add/remove modules, edit form fields, all without redeploying
+4. **Export RGFORMS.md** — an AI skill file that works with Claude Code, Cursor, Copilot, Windsurf, and any other AI IDE
 
 No RG Forms server is ever involved in provisioning or in serving your site's data. Every API call is made from your browser using your own OAuth token. Everything belongs entirely to you.
 
@@ -26,12 +25,8 @@ No RG Forms server is ever involved in provisioning or in serving your site's da
 Your Browser
     │
     ├─── Google OAuth           ──▶  Short-lived token, memory only
-    ├─── Gemini API (server*)   ──▶  AI proposes module structure / seeds sample data
     ├─── Google Drive API       ──▶  Creates Sheet + Drive folder
     └─── Apps Script API        ──▶  Creates & deploys doPost/doGet handler
-
-  * The only RG Forms server route: /api/propose-manifest and /api/seed-data — 
-    forwards prompt to Gemini, returns response, logs nothing.
 
 Your site's live API (after provisioning):
 
@@ -87,7 +82,6 @@ The Site Kit generates a `RGFORMS.md` file you can drop into any project. It giv
 | Language | TypeScript |
 | Styling | Tailwind CSS v4 (CSS-first, oklch color system) |
 | Auth | Google Identity Services — token model (popup, in-memory only) |
-| AI | Gemini 2.5 Flash — site structure proposals + sample data generation |
 | 3D / Animation | React Three Fiber + Motion |
 | Deployment | Vercel |
 | Backend | None — the deployed Apps Script IS the backend |
@@ -101,7 +95,6 @@ The Site Kit generates a `RGFORMS.md` file you can drop into any project. It giv
 - Node.js 18+
 - A Google Cloud project with the **Apps Script API** enabled
 - An OAuth 2.0 client ID (Web application type)
-- A Gemini API key (for AI features)
 
 ### Setup
 
@@ -115,7 +108,6 @@ Create `.env.local`:
 
 ```env
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_client_id_here.apps.googleusercontent.com
-GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 In your Google Cloud Console, add to **Authorized JavaScript origins**:
@@ -143,11 +135,6 @@ npm run dev
 ## Key files
 
 ```
-app/
-  api/
-    propose-manifest/   Gemini route: site description → module proposal
-    seed-data/          Gemini route: column names → realistic sample rows
-
 lib/
   auth.ts               OAuth popup flow + token/userinfo fetching
   createSite.ts         Full site provisioning (Sheet + Drive folder + Apps Script)
@@ -157,8 +144,8 @@ lib/
   modules/registry.ts   Module type registry
 
 components/
-  SiteStarter.tsx       AI site builder — describe → propose → customize → provision
-  SiteKit.tsx           Site management — modules, form editor, AI seed, RGFORMS.md export
+  SiteStarter.tsx       Site builder — define modules → customize → provision
+  SiteKit.tsx           Site management — modules, form editor, RGFORMS.md export
   SiteSelect.tsx        Site list — open, create, delete sites
   FormFieldEditor.tsx   Per-form field config (labels, types, required, email settings)
 
@@ -205,7 +192,6 @@ Scopes declared in `appsscript.json`: `spreadsheets.currentonly`, `gmail.send`.
 | Script execution | Runs as the site owner; `ANYONE_ANONYMOUS` callable endpoint |
 | Spam protection | Optional honeypot field — silently accepted to confuse bots |
 | Email safety | All submitted values escaped before rendering in HTML email |
-| AI data | Gemini receives column names + module type only — no personal data |
 | CORS | Apps Script public web apps return CORS headers automatically |
 
 ---

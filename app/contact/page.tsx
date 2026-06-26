@@ -85,7 +85,7 @@ export default function ContactPage() {
         {status === 'success' ? (
           <div
             className="rounded-xl border p-6 flex flex-col items-center gap-3 text-center"
-            style={{ background: 'rgba(34,197,94,0.06)', borderColor: 'rgba(34,197,94,0.3)' }}
+            style={{ background: 'var(--color-success-bg)', borderColor: 'var(--color-success-border)' }}
           >
             <CheckCircle size={32} style={{ color: 'var(--color-success)' }} />
             <p className="font-semibold" style={{ color: 'var(--color-text)' }}>Message sent!</p>
@@ -182,7 +182,7 @@ export default function ContactPage() {
             {status === 'error' && (
               <div
                 className="flex items-start gap-2 rounded-lg border px-4 py-3"
-                style={{ background: 'rgba(239,68,68,0.06)', borderColor: 'rgba(239,68,68,0.3)' }}
+                style={{ background: 'var(--color-error-bg)', borderColor: 'var(--color-error-border)' }}
               >
                 <AlertCircle size={15} className="mt-0.5 shrink-0" style={{ color: 'var(--color-error)' }} />
                 <p className="text-sm" style={{ color: 'var(--color-error)' }}>{errorMsg}</p>

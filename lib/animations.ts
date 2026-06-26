@@ -62,6 +62,27 @@ export const heroContainer: Variants = {
   },
 }
 
+// ─── Scroll Reveal (whileInView) ──────────────────────────────────────────────
+
+export const revealUp: Variants = {
+  hidden: { opacity: 0, y: 28 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: [0.21, 1.02, 0.73, 0.99] },
+  },
+}
+
+export const revealStagger: Variants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.09, delayChildren: 0.05 },
+  },
+}
+
+/** Shared viewport config for whileInView reveals */
+export const inView = { once: true, amount: 0.25 } as const
+
 // ─── Card Hover ───────────────────────────────────────────────────────────────
 
 export const cardHover = {

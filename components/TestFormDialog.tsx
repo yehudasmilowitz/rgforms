@@ -62,12 +62,12 @@ export default function TestFormDialog({ tab, scriptUrl, onClose }: Props) {
     <AnimatePresence>
       <div
         className="fixed inset-0 z-50 flex items-center justify-center p-4"
-        style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+        style={{ background: 'rgba(15,30,28,0.45)', backdropFilter: 'blur(4px)' }}
         onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       >
         <motion.div
           className="w-full max-w-md flex flex-col rounded-2xl overflow-hidden"
-          style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}
+          style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-xl)' }}
           initial={{ opacity: 0, scale: 0.96, y: 12 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.96, y: 12 }}
@@ -107,7 +107,7 @@ export default function TestFormDialog({ tab, scriptUrl, onClose }: Props) {
               <div className="flex flex-col items-center gap-4 py-6 text-center">
                 <div
                   className="w-12 h-12 rounded-full flex items-center justify-center"
-                  style={{ background: 'oklch(0.25 0.05 150 / 0.6)', border: '1px solid oklch(0.55 0.20 150 / 0.30)' }}
+                  style={{ background: 'var(--color-success-bg)', border: '1px solid var(--color-success-border)' }}
                 >
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                     <path d="M4 10.5l4.5 4.5 8-9" stroke="var(--color-success)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -190,7 +190,7 @@ export default function TestFormDialog({ tab, scriptUrl, onClose }: Props) {
                 {status === 'error' && (
                   <div
                     className="rounded-lg px-3 py-2.5 text-xs"
-                    style={{ background: 'oklch(0.40 0.18 25 / 0.10)', border: '1px solid oklch(0.55 0.20 25 / 0.30)', color: 'var(--color-error)' }}
+                    style={{ background: 'var(--color-error-bg)', border: '1px solid var(--color-error-border)', color: 'var(--color-error)' }}
                   >
                     {errMsg || 'Submission failed. Check the script is deployed and authorized.'}
                   </div>

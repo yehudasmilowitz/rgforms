@@ -31,7 +31,7 @@ function SiteRow({ site, onOpen, onDelete, onConfirmDelete, onCancelDelete, open
   return (
     <motion.div
       className="rounded-xl border overflow-hidden"
-      style={{ background: 'var(--color-surface)', borderColor: confirming ? 'oklch(0.55 0.20 25 / 0.50)' : 'var(--color-border)' }}
+      style={{ background: 'var(--color-surface)', borderColor: confirming ? 'var(--color-error-border)' : 'var(--color-border)' }}
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
     >
@@ -59,7 +59,7 @@ function SiteRow({ site, onOpen, onDelete, onConfirmDelete, onCancelDelete, open
             disabled={opening || deleting}
             className="flex items-center justify-center w-7 h-7 rounded-lg transition-all focus:outline-none disabled:opacity-40"
             style={{ color: 'var(--color-muted)', background: 'transparent' }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-error)'; e.currentTarget.style.background = 'oklch(0.40 0.18 25 / 0.10)'; }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-error)'; e.currentTarget.style.background = 'var(--color-error-bg)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-muted)'; e.currentTarget.style.background = 'transparent'; }}
             title="Delete site"
           >
@@ -74,7 +74,7 @@ function SiteRow({ site, onOpen, onDelete, onConfirmDelete, onCancelDelete, open
       </div>
       {confirming && (
         <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-t"
-          style={{ background: 'oklch(0.40 0.18 25 / 0.08)', borderColor: 'oklch(0.55 0.20 25 / 0.30)' }}>
+          style={{ background: 'var(--color-error-bg)', borderColor: 'var(--color-error-border)' }}>
           <p className="text-xs" style={{ color: 'var(--color-error)' }}>
             Delete <strong>{site.siteName}</strong>? This removes the Google Sheet permanently.
           </p>
@@ -186,7 +186,7 @@ export default function SiteSelect() {
 
         {error && (
           <div className="rounded-xl border px-4 py-3 text-sm"
-            style={{ background: 'oklch(0.40 0.18 25 / 0.10)', borderColor: 'oklch(0.55 0.20 25 / 0.30)', color: 'var(--color-error)' }}>
+            style={{ background: 'var(--color-error-bg)', borderColor: 'var(--color-error-border)', color: 'var(--color-error)' }}>
             {error}
           </div>
         )}

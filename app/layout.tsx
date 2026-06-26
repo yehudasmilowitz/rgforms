@@ -1,14 +1,23 @@
 import type { Metadata, Viewport } from 'next';
-import { Space_Grotesk, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
+import { Bricolage_Grotesque, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import Image from 'next/image';
 import Link from 'next/link';
+import { GitHubIcon } from '@/components/GitHubIcon';
 import { AppProvider } from '@/context/AppContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import ScrollToTop from '@/components/ScrollToTop';
+import NavAuthButton from '@/components/NavAuthButton';
+import ThemeToggle from '@/components/ThemeToggle';
+import SiteFooter from '@/components/SiteFooter';
 import './globals.css';
 
-const spaceGrotesk = Space_Grotesk({
+// Applies the saved (or system) theme before first paint to avoid a flash.
+// Keep the storage key in sync with context/ThemeContext.tsx.
+const themeInitScript = `(function(){try{var k='rgforms-theme';var s=localStorage.getItem(k)||'system';var d=s==='dark'||(s==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);var r=document.documentElement;r.classList.toggle('dark',d);r.style.colorScheme=d?'dark':'light';}catch(e){}})();`;
+
+const bricolage = Bricolage_Grotesque({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '500', '600', '700', '800'],
   variable: '--font-display',
   display: 'swap',
 });
@@ -75,7 +84,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#060411',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#faf8ff' },
+    { media: '(prefers-color-scheme: dark)', color: '#1a1626' },
+  ],
 };
 
 export default function RootLayout({
@@ -84,8 +96,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${spaceGrotesk.variable} ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${bricolage.variable} ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -118,98 +131,79 @@ export default function RootLayout({
       <body
         className={`${plusJakartaSans.className} bg-[var(--color-bg)] text-[var(--color-text)]`}
       >
+        <ThemeProvider>
+        <AppProvider>
         <div className="scroll-progress" aria-hidden="true" />
         <header
           style={{
             borderBottom: '1px solid var(--color-border)',
-            background: 'oklch(0.07 0.015 285 / 0.85)',
-            backdropFilter: 'blur(12px)',
+            background: 'var(--color-header-bg)',
+            backdropFilter: 'blur(14px)',
+            WebkitBackdropFilter: 'blur(14px)',
             position: 'sticky',
             top: 0,
             zIndex: 50,
           }}
         >
-          <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+          <div className="w-full px-5 sm:px-8 lg:px-12 h-16 flex items-center justify-between">
             <Link
               href="/"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2.5"
               aria-label="RG Forms home"
             >
               <Image
                 src="/favicon.svg"
                 alt="RG Forms logo"
-                width={28}
-                height={28}
+                width={30}
+                height={30}
                 priority
               />
               <span
-                className="font-bold tracking-tight text-base"
-                style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-display)' }}
+                className="font-extrabold tracking-tight text-lg gradient-text"
+                style={{ fontFamily: 'var(--font-display)' }}
               >
                 RG Forms
               </span>
             </Link>
-            <nav className="flex items-center gap-6" aria-label="Main navigation">
-              <Link
-                href="/how-it-works"
-                className="text-sm font-medium nav-link"
-              >
-                How it works
-              </Link>
-              <Link
-                href="/privacy"
-                className="text-sm font-medium nav-link"
-              >
-                Privacy
-              </Link>
-              <Link
-                href="/terms"
-                className="text-sm font-medium nav-link"
-              >
-                Terms
-              </Link>
-              <Link
-                href="/contact"
-                className="text-sm font-medium nav-link"
-              >
-                Contact
-              </Link>
+            <nav className="flex items-center gap-2 sm:gap-4" aria-label="Main navigation">
+              <div className="hidden sm:flex items-center gap-6">
+                <Link href="/how-it-works" className="text-sm font-medium nav-link">
+                  How it works
+                </Link>
+                <Link href="/privacy" className="text-sm font-medium nav-link">
+                  Privacy
+                </Link>
+                <Link href="/contact" className="text-sm font-medium nav-link">
+                  Contact
+                </Link>
+              </div>
+              <span
+                className="hidden sm:block h-5 w-px"
+                style={{ background: 'var(--color-border)' }}
+                aria-hidden="true"
+              />
+              <div className="flex items-center gap-1">
+                <a
+                  href="https://github.com/yehudasmilowitz/rgforms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="RG Forms on GitHub"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors hover:bg-[var(--color-surface-2)]"
+                  style={{ color: 'var(--color-muted)' }}
+                >
+                  <GitHubIcon size={19} />
+                </a>
+                <ThemeToggle />
+              </div>
+              <NavAuthButton />
             </nav>
           </div>
         </header>
         <ScrollToTop />
-        <AppProvider>{children}</AppProvider>
-        <footer
-          style={{ borderTop: '1px solid var(--color-border)' }}
-          className="mt-auto py-6 flex flex-col items-center gap-4 text-center text-xs"
-        >
-          <a
-            href="https://www.producthunt.com/products/rg-forms?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-rg-forms"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:opacity-90 transition-opacity"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              alt="RG Forms - Add a contact form to any static site without a backend | Product Hunt"
-              width={250}
-              height={54}
-              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1168947&theme=dark&t=1781144858758"
-            />
-          </a>
-          <span style={{ color: 'var(--color-text-muted)' }}>
-            RG Forms is a project of{' '}
-            <a
-              href="https://rgmarketinggroup.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:opacity-80 transition-opacity"
-              style={{ color: 'var(--color-text-muted)' }}
-            >
-              RG Marketing Group
-            </a>
-          </span>
-        </footer>
+        {children}
+        <SiteFooter />
+        </AppProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -42,10 +42,10 @@ export default function OAuthCallback() {
           <>
             <div
               className="flex items-center justify-center w-14 h-14 rounded-full"
-              style={{ background: 'oklch(0.30 0.08 145)' }}
+              style={{ background: 'var(--color-success)' }}
             >
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M5 13l4 4L19 7" stroke="oklch(0.85 0.15 145)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
             <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
@@ -56,10 +56,10 @@ export default function OAuthCallback() {
           <>
             <div
               className="flex items-center justify-center w-14 h-14 rounded-full"
-              style={{ background: 'oklch(0.25 0.08 25)' }}
+              style={{ background: 'var(--color-error)' }}
             >
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M18 6L6 18M6 6l12 12" stroke="oklch(0.75 0.15 25)" strokeWidth="2.5" strokeLinecap="round" />
+                <path d="M18 6L6 18M6 6l12 12" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" />
               </svg>
             </div>
             <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>

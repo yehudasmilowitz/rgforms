@@ -20,7 +20,7 @@ export default function OGImage() {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(160deg, #0d0a1e 0%, #080615 40%, #0d0a1e 100%)',
+        background: 'linear-gradient(160deg, #f7f4ff 0%, #ffffff 45%, #f3edff 100%)',
         fontFamily: 'system-ui, -apple-system, sans-serif',
         padding: '60px 80px',
         position: 'relative',
@@ -35,7 +35,7 @@ export default function OGImage() {
           transform: 'translate(-50%, -50%)',
           width: '800px',
           height: '400px',
-          background: 'radial-gradient(ellipse at center, rgba(124, 58, 237, 0.12) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse at center, rgba(135, 113, 255, 0.20) 0%, transparent 70%)',
           borderRadius: '50%',
         }}
       />
@@ -52,7 +52,7 @@ export default function OGImage() {
         />
         <span
           style={{
-            color: '#a78bfa',
+            color: '#5b34cf',
             fontSize: '30px',
             fontWeight: '700',
             letterSpacing: '-0.5px',
@@ -67,7 +67,7 @@ export default function OGImage() {
         style={{
           fontSize: '62px',
           fontWeight: '800',
-          color: '#f0ecff',
+          color: '#241640',
           textAlign: 'center',
           lineHeight: 1.05,
           letterSpacing: '-2.5px',
@@ -82,7 +82,7 @@ export default function OGImage() {
       <div
         style={{
           fontSize: '24px',
-          color: '#8b7fb8',
+          color: '#5b5470',
           textAlign: 'center',
           maxWidth: '720px',
           lineHeight: 1.5,
@@ -99,10 +99,10 @@ export default function OGImage() {
             key={tag}
             style={{
               padding: '10px 22px',
-              background: 'rgba(124, 58, 237, 0.12)',
-              border: '1px solid rgba(124, 58, 237, 0.35)',
+              background: 'rgba(135, 113, 255, 0.12)',
+              border: '1px solid rgba(83, 43, 199, 0.38)',
               borderRadius: '100px',
-              color: '#a78bfa',
+              color: '#5b34cf',
               fontSize: '19px',
               fontWeight: '500',
             }}

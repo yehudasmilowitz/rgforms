@@ -27,9 +27,9 @@ function ScopeBadge({ scope }: { scope: string }) {
     <span
       className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold"
       style={{
-        background:  'oklch(0.25 0.12 250 / 0.35)',
-        border:      '1px solid oklch(0.55 0.15 250 / 0.40)',
-        color:       'oklch(0.78 0.14 250)',
+        background:  'var(--color-info-bg)',
+        border:      '1px solid var(--color-info-border)',
+        color:       'var(--color-info)',
       }}
     >
       <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true">
@@ -167,7 +167,7 @@ function ModuleRow({ mod, index, onRetry }: { mod: SiteStarterModuleProgress; in
         {mod.status === 'error' && mod.errorCode === 'apps-script-user-setting' && (
           <div
             className="mt-2 flex flex-col gap-2 p-3 rounded-lg text-xs leading-relaxed"
-            style={{ background: 'oklch(0.40 0.18 25 / 0.08)', border: '1px solid oklch(0.55 0.20 25 / 0.25)' }}
+            style={{ background: 'var(--color-error-bg)', border: '1px solid var(--color-error-border)' }}
             role="alert"
           >
             <p style={{ color: 'var(--color-text)' }}>
@@ -274,7 +274,7 @@ export default function SiteStarterProgress() {
         {allDone && !hasError && (
           <motion.div
             className="flex items-center justify-center gap-2 py-3 rounded-xl"
-            style={{ background: 'oklch(0.25 0.05 150 / 0.6)', border: '1px solid oklch(0.55 0.20 150 / 0.30)' }}
+            style={{ background: 'var(--color-success-bg)', border: '1px solid var(--color-success-border)' }}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
@@ -296,7 +296,7 @@ export default function SiteStarterProgress() {
           return (
             <motion.div
               className="flex flex-col gap-1 py-3 px-4 rounded-xl"
-              style={{ background: 'oklch(0.40 0.18 25 / 0.10)', border: '1px solid oklch(0.55 0.20 25 / 0.30)' }}
+              style={{ background: 'var(--color-error-bg)', border: '1px solid var(--color-error-border)' }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               role="alert"

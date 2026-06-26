@@ -80,7 +80,7 @@ function TooltipLink({ href, label, tooltip, variant = 'default' }: {
   const [show, setShow] = useState(false);
 
   const isWarning = variant === 'warning';
-  const amber = 'oklch(0.78 0.18 75)';
+  const amber = 'var(--color-warning)';
 
   return (
     <div className="relative inline-flex">
@@ -91,8 +91,8 @@ function TooltipLink({ href, label, tooltip, variant = 'default' }: {
         aria-description={tooltip}
         className="inline-flex items-center gap-1.5 text-xs font-semibold transition-colors"
         style={isWarning ? {
-          background:   show ? 'oklch(0.78 0.18 75 / 0.18)' : 'oklch(0.78 0.18 75 / 0.10)',
-          border:       `1px solid oklch(0.78 0.18 75 / 0.40)`,
+          background:   'var(--color-warning-bg)',
+          border:       `1px solid var(--color-warning-border)`,
           color:        amber,
           borderRadius: '999px',
           padding:      '3px 9px 3px 8px',
@@ -108,7 +108,7 @@ function TooltipLink({ href, label, tooltip, variant = 'default' }: {
         {label}
         {isWarning && (
           <>
-            <span aria-hidden className="self-stretch w-px my-0.5" style={{ background: 'oklch(0.78 0.18 75 / 0.35)' }} />
+            <span aria-hidden className="self-stretch w-px my-0.5" style={{ background: 'var(--color-warning)' }} />
             <InfoIcon />
           </>
         )}
@@ -145,7 +145,7 @@ function CopyButton({ text }: { text: string }) {
       onClick={handleCopy}
       className="shrink-0 flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors focus:outline-none"
       style={{
-        background: copied ? 'oklch(0.25 0.05 150 / 0.6)' : 'var(--color-surface-2)',
+        background: copied ? 'var(--color-success-bg)' : 'var(--color-surface-2)',
         color:      copied ? 'var(--color-success)' : 'var(--color-muted)',
         border:     '1px solid var(--color-border)',
       }}
@@ -296,7 +296,7 @@ function FormRow({
   isConfirmingRemove: boolean;
   saving: boolean;
 }) {
-  const color = 'oklch(0.73 0.17 65)';
+  const color = 'var(--color-warning)';
 
   return (
     <div
@@ -304,7 +304,7 @@ function FormRow({
       style={{
         background:  'var(--color-surface)',
         borderColor: isConfirmingRemove
-          ? 'oklch(0.55 0.20 25 / 0.50)'
+          ? 'var(--color-error-border)'
           : isEditing ? 'var(--color-accent)' : 'var(--color-border)',
       }}
     >
@@ -350,7 +350,7 @@ function FormRow({
 
       {isConfirmingRemove && (
         <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-t"
-          style={{ background: 'oklch(0.40 0.18 25 / 0.08)', borderColor: 'oklch(0.55 0.20 25 / 0.30)' }}>
+          style={{ background: 'var(--color-error-bg)', borderColor: 'var(--color-error-border)' }}>
           <p className="text-xs" style={{ color: 'var(--color-error)' }}>
             Remove <strong>{tab.label}</strong>? This deletes the sheet tab permanently.
           </p>
@@ -399,12 +399,12 @@ function PreviewModal({ entry, onClose }: { entry: PreviewEntry; onClose: () => 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+      style={{ background: 'rgba(15,30,28,0.45)', backdropFilter: 'blur(4px)' }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <motion.div
         className="w-full max-w-3xl max-h-[85vh] flex flex-col rounded-2xl overflow-hidden"
-        style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}
+        style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-xl)' }}
         initial={{ opacity: 0, scale: 0.96, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: 12 }}
@@ -419,7 +419,7 @@ function PreviewModal({ entry, onClose }: { entry: PreviewEntry; onClose: () => 
             type="button" onClick={handleCopy}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
             style={{
-              background: copied ? 'oklch(0.25 0.05 150 / 0.6)' : 'var(--color-surface-2)',
+              background: copied ? 'var(--color-success-bg)' : 'var(--color-surface-2)',
               color:      copied ? 'var(--color-success)' : 'var(--color-muted)',
               border:     '1px solid var(--color-border)',
             }}
@@ -656,7 +656,7 @@ export default function SiteKit() {
         {/* Error */}
         {error && (
           <div className="rounded-xl border px-4 py-3 text-sm flex items-start justify-between gap-3"
-            style={{ background: 'oklch(0.40 0.18 25 / 0.10)', borderColor: 'oklch(0.55 0.20 25 / 0.30)', color: 'var(--color-error)' }}>
+            style={{ background: 'var(--color-error-bg)', borderColor: 'var(--color-error-border)', color: 'var(--color-error)' }}>
             {error}
             <button type="button" onClick={() => setError('')} className="shrink-0 text-xs">✕</button>
           </div>
