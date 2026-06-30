@@ -57,7 +57,7 @@ export default function PrivacyPage() {
             Privacy Policy
           </h1>
           <p className="text-sm" style={{ color: 'var(--color-muted)' }}>
-            Last updated: April 2026
+            Last updated: June 2026
           </p>
         </header>
 
@@ -216,14 +216,14 @@ export default function PrivacyPage() {
             Spam protection is optional and off by default. If you enable it, your form uses{' '}
             <a href="https://www.cloudflare.com/products/turnstile/" target="_blank" rel="noopener noreferrer"
               className="underline" style={{ color: 'var(--color-accent)' }}>Cloudflare Turnstile</a>, a
-            privacy-focused CAPTCHA alternative. When a visitor submits the form, the Turnstile
-            widget on your own page produces a token, and your Apps Script verifies that token
-            directly with Cloudflare before saving the row.
+            privacy-focused CAPTCHA alternative. The Turnstile widget on your own page obtains a
+            token from Cloudflare in the visitor&apos;s browser; when the form is submitted, your
+            Apps Script verifies that token directly with Cloudflare before saving the row.
           </P>
           <ul className="flex flex-col gap-2 list-none">
             {[
-              'The verification request is made by the script in your own Google account — not by any RG Forms server.',
-              'Cloudflare receives the captcha token and the requesting visitor\'s IP address to assess whether the visitor is human, as described in Cloudflare\'s privacy policy. Your form-field values are not sent to Cloudflare.',
+              'When the Turnstile widget runs in the visitor\'s browser, it contacts Cloudflare directly, so Cloudflare receives the visitor\'s IP address to assess whether they are human — as described in Cloudflare\'s privacy policy.',
+              'The resulting token is then verified by the script in your own Google account — not by any RG Forms server — and that verification sends only the token and your secret key, never the visitor\'s IP address or your form-field values.',
               'Your Turnstile secret key is stored in your own private Google Sheet (the hidden manifest tab) and is never exposed to the browser or to RG Forms.',
               'If you turn protection off, no tokens are sent and Cloudflare is not contacted.',
             ].map((item) => (
