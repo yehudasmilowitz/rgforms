@@ -133,10 +133,26 @@ export default function SiteSelect() {
     setDeletingId(site.sheetId);
     setConfirmDeleteId(null);
     try {
+      // Read the root folder id from the manifest before deleting the sheet —
+      // the manifest lives inside the sheet, and we want to clean up the folder
+      // we created (not whatever the sheet's current parent happens to be).
+      const manifest = await loadSiteManifest(token, site.sheetId).catch(() => null);
+
+      // Deleting the sheet also removes its container-bound Apps Script.
       await fetch(`${DRIVE_API}/${site.sheetId}`, {
         method: 'DELETE',
         headers: authHeaders(token),
       });
+
+      // Then remove the now-empty project folder.
+      const folderId = manifest?.drive_root_folder_id;
+      if (folderId) {
+        await fetch(`${DRIVE_API}/${folderId}?supportsAllDrives=true`, {
+          method: 'DELETE',
+          headers: authHeaders(token),
+        }).catch(() => {});
+      }
+
       setSites((prev) => prev.filter((s) => s.sheetId !== site.sheetId));
     } catch {
       setError(`Failed to delete "${site.siteName}". Please try again.`);
