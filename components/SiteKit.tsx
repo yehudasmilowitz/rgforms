@@ -10,7 +10,7 @@ import {
   updateTabHeaders,
   renameSite,
 } from '@/lib/siteTabHelpers';
-import { toFieldKey } from '@/lib/createSite';
+import { toFieldKey, redeploySiteCapabilities } from '@/lib/createSite';
 import FormFieldEditor, { DEFAULT_FORM_CONFIG } from '@/components/FormFieldEditor';
 import TestFormDialog from '@/components/TestFormDialog';
 import type { SiteTab, SiteTabFormConfig, SiteManifest } from '@/types';
@@ -536,10 +536,21 @@ export default function SiteKit() {
   const [captchaDraft,  setCaptchaDraft]  = useState<{ enabled: boolean; siteKey: string; secret: string } | null>(null);
   const [captchaSaving, setCaptchaSaving] = useState(false);
 
+  // Capability upgrades (in-place redeploy) + the re-auth prompt they trigger.
+  const [upgrading,    setUpgrading]    = useState<null | 'email' | 'captcha'>(null);
+  const [needsReauth,  setNeedsReauth]  = useState(false);
+  const [enableEmailValue, setEnableEmailValue] = useState('');
+  const [enableCaptchaKeys, setEnableCaptchaKeys] = useState({ siteKey: '', secret: '' });
+  const [emailDraft, setEmailDraft] = useState<string | null>(null);
+  const [emailSaving, setEmailSaving] = useState(false);
+
   if (!manifest) return null;
   const m: SiteManifest = manifest;
 
-  const captchaGranted = !!m.captcha || !!m.capabilities?.captcha;
+  const emailGranted   = m.capabilities?.email ?? !!m.notification_email;
+  const captchaGranted = m.capabilities?.captcha ?? !!m.captcha;
+  const canUpgrade     = !!m.script_id;
+  const scriptEditorUrl = m.script_id ? `https://script.google.com/d/${m.script_id}/edit` : m.script_url;
   const captcha = captchaDraft ?? {
     enabled: m.captcha?.enabled ?? false,
     siteKey: m.captcha?.siteKey ?? '',
@@ -562,6 +573,55 @@ export default function SiteKit() {
       setCaptchaDraft(null);
     } catch (err) { setError((err as Error).message); }
     finally { setCaptchaSaving(false); }
+  }
+
+  // Add the captcha capability to an existing project: redeploy the script with
+  // the external_request scope (same URL, same sheet), then persist the config.
+  async function handleEnableCaptcha() {
+    setUpgrading('captcha'); setError('');
+    try {
+      await redeploySiteCapabilities(token, m, { email: emailGranted, captcha: true });
+      const newManifest: SiteManifest = {
+        ...m,
+        capabilities: { email: emailGranted, captcha: true },
+        captcha: { provider: 'turnstile', enabled: false, siteKey: enableCaptchaKeys.siteKey.trim(), secret: enableCaptchaKeys.secret.trim() },
+      };
+      await updateManifestInSheet(token, m.sheet_id, newManifest);
+      dispatch({ type: 'UPDATE_SITE_MANIFEST', payload: newManifest });
+      setEnableCaptchaKeys({ siteKey: '', secret: '' });
+      setNeedsReauth(true);
+    } catch (err) { setError((err as Error).message); }
+    finally { setUpgrading(null); }
+  }
+
+  // Add the email-notifications capability to an existing project.
+  async function handleEnableEmail() {
+    setUpgrading('email'); setError('');
+    try {
+      await redeploySiteCapabilities(token, m, { email: true, captcha: captchaGranted });
+      const newManifest: SiteManifest = {
+        ...m,
+        capabilities: { email: true, captcha: captchaGranted },
+        notification_email: enableEmailValue.trim(),
+      };
+      await updateManifestInSheet(token, m.sheet_id, newManifest);
+      dispatch({ type: 'UPDATE_SITE_MANIFEST', payload: newManifest });
+      setNeedsReauth(true);
+    } catch (err) { setError((err as Error).message); }
+    finally { setUpgrading(null); }
+  }
+
+  // Edit the notification address (scope already granted — manifest only, no redeploy).
+  async function handleSaveEmail() {
+    if (emailDraft === null) return;
+    setEmailSaving(true); setError('');
+    try {
+      const newManifest: SiteManifest = { ...m, notification_email: emailDraft.trim() };
+      await updateManifestInSheet(token, m.sheet_id, newManifest);
+      dispatch({ type: 'UPDATE_SITE_MANIFEST', payload: newManifest });
+      setEmailDraft(null);
+    } catch (err) { setError((err as Error).message); }
+    finally { setEmailSaving(false); }
   }
 
   const date = new Date(m.created_at).toLocaleDateString('en-US', {
@@ -741,6 +801,27 @@ export default function SiteKit() {
           </div>
         )}
 
+        {/* Re-authorize required (after a capability upgrade) */}
+        {needsReauth && (
+          <div className="rounded-xl border px-4 py-3.5 flex flex-col gap-2"
+            style={{ background: 'var(--color-warning-bg)', borderColor: 'var(--color-warning-border)', color: 'var(--color-warning)' }}>
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm font-semibold">Action required: re-authorize the script</p>
+              <button type="button" onClick={() => setNeedsReauth(false)} className="shrink-0 text-xs">✕</button>
+            </div>
+            <p className="text-xs leading-relaxed">
+              The new capability is deployed and your form URL is unchanged — but until you approve the added permission,
+              the script may <strong>reject submissions</strong>, so do this now. Open the script editor, run any function
+              (or use <strong>Deploy → Test deployments</strong>), and click <strong>Review permissions → Allow</strong>.
+              Google may show an &ldquo;App isn&apos;t verified&rdquo; warning — choose <strong>Advanced → Continue</strong>.
+            </p>
+            <a href={scriptEditorUrl} target="_blank" rel="noopener noreferrer"
+              className="self-start inline-flex items-center gap-1.5 text-xs font-semibold mt-0.5">
+              <ExternalLinkIcon /> Open script editor
+            </a>
+          </div>
+        )}
+
         {/* API endpoint */}
         <div className="flex flex-col gap-3 p-4 rounded-xl border"
           style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
@@ -774,6 +855,85 @@ export default function SiteKit() {
           </div>
         </div>
 
+        {/* Email notifications */}
+        <div className="flex flex-col gap-3 p-4 rounded-xl border"
+          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-muted)' }}>
+              Email notifications
+            </p>
+            {emailGranted && (
+              <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                style={{
+                  background: m.notification_email ? 'var(--color-success-bg)' : 'var(--color-surface-2)',
+                  color:      m.notification_email ? 'var(--color-success)' : 'var(--color-subtle)',
+                  border:     `1px solid ${m.notification_email ? 'var(--color-success-border)' : 'var(--color-border)'}`,
+                }}>
+                {m.notification_email ? 'On' : 'Off'}
+              </span>
+            )}
+          </div>
+
+          {!emailGranted ? (
+            !canUpgrade ? (
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                This project was created before in-place upgrades were supported, so the{' '}
+                <code className="font-mono text-[11px]">script.send_mail</code> scope can&apos;t be added automatically —
+                recreate the project with email notifications enabled to use them.
+              </p>
+            ) : (
+              <div className="flex flex-col gap-3">
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                  Get an email on every submission. We&apos;ll redeploy the script with the{' '}
+                  <code className="font-mono text-[11px]">script.send_mail</code> scope — same endpoint URL and sheet.
+                  You must re-authorize right after (the form may reject submissions until you do).
+                </p>
+                <input type="email" value={enableEmailValue} onChange={(e) => setEnableEmailValue(e.target.value)}
+                  placeholder="you@example.com"
+                  className="rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                  style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }} />
+                <button type="button" onClick={handleEnableEmail}
+                  disabled={upgrading !== null || !enableEmailValue.trim().includes('@')}
+                  className="self-start flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
+                  style={{ background: 'var(--color-accent)', color: '#fff' }}>
+                  {upgrading === 'email' ? <SpinnerIcon /> : null}
+                  {upgrading === 'email' ? 'Redeploying…' : 'Enable email notifications'}
+                </button>
+              </div>
+            )
+          ) : (
+            <>
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                Submissions are emailed to this address. Clear it to stop notifications — no redeploy needed.
+              </p>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--color-muted)' }}>
+                  Notification address
+                </label>
+                <input type="email" value={emailDraft ?? m.notification_email ?? ''}
+                  onChange={(e) => setEmailDraft(e.target.value)}
+                  placeholder="you@example.com"
+                  className="rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                  style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }} />
+              </div>
+              {emailDraft !== null && emailDraft.trim() !== (m.notification_email ?? '') && (
+                <div className="flex gap-2">
+                  <button type="button" onClick={handleSaveEmail} disabled={emailSaving}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
+                    style={{ background: 'var(--color-accent)', color: '#fff' }}>
+                    {emailSaving ? <SpinnerIcon /> : null} Save changes
+                  </button>
+                  <button type="button" onClick={() => setEmailDraft(null)} disabled={emailSaving}
+                    className="px-4 py-2 rounded-lg text-xs font-medium"
+                    style={{ background: 'var(--color-surface-2)', color: 'var(--color-muted)', border: '1px solid var(--color-border)' }}>
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
         {/* Spam protection */}
         <div className="flex flex-col gap-3 p-4 rounded-xl border"
           style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
@@ -794,12 +954,51 @@ export default function SiteKit() {
           </div>
 
           {!captchaGranted ? (
-            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-              This project wasn&apos;t provisioned with Cloudflare Turnstile, so the script can&apos;t make the external
-              verification request. The <code className="font-mono text-[11px]">script.external_request</code> scope is
-              granted at creation — to add spam protection, recreate the project with it enabled. (The honeypot field
-              works on any form without it.)
-            </p>
+            !canUpgrade ? (
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                This project was created before in-place upgrades were supported, so the{' '}
+                <code className="font-mono text-[11px]">script.external_request</code> scope can&apos;t be added
+                automatically — recreate the project with spam protection enabled to use Turnstile. (The honeypot field
+                works on any form without it.)
+              </p>
+            ) : (
+              <div className="flex flex-col gap-3">
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                  Add Cloudflare Turnstile to this project. We&apos;ll redeploy the script with the{' '}
+                  <code className="font-mono text-[11px]">script.external_request</code> scope — your endpoint URL and
+                  sheet stay exactly the same. You must re-authorize right after (the form may reject submissions until
+                  you do), then turn validation on once the widget is on your site.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--color-muted)' }}>
+                      Site key (public)
+                    </label>
+                    <input type="text" value={enableCaptchaKeys.siteKey}
+                      onChange={(e) => setEnableCaptchaKeys((k) => ({ ...k, siteKey: e.target.value }))}
+                      placeholder="0x4AAAA…"
+                      className="rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                      style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }} />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--color-muted)' }}>
+                      Secret key (private)
+                    </label>
+                    <input type="password" value={enableCaptchaKeys.secret}
+                      onChange={(e) => setEnableCaptchaKeys((k) => ({ ...k, secret: e.target.value }))}
+                      placeholder="0x4AAAA…"
+                      className="rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                      style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }} />
+                  </div>
+                </div>
+                <button type="button" onClick={handleEnableCaptcha} disabled={upgrading !== null}
+                  className="self-start flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
+                  style={{ background: 'var(--color-accent)', color: '#fff' }}>
+                  {upgrading === 'captcha' ? <SpinnerIcon /> : null}
+                  {upgrading === 'captcha' ? 'Redeploying…' : 'Enable spam protection'}
+                </button>
+              </div>
+            )
           ) : (
             <>
               <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>

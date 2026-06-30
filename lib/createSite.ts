@@ -8,15 +8,50 @@ import {
   createScriptProject,
   uploadCode,
   deployWebApp,
+  createScriptVersion,
+  findWebAppDeploymentId,
+  updateWebAppDeployment,
   styleHeaderRow,
 } from '@/lib/core/provisionHelpers';
-import { generateSiteScript, generateAppsScriptJson } from './siteScript';
+import { generateSiteScript, generateAppsScriptJson, type SiteScriptCapabilities } from './siteScript';
 import type { CreateSiteInput, SiteManifest, SiteTab } from '@/types';
 
 export type { CreateSiteInput };
 
 export function toFieldKey(label: string): string {
   return label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'field';
+}
+
+// ─── In-place capability upgrade ──────────────────────────────────────────────
+
+/**
+ * Re-deploy an existing project's script with a new capability set (added
+ * scopes / code), keeping the SAME web app URL and the SAME sheet. The script
+ * is bound to the spreadsheet and never recreated; only its code + deployment
+ * version change. The newly granted scope stays inert until the owner
+ * re-authorizes the script (Apps Script cannot grant scopes via API).
+ *
+ * Requires `manifest.script_id` — projects provisioned before it was stored
+ * can't be targeted and must be recreated. Callers should persist the updated
+ * `capabilities` (and any new config) to the manifest after this resolves.
+ */
+export async function redeploySiteCapabilities(
+  token: string,
+  manifest: SiteManifest,
+  caps: SiteScriptCapabilities,
+): Promise<void> {
+  const scriptId = manifest.script_id;
+  if (!scriptId) {
+    throw new Error('This project predates in-place upgrades. Recreate it with the capability enabled to add it.');
+  }
+  // 1. Re-upload code + manifest with the new scope set. This touches HEAD only;
+  //    the live /exec endpoint keeps serving the old version until step 3.
+  await uploadCode(token, scriptId, generateSiteScript(caps), generateAppsScriptJson(caps));
+  // 2. Snapshot it as a new version.
+  const versionNumber = await createScriptVersion(token, scriptId, `${manifest.site_name} — capability update`);
+  // 3. Point the existing deployment at the new version — URL is preserved.
+  const deploymentId = await findWebAppDeploymentId(token, scriptId, manifest.script_url);
+  await updateWebAppDeployment(token, scriptId, deploymentId, versionNumber, `${manifest.site_name} — Forms API`);
 }
 
 // ─── Progress callback ────────────────────────────────────────────────────────

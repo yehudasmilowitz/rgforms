@@ -115,6 +115,83 @@ export async function deployWebApp(
   return webApp.webApp.url;
 }
 
+// ─── In-place redeploy (scope/capability upgrades) ────────────────────────────
+//
+// To change a deployed web app's code or scopes *without* changing its URL, you
+// must update the EXISTING deployment rather than create a new one. The URL is
+// derived from the deploymentId, so updating in place keeps it byte-for-byte:
+//   1. createScriptVersion   — snapshot the freshly uploaded content
+//   2. findWebAppDeploymentId — locate the live deployment behind script_url
+//   3. updateWebAppDeployment — point that deployment at the new version
+// The newly declared scopes stay inert until the owner re-authorizes the script.
+
+/** Snapshot the current script content as an immutable version. */
+export async function createScriptVersion(
+  token: string,
+  scriptId: string,
+  description = 'rgforms capability update',
+): Promise<number> {
+  const result = await apiCall<{ versionNumber: number }>(`${SCRIPT_API}/${scriptId}/versions`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({ description }),
+  });
+  return result.versionNumber;
+}
+
+/** Find the deploymentId of the live web app, preferring an exact URL match. */
+export async function findWebAppDeploymentId(
+  token: string,
+  scriptId: string,
+  webAppUrl: string,
+): Promise<string> {
+  const result = await apiCall<{
+    deployments?: Array<{
+      deploymentId: string;
+      deploymentConfig?: { versionNumber?: number };
+      entryPoints?: Array<{ entryPointType: string; webApp?: { url: string } }>;
+    }>;
+  }>(`${SCRIPT_API}/${scriptId}/deployments`, {
+    method: 'GET',
+    headers: authHeaders(token),
+  });
+
+  const deployments = result.deployments ?? [];
+  const hasWebApp = (d: (typeof deployments)[number]) =>
+    d.entryPoints?.some((ep) => ep.entryPointType === 'WEB_APP');
+
+  // Exact URL match is safest; otherwise the first versioned (non-@HEAD) web app.
+  const byUrl = deployments.find((d) =>
+    d.entryPoints?.some((ep) => ep.entryPointType === 'WEB_APP' && ep.webApp?.url === webAppUrl),
+  );
+  const match = byUrl ?? deployments.find((d) => d.deploymentConfig?.versionNumber !== undefined && hasWebApp(d));
+
+  if (!match) throw new Error('Could not find the existing web app deployment to update.');
+  return match.deploymentId;
+}
+
+/** Point an existing deployment at a new version — keeps the same URL. */
+export async function updateWebAppDeployment(
+  token: string,
+  scriptId: string,
+  deploymentId: string,
+  versionNumber: number,
+  description = 'rgforms API',
+): Promise<string> {
+  const result = await apiCall<{ entryPoints?: Array<{ entryPointType: string; webApp?: { url: string } }> }>(
+    `${SCRIPT_API}/${scriptId}/deployments/${deploymentId}`,
+    {
+      method: 'PUT',
+      headers: authHeaders(token),
+      body: JSON.stringify({
+        deploymentConfig: { scriptId, versionNumber, manifestFileName: 'appsscript', description },
+      }),
+    },
+  );
+  const webApp = result.entryPoints?.find((ep) => ep.entryPointType === 'WEB_APP');
+  return webApp?.webApp?.url ?? '';
+}
+
 // ─── Sheet helpers ────────────────────────────────────────────────────────────
 
 /** Bold the first row and freeze it as a header row. */
