@@ -200,13 +200,49 @@ export default function PrivacyPage() {
             The Apps Script deployed to your Google Drive declares its own scopes separately from
             the RG Forms web app. When you authorize the script, Google will show it requesting
             access to that one spreadsheet only (using the <code className="text-xs px-1 rounded" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>spreadsheets.currentonly</code> scope — not
-            all your spreadsheets) and the ability to send email on your behalf. These permissions
-            are granted to the script running under your own Google account — not to RG Forms.
+            all your spreadsheets). If you enable email notifications, it also requests the ability
+            to send email on your behalf (<code className="text-xs px-1 rounded" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>script.send_mail</code>). If
+            you enable spam protection, it also requests the ability to make outbound requests
+            (<code className="text-xs px-1 rounded" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}>script.external_request</code>),
+            used only to verify captcha tokens with Cloudflare. Both are optional — chosen when you
+            create the project — and these permissions are granted to the script running under your
+            own Google account, not to RG Forms.
           </P>
         </Section>
 
         <Section>
-          <H2>5. Your site submissions and data</H2>
+          <H2>5. Spam protection (Cloudflare Turnstile)</H2>
+          <P>
+            Spam protection is optional and off by default. If you enable it, your form uses{' '}
+            <a href="https://www.cloudflare.com/products/turnstile/" target="_blank" rel="noopener noreferrer"
+              className="underline" style={{ color: 'var(--color-accent)' }}>Cloudflare Turnstile</a>, a
+            privacy-focused CAPTCHA alternative. When a visitor submits the form, the Turnstile
+            widget on your own page produces a token, and your Apps Script verifies that token
+            directly with Cloudflare before saving the row.
+          </P>
+          <ul className="flex flex-col gap-2 list-none">
+            {[
+              'The verification request is made by the script in your own Google account — not by any RG Forms server.',
+              'Cloudflare receives the captcha token and the requesting visitor\'s IP address to assess whether the visitor is human, as described in Cloudflare\'s privacy policy. Your form-field values are not sent to Cloudflare.',
+              'Your Turnstile secret key is stored in your own private Google Sheet (the hidden manifest tab) and is never exposed to the browser or to RG Forms.',
+              'If you turn protection off, no tokens are sent and Cloudflare is not contacted.',
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-2">
+                <Check size={13} className="mt-1 shrink-0" style={{ color: 'var(--color-success)' }} aria-hidden="true" />
+                <span className="text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>{item}</span>
+              </li>
+            ))}
+          </ul>
+          <P>
+            Cloudflare is an independent third party. Its handling of the data it receives is
+            governed by{' '}
+            <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer"
+              className="underline" style={{ color: 'var(--color-accent)' }}>Cloudflare&apos;s privacy policy</a>.
+          </P>
+        </Section>
+
+        <Section>
+          <H2>6. Your site submissions and data</H2>
           <P>
             After provisioning, visitors who submit forms or query your site&apos;s API do so directly
             from their browser to your Google Apps Script deployment URL. That data goes directly
@@ -221,7 +257,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section>
-          <H2>6. Google&apos;s Privacy Policy</H2>
+          <H2>7. Google&apos;s Privacy Policy</H2>
           <P>
             By signing in with Google, you are also subject to Google&apos;s own privacy policy and
             terms of service. The resources created in your Google Drive (Sheets, Apps Script)
@@ -243,7 +279,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section>
-          <H2>7. Cookies and Tracking</H2>
+          <H2>8. Cookies and Tracking</H2>
           <P>
             RG Forms does not use cookies, local storage, session storage, or any tracking
             pixels. There are no analytics scripts or external sign-in SDKs loaded on this
@@ -253,7 +289,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section>
-          <H2>8. Changes to this policy</H2>
+          <H2>9. Changes to this policy</H2>
           <P>
             If this privacy policy changes materially, the &ldquo;Last updated&rdquo; date at the top will
             be revised. Since we collect no personal data, changes are unlikely to affect you.
@@ -261,7 +297,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section>
-          <H2>9. Contact</H2>
+          <H2>10. Contact</H2>
           <P>
             Questions about this privacy policy?{' '}
             <Link

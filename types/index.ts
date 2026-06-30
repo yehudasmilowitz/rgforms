@@ -52,17 +52,46 @@ export interface SiteTab {
   formConfig?:      SiteTabFormConfig;
 }
 
+// ─── Spam protection (captcha) ────────────────────────────────────────────────
+// Project-level. Verification runs server-side inside Apps Script via
+// UrlFetchApp, so it depends on the `script.external_request` scope being
+// granted at provision time (see `capabilities.captcha`). The secret lives in
+// the owner's own private Sheet manifest; only the public siteKey reaches the
+// browser. `enabled` is a live runtime switch — flip it any time from the UI
+// (it just rewrites the manifest); the granted scope is what can't change later.
+
+export type CaptchaProvider = 'turnstile';
+
+export interface CaptchaConfig {
+  provider: CaptchaProvider;
+  enabled:  boolean;   // runtime on/off — validation is skipped entirely when false
+  siteKey:  string;    // public; safe to embed in the form HTML
+  secret:   string;    // private; stays in the owner's Sheet, never sent to the browser
+}
+
+// Which sensitive Apps Script scopes were granted when the project was
+// provisioned. These gate whether the generated script *can* send mail / make
+// external requests at all; the per-feature runtime switches live elsewhere
+// (notification_email for email, captcha.enabled for spam protection).
+export interface SiteCapabilities {
+  email:   boolean;   // script.send_mail
+  captcha: boolean;   // script.external_request
+}
+
 export interface SiteManifest {
   project_slug:          string;
   site_name:             string;
   created_at:            string;
   google_account:        string;
+  script_id?:            string;
   script_url:            string;
   sheet_id:              string;
   sheet_url:             string;
   drive_root_folder_id:  string;
   drive_root_folder_url: string;
   notification_email:    string;
+  capabilities?:         SiteCapabilities;
+  captcha?:              CaptchaConfig;
   tabs:                  SiteTab[];
 }
 
@@ -95,6 +124,13 @@ export interface CreateSiteInput {
   formLabel:             string;
   formConfig:            SiteTabFormConfig;
   notificationsEnabled:  boolean;
+  // Spam protection — opt-in at provision time. When true, the
+  // script.external_request scope is granted and the Turnstile verify code is
+  // included. Validation itself stays OFF until captcha.enabled is flipped on
+  // (after the consumer adds the widget), so provisioning never breaks a form.
+  captchaEnabled:        boolean;
+  captchaSiteKey:        string;
+  captchaSecret:         string;
 }
 
 // ─── App State ───────────────────────────────────────────────────────────────

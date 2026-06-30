@@ -116,7 +116,11 @@ export async function createSite(
   input: CreateSiteInput,
   onStep: SiteProvisionCallback,
 ): Promise<SiteManifest> {
-  const { siteName, notifyEmail, googleAccount, formLabel, formConfig, notificationsEnabled } = input;
+  const {
+    siteName, notifyEmail, googleAccount, formLabel, formConfig, notificationsEnabled,
+    captchaEnabled, captchaSiteKey, captchaSecret,
+  } = input;
+  const caps = { email: notificationsEnabled, captcha: captchaEnabled };
   const createdAt   = new Date().toISOString();
   const projectSlug = siteName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const tabName     = 'contact';
@@ -189,7 +193,7 @@ export async function createSite(
 
   try {
     ({ scriptId } = await createScriptProject(token, `${siteName} — Forms API`, sheetId));
-    await uploadCode(token, scriptId, generateSiteScript(notificationsEnabled), generateAppsScriptJson(notificationsEnabled));
+    await uploadCode(token, scriptId, generateSiteScript(caps), generateAppsScriptJson(caps));
     onStep('script', 'complete');
   } catch (err) {
     if (err instanceof AppsScriptUserSettingError) {
@@ -229,12 +233,20 @@ export async function createSite(
     site_name:             siteName,
     created_at:            createdAt,
     google_account:        googleAccount,
+    script_id:             scriptId,
     script_url:            deploymentUrl,
     sheet_id:              sheetId,
     sheet_url:             sheetUrl,
     drive_root_folder_id:  rootFolderId,
     drive_root_folder_url: `https://drive.google.com/drive/folders/${rootFolderId}`,
     notification_email:    notifyEmail,
+    capabilities:          { email: notificationsEnabled, captcha: captchaEnabled },
+    // Captcha config persists only when the scope was granted. Validation
+    // starts OFF — the owner flips it on from the dashboard once the widget is
+    // live on their site, so enabling the capability never breaks submissions.
+    ...(captchaEnabled
+      ? { captcha: { provider: 'turnstile' as const, enabled: false, siteKey: captchaSiteKey, secret: captchaSecret } }
+      : {}),
     tabs:                  [tab],
   };
 

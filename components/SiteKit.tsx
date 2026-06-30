@@ -169,7 +169,8 @@ function makeTabName(label: string, existing: string[]): string {
 // ─── RGFORMS.md generator ─────────────────────────────────────────────────────
 
 function generateClaudeMd(manifest: SiteManifest, date: string): string {
-  const { project_slug, script_url, sheet_url, drive_root_folder_url, tabs } = manifest;
+  const { project_slug, script_url, sheet_url, drive_root_folder_url, tabs, captcha } = manifest;
+  const captchaOn = !!captcha?.enabled;
 
   const tabDocs = tabs
     .filter((tab) => tab.type === 'form')
@@ -220,7 +221,42 @@ const res = await fetch('${script_url}', {
 const data = await res.json();
 // { result: 'success' } or { result: 'error', error: '...' }
 \`\`\`
+${captchaOn ? `
+---
 
+## Spam protection (Cloudflare Turnstile)
+
+This form has Turnstile **enabled** — the backend verifies a captcha token on every
+submission and rejects requests without a valid one. You must render the widget and
+send its token as the \`_captcha\` field.
+
+1. Load the Turnstile script in your page \`<head>\`:
+
+\`\`\`html
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+\`\`\`
+
+2. Render the widget inside your form (site key is public):
+
+\`\`\`html
+<div class="cf-turnstile" data-sitekey="${captcha?.siteKey || 'YOUR_SITE_KEY'}"></div>
+\`\`\`
+
+3. Send the token (Turnstile writes it to a hidden \`cf-turnstile-response\` input) as \`_captcha\`:
+
+\`\`\`typescript
+const token = (document.querySelector('[name="cf-turnstile-response"]') as HTMLInputElement)?.value;
+const res = await fetch('${script_url}', {
+  method: 'POST',
+  headers: { 'Content-Type': 'text/plain' },
+  body: JSON.stringify({ tab: 'contact', fields: { ...fields, _captcha: token } }),
+});
+\`\`\`
+
+If protection is toggled off later in the RG Forms dashboard, the token is simply
+ignored — you can leave the widget in place. If it's on and no token is sent, the
+response is \`{ result: "error", error: "Spam protection is enabled but no captcha token was sent…" }\`.
+` : ''}
 ---
 
 ## Environment variables
@@ -243,7 +279,8 @@ ${tabDocs}
 2. **CORS**: Always use \`Content-Type: text/plain\` — never \`application/json\`. Apps Script cannot respond to the CORS preflight that \`application/json\` triggers, which causes the browser to block the request. The body is still JSON; the script parses it correctly.
 3. **Cold starts**: Apps Script takes ~800ms–2s on the first request after inactivity. Normal after that.
 4. **Form responses**: \`{ result: "success" }\` on success, \`{ result: "error", error: "..." }\` on failure.
-${anyHoneypot ? `5. **Spam protection**: Honeypot-enabled — include \`<input type="text" name="_hp" style="display:none" tabindex="-1" />\`. Script silently discards submissions where this is filled.` : ''}
+${anyHoneypot ? `5. **Honeypot**: include \`<input type="text" name="_hp" style="display:none" tabindex="-1" />\`. Script silently discards submissions where this is filled.` : ''}
+${captchaOn ? `6. **Captcha**: Turnstile is enabled — render the widget and send its token as \`_captcha\` (see "Spam protection" above). Submissions without a valid token are rejected.` : ''}
 
 ---
 
@@ -252,30 +289,39 @@ ${anyHoneypot ? `5. **Spam protection**: Honeypot-enabled — include \`<input t
 When building UI for this form:
 1. POST \`{ tab, fields }\` directly to \`${script_url}\`.
 2. Set \`Content-Type: text/plain\` — NOT \`application/json\`. This prevents a CORS preflight that Apps Script cannot handle.
-3. The endpoint is public — no token required.
-4. Check \`data.result === "success"\` for the response.
+3. The endpoint is public — no auth token required.${captchaOn ? `\n4. **Spam protection is ON.** Add the Cloudflare Turnstile widget (site key \`${captcha?.siteKey || 'YOUR_SITE_KEY'}\`) and send its token as the \`_captcha\` field, or every submission is rejected.` : ''}
+${captchaOn ? '5' : '4'}. Check \`data.result === "success"\` for the response.
 `;
 }
 
 // ─── Manifest guide ───────────────────────────────────────────────────────────
 
 function buildManifestGuide(manifest: SiteManifest) {
-  const { script_url } = manifest;
+  const { script_url, captcha } = manifest;
+  const captchaOn = !!captcha?.enabled;
   return {
     _readme: 'Implementation guide — safe to delete once your form is wired up.',
     form_submissions: {
-      note: 'POST { tab, fields } directly to script_url — no token required.',
+      note: 'POST { tab, fields } directly to script_url — no auth token required.',
       response_success: '{ result: "success" }',
       response_error:   '{ result: "error", error: "..." }',
       example: [
         '// Use text/plain to avoid CORS preflight — body is still JSON',
         'const res = await fetch(FORM_SCRIPT_URL, {',
         '  method: "POST", headers: { "Content-Type": "text/plain" },',
-        '  body: JSON.stringify({ tab: "contact", fields }),',
+        `  body: JSON.stringify({ tab: "contact", fields${captchaOn ? ': { ...fields, _captcha: turnstileToken }' : ''} }),`,
         '});',
       ].join('\n'),
       env_example: `FORM_SCRIPT_URL=${script_url}`,
     },
+    ...(captchaOn ? {
+      spam_protection: {
+        provider: 'cloudflare-turnstile',
+        note: 'Captcha is ON — render the Turnstile widget and send its token as the _captcha field, or submissions are rejected. See RGFORMS.md for the snippet.',
+        site_key: captcha?.siteKey || '',
+        script: 'https://challenges.cloudflare.com/turnstile/v0/api.js',
+      },
+    } : {}),
     authorization: 'Visit script_url once in your browser as the Google account owner to authorize.',
   };
 }
@@ -487,8 +533,36 @@ export default function SiteKit() {
   const [renameValue,     setRenameValue]     = useState('');
   const [renameSaving,    setRenameSaving]    = useState(false);
 
+  const [captchaDraft,  setCaptchaDraft]  = useState<{ enabled: boolean; siteKey: string; secret: string } | null>(null);
+  const [captchaSaving, setCaptchaSaving] = useState(false);
+
   if (!manifest) return null;
   const m: SiteManifest = manifest;
+
+  const captchaGranted = !!m.captcha || !!m.capabilities?.captcha;
+  const captcha = captchaDraft ?? {
+    enabled: m.captcha?.enabled ?? false,
+    siteKey: m.captcha?.siteKey ?? '',
+    secret:  m.captcha?.secret ?? '',
+  };
+  const captchaDirty =
+    captcha.enabled !== (m.captcha?.enabled ?? false) ||
+    captcha.siteKey !== (m.captcha?.siteKey ?? '') ||
+    captcha.secret  !== (m.captcha?.secret ?? '');
+
+  async function handleSaveCaptcha() {
+    setCaptchaSaving(true); setError('');
+    try {
+      const newManifest: SiteManifest = {
+        ...m,
+        captcha: { provider: 'turnstile', enabled: captcha.enabled, siteKey: captcha.siteKey.trim(), secret: captcha.secret.trim() },
+      };
+      await updateManifestInSheet(token, m.sheet_id, newManifest);
+      dispatch({ type: 'UPDATE_SITE_MANIFEST', payload: newManifest });
+      setCaptchaDraft(null);
+    } catch (err) { setError((err as Error).message); }
+    finally { setCaptchaSaving(false); }
+  }
 
   const date = new Date(m.created_at).toLocaleDateString('en-US', {
     year: 'numeric', month: 'long', day: 'numeric',
@@ -554,8 +628,13 @@ export default function SiteKit() {
   }
 
   function handlePreviewManifest() {
-    const guide    = buildManifestGuide(m);
-    const content  = JSON.stringify({ ...m, ...guide }, null, 2);
+    const guide = buildManifestGuide(m);
+    // Redact the Turnstile secret — this manifest is meant to be copied/committed,
+    // and the secret must never leave the owner's private Sheet.
+    const safe = m.captcha
+      ? { ...m, captcha: { ...m.captcha, secret: m.captcha.secret ? '••• stored in your private Sheet •••' : '' } }
+      : m;
+    const content = JSON.stringify({ ...safe, ...guide }, null, 2);
     setPreview({ title: `${m.project_slug}-manifest.json`, content, filename: `${m.project_slug}-manifest.json` });
   }
 
@@ -693,6 +772,111 @@ export default function SiteKit() {
               variant="warning"
             />
           </div>
+        </div>
+
+        {/* Spam protection */}
+        <div className="flex flex-col gap-3 p-4 rounded-xl border"
+          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-muted)' }}>
+              Spam protection
+            </p>
+            {captchaGranted && (
+              <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                style={{
+                  background: captcha.enabled ? 'var(--color-success-bg)' : 'var(--color-surface-2)',
+                  color:      captcha.enabled ? 'var(--color-success)' : 'var(--color-subtle)',
+                  border:     `1px solid ${captcha.enabled ? 'var(--color-success-border)' : 'var(--color-border)'}`,
+                }}>
+                {captcha.enabled ? 'On' : 'Off'}
+              </span>
+            )}
+          </div>
+
+          {!captchaGranted ? (
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+              This project wasn&apos;t provisioned with Cloudflare Turnstile, so the script can&apos;t make the external
+              verification request. The <code className="font-mono text-[11px]">script.external_request</code> scope is
+              granted at creation — to add spam protection, recreate the project with it enabled. (The honeypot field
+              works on any form without it.)
+            </p>
+          ) : (
+            <>
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
+                Turnstile verifies each submission server-side. Toggle it on once the widget is live on your site —
+                changes take effect immediately, no redeploy. See <strong style={{ color: 'var(--color-text)' }}>RGFORMS.md</strong> for the widget snippet.
+              </p>
+
+              <label className="flex items-center gap-3 self-start cursor-pointer select-none">
+                <span
+                  className="relative inline-flex h-5 w-9 shrink-0 rounded-full border transition-colors duration-200"
+                  style={{
+                    background:  captcha.enabled ? 'var(--color-accent)' : 'var(--color-surface-2)',
+                    borderColor: captcha.enabled ? 'var(--color-accent)' : 'var(--color-border)',
+                  }}
+                  onClick={() => setCaptchaDraft({ ...captcha, enabled: !captcha.enabled })}
+                >
+                  <span className="pointer-events-none absolute top-0.5 h-4 w-4 rounded-full shadow transition-transform duration-200"
+                    style={{ background: '#fff', transform: captcha.enabled ? 'translateX(16px)' : 'translateX(2px)' }} />
+                </span>
+                <span className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}
+                  onClick={() => setCaptchaDraft({ ...captcha, enabled: !captcha.enabled })}>
+                  Verify submissions with Turnstile
+                </span>
+              </label>
+
+              {captcha.enabled && !captcha.secret.trim() && (
+                <div className="rounded-lg px-3 py-2 text-xs"
+                  style={{ background: 'var(--color-warning-bg)', border: '1px solid var(--color-warning-border)', color: 'var(--color-warning)' }}>
+                  Validation is on but no secret key is set — submissions with a token will be rejected. Add your secret key below.
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--color-muted)' }}>
+                    Site key (public)
+                  </label>
+                  <input
+                    type="text"
+                    value={captcha.siteKey}
+                    onChange={(e) => setCaptchaDraft({ ...captcha, siteKey: e.target.value })}
+                    placeholder="0x4AAAA…"
+                    className="rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                    style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--color-muted)' }}>
+                    Secret key (private)
+                  </label>
+                  <input
+                    type="password"
+                    value={captcha.secret}
+                    onChange={(e) => setCaptchaDraft({ ...captcha, secret: e.target.value })}
+                    placeholder="0x4AAAA…"
+                    className="rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                    style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
+                  />
+                </div>
+              </div>
+
+              {captchaDirty && (
+                <div className="flex gap-2">
+                  <button type="button" onClick={handleSaveCaptcha} disabled={captchaSaving}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
+                    style={{ background: 'var(--color-accent)', color: '#fff' }}>
+                    {captchaSaving ? <SpinnerIcon /> : null} Save changes
+                  </button>
+                  <button type="button" onClick={() => setCaptchaDraft(null)} disabled={captchaSaving}
+                    className="px-4 py-2 rounded-lg text-xs font-medium"
+                    style={{ background: 'var(--color-surface-2)', color: 'var(--color-muted)', border: '1px solid var(--color-border)' }}>
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
 
         {/* Forms */}
@@ -858,6 +1042,7 @@ export default function SiteKit() {
         <TestFormDialog
           tab={testingTab}
           scriptUrl={manifest.script_url}
+          captcha={m.captcha ? { enabled: m.captcha.enabled, siteKey: m.captcha.siteKey } : undefined}
           onClose={() => setTestingTab(null)}
         />
       )}

@@ -1,6 +1,12 @@
-export function generateAppsScriptJson(notificationsEnabled = true) {
+export interface SiteScriptCapabilities {
+  email:   boolean;   // declares script.send_mail + includes the email block
+  captcha: boolean;   // declares script.external_request + includes the verify block
+}
+
+export function generateAppsScriptJson(caps: SiteScriptCapabilities) {
   const scopes = ['https://www.googleapis.com/auth/spreadsheets.currentonly'];
-  if (notificationsEnabled) scopes.push('https://www.googleapis.com/auth/script.send_mail');
+  if (caps.email)   scopes.push('https://www.googleapis.com/auth/script.send_mail');
+  if (caps.captcha) scopes.push('https://www.googleapis.com/auth/script.external_request');
   return {
     timeZone: 'America/New_York',
     exceptionLogging: 'STACKDRIVER',
@@ -13,7 +19,8 @@ export function generateAppsScriptJson(notificationsEnabled = true) {
   };
 }
 
-export function generateSiteScript(notificationsEnabled = true): string {
+export function generateSiteScript(caps: SiteScriptCapabilities): string {
+  const notificationsEnabled = caps.email;
   return `
 var CONFIG = (function () {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('_manifest');
@@ -106,7 +113,32 @@ function doPost(e) {
     if (formConf.enableHoneypot && fields['_hp']) {
       return jsonResponse({ result: 'success' });
     }
-
+${caps.captcha ? `
+    // Spam protection (Cloudflare Turnstile). Project-level, live-toggled from
+    // the manifest. When disabled, any token is ignored. When enabled, the
+    // token is verified server-side against Cloudflare before the row is saved.
+    var cap = CONFIG.captcha || {};
+    if (cap.enabled && cap.secret) {
+      var capToken = fields['_captcha'] || body.captchaToken || '';
+      if (!capToken) {
+        return jsonResponse({ result: 'error', error: 'Spam protection is enabled but no captcha token was sent. Add the Turnstile widget to your form (see RGFORMS.md).' });
+      }
+      var capOk = false;
+      try {
+        var capRes = UrlFetchApp.fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+          method: 'post',
+          muteHttpExceptions: true,
+          payload: { secret: cap.secret, response: capToken }
+        });
+        capOk = JSON.parse(capRes.getContentText()).success === true;
+      } catch (capErr) {
+        capOk = false;
+      }
+      if (!capOk) {
+        return jsonResponse({ result: 'error', error: 'Captcha verification failed.' });
+      }
+    }
+` : ''}
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(body.tab);
     if (!sheet) return jsonResponse({ result: 'error', error: 'Tab not found: ' + body.tab });
 
@@ -122,7 +154,7 @@ function doPost(e) {
     ${notificationsEnabled ? `var toEmail = (formConf.notifyEmail) || CONFIG.notification_email;
     if (toEmail) {
       var siteName = CONFIG.site_name || CONFIG.project_slug || '';
-      var displayKeys = Object.keys(fields).filter(function (k) { return k !== '_hp'; });
+      var displayKeys = Object.keys(fields).filter(function (k) { return k !== '_hp' && k !== '_captcha'; });
       var subject = formConf.emailSubject || ('New ' + tabDef.label + ' submission' + (siteName ? ' — ' + siteName : ''));
       var bodyHeader = subject + '\\n' + new Array(subject.length + 1).join('-') + '\\n\\n';
       var lines = bodyHeader + displayKeys.map(function (k) { return k + ': ' + fields[k]; }).join('\\n');

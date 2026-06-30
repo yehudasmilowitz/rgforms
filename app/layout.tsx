@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     template: '%s — RG Forms',
   },
   description:
-    'Create a contact form in minutes. Submissions go directly to a Google Sheet you own — email notifications, spam protection, no monthly fees, no third-party storage.',
+    'Create a contact form in minutes. Submissions go directly to a Google Sheet you own — email notifications, spam protection (honeypot + optional Cloudflare Turnstile), no monthly fees, no third-party storage.',
   keywords: ['contact form', 'Google Sheets form', 'form to spreadsheet', 'Google Apps Script form', 'free contact form', 'serverless form backend'],
   authors: [{ name: 'RG Forms' }],
   creator: 'RG Forms',

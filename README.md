@@ -174,7 +174,7 @@ When you launch a site, `lib/createSite.ts` runs these steps in sequence using y
 
 The generated script (`lib/siteScript.ts`) is a single JS file uploaded to the user's Apps Script project:
 
-- **`doPost(e)`** — reads `_manifest` tab, finds the matching form tab, appends a row, sends email via `GmailApp.sendEmail` (supports CC, BCC, custom subject, sender name, reply-to, honeypot)
+- **`doPost(e)`** — reads `_manifest` tab, finds the matching form tab, optionally verifies a Cloudflare Turnstile token (`_captcha`) via `UrlFetchApp`, appends a row, sends email via `MailApp.sendEmail` (supports CC, BCC, custom subject, sender name, reply-to, honeypot)
 - **`_manifest` tab** — live JSON config, updated by RG Forms when you add/remove form modules; no script redeploy needed
 - **Response format** — always `{ result: 'success' }` or `{ result: 'error', error: '...' }`
 
@@ -190,7 +190,7 @@ Scopes declared in `appsscript.json`: `spreadsheets.currentonly`, `gmail.send`.
 | Drive access | `drive.file` scope — only files created by this app |
 | Sheet access | `spreadsheets.currentonly` — one sheet only |
 | Script execution | Runs as the site owner; `ANYONE_ANONYMOUS` callable endpoint |
-| Spam protection | Optional honeypot field — silently accepted to confuse bots |
+| Spam protection | Optional honeypot field (silently discarded) + optional Cloudflare Turnstile captcha, verified server-side via `script.external_request` |
 | Email safety | All submitted values escaped before rendering in HTML email |
 | CORS | Apps Script public web apps return CORS headers automatically |
 

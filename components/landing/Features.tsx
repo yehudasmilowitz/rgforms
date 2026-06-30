@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { Bell, Copy, Reply, Bug, Layers, PencilLine, FileCode2, Braces } from 'lucide-react';
+import { Bell, Copy, Reply, Bug, ShieldCheck, Layers, PencilLine, FileCode2, Braces } from 'lucide-react';
 import { revealUp, revealStagger, inView } from '@/lib/animations';
 
 const FEATURED = {
@@ -15,6 +15,7 @@ const FEATURES = [
   { icon: Copy, title: 'CC / BCC support', desc: 'Copy other addresses on every notification without exposing them in your frontend code.' },
   { icon: Reply, title: 'Reply-to field', desc: 'Map a form field (like email) as the reply-to address so you can respond directly.' },
   { icon: Bug, title: 'Honeypot spam protection', desc: 'A hidden field bots fill out; the script silently discards those submissions.' },
+  { icon: ShieldCheck, title: 'Captcha (Cloudflare Turnstile)', desc: 'Optional server-side Turnstile verification on every submission. Toggle it on or off any time — no redeploy.' },
   { icon: Layers, title: 'Multiple forms', desc: 'Add more form tabs to the same sheet — separate tabs, same endpoint.' },
   { icon: PencilLine, title: 'Edit fields any time', desc: 'Update labels, add or remove fields — no reprovisioning needed.' },
   { icon: Braces, title: 'Manifest JSON', desc: 'Download your full configuration as JSON for your own records or tooling.' },

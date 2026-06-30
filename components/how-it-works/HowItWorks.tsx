@@ -222,6 +222,7 @@ const FEATURES = [
   { icon: Copy, title: 'CC / BCC support', desc: 'Copy other addresses on every notification without exposing them in your frontend code.' },
   { icon: Reply, title: 'Reply-to field', desc: 'Map a form field (like email) as the reply-to address so you can respond directly.' },
   { icon: Bug, title: 'Honeypot spam protection', desc: 'A hidden field bots fill out; the script silently discards those submissions.' },
+  { icon: ShieldCheck, title: 'Captcha (Cloudflare Turnstile)', desc: 'Optional Turnstile verification, checked server-side on every submission. Toggle on or off from the dashboard — no redeploy.' },
   { icon: Layers, title: 'Multiple forms', desc: 'Add more form tabs to the same sheet from the dashboard — separate tabs, same endpoint.' },
   { icon: PencilLine, title: 'Edit fields any time', desc: 'Update labels, add fields, remove fields — no reprovisioning or redeployment needed.' },
   { icon: FileCode2, title: 'RGFORMS.md export', desc: 'Export an AI skill file compatible with any AI IDE — Claude Code, Cursor, Copilot, Windsurf, and more.' },
@@ -258,7 +259,7 @@ const LIMITS = [
   { icon: MailIcon, title: 'Email quota', body: 'Google Apps Script accounts are limited to roughly 100 email notifications per day on free Google accounts. This is a Google-imposed quota.' },
   { icon: KeyRound, title: 'One-time script authorization', body: 'After provisioning, you must open the script URL once while signed in to Google and approve the permissions. This is a Google requirement for scripts deployed via API.' },
   { icon: ShieldCheck, title: 'Apps Script API must be enabled', body: 'The Google Apps Script API must be enabled in your Google account before provisioning. RG Forms detects this and shows a direct link to enable it — a single toggle.' },
-  { icon: Bug, title: 'Honeypot-only spam protection', body: 'Forms support a honeypot hidden field. For high-traffic forms, consider adding reCAPTCHA to your frontend HTML manually.' },
+  { icon: Bug, title: 'Spam protection is opt-in at creation', body: 'Every form gets a zero-config honeypot. Cloudflare Turnstile (verified server-side) is also built in, but its permission is granted when you create the project — enable it then if you may want it. You add the Turnstile widget to your own frontend; the dashboard handles verification.' },
 ];
 
 function Limitations() {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { SiteTab } from '@/types';
 import { toFieldKey } from '@/lib/createSite';
@@ -8,19 +8,62 @@ import { toFieldKey } from '@/lib/createSite';
 interface Props {
   tab:       SiteTab;
   scriptUrl: string;
+  /** Live captcha config — when enabled with a site key, the tester renders the widget. */
+  captcha?:  { enabled: boolean; siteKey: string };
   onClose:   () => void;
 }
 
 type Status = 'idle' | 'submitting' | 'success' | 'error';
 
-export default function TestFormDialog({ tab, scriptUrl, onClose }: Props) {
+const TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+
+export default function TestFormDialog({ tab, scriptUrl, captcha, onClose }: Props) {
   const fields = tab.formConfig?.fields ?? [];
+  const captchaActive = !!captcha?.enabled && !!captcha?.siteKey;
 
   const [values,  setValues]  = useState<Record<string, string>>(() =>
     Object.fromEntries(fields.map((f) => [toFieldKey(f.label), ''])),
   );
   const [status,  setStatus]  = useState<Status>('idle');
   const [errMsg,  setErrMsg]  = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
+  const widgetRef = useRef<HTMLDivElement | null>(null);
+
+  // Load the Turnstile script + render the widget when captcha is active.
+  useEffect(() => {
+    if (!captchaActive) return;
+    let cancelled = false;
+
+    function render() {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ts = (window as any).turnstile;
+      if (!ts || !widgetRef.current || cancelled) return;
+      widgetRef.current.innerHTML = '';
+      ts.render(widgetRef.current, {
+        sitekey:    captcha!.siteKey,
+        callback:   (token: string) => setCaptchaToken(token),
+        'expired-callback': () => setCaptchaToken(''),
+        'error-callback':   () => setCaptchaToken(''),
+      });
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((window as any).turnstile) {
+      render();
+    } else if (!document.querySelector(`script[src="${TURNSTILE_SRC}"]`)) {
+      const s = document.createElement('script');
+      s.src = TURNSTILE_SRC; s.async = true; s.defer = true;
+      s.onload = render;
+      document.head.appendChild(s);
+    } else {
+      const t = setInterval(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if ((window as any).turnstile) { clearInterval(t); render(); }
+      }, 200);
+      return () => { cancelled = true; clearInterval(t); };
+    }
+    return () => { cancelled = true; };
+  }, [captchaActive, captcha]);
 
   function handleChange(key: string, value: string) {
     setValues((v) => ({ ...v, [key]: value }));
@@ -31,11 +74,13 @@ export default function TestFormDialog({ tab, scriptUrl, onClose }: Props) {
     setStatus('submitting');
     setErrMsg('');
 
+    const payloadFields = captchaActive ? { ...values, _captcha: captchaToken } : values;
+
     try {
       const res = await fetch(scriptUrl, {
         method:  'POST',
         headers: { 'Content-Type': 'text/plain' },
-        body:    JSON.stringify({ tab: tab.name, fields: values }),
+        body:    JSON.stringify({ tab: tab.name, fields: payloadFields }),
       });
 
       const json = await res.json().catch(() => ({ result: 'error', error: 'Invalid response' }));
@@ -56,6 +101,9 @@ export default function TestFormDialog({ tab, scriptUrl, onClose }: Props) {
     setValues(Object.fromEntries(fields.map((f) => [toFieldKey(f.label), ''])));
     setStatus('idle');
     setErrMsg('');
+    setCaptchaToken('');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).turnstile?.reset?.();
   }
 
   return (
@@ -185,6 +233,17 @@ export default function TestFormDialog({ tab, scriptUrl, onClose }: Props) {
                       </div>
                     );
                   })
+                )}
+
+                {captchaActive && (
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>Spam protection</span>
+                    <div ref={widgetRef} />
+                    <p className="text-[11px]" style={{ color: 'var(--color-muted)' }}>
+                      Turnstile is enabled. If your site key is domain-restricted, the widget may not load here — add this
+                      domain in Cloudflare, or toggle protection off to test.
+                    </p>
+                  </div>
                 )}
 
                 {status === 'error' && (
