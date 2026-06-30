@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '@/context/AppContext';
 import {
@@ -509,6 +509,45 @@ function PreviewModal({ entry, onClose }: { entry: PreviewEntry; onClose: () => 
   );
 }
 
+// ─── Collapsible capability card ──────────────────────────────────────────────
+
+function StatusPill({ on, label }: { on: boolean; label: string }) {
+  return (
+    <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full shrink-0"
+      style={{
+        background: on ? 'var(--color-success-bg)' : 'var(--color-surface-2)',
+        color:      on ? 'var(--color-success)' : 'var(--color-subtle)',
+        border:     `1px solid ${on ? 'var(--color-success-border)' : 'var(--color-border)'}`,
+      }}>
+      {label}
+    </span>
+  );
+}
+
+function CollapsibleCard({ title, pill, open, onToggle, children }: {
+  title: string; pill: ReactNode; open: boolean; onToggle: () => void; children: ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+      <button type="button" onClick={onToggle} className="w-full flex items-center justify-between gap-3 px-4 py-3">
+        <span className="flex items-center gap-2 min-w-0">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"
+            style={{ color: 'var(--color-subtle)', transform: open ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.15s' }}>
+            <path d="M3 2l4 3-4 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span className="text-xs font-bold uppercase tracking-widest truncate" style={{ color: 'var(--color-muted)' }}>{title}</span>
+        </span>
+        {pill}
+      </button>
+      {open && (
+        <div className="px-4 pb-4 pt-3 flex flex-col gap-3 border-t" style={{ borderColor: 'var(--color-border)' }}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function SiteKit() {
@@ -539,10 +578,12 @@ export default function SiteKit() {
   // Capability upgrades (in-place redeploy) + the re-auth prompt they trigger.
   const [upgrading,    setUpgrading]    = useState<null | 'email' | 'captcha'>(null);
   const [needsReauth,  setNeedsReauth]  = useState(false);
-  const [enableEmailValue, setEnableEmailValue] = useState('');
+  const [enableEmailValue, setEnableEmailValue] = useState(manifest?.google_account ?? '');
   const [enableCaptchaKeys, setEnableCaptchaKeys] = useState({ siteKey: '', secret: '' });
   const [emailDraft, setEmailDraft] = useState<string | null>(null);
   const [emailSaving, setEmailSaving] = useState(false);
+  const [showEmailCard,   setShowEmailCard]   = useState(false);
+  const [showCaptchaCard, setShowCaptchaCard] = useState(false);
 
   if (!manifest) return null;
   const m: SiteManifest = manifest;
@@ -855,25 +896,15 @@ export default function SiteKit() {
           </div>
         </div>
 
+        {/* Capabilities */}
+        <div className="flex flex-col gap-2">
         {/* Email notifications */}
-        <div className="flex flex-col gap-3 p-4 rounded-xl border"
-          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-muted)' }}>
-              Email notifications
-            </p>
-            {emailGranted && (
-              <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
-                style={{
-                  background: m.notification_email ? 'var(--color-success-bg)' : 'var(--color-surface-2)',
-                  color:      m.notification_email ? 'var(--color-success)' : 'var(--color-subtle)',
-                  border:     `1px solid ${m.notification_email ? 'var(--color-success-border)' : 'var(--color-border)'}`,
-                }}>
-                {m.notification_email ? 'On' : 'Off'}
-              </span>
-            )}
-          </div>
-
+        <CollapsibleCard
+          title="Email notifications"
+          open={showEmailCard}
+          onToggle={() => setShowEmailCard((v) => !v)}
+          pill={<StatusPill on={emailGranted && !!m.notification_email} label={emailGranted ? (m.notification_email ? 'On' : 'Off') : 'Add'} />}
+        >
           {!emailGranted ? (
             !canUpgrade ? (
               <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
@@ -932,27 +963,15 @@ export default function SiteKit() {
               )}
             </>
           )}
-        </div>
+        </CollapsibleCard>
 
         {/* Spam protection */}
-        <div className="flex flex-col gap-3 p-4 rounded-xl border"
-          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-muted)' }}>
-              Spam protection
-            </p>
-            {captchaGranted && (
-              <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
-                style={{
-                  background: captcha.enabled ? 'var(--color-success-bg)' : 'var(--color-surface-2)',
-                  color:      captcha.enabled ? 'var(--color-success)' : 'var(--color-subtle)',
-                  border:     `1px solid ${captcha.enabled ? 'var(--color-success-border)' : 'var(--color-border)'}`,
-                }}>
-                {captcha.enabled ? 'On' : 'Off'}
-              </span>
-            )}
-          </div>
-
+        <CollapsibleCard
+          title="Spam protection"
+          open={showCaptchaCard}
+          onToggle={() => setShowCaptchaCard((v) => !v)}
+          pill={<StatusPill on={captchaGranted && captcha.enabled} label={captchaGranted ? (captcha.enabled ? 'On' : 'Off') : 'Add'} />}
+        >
           {!captchaGranted ? (
             !canUpgrade ? (
               <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
@@ -1076,6 +1095,7 @@ export default function SiteKit() {
               )}
             </>
           )}
+        </CollapsibleCard>
         </div>
 
         {/* Forms */}
