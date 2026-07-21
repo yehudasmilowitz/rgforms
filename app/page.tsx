@@ -12,6 +12,7 @@ import Benefits from '@/components/landing/Benefits'
 import CodeDemo from '@/components/landing/CodeDemo'
 import Features from '@/components/landing/Features'
 import BuiltOn from '@/components/landing/BuiltOn'
+import FreeOpenSource from '@/components/landing/FreeOpenSource'
 import SectionDivider from '@/components/landing/SectionDivider'
 
 const BG = 'var(--color-bg)'
@@ -50,6 +51,8 @@ export default function Page() {
       <SectionDivider top={BG} bottom={BG2} flip />
 
       <Benefits />
+
+      <FreeOpenSource />
 
       <SectionDivider top={BG2} bottom={BG} />
 

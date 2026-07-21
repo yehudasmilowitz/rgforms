@@ -8,6 +8,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 import NavAuthButton from '@/components/NavAuthButton';
 import ThemeToggle from '@/components/ThemeToggle';
 import SiteFooter from '@/components/SiteFooter';
+import { GithubIcon } from '@/components/GithubIcon';
 import './globals.css';
 
 // Applies the saved (or system) theme before first paint to avoid a flash.
@@ -40,12 +41,12 @@ const siteUrl = 'https://rgforms.com';
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'RG Forms — Contact Forms Backed by Your Google Sheet',
+    default: 'RG Forms — Free, Open-Source Contact Forms Backed by Your Google Sheet',
     template: '%s — RG Forms',
   },
   description:
-    'Create a contact form in minutes. Submissions go directly to a Google Sheet you own — email notifications, spam protection (honeypot + optional Cloudflare Turnstile), no monthly fees, no third-party storage.',
-  keywords: ['contact form', 'Google Sheets form', 'form to spreadsheet', 'Google Apps Script form', 'free contact form', 'serverless form backend'],
+    'A free, open-source contact form endpoint. Submissions go directly to a Google Sheet you own — email notifications, spam protection (honeypot + optional Cloudflare Turnstile), no monthly fees, no third-party storage.',
+  keywords: ['contact form', 'Google Sheets form', 'form to spreadsheet', 'Google Apps Script form', 'free contact form', 'open source contact form', 'serverless form backend'],
   authors: [{ name: 'RG Forms' }],
   creator: 'RG Forms',
   openGraph: {
@@ -53,9 +54,9 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: siteUrl,
     siteName: 'RG Forms',
-    title: 'RG Forms — Contact Forms Backed by Your Google Sheet',
+    title: 'RG Forms — Free, Open-Source Contact Forms Backed by Your Google Sheet',
     description:
-      'Set up your fields, connect your Google account, get a live form endpoint. Submissions go straight to a Google Sheet you own. No monthly fees.',
+      'Set up your fields, connect your Google account, get a live form endpoint. Submissions go straight to a Google Sheet you own. Completely free and open source — no monthly fees.',
   },
   twitter: {
     card: 'summary_large_image',
@@ -182,6 +183,17 @@ export default function RootLayout({
                 aria-hidden="true"
               />
               <div className="flex items-center gap-1">
+                <a
+                  href="https://github.com/yehudasmilowitz/rgforms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors nav-link"
+                  aria-label="RG Forms on GitHub — free and open source"
+                  title="Free & open source — view on GitHub"
+                >
+                  <GithubIcon size={17} />
+                  <span className="hidden md:inline">Free &amp; open source</span>
+                </a>
                 <ThemeToggle />
               </div>
               <NavAuthButton />

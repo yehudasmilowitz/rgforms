@@ -1,8 +1,9 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { Bell, Copy, Reply, Bug, ShieldCheck, Layers, PencilLine, FileCode2, Braces } from 'lucide-react';
+import { Bell, Copy, Reply, Bug, ShieldCheck, Layers, PencilLine, FileCode2, Braces, CircleDollarSign } from 'lucide-react';
 import { revealUp, revealStagger, inView } from '@/lib/animations';
+import { GithubIcon } from '@/components/GithubIcon';
 
 const FEATURED = {
   icon: FileCode2,
@@ -11,6 +12,8 @@ const FEATURED = {
 };
 
 const FEATURES = [
+  { icon: CircleDollarSign, title: 'Free forever', desc: 'No subscription, no monthly fee, no credit card. Everything runs inside your own Google account.' },
+  { icon: GithubIcon, title: 'Open source', desc: 'The full source is on GitHub — audit exactly what runs, fork it, or self-host your own copy.' },
   { icon: Bell, title: 'Email notifications', desc: 'Every submission triggers an email to your notification address. Configurable subject line.' },
   { icon: Copy, title: 'CC / BCC support', desc: 'Copy other addresses on every notification without exposing them in your frontend code.' },
   { icon: Reply, title: 'Reply-to field', desc: 'Map a form field (like email) as the reply-to address so you can respond directly.' },

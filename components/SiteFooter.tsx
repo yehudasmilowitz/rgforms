@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { GoogleSheetsIcon, GoogleAppsScriptIcon, GoogleDriveIcon } from '@/components/google-icons';
+import { GithubIcon } from '@/components/GithubIcon';
+
+const REPO_URL = 'https://github.com/yehudasmilowitz/rgforms';
 
 type FooterLink = { label: string; href: string; external?: boolean };
 
@@ -10,6 +13,7 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: 'How it works', href: '/how-it-works' },
       { label: 'Get started', href: '/' },
+      { label: 'Source on GitHub', href: REPO_URL, external: true },
       { label: 'Contact', href: '/contact' },
     ],
   },
@@ -73,8 +77,21 @@ export default function SiteFooter() {
             </Link>
             <p className="text-sm leading-relaxed max-w-xs" style={{ color: 'var(--color-muted)' }}>
               A live contact form endpoint in under 2 minutes — backed entirely by a Google Sheet you own.
-              No server, no monthly fee.
+              No server, no monthly fee. <span style={{ color: 'var(--color-heading)', fontWeight: 600 }}>Completely free and open source.</span>
             </p>
+            <a
+              href={REPO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 w-fit rounded-lg px-3 py-2 text-sm font-semibold transition-colors"
+              style={{
+                background: 'var(--color-surface)',
+                color: 'var(--color-heading)',
+                border: '1px solid var(--color-border)',
+              }}
+            >
+              <GithubIcon size={16} /> Star on GitHub
+            </a>
             <a
               href="https://www.producthunt.com/products/rg-forms?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-rg-forms"
               target="_blank"

@@ -256,7 +256,7 @@ function Features() {
 
 /* ── Limitations ───────────────────────────────────────────────── */
 const LIMITS = [
-  { icon: MailIcon, title: 'Email quota', body: 'Google Apps Script accounts are limited to roughly 100 email notifications per day on free Google accounts. This is a Google-imposed quota.' },
+  { icon: MailIcon, title: 'Email quota', body: 'Notifications are sent by Apps Script, which Google caps per day: about 100 recipients/day on a free personal Gmail account, and about 1,500 recipients/day on a paid Google Workspace account. This is a Google-imposed limit, not ours.' },
   { icon: KeyRound, title: 'One-time script authorization', body: 'After provisioning, you must open the script URL once while signed in to Google and approve the permissions. This is a Google requirement for scripts deployed via API.' },
   { icon: ShieldCheck, title: 'Apps Script API must be enabled', body: 'The Google Apps Script API must be enabled in your Google account before provisioning. RG Forms detects this and shows a direct link to enable it — a single toggle.' },
   { icon: Bug, title: 'Spam protection is opt-in at creation', body: 'Every form gets a zero-config honeypot. Cloudflare Turnstile (verified server-side) is also built in, but its permission is granted when you create the project — enable it then if you may want it. You add the Turnstile widget to your own frontend; the dashboard handles verification.' },

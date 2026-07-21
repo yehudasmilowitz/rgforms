@@ -198,7 +198,7 @@ Scopes declared in `appsscript.json`: `spreadsheets.currentonly`, `gmail.send`.
 
 ## Limitations
 
-- **Email quota**: ~100 emails/day on free Google accounts (Google-imposed)
+- **Email quota**: Apps Script caps notification recipients per day — ~100/day on a free personal Gmail account, ~1,500/day on a paid Google Workspace account (Google-imposed)
 - **No file uploads**: endpoint handles URL-encoded form data only
 - **Script authorization**: after provisioning, user must visit the script URL once to authorize (Google requirement)
 - **Apps Script API**: must be enabled in the user's Google account before provisioning
