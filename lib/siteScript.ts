@@ -38,8 +38,8 @@ function doGet(e) {
   var tabName = e.parameter.tab;
 
   if (!tabName) {
-    var projectName = CONFIG.site_name || CONFIG.project_slug || 'RG Forms';
-    var html = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + projectName + ' — RG Forms</title>'
+    var projectName = CONFIG.site_name || CONFIG.project_slug || 'Forms';
+    var html = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + projectName + '</title>'
       + '<style>'
       + '*{box-sizing:border-box;margin:0;padding:0}'
       + 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0f0f13;color:#e2e2e8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}'
@@ -48,30 +48,16 @@ function doGet(e) {
       + '.dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.6)}'
       + '.badge-text{font-size:12px;font-weight:600;color:#22c55e;letter-spacing:0.04em}'
       + 'h1{font-size:22px;font-weight:700;color:#f0f0f6;margin-bottom:8px}'
-      + '.subtitle{font-size:14px;color:#6b6b80;margin-bottom:32px;line-height:1.5}'
-      + '.divider{height:1px;background:#2a2a38;margin-bottom:28px}'
-      + '.meta{display:flex;flex-direction:column;gap:10px}'
-      + '.meta-row{display:flex;justify-content:space-between;align-items:center;font-size:12px}'
-      + '.meta-label{color:#6b6b80;font-weight:500}'
-      + '.meta-value{color:#c0c0cc;font-weight:500;font-family:monospace;font-size:11px}'
-      + '.pill{display:inline-block;background:#2a2a38;border:1px solid #3a3a50;border-radius:6px;padding:2px 8px}'
-      + '.footer{margin-top:28px;font-size:11px;color:#3a3a50}'
+      + '.subtitle{font-size:14px;color:#6b6b80;line-height:1.5}'
       + '</style>'
       + '</head><body>'
       + '<div class="card">'
-      + '<div class="badge"><span class="dot"></span><span class="badge-text">API Active</span></div>'
+      + '<div class="badge"><span class="dot"></span><span class="badge-text">Active</span></div>'
       + '<h1>' + projectName + '</h1>'
-      + '<p class="subtitle">This RG Forms endpoint is live and ready to accept submissions.</p>'
-      + '<div class="divider"></div>'
-      + '<div class="meta">'
-      + '<div class="meta-row"><span class="meta-label">Status</span><span class="meta-value" style="color:#22c55e">operational</span></div>'
-      + '<div class="meta-row"><span class="meta-label">Method</span><span class="meta-value"><span class="pill">POST</span> application/json</span></div>'
-      + '<div class="meta-row"><span class="meta-label">Forms</span><span class="meta-value">' + CONFIG.tabs.filter(function(t){return t.type==="form";}).length + ' active</span></div>'
-      + '</div>'
-      + '<p class="footer">Powered by RG Forms</p>'
+      + '<p class="subtitle">This endpoint accepts form submissions.</p>'
       + '</div>'
       + '</body></html>';
-    return HtmlService.createHtmlOutput(html).setTitle(projectName + ' — RG Forms');
+    return HtmlService.createHtmlOutput(html).setTitle(projectName);
   }
 
   var tabDef = findTab(tabName);
