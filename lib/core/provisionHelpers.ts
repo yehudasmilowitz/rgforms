@@ -91,7 +91,7 @@ export async function uploadCode(
 export async function deployWebApp(
   token: string,
   scriptId: string,
-  description = 'rgforms API',
+  description = 'Form handler',
 ): Promise<string> {
   const version = await apiCall<{ versionNumber: number }>(`${SCRIPT_API}/${scriptId}/versions`, {
     method: 'POST',
@@ -176,7 +176,7 @@ export async function updateWebAppDeployment(
   scriptId: string,
   deploymentId: string,
   versionNumber: number,
-  description = 'rgforms API',
+  description = 'Form handler',
 ): Promise<string> {
   const result = await apiCall<{ entryPoints?: Array<{ entryPointType: string; webApp?: { url: string } }> }>(
     `${SCRIPT_API}/${scriptId}/deployments/${deploymentId}`,

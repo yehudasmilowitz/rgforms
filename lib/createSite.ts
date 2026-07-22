@@ -51,7 +51,7 @@ export async function redeploySiteCapabilities(
   const versionNumber = await createScriptVersion(token, scriptId, `${manifest.site_name} — capability update`);
   // 3. Point the existing deployment at the new version — URL is preserved.
   const deploymentId = await findWebAppDeploymentId(token, scriptId, manifest.script_url);
-  await updateWebAppDeployment(token, scriptId, deploymentId, versionNumber, `${manifest.site_name} — Forms API`);
+  await updateWebAppDeployment(token, scriptId, deploymentId, versionNumber, `${manifest.site_name} — Form handler`);
 }
 
 // ─── Progress callback ────────────────────────────────────────────────────────
@@ -227,7 +227,7 @@ export async function createSite(
   let deploymentUrl = '';
 
   try {
-    ({ scriptId } = await createScriptProject(token, `${siteName} — Forms API`, sheetId));
+    ({ scriptId } = await createScriptProject(token, `${siteName} — Form handler`, sheetId));
     await uploadCode(token, scriptId, generateSiteScript(caps), generateAppsScriptJson(caps));
     onStep('script', 'complete');
   } catch (err) {
@@ -243,7 +243,7 @@ export async function createSite(
 
   onStep('deploy', 'running');
   try {
-    deploymentUrl = await deployWebApp(token, scriptId, `${siteName} — Forms API`);
+    deploymentUrl = await deployWebApp(token, scriptId, `${siteName} — Form handler`);
     onStep('deploy', 'complete');
   } catch (err) {
     onStep('deploy', 'error', (err as Error).message);
