@@ -9,8 +9,6 @@ import HeroGraphic from '@/components/landing/HeroGraphic';
 import SectionDivider from '@/components/landing/SectionDivider';
 import { GithubIcon } from '@/components/GithubIcon';
 
-const REPO_URL = 'https://github.com/yehudasmilowitz/rgforms';
-
 const CHIPS = [
   { icon: Server, label: 'No server' },
   { icon: GithubIcon, label: 'Open source' },
@@ -32,29 +30,6 @@ export default function Hero() {
       >
         {/* Left — copy */}
         <div className="min-w-0 flex flex-col items-center text-center lg:items-start lg:text-left gap-5">
-          <motion.a
-            variants={fadeUp}
-            href={REPO_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex items-center gap-2 rounded-full pl-1.5 pr-3 py-1.5 text-sm font-bold transition-colors"
-            style={{
-              background: 'var(--color-accent-subtle)',
-              color: 'var(--color-accent-ink)',
-              border: '1px solid var(--color-accent-border)',
-            }}
-          >
-            <span
-              className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-extrabold uppercase tracking-wide btn-gradient text-white"
-            >
-              100% Free
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <GithubIcon size={15} /> Open source
-            </span>
-            <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
-          </motion.a>
-
           <motion.h1
             variants={fadeUp}
             className="text-[length:var(--text-hero)] font-extrabold leading-[1.08] tracking-tight"
