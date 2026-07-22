@@ -157,7 +157,13 @@ ${caps.captcha ? `
       var displayKeys = Object.keys(fields).filter(function (k) { return k !== '_hp' && k !== '_captcha'; });
       var subject = formConf.emailSubject || ('New ' + tabDef.label + ' submission' + (siteName ? ' — ' + siteName : ''));
       var bodyHeader = subject + '\\n' + new Array(subject.length + 1).join('-') + '\\n\\n';
-      var lines = bodyHeader + displayKeys.map(function (k) { return k + ': ' + fields[k]; }).join('\\n');
+      var senderAcct = '';
+      try { senderAcct = Session.getEffectiveUser().getEmail() || ''; } catch (acctErr) {}
+      var esc = function (s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+      var lines = bodyHeader + displayKeys.map(function (k) { return k + ': ' + fields[k]; }).join('\\n')
+        + '\\n\\n----\\n'
+        + (senderAcct ? 'Sending account: ' + senderAcct + '\\n' : '')
+        + 'Handled entirely within your Google account via Apps Script · Built with RG Forms';
       var htmlParts = displayKeys.map(function (k) {
         var val = String(fields[k] !== undefined ? fields[k] : '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         return '<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #f3f4f6;">'
@@ -175,7 +181,8 @@ ${caps.captcha ? `
         + htmlParts.join('')
         + '</div>'
         + '<div style="padding:12px 24px;background:#f9fafb;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px;">'
-        + '<p style="margin:0;font-size:11px;color:#9ca3af;">Sent via RG Forms</p>'
+        + (senderAcct ? '<p style="margin:0 0 6px;font-size:11px;color:#6b7280;"><strong style="color:#4b5563;font-weight:600;">Sending account:</strong> ' + esc(senderAcct) + '</p>' : '')
+        + '<p style="margin:0;font-size:11px;color:#9ca3af;">Handled entirely within your Google account via Apps Script · Built with RG Forms</p>'
         + '</div>'
         + '</div>';
       var opts = { htmlBody: htmlBody };
