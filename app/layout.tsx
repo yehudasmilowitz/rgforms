@@ -109,6 +109,8 @@ export default function RootLayout({
               url: siteUrl,
               applicationCategory: 'DeveloperApplication',
               operatingSystem: 'Web',
+              isAccessibleForFree: true,
+              sameAs: ['https://github.com/yehudasmilowitz/rgforms'],
               offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
               description:
                 'Describe your forms and get a fully provisioned Google Sheet + Apps Script backend — ready to accept submissions in under 2 minutes. No server, no subscription.',

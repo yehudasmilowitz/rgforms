@@ -12,6 +12,7 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
     title: 'Product',
     links: [
       { label: 'How it works', href: '/how-it-works' },
+      { label: 'FAQ', href: '/faq' },
       { label: 'Get started', href: '/' },
       { label: 'Source on GitHub', href: REPO_URL, external: true },
       { label: 'Contact', href: '/contact' },

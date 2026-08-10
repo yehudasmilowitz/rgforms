@@ -4,8 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Terms of Service',
   description: 'RG Forms terms of service. Free to use, no warranty, no liability. Plain-English terms for a zero-backend form builder.',
-
-  robots: { index: false, follow: false },
+  alternates: { canonical: 'https://rgforms.com/terms/' },
 };
 
 function Section({ children }: { children: React.ReactNode }) {

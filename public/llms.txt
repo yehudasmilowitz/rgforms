@@ -1,0 +1,406 @@
+# RG Forms — llms.txt
+
+> RG Forms (rgforms.com) provisions form backends inside the user's own Google Drive.
+> One Google Sheet + one Apps Script web app per project, created in ~90 seconds from
+> the browser. No RG Forms server, no database, no subscription. Everything belongs
+> to the user forever.
+>
+> This file is a complete reference for AI assistants answering questions about
+> setting up and using RG Forms. It covers every step, every warning screen, and
+> every setting in exact detail.
+
+---
+
+## 1. Core concepts and terminology
+
+- **Project** — the top-level unit. Each project = one Drive folder + one Google
+  Sheet + one Apps Script web app with a permanent HTTPS endpoint URL. Users can
+  have many projects (one per website, typically).
+- **Form** — a form inside a project. Each form is a tab in the project's Google
+  Sheet. All forms in a project share the same endpoint URL and are addressed by
+  their `tab` name (e.g. `contact`).
+- **Endpoint / script URL** — the deployed Apps Script web app URL, shaped like
+  `https://script.google.com/macros/s/AKfycb.../exec`. It never changes for the
+  life of the project, even when forms or fields are edited.
+- **`_manifest` tab** — a hidden tab in the Google Sheet containing the project's
+  full JSON configuration. The Apps Script reads it on every request, so config
+  changes (adding forms, editing fields, changing the notification email, toggling
+  captcha) take effect immediately with **no redeploy** and no URL change.
+- **Capabilities** — optional features that require extra Apps Script OAuth scopes:
+  email notifications (`script.send_mail`) and Turnstile spam protection
+  (`script.external_request`). Granted at project creation or added later via an
+  in-place redeploy (which requires re-authorizing the script).
+- **RGFORMS.md** — an exportable AI-skill file describing the project's endpoint,
+  tabs, fields, and calling conventions, meant to be dropped into a codebase so AI
+  IDEs (Claude Code, Cursor, Copilot, Windsurf, etc.) can wire up forms automatically.
+
+Architecture in one line: the RG Forms site is a fully static web app; during
+setup the user's browser calls Google APIs directly with the user's own short-lived
+OAuth token, and after setup the deployed Apps Script IS the backend.
+
+---
+
+## 2. Signing in to RG Forms
+
+1. User clicks "Sign in with Google" on rgforms.com.
+2. A standard OAuth 2.0 implicit-grant **popup** opens (no third-party SDK). If the
+   popup is blocked, the user must allow popups for the site and retry.
+3. Scopes requested by the RG Forms web app itself:
+   - `openid`, `userinfo.email`, `userinfo.profile` — identify the account
+   - `https://www.googleapis.com/auth/drive.file` — create/see ONLY files this app
+     creates (RG Forms cannot see the rest of the user's Drive)
+   - `https://www.googleapis.com/auth/script.projects` — create/update Apps Script projects
+   - `https://www.googleapis.com/auth/script.deployments` — deploy the web app
+4. The access token lives **only in browser memory** (React state). It is never
+   sent to any RG Forms server, never written to disk, and disappears when the tab
+   closes. Signing out revokes the token at Google.
+5. Tokens expire after ~1 hour. Provisioning is a one-time operation, so this
+   rarely matters; if a dashboard action fails with an auth error, sign out and
+   sign back in.
+
+After sign-in the flow is: **landing → project select → project dashboard**.
+The project-select screen lists existing projects (found by querying Drive for
+sheets tagged with the app property `rgforms_type=site`) and lets the user open,
+create, or delete projects.
+
+---
+
+## 3. Creating a project (step by step)
+
+### 3.1 The setup screen
+
+After naming a new project the user configures the first form:
+
+- **Form name** — display label, default "Contact Form". The sheet tab for the
+  first form is always named `contact`.
+- **Form fields** — default set: Name (text, required), Email (email, required),
+  Phone (tel, optional), Message (textarea, required). Users can add/remove/rename
+  fields, choose a type per field — `text`, `email`, `tel`, `textarea`, `select`
+  (select takes comma-separated options) — and toggle required.
+- **Email settings** (collapsible, per form): CC list, BCC list, subject template,
+  sender name, reply-to field (choose any email-type field), and a honeypot
+  checkbox ("Enable spam protection (honeypot)").
+- **Send email notifications on form submission** (toggle, off by default) — see §6.
+- **Enable spam protection (Cloudflare Turnstile)** (toggle, off by default) — see §7.
+
+IMPORTANT ADVICE: enable email notifications and/or Turnstile **at creation** if
+there is any chance the user will want them. Both can be added later, but adding
+them later triggers a script redeploy plus a manual re-authorization step. Enabling
+at creation costs nothing: notifications only fire if an address is set, and
+Turnstile validation stays OFF until explicitly toggled on from the dashboard.
+
+### 3.2 What provisioning does (the 5 steps shown on the progress screen)
+
+All calls are made from the user's browser with the user's own OAuth token:
+
+| # | Step label | API | Scope used | What happens |
+|---|---|---|---|---|
+| 1 | Drive folder | Google Drive API | `drive.file` | Creates a folder named `<Project> — RG Forms` |
+| 2 | Google Sheet + tabs | Google Sheets API | `drive.file` | Creates `<Project> — Forms` sheet with a `contact` tab (bold, frozen header row: `submitted_at` + one column per field) and a hidden `_manifest` tab; tags the file `rgforms_type=site`; moves it into the folder |
+| 3 | Apps Script project | Apps Script API | `script.projects` | Creates a script named `<Project> — Form handler` **bound to the sheet**, uploads the generated `doPost`/`doGet` code and `appsscript.json` |
+| 4 | Web app deployment | Apps Script API | `script.deployments` | Creates a version and deploys it as a web app: runs as the owner (`USER_DEPLOYING`), callable by `ANYONE_ANONYMOUS` → returns the permanent endpoint URL |
+| 5 | Manifest + configuration | Sheets API | — | Writes the full manifest JSON (including the endpoint URL) into `_manifest` |
+
+Column keys are derived from field labels: lowercase, any run of non-alphanumeric
+characters becomes `_`, trimmed (e.g. "Company Name" → `company_name`). If any step
+fails, already-created resources are cleaned up so retry starts clean.
+
+### 3.3 Provisioning error: "Apps Script access needs to be enabled"
+
+If step 3 fails with error code `apps-script-user-setting`, the cause is a Google
+account-level setting: the **Google Apps Script API** must be switched on once per
+account before scripts can be created via API. Fix:
+
+1. Open https://script.google.com/home/usersettings (RG Forms shows this button).
+2. Turn ON "Google Apps Script API".
+3. Return to the RG Forms tab and click "I've enabled it — try again".
+
+This is one-time per Google account and takes a few seconds. (This is different
+from enabling APIs in a Google Cloud project — it's a personal account toggle.)
+
+Other provisioning failures: an expired token (~1 hour; sign out/in) or the
+Apps Script deployment quota (~50 deployments/day per user; wait a day).
+
+---
+
+## 4. The one-time script authorization (and why the warning page appears)
+
+**After provisioning, the owner must open the endpoint URL once in their browser
+while signed in to their Google account, and approve the permissions dialog.**
+The dashboard shows an amber "Open Script to Authorize" chip for this. Until then,
+capabilities that use scopes (email sending, captcha verification) cannot run.
+
+Why: Google requires manual, human authorization for any Apps Script that was
+deployed programmatically (via API). RG Forms cannot grant scopes on the user's
+behalf — only the account owner clicking "Allow" can.
+
+### Why Google shows "Google hasn't verified this app" / "App isn't verified"
+
+When the user authorizes the script, Google may show a warning screen saying the
+app is unverified. Explain it exactly like this:
+
+- The "app" in that dialog is **the user's own Apps Script** — the form handler
+  that RG Forms just created inside their own Google account. It is not RG Forms
+  asking for access, and no third party is involved.
+- Google shows this screen for ANY script that (a) requests "sensitive" scopes and
+  (b) has not gone through Google's app-verification program. A personal script
+  created minutes ago obviously has no verification, so the warning is expected
+  and normal — it appears for every Apps Script hobby project in existence.
+- The scopes that trigger it here: `script.send_mail` (email notifications) and/or
+  `script.external_request` (Turnstile verification). A bare project with neither
+  capability only uses `spreadsheets.currentonly` (access to that one sheet).
+- It is safe to proceed because the user is granting **their own script** access to
+  **their own account**, and the script's code is fully inspectable in their Apps
+  Script editor.
+
+How to get past it:
+
+1. Click **Advanced** (bottom-left of the warning).
+2. Click **Go to <project name> (unsafe)** — "unsafe" is Google's blanket wording
+   for "unverified", not a judgment of this script.
+3. Review the permission list and click **Allow**.
+
+What the script actually asks for (worst case, all capabilities on):
+- "See and manage this spreadsheet" — `spreadsheets.currentonly`, only the project's own sheet
+- "Send email on your behalf" — `script.send_mail`, only if email notifications enabled
+- "Connect to an external service" — `script.external_request`, only if Turnstile enabled
+
+Authorization is needed **once** at creation, and **again** any time a new
+capability (new scope) is added later — see §8.
+
+---
+
+## 5. Submitting to the endpoint (API usage)
+
+### POST — submit a form
+
+```js
+const res = await fetch(SCRIPT_URL, {
+  method: 'POST',
+  headers: { 'Content-Type': 'text/plain' },   // ← critical, see below
+  body: JSON.stringify({
+    tab: 'contact',                             // the form's tab name
+    fields: { name: 'Ada', email: 'ada@example.com', message: 'Hi' },
+  }),
+});
+const data = await res.json();
+// { result: 'success' }  or  { result: 'error', error: '...' }
+```
+
+Rules — get these exactly right:
+
+- **Always use `Content-Type: text/plain`, never `application/json`.**
+  `application/json` triggers a CORS preflight (an OPTIONS request), and Apps
+  Script web apps cannot answer OPTIONS, so the browser blocks the request.
+  `text/plain` is a "simple" content type with no preflight. The body is still a
+  JSON string; the script parses it fine.
+- Field keys in `fields` must match the sheet's column keys: field label
+  lowercased with non-alphanumerics collapsed to `_` (e.g. "Company Name" →
+  `company_name`). The RGFORMS.md export lists the exact keys.
+- `submitted_at` is filled automatically (ISO timestamp) — never send it.
+- Keys not matching a column are ignored for the row (but DO appear in the
+  notification email); missing keys produce empty cells.
+- Required flags are a frontend concern — the endpoint does not enforce them.
+- The endpoint is public: no auth token or API key is needed to submit.
+- Cold starts: the first request after inactivity takes ~800 ms–2 s. Normal.
+- No file uploads — text data only.
+- Special fields: `_hp` (honeypot, §7) and `_captcha` (Turnstile token, §7) are
+  never stored in the row and never shown in emails.
+- Error responses you might see: `Invalid form tab: <name>` (wrong/missing `tab`
+  or the tab isn't a form), `Tab not found: <name>` (sheet tab deleted manually),
+  `Captcha verification failed.`, `Spam protection is enabled but no captcha token
+  was sent...`.
+
+### GET — read data / landing page
+
+- `GET SCRIPT_URL` with no parameters → a styled HTML landing page showing the
+  project name and an "Active" badge with "This endpoint accepts form submissions."
+  Useful to verify the deployment is live (and this visit is also when first-time
+  authorization is prompted for the owner).
+- `GET SCRIPT_URL?tab=contact` → JSON array of all submissions in that tab as
+  objects keyed by the header row (the `_hp` column is excluded). Empty tab → `[]`.
+  Note: this read endpoint is as public as the submit endpoint.
+
+---
+
+## 6. Email notifications
+
+**What it does:** on every submission, the Apps Script sends an email (plain-text
++ styled HTML) via `MailApp.sendEmail` from the owner's own Google account.
+
+**Enabling at project creation (recommended):** toggle "Send email notifications
+on form submission" and enter the destination address (defaults to the signed-in
+account). This adds the `script.send_mail` scope to the script. The UI shows an
+info box warning that Google may display the "App isn't verified" screen during
+authorization — Advanced → Continue (see §4).
+
+**Enabling later (existing project):** dashboard → "Email notifications" card →
+"Add". Enter an address and click "Enable email notifications". RG Forms then:
+1. Re-uploads the script code with the `script.send_mail` scope added.
+2. Snapshots a new version and points the EXISTING deployment at it — the
+   endpoint URL and sheet are unchanged.
+3. Shows an "Action required: re-authorize the script" banner. Until the owner
+   re-authorizes, the script may **reject submissions**, so this must be done
+   immediately: open the script editor, run any function (or Deploy → Test
+   deployments), click **Review permissions → Allow** (Advanced → Continue past
+   the unverified warning if shown).
+
+Projects created before in-place upgrades were supported (no stored `script_id`)
+cannot add capabilities automatically — they must be recreated with the capability
+enabled.
+
+**Changing or stopping notifications:** editing the notification address (or
+clearing it to stop emails) is a manifest-only change — instant, **no redeploy, no
+re-auth**. The scope, once granted, stays.
+
+**Per-form email settings** (in the field editor, per form):
+- **CC / BCC** — comma-separated address lists copied on every notification
+  (without exposing them in frontend code).
+- **Subject template** — custom subject; default is
+  `New <Form label> submission — <Project name>`.
+- **Sender name** — display name on the notification email.
+- **Reply-to field** — map an email-type form field (e.g. the visitor's email) as
+  the reply-to address so the owner can hit Reply directly.
+- The email lists every submitted field except `_hp` and `_captcha`; all values
+  are HTML-escaped. The footer shows the sending Google account.
+
+**Address resolution:** a per-form `notifyEmail` in the manifest overrides the
+project-level `notification_email`; if neither is set, no email is sent.
+
+**Reliability:** email failure never fails the submission — the row is already
+saved and the endpoint still returns `{ result: 'success' }`.
+
+**Quotas (Google-imposed, not RG Forms):** Apps Script caps email recipients per
+day — roughly **100/day on a free @gmail.com account**, **1,500/day on a paid
+Google Workspace account**. High-volume forms will silently stop notifying after
+the cap (rows still get saved).
+
+---
+
+## 7. Spam protection
+
+Two independent mechanisms:
+
+### 7.1 Honeypot (zero-config, per form)
+
+- Enabled via the "Enable spam protection (honeypot)" checkbox in a form's email
+  settings. Needs no scopes, no keys, no authorization.
+- Frontend adds: `<input type="text" name="_hp" style="display:none" tabindex="-1" />`
+  and submits its value as the `_hp` field.
+- Humans leave it empty; bots fill it. If `_hp` is non-empty the script returns
+  `{ result: 'success' }` **without saving anything** — bots can't tell they were
+  caught. The `_hp` column is never included in GET responses or emails.
+
+### 7.2 Cloudflare Turnstile (server-side captcha)
+
+- Requires a free Turnstile key pair from the Cloudflare dashboard
+  (https://dash.cloudflare.com → Turnstile): a **site key** (public) and a
+  **secret key** (private, stored only in the user's own hidden `_manifest` tab).
+- Requires the `script.external_request` scope (the script calls Cloudflare's
+  siteverify API). Grant it at project creation (recommended — keys can be left
+  blank and added later) or add it later via the same redeploy + re-authorize flow
+  described in §6.
+- **Validation starts OFF even when the capability is granted.** The owner toggles
+  "Verify submissions with Turnstile" in the dashboard's Spam protection card
+  only AFTER the widget is live on their site — so enabling never breaks live
+  submissions. The toggle is a manifest change: takes effect immediately, no
+  redeploy.
+- Frontend integration when validation is ON:
+  1. `<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>` in `<head>`
+  2. `<div class="cf-turnstile" data-sitekey="SITE_KEY"></div>` inside the form
+  3. Read the token Turnstile writes into the hidden `cf-turnstile-response` input
+     and send it as the `_captcha` field (top-level `captchaToken` also accepted).
+- Behavior: validation ON + valid token → row saved; ON + no token →
+  `{ result: 'error', error: 'Spam protection is enabled but no captcha token was sent…' }`;
+  ON + invalid token → `{ result: 'error', error: 'Captcha verification failed.' }`;
+  validation OFF → any token is ignored (safe to leave the widget in place).
+- Gotcha: validation ON with an empty secret key rejects all tokened submissions —
+  the dashboard warns about this. Add the secret key or turn validation off.
+
+---
+
+## 8. Managing a project from the dashboard
+
+The dashboard (project page) shows the endpoint URL (with copy button), links to
+the Google Sheet, Drive folder, and the "Open Script to Authorize" chip, plus:
+
+- **Add form** — creates a new sheet tab (name auto-derived from the label,
+  e.g. "Newsletter Signup" → `newslettersignup`, de-duplicated with numeric
+  suffixes) with its own fields and email settings. Same endpoint URL — the new
+  form is addressed by its `tab` name. Instant, no redeploy.
+- **Edit fields** — change labels/types/required/email settings any time. Updates
+  the tab's header row and the manifest. Instant, no redeploy. (Renaming a field
+  changes its column key — update frontend code and re-export RGFORMS.md.)
+- **Remove form** — deletes the sheet tab **permanently, including its
+  submissions** (confirmation required).
+- **Test** — a built-in dialog that sends a real submission to the live endpoint
+  so users can verify end-to-end without writing code.
+- **Rename project** — renames the Drive folder/sheet and updates the slug.
+- **Email notifications card / Spam protection card** — see §6 and §7.
+- **AI Skill (RGFORMS.md)** — preview/copy/download the AI skill file: endpoint
+  URL, every form's tab name and exact field keys/types/required flags, the
+  text/plain calling convention, honeypot/captcha snippets, and instructions for
+  AI assistants.
+- **Manifest (JSON)** — download the full config as JSON (the Turnstile secret is
+  redacted; it stays only in the user's private sheet).
+
+**Why edits never need redeploys:** the script has no configuration hardcoded — it
+reads the `_manifest` tab on every request. Only capability (scope) changes touch
+the deployment, and even those keep the same URL via an in-place version update.
+
+---
+
+## 9. Security & privacy model (for "is this safe?" questions)
+
+- No RG Forms server ever sees the user's data or token. The site is static; all
+  Google API calls originate in the user's browser; submissions go visitor →
+  user's Apps Script → user's Sheet.
+- OAuth token: in-memory only, ~1 h lifetime, revoked on sign-out.
+- `drive.file` scope means RG Forms can only see files it created — never the
+  user's existing Drive contents.
+- The script itself can only touch its own spreadsheet (`spreadsheets.currentonly`),
+  plus email-send / external-request if those capabilities were granted.
+- The endpoint runs as the owner but is anonymously callable (required for public
+  forms). Submitted values are HTML-escaped before being rendered in emails.
+- The Turnstile secret lives only in the hidden `_manifest` tab of the user's own
+  sheet and is redacted from exports.
+- Deleting a project's folder/sheet/script from Drive removes everything — the
+  user owns all the pieces.
+
+---
+
+## 10. Troubleshooting quick reference
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| "Google hasn't verified this app" when signing in to rgforms.com | The RG Forms OAuth client is in testing / unverified for this account | Proceed via Advanced → Continue, or (self-hosted) add the account as a test user in Google Cloud Console → OAuth consent screen |
+| "App isn't verified" when authorizing the script | Normal for any personal Apps Script with sensitive scopes (§4) | Advanced → Go to project (unsafe) → Allow |
+| Provisioning fails at the Apps Script step | Apps Script API user setting is off | script.google.com/home/usersettings → enable → retry (§3.3) |
+| Sign-in popup never appears | Browser popup blocker | Allow popups for the site, retry |
+| Browser console shows CORS error on submit | `Content-Type: application/json` triggered a preflight | Use `Content-Type: text/plain` (§5) |
+| Submissions rejected right after adding a capability | New scope not yet authorized | Open script editor → run any function → Review permissions → Allow (§6) |
+| `{ result: 'error', error: 'Invalid form tab: …' }` | Wrong `tab` value | Use the tab name from RGFORMS.md (first form is `contact`) |
+| Captcha errors on every submission | Validation ON without widget/token, or missing secret key | Add the widget + `_captcha` token, set the secret key, or toggle validation off (§7.2) |
+| Rows saved but no notification emails | No notification address set, or daily quota hit (~100 free / ~1,500 Workspace), or capability never granted | Set the address in the dashboard; check quota; add the email capability (§6) |
+| First request very slow | Apps Script cold start | Expected: ~800 ms–2 s after inactivity |
+| Dashboard actions fail with auth errors | OAuth token expired (~1 h) | Sign out and sign back in |
+| A form field's data lands in the wrong/empty column | Field key mismatch after renaming a label | Keys = label lowercased, non-alphanumerics → `_`; re-export RGFORMS.md |
+
+---
+
+## 11. Known limits
+
+- Email recipients/day: ~100 (free Gmail) / ~1,500 (Google Workspace) — Google-imposed.
+- No file uploads; text fields only.
+- Apps Script deployments: ~50/day per user (only matters when creating many projects).
+- One-time manual script authorization is unavoidable (Google requirement for
+  API-deployed scripts), and repeats when a new scope capability is added later.
+- Reads via `GET ?tab=` are public to anyone with the endpoint URL.
+
+## 12. Related pages
+
+- https://rgforms.com — the app
+- https://rgforms.com/how-it-works — human-readable walkthrough of everything above
+- https://rgforms.com/privacy — privacy policy
+- From the same makers: https://sheetspin.com — full site backends (blog, gallery,
+  events, newsletter) in Google Drive, for users who need more than forms.

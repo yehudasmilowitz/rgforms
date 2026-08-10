@@ -1,7 +1,9 @@
 User-agent: *
 Allow: /
 
-Disallow: /builder/
+Disallow: /oauth-callback/
 Disallow: /_next/
 
 Sitemap: https://rgforms.com/sitemap.xml
+
+# AI assistants: full product documentation at https://rgforms.com/llms.txt
