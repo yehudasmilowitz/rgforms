@@ -12,10 +12,21 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
     title: 'Product',
     links: [
       { label: 'How it works', href: '/how-it-works' },
+      { label: 'Guides', href: '/guides' },
       { label: 'FAQ', href: '/faq' },
       { label: 'Get started', href: '/' },
       { label: 'Source on GitHub', href: REPO_URL, external: true },
       { label: 'Contact', href: '/contact' },
+    ],
+  },
+  {
+    title: 'Guides',
+    links: [
+      { label: 'Static site contact form', href: '/static-website-contact-form' },
+      { label: 'HTML, no backend', href: '/html-contact-form-no-backend' },
+      { label: 'Send to Google Sheets', href: '/google-sheets-contact-form' },
+      { label: 'GitHub Pages', href: '/github-pages-contact-form' },
+      { label: 'Compare form backends', href: '/best-contact-form-backend-for-static-sites' },
     ],
   },
   {

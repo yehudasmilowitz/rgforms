@@ -41,12 +41,23 @@ const siteUrl = 'https://rgforms.com';
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'RG Forms — Free, Open-Source Contact Forms Backed by Your Google Sheet',
+    default: 'RG Forms — The Free Form Backend for Static Websites',
     template: '%s — RG Forms',
   },
   description:
-    'A free, open-source contact form endpoint. Submissions go directly to a Google Sheet you own — email notifications, spam protection (honeypot + optional Cloudflare Turnstile), no monthly fees, no third-party storage.',
-  keywords: ['contact form', 'Google Sheets form', 'form to spreadsheet', 'Google Apps Script form', 'free contact form', 'open source contact form', 'serverless form backend'],
+    'Add contact forms to HTML, React, Astro, Hugo, Jekyll, GitHub Pages, Netlify, Cloudflare Pages, Vercel or any static site — without building a backend. Submissions go directly to a Google Sheet you own. No server. No database. No monthly fee.',
+  keywords: [
+    'form backend for static sites',
+    'contact form without a backend',
+    'static website contact form',
+    'HTML contact form no backend',
+    'Google Sheets contact form',
+    'form endpoint',
+    'free contact form',
+    'open source contact form',
+    'serverless form backend',
+    'GitHub Pages contact form',
+  ],
   authors: [{ name: 'RG Forms' }],
   creator: 'RG Forms',
   openGraph: {
@@ -54,14 +65,14 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: siteUrl,
     siteName: 'RG Forms',
-    title: 'RG Forms — Free, Open-Source Contact Forms Backed by Your Google Sheet',
+    title: 'RG Forms — The Free Form Backend for Static Websites',
     description:
-      'Set up your fields, connect your Google account, get a live form endpoint. Submissions go straight to a Google Sheet you own. Completely free and open source — no monthly fees.',
+      'Add a contact form to any static site without building a backend. Submissions go straight to a Google Sheet you own. Completely free and open source — no monthly fees.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'RG Forms — Contact Forms Backed by Your Google Sheet',
-    description: 'Contact forms that store submissions in your own Google Sheet. Free, no server, zero lock-in.',
+    title: 'RG Forms — The Free Form Backend for Static Websites',
+    description: 'Contact forms for any static site, with submissions stored in your own Google Sheet. Free, no server, zero lock-in.',
   },
   icons: {
     icon: '/favicon.svg',
@@ -113,7 +124,15 @@ export default function RootLayout({
               sameAs: ['https://github.com/yehudasmilowitz/rgforms'],
               offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
               description:
-                'Describe your forms and get a fully provisioned Google Sheet + Apps Script backend — ready to accept submissions in under 2 minutes. No server, no subscription.',
+                'The free form backend for static websites. Add contact forms to HTML, React, Astro, Hugo, Jekyll, GitHub Pages, Netlify, Cloudflare Pages or Vercel without building a backend — submissions go directly to a Google Sheet you own. No server, no database, no subscription.',
+              featureList: [
+                'Form endpoint provisioned inside your own Google account',
+                'Submissions stored as rows in your own Google Sheet',
+                'Email notifications sent from your own Google account',
+                'Honeypot and Cloudflare Turnstile spam protection',
+                'Multiple forms per project behind one endpoint URL',
+                'Works with any static host or framework',
+              ],
               logo: { '@type': 'ImageObject', url: `${siteUrl}/logo.svg` },
             }),
           }}
@@ -172,8 +191,8 @@ export default function RootLayout({
                 <Link href="/how-it-works" className="text-sm font-medium nav-link">
                   How it works
                 </Link>
-                <Link href="/privacy" className="text-sm font-medium nav-link">
-                  Privacy
+                <Link href="/guides" className="text-sm font-medium nav-link">
+                  Guides
                 </Link>
                 <Link href="/contact" className="text-sm font-medium nav-link">
                   Contact

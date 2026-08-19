@@ -75,7 +75,7 @@ export default function OGImage() {
           maxWidth: '960px',
         }}
       >
-        Contact forms that go straight to your Google Sheet
+        The free form backend for static websites
       </div>
 
       {/* Subline */}
@@ -89,12 +89,13 @@ export default function OGImage() {
           marginBottom: '52px',
         }}
       >
-        Live endpoint in 2 minutes. No server, no monthly fees. Submissions go to your Drive.
+        Add a contact form to any static site without building a backend. Submissions go
+        straight to a Google Sheet you own.
       </div>
 
       {/* Pill tags */}
       <div style={{ display: 'flex', gap: '14px' }}>
-        {['Google Sheets', 'Email Notifications', 'Zero Server'].map((tag) => (
+        {['Google Sheets', 'No server', 'Free & open source'].map((tag) => (
           <div
             key={tag}
             style={{

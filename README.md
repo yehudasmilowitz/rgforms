@@ -1,6 +1,6 @@
 # RG Forms
 
-> Form backends in your Google Drive. Describe your forms, get a fully provisioned Google Sheet + Apps Script API — ready to accept submissions in under 2 minutes. No server, no subscription, yours forever.
+> **The free form backend for static websites.** Add contact forms to HTML, React, Astro, Hugo, Jekyll, GitHub Pages, Netlify, Cloudflare Pages, Vercel or any static site — without building a backend. Describe your forms, get a fully provisioned Google Sheet + Apps Script endpoint in under 2 minutes. Submissions land in a Google Sheet you own. No server, no subscription, yours forever.
 
 **Live site**: [rgforms.com](https://rgforms.com)
 

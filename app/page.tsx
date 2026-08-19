@@ -11,6 +11,8 @@ import FlowDiagram from '@/components/landing/FlowDiagram'
 import Benefits from '@/components/landing/Benefits'
 import CodeDemo from '@/components/landing/CodeDemo'
 import Features from '@/components/landing/Features'
+import WorksWith from '@/components/landing/WorksWith'
+import CtaBand from '@/components/landing/CtaBand'
 import BuiltOn from '@/components/landing/BuiltOn'
 import FreeOpenSource from '@/components/landing/FreeOpenSource'
 import SectionDivider from '@/components/landing/SectionDivider'
@@ -65,6 +67,10 @@ export default function Page() {
       <SectionDivider top={BG2} bottom={BG} />
 
       <Features />
+
+      <WorksWith />
+
+      <CtaBand />
     </main>
   )
 }
