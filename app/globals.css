@@ -18,7 +18,7 @@
   --color-heading:      oklch(0.22 0.045 295);
   --color-text:         oklch(0.30 0.035 295);
   --color-muted:        oklch(0.50 0.030 295);
-  --color-subtle:       oklch(0.63 0.025 295);
+  --color-subtle:       oklch(0.52 0.028 295);  /* AA on both --color-bg (5.4:1) and --color-bg-2 (4.7:1) */
 
   /* ── Brand: violet → indigo → fuchsia (from the logo) ───── */
   --color-accent:        oklch(0.55 0.22 290);   /* deep violet — AA with #fff text */
@@ -154,7 +154,7 @@ html.dark {
   --color-heading:      oklch(0.97 0.012 300);
   --color-text:         oklch(0.90 0.016 300);
   --color-muted:        oklch(0.72 0.026 297);
-  --color-subtle:       oklch(0.60 0.026 297);
+  --color-subtle:       oklch(0.64 0.026 297);  /* AA on both dark surfaces (5.7:1 / 5.3:1) */
 
   /* ── Brand accent — lifted for contrast on dark ────────── */
   --color-accent:        oklch(0.70 0.19 290);

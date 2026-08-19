@@ -28,7 +28,7 @@ export default function CtaBand() {
         <div className="absolute inset-0 dot-grid opacity-30" aria-hidden="true" />
 
         <div className="relative z-10 flex flex-col items-center gap-6">
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold" style={{ background: 'rgba(255,255,255,0.18)', color: '#fff' }}>
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold" style={{ background: 'rgba(0,0,0,0.28)', color: '#fff' }}>
             <BeaconFallback /> Your endpoint goes live in ~90 seconds
           </span>
           <div className="mt-2 rounded-xl bg-white/10 p-1.5 backdrop-blur-sm">
