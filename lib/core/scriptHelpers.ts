@@ -47,8 +47,10 @@ export const WRITE_MANIFEST: Manifest = {
 // These are template strings embedded into generated Apps Script source.
 
 /**
- * The htmlConfirmation() function shown to users when they first open the
- * deployed URL to authorize it. Rendered as an HtmlService page.
+ * The htmlConfirmation() function shown to users on the ?setup=1 route after
+ * they authorize the deployed script. Rendered as an HtmlService page.
+ * Never serve this from the bare exec URL: Apps Script can't send robots.txt,
+ * a noindex tag, or a non-200 status, so bare-URL HTML gets indexed by Google.
  */
 export function htmlConfirmationBlock(apiLabel: string, apiDescription: string): string {
   return `
@@ -103,14 +105,18 @@ function jsonResponse_(payload) {
 `.trim();
 
 /**
- * A standard doGet guard: if the request isn't a JSON request (no ?json=1),
- * return the HTML confirmation page. Otherwise run the handler.
+ * A standard doGet guard: the HTML confirmation page is served only at
+ * ?setup=1; JSON data requests pass ?json=1; anything else (including the
+ * bare exec URL, which search engines fetch) gets a minimal JSON response.
  * Usage: embed this pattern in the generated doGet().
  */
 export function doGetGuardBlock(): string {
   return `
-  if (!e || !e.parameter || e.parameter.json !== '1') {
+  if (e && e.parameter && e.parameter.setup === '1') {
     return htmlConfirmation_();
+  }
+  if (!e || !e.parameter || e.parameter.json !== '1') {
+    return jsonResponse_({ ok: true });
   }
 `.trim();
 }
@@ -213,8 +219,11 @@ ${JSON_RESPONSE_BLOCK}
 ${rowParserBlock(booleanKeys, numericKeys)}
 
 function doGet(e) {
-  if (!e || !e.parameter || e.parameter.json !== '1') {
+  if (e && e.parameter && e.parameter.setup === '1') {
     return htmlConfirmation_();
+  }
+  if (!e || !e.parameter || e.parameter.json !== '1') {
+    return jsonResponse_({ ok: true });
   }
   try {
     var ss      = SpreadsheetApp.getActiveSpreadsheet();

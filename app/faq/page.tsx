@@ -196,6 +196,29 @@ const FAQS: Array<{ q: string; a: React.ReactNode; aText: string }> = [
       </>
     ),
   },
+  {
+    q: 'My endpoint URL is showing up in Google search results. How do I stop that?',
+    aText:
+      'Endpoints created before August 2026 served a small HTML confirmation page at the bare script URL, and because Apps Script cannot serve a robots.txt, a noindex tag, or a non-200 status, Google could index that page. New endpoints return a plain JSON response ({"ok":true}) at the bare URL instead, which search engines don\'t index as a page, and serve the confirmation page only at ?setup=1. To update an existing endpoint: open your project\'s script editor from the dashboard, find the doGet function, and move the HTML branch behind a check for e.parameter.setup === \'1\', returning ContentService.createTextOutput(JSON.stringify({ ok: true })).setMimeType(ContentService.MimeType.JSON) otherwise. Then Deploy → Manage deployments → edit the active deployment → New version → Deploy (this keeps your URL the same). Your form action URL and doPost submissions are unaffected. Once the live response has changed, use Google Search Console → Removals → Outdated content to clear the already-indexed result.',
+    a: (
+      <>
+        Endpoints created before August 2026 served a small HTML confirmation page at the bare
+        script URL, and because Apps Script cannot serve a robots.txt, a noindex tag, or a non-200
+        status, Google could index that page. New endpoints return a plain JSON response
+        (<code>{'{"ok":true}'}</code>) at the bare URL instead — which search engines don&apos;t
+        index as a page — and serve the confirmation page only at <code>?setup=1</code>. To update
+        an existing endpoint: open your project&apos;s script editor from the dashboard, find the{' '}
+        <code>doGet</code> function, and move the HTML branch behind a check for{' '}
+        <code>e.parameter.setup === &apos;1&apos;</code>, returning{' '}
+        <code>ContentService.createTextOutput(JSON.stringify({'{ ok: true }'})).setMimeType(ContentService.MimeType.JSON)</code>{' '}
+        otherwise. Then <strong>Deploy → Manage deployments → edit the active deployment → New
+        version → Deploy</strong> — this keeps your URL the same. Your form action URL and{' '}
+        <code>doPost</code> submissions are unaffected. Once the live response has changed, use{' '}
+        <strong>Google Search Console → Removals → Outdated content</strong> to clear the
+        already-indexed result.
+      </>
+    ),
+  },
 ];
 
 export default function FaqPage() {

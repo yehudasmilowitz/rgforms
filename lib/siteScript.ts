@@ -38,6 +38,12 @@ function doGet(e) {
   var tabName = e.parameter.tab;
 
   if (!tabName) {
+    // Bare exec URL: JSON only. Apps Script can't serve robots.txt, a noindex
+    // meta tag, or a non-200 status, so returning HTML here gets the endpoint
+    // indexed by search engines. The human confirmation page lives at ?setup=1.
+    if (e.parameter.setup !== '1') {
+      return jsonResponse({ ok: true });
+    }
     var projectName = CONFIG.site_name || CONFIG.project_slug || 'Forms';
     var html = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + projectName + '</title>'
       + '<style>'

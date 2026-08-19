@@ -275,7 +275,7 @@ ${tabDocs}
 
 ## Usage notes
 
-1. **Authorization**: Visit the script URL once in your browser as the account owner to authorize before first use.
+1. **Authorization**: Visit the script URL once in your browser as the account owner to authorize before first use. Once authorized, the bare URL responds with a small JSON payload (\`{"ok":true}\`) — that is expected, and keeps the endpoint out of search results.
 2. **CORS**: Always use \`Content-Type: text/plain\` — never \`application/json\`. Apps Script cannot respond to the CORS preflight that \`application/json\` triggers, which causes the browser to block the request. The body is still JSON; the script parses it correctly.
 3. **Cold starts**: Apps Script takes ~800ms–2s on the first request after inactivity. Normal after that.
 4. **Form responses**: \`{ result: "success" }\` on success, \`{ result: "error", error: "..." }\` on failure.
@@ -322,7 +322,7 @@ function buildManifestGuide(manifest: SiteManifest) {
         script: 'https://challenges.cloudflare.com/turnstile/v0/api.js',
       },
     } : {}),
-    authorization: 'Visit script_url once in your browser as the Google account owner to authorize.',
+    authorization: 'Visit script_url once in your browser as the Google account owner to authorize. Once authorized, the bare URL responds with a small JSON payload — that is expected.',
   };
 }
 
@@ -888,7 +888,7 @@ export default function SiteKit() {
               </a>
             ))}
             <TooltipLink
-              href={m.script_url}
+              href={`${m.script_url}?setup=1`}
               label="Open Script to Authorize"
               tooltip="Google requires a one-time authorization after your script is deployed. Click to open the script in your browser, then approve the permissions dialog when prompted. You only need to do this once."
               variant="warning"
