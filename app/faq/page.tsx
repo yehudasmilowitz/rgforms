@@ -267,7 +267,11 @@ export default function FaqPage() {
             <Link href="/how-it-works" className="underline hover:no-underline" style={{ color: 'var(--color-accent-ink)' }}>
               how it works
             </Link>
-            .
+            , or the{' '}
+            <Link href="/guides" className="underline hover:no-underline" style={{ color: 'var(--color-accent-ink)' }}>
+              guides
+            </Link>{' '}
+            for per-host and per-framework setups.
           </p>
         </header>
 
@@ -295,6 +299,9 @@ export default function FaqPage() {
           </Link>
           <Link href="/how-it-works" className="text-sm nav-link">
             How it works
+          </Link>
+          <Link href="/guides" className="text-sm nav-link">
+            Guides
           </Link>
           <Link href="/contact" className="text-sm nav-link">
             Contact

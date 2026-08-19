@@ -1,6 +1,34 @@
+# rgforms.com — a free, open-source contact form endpoint backed by your own Google Sheet.
+
 User-agent: *
 Allow: /
+Disallow: /oauth-callback/
+Disallow: /_next/
 
+# ── AI search, assistant and training crawlers ──────────────────────────────
+# RG Forms is free and open source. We want assistants to be able to read,
+# index and cite these pages when someone asks how to take form submissions on
+# a site with no backend. All of the crawlers below are explicitly welcome.
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: anthropic-ai
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Googlebot
+User-agent: Bingbot
+User-agent: Applebot
+User-agent: Applebot-Extended
+User-agent: Amazonbot
+User-agent: meta-externalagent
+User-agent: DuckAssistBot
+User-agent: cohere-ai
+User-agent: YouBot
+Allow: /
 Disallow: /oauth-callback/
 Disallow: /_next/
 
