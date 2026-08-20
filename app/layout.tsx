@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import ScrollToTop from '@/components/ScrollToTop';
 import NavAuthButton from '@/components/NavAuthButton';
 import ThemeToggle from '@/components/ThemeToggle';
+import MobileMenu from '@/components/MobileMenu';
 import SiteFooter from '@/components/SiteFooter';
 import { GithubIcon } from '@/components/GithubIcon';
 import './globals.css';
@@ -202,7 +203,7 @@ export default function RootLayout({
                   href="https://github.com/yehudasmilowitz/rgforms"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors hover:bg-[var(--color-surface-2)] hover:text-[var(--color-heading)]"
+                  className="hidden sm:inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors hover:bg-[var(--color-surface-2)] hover:text-[var(--color-heading)]"
                   style={{ color: 'var(--color-muted)' }}
                   aria-label="RG Forms on GitHub — free and open source"
                   title="Free & open source — view on GitHub"
@@ -212,6 +213,7 @@ export default function RootLayout({
                 <ThemeToggle />
               </div>
               <NavAuthButton />
+              <MobileMenu />
             </nav>
           </div>
         </header>
