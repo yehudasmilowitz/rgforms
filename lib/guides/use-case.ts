@@ -135,6 +135,7 @@ export const USE_CASE_GUIDES: Guide[] = [
 
   {
     slug: 'html-contact-form-no-backend',
+    icon: 'Html5',
     category: 'use-case',
     eyebrow: 'Plain HTML',
     title: 'HTML contact form with no backend',

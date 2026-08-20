@@ -39,6 +39,8 @@ export type Section =
     }
   | { type: 'checklist'; heading: string; intro?: string; items: Array<{ label: string; body?: string }> };
 
+import type { BrandIconKey } from '@/components/brand-icons';
+
 export type GuideCategory = 'use-case' | 'platform' | 'framework' | 'compare';
 
 export type Guide = {
@@ -68,4 +70,6 @@ export type Guide = {
   updated: string;
   /** Card blurb on the /guides hub. */
   cardBlurb: string;
+  /** Optional brand mark shown on cards and in the page header. */
+  icon?: BrandIconKey;
 };

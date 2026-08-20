@@ -317,6 +317,30 @@ body::after {
 }
 
 /* Pill / eyebrow chip */
+/* Vendored brand marks (components/brand-icons.tsx) carry their official colour
+   as a CSS var so a dark-mode swap is possible — inline styles can't do that. */
+.brand-glyph { color: var(--brand-hex); }
+html.dark .brand-glyph { color: var(--brand-hex-dark, var(--brand-hex)); }
+
+.brand-tile {
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.18s cubic-bezier(0.21, 1.02, 0.73, 0.99), box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.brand-link:hover .brand-tile,
+.brand-link:focus-visible .brand-tile {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-accent-border);
+}
+.brand-link:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; border-radius: var(--radius-md); }
+
 .chip {
   display: inline-flex;
   align-items: center;

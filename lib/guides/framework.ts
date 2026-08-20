@@ -4,6 +4,7 @@ import { REACT_FORM, CURL_TEST } from '@/lib/guides/snippets';
 export const FRAMEWORK_GUIDES: Guide[] = [
   {
     slug: 'astro-contact-form',
+    icon: 'Astro',
     category: 'framework',
     eyebrow: 'Astro',
     title: 'Adding a contact form to an Astro site',
@@ -181,6 +182,7 @@ import ContactForm from '../components/ContactForm.astro';
 
   {
     slug: 'hugo-contact-form',
+    icon: 'Hugo',
     category: 'framework',
     eyebrow: 'Hugo',
     title: 'Adding a contact form to a Hugo site',
@@ -347,6 +349,7 @@ Questions about a project? Send a note and we'll reply within a day.
 
   {
     slug: 'jekyll-contact-form',
+    icon: 'Jekyll',
     category: 'framework',
     eyebrow: 'Jekyll',
     title: 'Adding a contact form to a Jekyll site',
@@ -504,6 +507,7 @@ Have a question? Send a message and we'll get back to you.
 
   {
     slug: 'react-contact-form-without-backend',
+    icon: 'React',
     category: 'framework',
     eyebrow: 'React',
     title: 'A React contact form with no backend',

@@ -4,6 +4,7 @@ import { HTML_FORM, CURL_TEST } from '@/lib/guides/snippets';
 export const PLATFORM_GUIDES: Guide[] = [
   {
     slug: 'github-pages-contact-form',
+    icon: 'Github',
     category: 'platform',
     eyebrow: 'GitHub Pages',
     title: 'Adding a contact form to a GitHub Pages site',
@@ -112,6 +113,7 @@ export const PLATFORM_GUIDES: Guide[] = [
 
   {
     slug: 'netlify-contact-form',
+    icon: 'Netlify',
     category: 'platform',
     eyebrow: 'Netlify',
     title: 'Contact forms on Netlify: the built-in option and the portable one',
@@ -219,6 +221,7 @@ export const PLATFORM_GUIDES: Guide[] = [
 
   {
     slug: 'cloudflare-pages-contact-form',
+    icon: 'CloudflarePages',
     category: 'platform',
     eyebrow: 'Cloudflare Pages',
     title: 'Adding a contact form to a Cloudflare Pages site',
@@ -312,6 +315,7 @@ export const PLATFORM_GUIDES: Guide[] = [
 
   {
     slug: 'vercel-static-contact-form',
+    icon: 'Vercel',
     category: 'platform',
     eyebrow: 'Vercel',
     title: 'A contact form on Vercel without an API route',
