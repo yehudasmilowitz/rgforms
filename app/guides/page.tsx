@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { CATEGORY_META, CATEGORY_ORDER, GUIDES, guidesByCategory } from '@/lib/guides';
+import SectionDivider from '@/components/landing/SectionDivider';
+import { BRAND_ICONS, BrandGlyph } from '@/components/brand-icons';
 
 const SITE_URL = 'https://rgforms.com';
 
@@ -38,7 +40,7 @@ export default function GuidesPage() {
     <main style={{ background: 'var(--color-bg)', color: 'var(--color-text)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <header className="relative overflow-hidden px-4 pt-14 pb-12">
+      <header className="relative overflow-hidden px-4 pt-14 pb-24 sm:pb-28">
         <div className="mesh-bg" aria-hidden="true" />
         <div className="absolute inset-0 dot-grid pointer-events-none" aria-hidden="true" />
         <div className="relative z-10 max-w-5xl mx-auto flex flex-col gap-4">
@@ -64,9 +66,12 @@ export default function GuidesPage() {
             tools worth considering, including the ones that aren&apos;t ours.
           </p>
         </div>
+
+        {/* Wave seam out of the mesh, so the band never butts into the content. */}
+        <SectionDivider overlay bottom="var(--color-bg)" />
       </header>
 
-      <div className="px-4 pb-20">
+      <div className="px-4 pt-2 sm:pt-4 pb-20">
         <div className="max-w-5xl mx-auto flex flex-col gap-14">
           {CATEGORY_ORDER.map((category) => {
             const guides = guidesByCategory(category);
@@ -93,7 +98,11 @@ export default function GuidesPage() {
                       href={`/${guide.slug}`}
                       className="card card-hover p-5 flex flex-col gap-2 group"
                     >
-                      <span className="text-xs font-semibold" style={{ color: 'var(--color-accent-ink)' }}>
+                      <span
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold"
+                        style={{ color: 'var(--color-accent-ink)' }}
+                      >
+                        {guide.icon && <BrandGlyph icon={BRAND_ICONS[guide.icon]} size={13} />}
                         {guide.eyebrow}
                       </span>
                       <h3 className="font-bold leading-snug" style={{ color: 'var(--color-heading)' }}>

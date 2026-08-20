@@ -5,6 +5,8 @@ import { getGuide } from '@/lib/guides';
 import RichText from '@/components/guides/RichText';
 import CodeCard from '@/components/guides/CodeCard';
 import CtaBand from '@/components/landing/CtaBand';
+import SectionDivider from '@/components/landing/SectionDivider';
+import { BRAND_ICONS, BrandGlyph } from '@/components/brand-icons';
 
 const TONES = {
   info: { bg: 'var(--color-info-bg)', border: 'var(--color-info-border)', fg: 'var(--color-info)', Icon: Info },
@@ -205,7 +207,7 @@ export default function GuideArticle({ guide }: { guide: Guide }) {
   return (
     <main style={{ background: 'var(--color-bg)', color: 'var(--color-text)' }}>
       {/* Header band */}
-      <header className="relative overflow-hidden px-4 pt-12 pb-10 sm:pt-16">
+      <header className="relative overflow-hidden px-4 pt-12 pb-28 sm:pt-16 sm:pb-32">
         <div className="mesh-bg" aria-hidden="true" />
         <div className="absolute inset-0 dot-grid pointer-events-none" aria-hidden="true" />
         <div className="relative z-10 max-w-3xl mx-auto flex flex-col gap-4">
@@ -227,7 +229,12 @@ export default function GuideArticle({ guide }: { guide: Guide }) {
               color: 'var(--color-accent-ink)',
             }}
           >
-            <Sparkles size={12} /> {guide.eyebrow}
+            {guide.icon ? (
+              <BrandGlyph icon={BRAND_ICONS[guide.icon]} size={13} />
+            ) : (
+              <Sparkles size={12} />
+            )}
+            {guide.eyebrow}
           </span>
 
           <h1
@@ -247,9 +254,12 @@ export default function GuideArticle({ guide }: { guide: Guide }) {
             Last updated {updated}
           </p>
         </div>
+
+        {/* Wave seam out of the mesh, so the band never butts into the content. */}
+        <SectionDivider overlay bottom="var(--color-bg)" />
       </header>
 
-      <article className="px-4 pb-16">
+      <article className="px-4 pt-4 pb-20 sm:pt-6">
         <div className="max-w-3xl mx-auto flex flex-col gap-10">
           {/* The extractable answer */}
           <div
@@ -315,7 +325,11 @@ export default function GuideArticle({ guide }: { guide: Guide }) {
                   href={`/${r.slug}`}
                   className="card card-hover p-5 flex flex-col gap-2 group"
                 >
-                  <span className="text-xs font-semibold" style={{ color: 'var(--color-accent-ink)' }}>
+                  <span
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold"
+                    style={{ color: 'var(--color-accent-ink)' }}
+                  >
+                    {r.icon && <BrandGlyph icon={BRAND_ICONS[r.icon]} size={13} />}
                     {r.eyebrow}
                   </span>
                   <span className="font-bold leading-snug" style={{ color: 'var(--color-heading)' }}>

@@ -37,7 +37,7 @@ function Station({
       >
         {children}
       </div>
-      <span className="text-xs font-semibold" style={{ color: 'var(--color-muted)' }}>
+      <span className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>
         {label}
       </span>
     </motion.div>
@@ -150,7 +150,7 @@ export default function FlowDiagram() {
         </Station>
       </div>
 
-      <p className="mt-7 flex items-center justify-center gap-2 text-xs font-medium" style={{ color: 'var(--color-subtle)' }}>
+      <p className="mt-7 flex items-center justify-center gap-2 text-xs font-medium" style={{ color: 'var(--color-muted)' }}>
         No server in between
         <ArrowRight size={13} />
         just your Google account
