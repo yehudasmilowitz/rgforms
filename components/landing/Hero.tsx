@@ -7,6 +7,7 @@ import { heroContainer, fadeUp, scaleIn } from '@/lib/animations';
 import AuthButton from '@/components/AuthButton';
 import HeroGraphic from '@/components/landing/HeroGraphic';
 import SectionDivider from '@/components/landing/SectionDivider';
+import StackAvatars from '@/components/landing/StackAvatars';
 import { GithubIcon } from '@/components/GithubIcon';
 
 const CHIPS = [
@@ -54,13 +55,17 @@ export default function Hero() {
             className="text-base sm:text-lg leading-relaxed max-w-xl"
             style={{ color: 'var(--color-muted)' }}
           >
-            Add contact forms to HTML, React, Astro, Hugo, Jekyll, GitHub Pages, Netlify or any
-            static site — without building a backend. Your submissions go directly to{' '}
+            Add a contact form to any static site — without building a backend. Your submissions
+            go directly to{' '}
             <span style={{ color: 'var(--color-heading)', fontWeight: 700 }}>
               your own Google Sheet
             </span>
             . No server. No database. No monthly fee — it&apos;s free and open source.
           </motion.p>
+
+          <motion.div variants={fadeUp}>
+            <StackAvatars />
+          </motion.div>
 
           <motion.div variants={scaleIn} className="flex flex-col sm:flex-row items-center gap-3 pt-1">
             <AuthButton />
