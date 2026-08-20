@@ -158,11 +158,8 @@ export default function RootLayout({
         <header
           style={{
             borderBottom: '1px solid var(--color-border)',
-            background: 'var(--color-header-bg)',
-            backdropFilter: 'blur(14px)',
-            WebkitBackdropFilter: 'blur(14px)',
-            position: 'sticky',
-            top: 0,
+            background: 'var(--color-bg)',
+            position: 'relative',
             zIndex: 50,
           }}
         >
@@ -194,26 +191,23 @@ export default function RootLayout({
                 <Link href="/guides" className="text-sm font-medium nav-link">
                   Guides
                 </Link>
-                <Link href="/contact" className="text-sm font-medium nav-link">
-                  Contact
-                </Link>
               </div>
               <span
                 className="hidden sm:block h-5 w-px"
                 style={{ background: 'var(--color-border)' }}
                 aria-hidden="true"
               />
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-0.5">
                 <a
                   href="https://github.com/yehudasmilowitz/rgforms"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors nav-link"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors hover:bg-[var(--color-surface-2)] hover:text-[var(--color-heading)]"
+                  style={{ color: 'var(--color-muted)' }}
                   aria-label="RG Forms on GitHub — free and open source"
                   title="Free & open source — view on GitHub"
                 >
                   <GithubIcon size={17} />
-                  <span className="hidden md:inline">Free &amp; open source</span>
                 </a>
                 <ThemeToggle />
               </div>
