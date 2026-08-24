@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types \"lib/**/*.test.ts\""
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

@@ -14,6 +14,7 @@ import {
   styleHeaderRow,
 } from '@/lib/core/provisionHelpers';
 import { generateSiteScript, generateAppsScriptJson, type SiteScriptCapabilities } from './siteScript';
+import { SCRIPT_VERSION } from '@/types';
 import type { CreateSiteInput, SiteManifest, SiteTab } from '@/types';
 
 export type { CreateSiteInput };
@@ -267,6 +268,7 @@ export async function createSite(
     project_slug:          projectSlug,
     site_name:             siteName,
     created_at:            createdAt,
+    script_version:        SCRIPT_VERSION,
     google_account:        googleAccount,
     script_id:             scriptId,
     script_url:            deploymentUrl,

