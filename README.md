@@ -32,15 +32,16 @@ Your site's live API (after provisioning):
 
 Visitor's Browser / Claude agent / your frontend
     │
-    └─── fetch(scriptUrl, { body: URLSearchParams })  ← POST (form submission)
-    └─── fetch(scriptUrl?tab=blog&token=...)          ← GET (read data)
+    └─── fetch(scriptUrl, { headers: { 'Content-Type': 'text/plain' },
+                            body: JSON.stringify({ tab, fields }) })  ← POST (submission)
               │
               └─── Apps Script reads _manifest tab at runtime
-                        ├─── form:      appends row, sends email (CC/BCC/reply-to)
-                        ├─── rows:      GET returns JSON array
-                        ├─── key-value: GET returns config object
+                        ├─── appends the row, sends email (CC/BCC/reply-to)
                         └─── Returns { result: 'success' } or { result: 'error', error: '...' }
 ```
+
+The endpoint only accepts submissions — it never returns them. Read your data in
+the Google Sheet.
 
 ---
 

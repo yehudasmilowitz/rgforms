@@ -262,7 +262,7 @@ export const USE_CASE_GUIDES: Guide[] = [
         heading: 'What “no backend” costs you',
         body: [
           "Being honest about the trade: because there’s no server of yours in the path, **required-field enforcement is a frontend concern**. A determined person can POST directly to the endpoint and skip your HTML validation. For a contact form that’s a non-issue — the worst case is a row with empty cells — but it’s the wrong architecture for anything that needs to be authoritative, like a payment or an account signup.",
-          "Two other honest limits: there are **no file uploads** (text fields only), and reads via `GET ?tab=` are public to anyone who has the endpoint URL. If your form collects something genuinely sensitive, that’s worth knowing before you build on it.",
+          "Two other things worth knowing: there are **no file uploads** (text fields only), and there is **no read API** — the endpoint accepts submissions but never returns them, so pulling your data into another system means reading the Sheet rather than fetching a URL.",
           "Everything else you’d expect — timestamps, multiple forms, custom fields, notification routing, CC/BCC, custom subjects, spam filtering — is there.",
         ],
       },

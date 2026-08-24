@@ -65,7 +65,7 @@ export const PLATFORM_GUIDES: Guide[] = [
         body: [
           "Your repository is probably public, so anyone can read the endpoint URL out of your HTML. That’s expected: it has to be publicly callable for anonymous visitors to submit at all, exactly like every other form endpoint on the web.",
           "What protects you is the honeypot and, if you want it, Cloudflare Turnstile verified inside your script before a row is written. What the URL doesn’t give anyone is access to your Google account — the script can only touch its own spreadsheet.",
-          "One thing to know: a `GET` to the endpoint with `?tab=contact` returns that tab’s submissions as JSON, and that read is as public as the write. Don’t collect anything through it that you wouldn’t be comfortable having read by someone who found the URL in your source.",
+          "The endpoint only accepts submissions — it never returns them. A `GET` gets you `{\"ok\":true}` and nothing more, whatever parameters you add. So finding the URL in your source tells someone where to post, not what anyone has posted. Your submissions live in your Google Sheet, and who can see them there is down to how you’ve shared it — that part is yours to control, not something the endpoint decides.",
         ],
       },
       {

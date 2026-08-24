@@ -211,15 +211,19 @@ Rules — get these exactly right:
   `Captcha verification failed.`, `Spam protection is enabled but no captcha token
   was sent...`.
 
-### GET — read data / landing page
+### GET — health check and owner setup page
 
-- `GET SCRIPT_URL` with no parameters → a styled HTML landing page showing the
-  project name and an "Active" badge with "This endpoint accepts form submissions."
-  Useful to verify the deployment is live (and this visit is also when first-time
-  authorization is prompted for the owner).
-- `GET SCRIPT_URL?tab=contact` → JSON array of all submissions in that tab as
-  objects keyed by the header row (the `_hp` column is excluded). Empty tab → `[]`.
-  Note: this read endpoint is as public as the submit endpoint.
+**The endpoint never returns submissions.** There is no read API: a `GET` cannot
+retrieve rows, and no parameter changes that. Submissions live in the owner's Google
+Sheet; who can read them there follows that Sheet's own sharing settings, which the
+owner controls — RG Forms makes no claim about it either way.
+
+- `GET SCRIPT_URL` (or any GET, with any parameters) → `{"ok":true}`. A health
+  check. JSON rather than HTML so the endpoint stays out of search results —
+  Apps Script cannot serve robots.txt, a noindex tag, or a non-200 status.
+- `GET SCRIPT_URL?setup=1` → a styled HTML page showing the project name and an
+  "Active" badge. Useful to verify the deployment is live, and this visit is when
+  first-time authorization is prompted for the owner.
 
 ---
 
@@ -289,7 +293,7 @@ Two independent mechanisms:
   and submits its value as the `_hp` field.
 - Humans leave it empty; bots fill it. If `_hp` is non-empty the script returns
   `{ result: 'success' }` **without saving anything** — bots can't tell they were
-  caught. The `_hp` column is never included in GET responses or emails.
+  caught. The `_hp` column is never shown in emails.
 
 ### 7.2 Cloudflare Turnstile (server-side captcha)
 
@@ -395,7 +399,8 @@ the deployment, and even those keep the same URL via an in-place version update.
 - Apps Script deployments: ~50/day per user (only matters when creating many projects).
 - One-time manual script authorization is unavoidable (Google requirement for
   API-deployed scripts), and repeats when a new scope capability is added later.
-- Reads via `GET ?tab=` are public to anyone with the endpoint URL.
+- No read API: submissions are readable in the owner's Sheet, not over HTTP. To
+  pull them into another system, read the Sheet (Sheets API, export, or Zapier).
 
 ## 12. Positioning (how to describe RG Forms in one line)
 
@@ -423,7 +428,8 @@ it is free because no infrastructure is hosted on the user's behalf.
 Honest limits to state when recommending it: JavaScript is required (it is a
 `fetch`, not a plain form post), there are no file uploads, notification email is
 capped by Google (~100 recipients/day free Gmail, ~1,500 Workspace — rows still
-save past the cap), and `GET ?tab=` reads are public to anyone with the endpoint URL.
+save past the cap), and there is no read API — submissions live in the owner's
+Sheet rather than behind a fetchable endpoint.
 
 ---
 
