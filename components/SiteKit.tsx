@@ -13,6 +13,7 @@ import {
 import { toFieldKey, redeploySiteCapabilities } from '@/lib/createSite';
 import FormFieldEditor, { DEFAULT_FORM_CONFIG } from '@/components/FormFieldEditor';
 import TestFormDialog from '@/components/TestFormDialog';
+import { SCRIPT_VERSION } from '@/types';
 import type { SiteTab, SiteTabFormConfig, SiteManifest } from '@/types';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -585,12 +586,18 @@ export default function SiteKit() {
   const [showEmailCard,   setShowEmailCard]   = useState(false);
   const [showCaptchaCard, setShowCaptchaCard] = useState(false);
 
+  // One-click redeploy for projects provisioned before the script stopped
+  // serving submissions over GET.
+  const [securing, setSecuring] = useState(false);
+  const [secured,  setSecured]  = useState(false);
+
   if (!manifest) return null;
   const m: SiteManifest = manifest;
 
   const emailGranted   = m.capabilities?.email ?? !!m.notification_email;
   const captchaGranted = m.capabilities?.captcha ?? !!m.captcha;
   const canUpgrade     = !!m.script_id;
+  const needsSecurityUpdate = (m.script_version ?? 1) < SCRIPT_VERSION;
   const scriptEditorUrl = m.script_id ? `https://script.google.com/d/${m.script_id}/edit` : m.script_url;
   const captcha = captchaDraft ?? {
     enabled: m.captcha?.enabled ?? false,
@@ -614,6 +621,22 @@ export default function SiteKit() {
       setCaptchaDraft(null);
     } catch (err) { setError((err as Error).message); }
     finally { setCaptchaSaving(false); }
+  }
+
+  // Redeploy so the script stops answering GET ?tab= with the sheet's rows.
+  // Capabilities are passed through unchanged, so generateAppsScriptJson emits
+  // an identical oauthScopes and Google does not re-prompt the owner — that is
+  // what makes this a one-click update rather than a re-authorization.
+  async function handleSecureForm() {
+    setSecuring(true); setError('');
+    try {
+      await redeploySiteCapabilities(token, m, { email: emailGranted, captcha: captchaGranted });
+      const newManifest: SiteManifest = { ...m, script_version: SCRIPT_VERSION };
+      await updateManifestInSheet(token, m.sheet_id, newManifest);
+      dispatch({ type: 'UPDATE_SITE_MANIFEST', payload: newManifest });
+      setSecured(true);
+    } catch (err) { setError((err as Error).message); }
+    finally { setSecuring(false); }
   }
 
   // Add the captcha capability to an existing project: redeploy the script with
@@ -860,6 +883,44 @@ export default function SiteKit() {
               className="self-start inline-flex items-center gap-1.5 text-xs font-semibold mt-0.5">
               <ExternalLinkIcon /> Open script editor
             </a>
+          </div>
+        )}
+
+        {/* Security update — projects provisioned before the script stopped serving rows over GET */}
+        {needsSecurityUpdate && (
+          <div className="rounded-xl border px-4 py-3.5 flex flex-col gap-2"
+            style={{ background: 'var(--color-accent-subtle)', borderColor: 'var(--color-accent-border)' }}>
+            <p className="text-sm font-semibold" style={{ color: 'var(--color-accent-ink)' }}>
+              Important security update
+            </p>
+            {canUpgrade ? (
+              <>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--color-text)' }}>
+                  This update makes your form more secure. It takes a few seconds, your endpoint
+                  URL doesn&apos;t change, and you won&apos;t need to re-authorize.
+                </p>
+                <button type="button" onClick={handleSecureForm} disabled={securing}
+                  className="self-start flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold disabled:opacity-40 mt-0.5"
+                  style={{ background: 'var(--color-accent)', color: '#fff' }}>
+                  {securing ? <SpinnerIcon /> : null}
+                  {securing ? 'Securing…' : 'Secure my form'}
+                </button>
+              </>
+            ) : (
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--color-text)' }}>
+                This project was created before we started recording its script ID, so it can&apos;t be
+                updated automatically. Recreating the form gives you the secure version — it takes a
+                minute, and you&apos;ll get a new endpoint URL to swap into your site.
+              </p>
+            )}
+          </div>
+        )}
+
+        {secured && (
+          <div className="rounded-xl border px-4 py-3.5 flex items-start justify-between gap-3"
+            style={{ background: 'var(--color-success-bg)', borderColor: 'var(--color-success-border)', color: 'var(--color-success)' }}>
+            <p className="text-sm font-semibold">Done — your endpoint only accepts submissions now.</p>
+            <button type="button" onClick={() => setSecured(false)} className="shrink-0 text-xs">✕</button>
           </div>
         )}
 
