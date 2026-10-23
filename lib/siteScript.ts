@@ -1,3 +1,5 @@
+import { SUBJECT_RENDERER_SRC } from './formConfig.ts';
+
 export interface SiteScriptCapabilities {
   email:   boolean;   // declares script.send_mail + includes the email block
   captcha: boolean;   // declares script.external_request + includes the verify block
@@ -123,7 +125,10 @@ ${caps.captcha ? `
     if (toEmail) {
       var siteName = CONFIG.site_name || CONFIG.project_slug || '';
       var displayKeys = Object.keys(fields).filter(function (k) { return k !== '_hp' && k !== '_captcha'; });
-      var subject = formConf.emailSubject || ('New ' + tabDef.label + ' submission' + (siteName ? ' — ' + siteName : ''));
+      // Merge tags ({{field_key}}) resolve from the submission; blanks, unknown
+      // tags and control characters are handled inside renderSubject_.
+      var subject = renderSubject_(formConf.emailSubject, fields,
+        'New ' + tabDef.label + ' submission' + (siteName ? ' — ' + siteName : ''));
       var bodyHeader = subject + '\\n' + new Array(subject.length + 1).join('-') + '\\n\\n';
       var senderAcct = '';
       try { senderAcct = Session.getEffectiveUser().getEmail() || ''; } catch (acctErr) {}
@@ -156,9 +161,12 @@ ${caps.captcha ? `
       var opts = { htmlBody: htmlBody };
       if (formConf.ccEmails && formConf.ccEmails.length) opts.cc = formConf.ccEmails.join(',');
       if (formConf.bccEmails && formConf.bccEmails.length) opts.bcc = formConf.bccEmails.join(',');
-      if (formConf.senderName) opts.name = formConf.senderName;
-      if (formConf.replyToField && fields[formConf.replyToField]) {
-        opts.replyTo = String(fields[formConf.replyToField]);
+      if (formConf.senderName) opts.name = String(formConf.senderName).replace(/[\\u0000-\\u001f\\u007f]+/g, ' ');
+      // Reply-to comes from the visitor, so only a plain address is accepted. A
+      // malformed one used to make sendEmail throw and drop the notification.
+      var replyTo = formConf.replyToField ? String(fields[formConf.replyToField] || '').trim() : '';
+      if (replyTo && /^[^\\s@,;<>"]+@[^\\s@,;<>"]+\\.[^\\s@,;<>"]+$/.test(replyTo)) {
+        opts.replyTo = replyTo;
       }
       try {
         MailApp.sendEmail(toEmail, subject, lines, opts);
@@ -185,7 +193,7 @@ function textOnly(v) {
   return (c === 61 || c === 43 || c === 45 || c === 64 || c === 9 || c === 13) ? "'" + v : v;
 }
 
-function findTab(name) {
+${notificationsEnabled ? SUBJECT_RENDERER_SRC + '\n\n' : ''}function findTab(name) {
   for (var i = 0; i < CONFIG.tabs.length; i++) {
     if (CONFIG.tabs[i].name === name) return CONFIG.tabs[i];
   }

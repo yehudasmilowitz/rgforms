@@ -62,3 +62,48 @@ test('notification email escapes every attacker-controlled string', () => {
   assert.match(src, /esc\(tabDef\.label\)/);
   assert.match(src, /esc\(siteName\)/);
 });
+
+// ─── v3: subject merge tags + reply-to ───────────────────────────────────────
+
+/** Pull a top-level function out of the generated script and run it for real. */
+function emitted<T>(src: string, name: string): T {
+  const fn = src.match(new RegExp(`function ${name}\\([\\s\\S]*?\\n}`))?.[0];
+  assert.ok(fn, `${name} should be present in the generated script`);
+  return new Function(`${fn}; return ${name};`)() as T;
+}
+
+test('the delivered subject goes through the merge-tag renderer', () => {
+  const src = generateSiteScript(CAPS);
+  assert.match(src, /var subject = renderSubject_\(formConf\.emailSubject, fields,/);
+  assert.doesNotMatch(src, /var subject = formConf\.emailSubject \|\|/, 'raw template must not be used directly');
+  assert.doesNotMatch(generateSiteScript({ email: false, captcha: false }), /renderSubject_/);
+});
+
+test('the emitted renderer resolves tags and blocks header injection', () => {
+  const render = emitted<(t: string, f: Record<string, unknown>, d: string) => string>(
+    generateSiteScript(CAPS), 'renderSubject_');
+  const t = 'ELC website contact form - {{applicant_name}} - {{type_of_job}}';
+  assert.equal(render(t, { applicant_name: 'Ann Lee', type_of_job: 'Roofing' }, 'D'),
+    'ELC website contact form - Ann Lee - Roofing');
+  const injected = render(t, { applicant_name: 'x\r\nBcc: victim@example.com', type_of_job: 'y' }, 'D');
+  assert.doesNotMatch(injected, /[\r\n]/);
+  assert.doesNotMatch(render(t, {}, 'D'), /\{\{|\}\}/, 'unresolved tags must never be delivered');
+});
+
+test('reply-to only accepts a plain address from the submission', () => {
+  const src = generateSiteScript(CAPS);
+  assert.doesNotMatch(src, /opts\.replyTo = String\(fields\[formConf\.replyToField\]\)/);
+  const re = src.match(/if \(replyTo && (\/.*\/)\.test\(replyTo\)\)/)?.[1];
+  assert.ok(re, 'reply-to guard should be present');
+  const ok = new Function(`return ${re};`)() as RegExp;
+  assert.ok(ok.test('ann@example.com'));
+  for (const bad of ['ann@example.com\r\nBcc: x@y.z', 'a@b.com, c@d.com', 'not an email', '<a@b.com>']) {
+    assert.ok(!ok.test(bad), `${JSON.stringify(bad)} must be rejected`);
+  }
+});
+
+test('every generated variant is valid JavaScript', () => {
+  for (const email of [true, false]) for (const captcha of [true, false]) {
+    assert.doesNotThrow(() => new Function(generateSiteScript({ email, captcha })), `email=${email} captcha=${captcha}`);
+  }
+});

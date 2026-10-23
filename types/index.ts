@@ -82,8 +82,9 @@ export interface SiteCapabilities {
  * Bump when the generated Apps Script changes in a way existing projects must
  * pick up. Absent means v1 — those projects predate the removal of the public
  * `GET ?tab=` read path and are offered a one-click redeploy in the dashboard.
+ * v3: email subjects resolve {{field_key}} merge tags; reply-to is validated.
  */
-export const SCRIPT_VERSION = 2;
+export const SCRIPT_VERSION = 3;
 
 export interface SiteManifest {
   project_slug:          string;

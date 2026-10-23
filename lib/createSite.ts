@@ -19,9 +19,8 @@ import type { CreateSiteInput, SiteManifest, SiteTab } from '@/types';
 
 export type { CreateSiteInput };
 
-export function toFieldKey(label: string): string {
-  return label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'field';
-}
+import { toFieldKey } from './formConfig';
+export { toFieldKey };
 
 // ─── In-place capability upgrade ──────────────────────────────────────────────
 

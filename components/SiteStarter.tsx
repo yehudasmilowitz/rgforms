@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import { useApp } from '@/context/AppContext';
 import { useSiteProvisioning } from '@/hooks/useSiteProvisioning';
 import type { SiteTabFormConfig } from '@/types';
-import FormFieldEditor, { DEFAULT_FORM_CONFIG } from '@/components/FormFieldEditor';
+import FormFieldEditor, { DEFAULT_FORM_CONFIG, formConfigIssues } from '@/components/FormFieldEditor';
 
 function BackButton({ onClick }: { onClick: () => void }) {
   return (
@@ -42,7 +42,7 @@ export default function SiteStarter() {
   const [launching,              setLaunching]              = useState(false);
 
   const emailValid = !notificationsEnabled || notifyEmail.trim().includes('@');
-  const canLaunch  = siteName.trim().length >= 2 && emailValid && !launching;
+  const canLaunch  = siteName.trim().length >= 2 && emailValid && !launching && formConfigIssues(formConfig).length === 0;
 
   async function handleLaunch() {
     if (!state.auth.accessToken || !canLaunch) return;
@@ -335,7 +335,10 @@ export default function SiteStarter() {
           <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-muted)' }}>
             Form fields
           </p>
-          <FormFieldEditor config={formConfig} onChange={setFormConfig} />
+          <FormFieldEditor config={formConfig} onChange={setFormConfig}
+            emailEnabled={notificationsEnabled}
+            emailOffHint="Turn on “Send email notifications” above to use them"
+            defaultSubject={`New ${formLabel.trim() || 'Contact Form'} submission — ${siteName.trim() || 'your site'}`} />
         </div>
 
         {/* Launch */}
