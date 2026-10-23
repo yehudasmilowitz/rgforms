@@ -11,7 +11,9 @@ import {
   renameSite,
 } from '@/lib/siteTabHelpers';
 import { toFieldKey, redeploySiteCapabilities } from '@/lib/createSite';
-import FormFieldEditor, { DEFAULT_FORM_CONFIG } from '@/components/FormFieldEditor';
+import FormFieldEditor, { DEFAULT_FORM_CONFIG, Switch, formConfigIssues } from '@/components/FormFieldEditor';
+import { GoogleSheetsIcon, GoogleDriveIcon } from '@/components/google-icons';
+import { isEmail } from '@/lib/formConfig';
 import TestFormDialog from '@/components/TestFormDialog';
 import { SCRIPT_VERSION } from '@/types';
 import type { SiteTab, SiteTabFormConfig, SiteManifest } from '@/types';
@@ -327,6 +329,58 @@ function buildManifestGuide(manifest: SiteManifest) {
   };
 }
 
+// ─── Sheet + Drive buttons ────────────────────────────────────────────────────
+
+/** Only ever link to Google's own hosts; anything else is treated as missing. */
+function googleUrl(url: string | undefined, host: string): string {
+  try { return url && new URL(url).hostname === host ? url : ''; } catch { return ''; }
+}
+
+function DataLinks({ m }: { m: SiteManifest }) {
+  const sheet = googleUrl(m.sheet_url, 'docs.google.com')
+    || (m.sheet_id ? `https://docs.google.com/spreadsheets/d/${encodeURIComponent(m.sheet_id)}/edit` : '');
+  const drive = googleUrl(m.drive_root_folder_url, 'drive.google.com')
+    || (m.drive_root_folder_id ? `https://drive.google.com/drive/folders/${encodeURIComponent(m.drive_root_folder_id)}` : '');
+  const links = [
+    { href: sheet, icon: <GoogleSheetsIcon />, label: 'Open submissions', sub: 'Google Sheet' },
+    { href: drive, icon: <GoogleDriveIcon />,  label: 'Open Drive folder', sub: 'Google Drive' },
+  ];
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {links.map((l) => l.href ? (
+          <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-3 min-h-[52px] px-4 py-2.5 rounded-xl border transition-colors hover:border-[var(--color-accent)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+            style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+            <span className="shrink-0">{l.icon}</span>
+            <span className="flex-1 flex flex-col min-w-0">
+              <span className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{l.label}</span>
+              <span className="text-xs" style={{ color: 'var(--color-muted)' }}>
+                {l.sub}<span className="sr-only"> (opens in a new tab)</span>
+              </span>
+            </span>
+            <span style={{ color: 'var(--color-muted)' }}><ExternalLinkIcon /></span>
+          </a>
+        ) : (
+          <div key={l.label} className="flex items-center gap-3 min-h-[52px] px-4 py-2.5 rounded-xl border border-dashed"
+            style={{ borderColor: 'var(--color-border)' }}>
+            <span className="shrink-0 opacity-50">{l.icon}</span>
+            <span className="flex flex-col">
+              <span className="text-sm font-semibold" style={{ color: 'var(--color-muted)' }}>{l.label}</span>
+              <span className="text-xs" style={{ color: 'var(--color-muted)' }}>
+                Link not recorded for this project. Find it in Google Drive.
+              </span>
+            </span>
+          </div>
+        ))}
+      </div>
+      <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
+        Opens in a new tab. If Google asks for access, switch to <strong>{m.google_account}</strong>, the account that owns this project.
+      </p>
+    </div>
+  );
+}
+
 // ─── Form row ─────────────────────────────────────────────────────────────────
 
 function FormRow({
@@ -361,6 +415,7 @@ function FormRow({
           <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text)' }}>{tab.label}</p>
           <p className="text-[10px] font-bold uppercase tracking-wide mt-0.5" style={{ color }}>
             form{tab.formConfig?.fields.length ? ` · ${tab.formConfig.fields.length} fields` : ''}
+            {tab.formConfig?.enableHoneypot ? ' · honeypot' : ''}
           </p>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
@@ -379,7 +434,7 @@ function FormRow({
               color:      isEditing ? '#fff' : 'var(--color-muted)',
               border:     `1px solid ${isEditing ? 'var(--color-accent)' : 'var(--color-border)'}`,
             }}>
-            Edit fields
+            {isEditing ? 'Close editor' : 'Edit form'}
           </button>
           <button type="button" onClick={onConfirmRemove} disabled={saving}
             className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors disabled:opacity-40"
@@ -387,8 +442,9 @@ function FormRow({
             onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-error)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-subtle)'; }}
             title="Remove form"
+            aria-label={`Remove ${tab.label}`}
           >
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
               <path d="M1.5 3h10M4.5 3V2h4v1M4 3l.5 7.5M9 3l-.5 7.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
@@ -399,7 +455,7 @@ function FormRow({
         <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-t"
           style={{ background: 'var(--color-error-bg)', borderColor: 'var(--color-error-border)' }}>
           <p className="text-xs" style={{ color: 'var(--color-error)' }}>
-            Remove <strong>{tab.label}</strong>? This deletes the sheet tab permanently.
+            Remove <strong>{tab.label}</strong>? This permanently deletes its sheet tab and every submission in it.
           </p>
           <div className="flex gap-2 shrink-0">
             <button type="button" onClick={onRemove} disabled={saving}
@@ -597,7 +653,13 @@ export default function SiteKit() {
   const emailGranted   = m.capabilities?.email ?? !!m.notification_email;
   const captchaGranted = m.capabilities?.captcha ?? !!m.captcha;
   const canUpgrade     = !!m.script_id;
-  const needsSecurityUpdate = (m.script_version ?? 1) < SCRIPT_VERSION;
+  const scriptVersion  = m.script_version ?? 1;
+  const needsSecurityUpdate = scriptVersion < SCRIPT_VERSION;
+  // Fixes that matter for safety (v1 served submissions over GET) get the
+  // urgent card; later versions are feature updates.
+  const securityCritical = scriptVersion < 2;
+  // {{merge tags}} in subjects only resolve on a v3+ handler.
+  const mergeTags = scriptVersion >= 3;
   const scriptEditorUrl = m.script_id ? `https://script.google.com/d/${m.script_id}/edit` : m.script_url;
   const captcha = captchaDraft ?? {
     enabled: m.captcha?.enabled ?? false,
@@ -648,6 +710,7 @@ export default function SiteKit() {
       const newManifest: SiteManifest = {
         ...m,
         capabilities: { email: emailGranted, captcha: true },
+        script_version: SCRIPT_VERSION,   // the redeploy shipped the current script
         captcha: { provider: 'turnstile', enabled: false, siteKey: enableCaptchaKeys.siteKey.trim(), secret: enableCaptchaKeys.secret.trim() },
       };
       await updateManifestInSheet(token, m.sheet_id, newManifest);
@@ -666,6 +729,7 @@ export default function SiteKit() {
       const newManifest: SiteManifest = {
         ...m,
         capabilities: { email: true, captcha: captchaGranted },
+        script_version: SCRIPT_VERSION,   // the redeploy shipped the current script
         notification_email: enableEmailValue.trim(),
       };
       await updateManifestInSheet(token, m.sheet_id, newManifest);
@@ -678,6 +742,10 @@ export default function SiteKit() {
   // Edit the notification address (scope already granted — manifest only, no redeploy).
   async function handleSaveEmail() {
     if (emailDraft === null) return;
+    if (emailDraft.trim() && !isEmail(emailDraft)) {
+      setError('That notification address isn\'t a valid email. Fix it, or clear it to stop notifications.');
+      return;
+    }
     setEmailSaving(true); setError('');
     try {
       const newManifest: SiteManifest = { ...m, notification_email: emailDraft.trim() };
@@ -692,19 +760,30 @@ export default function SiteKit() {
     year: 'numeric', month: 'long', day: 'numeric',
   });
 
+  // Unsaved edits are only ever thrown away by an explicit Cancel/Close.
+  const editingDirty = !!editingTab && !!editFormConfig &&
+    JSON.stringify(editFormConfig) !== JSON.stringify(m.tabs.find((t) => t.name === editingTab)?.formConfig ?? DEFAULT_FORM_CONFIG);
+  function blockIfDirty(): boolean {
+    if (!editingDirty) return false;
+    const label = m.tabs.find((t) => t.name === editingTab)?.label ?? 'this form';
+    setError(`You have unsaved changes to ${label}. Save them, or press Cancel to discard them.`);
+    return true;
+  }
+
   function openEdit(tab: SiteTab) {
     if (editingTab === tab.name) { setEditingTab(null); setEditFormConfig(null); return; }
+    if (blockIfDirty()) return;
     setEditingTab(tab.name);
     setEditFormConfig(tab.formConfig ? { ...tab.formConfig, fields: [...tab.formConfig.fields] } : { ...DEFAULT_FORM_CONFIG });
     setRemovingTab(null);
   }
 
   async function handleSaveFormEdit() {
-    if (!editingTab || !editFormConfig) return;
+    if (!editingTab || !editFormConfig || formConfigIssues(editFormConfig, mergeTags).length) return;
     setSaving(true); setError('');
     try {
-      const cols = ['submitted_at', ...editFormConfig.fields.map((f) => toFieldKey(f.label))];
-      await updateTabHeaders(token, m.sheet_id, editingTab, cols);
+      const before = m.tabs.find((t) => t.name === editingTab)?.formConfig?.fields ?? [];
+      await updateTabHeaders(token, m.sheet_id, editingTab, before, editFormConfig.fields);
       const newTabs     = m.tabs.map((t) => t.name === editingTab ? { ...t, formConfig: editFormConfig } : t);
       const newManifest = { ...m, tabs: newTabs };
       await updateManifestInSheet(token, m.sheet_id, newManifest);
@@ -728,7 +807,7 @@ export default function SiteKit() {
   }
 
   async function handleAddForm() {
-    if (addFormLabel.trim().length < 2) return;
+    if (addFormLabel.trim().length < 2 || formConfigIssues(addFormConfig, mergeTags).length) return;
     setSaving(true); setError('');
     try {
       const label   = addFormLabel.trim();
@@ -807,6 +886,7 @@ export default function SiteKit() {
               <div className="flex items-center gap-2">
                 <input
                   autoFocus
+                  aria-label="Project name"
                   value={renameValue}
                   onChange={(e) => setRenameValue(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleRenameProject(); if (e.key === 'Escape') setRenamingProject(false); }}
@@ -830,8 +910,8 @@ export default function SiteKit() {
                 <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
                   {m.site_name}
                 </h1>
-                <button type="button" onClick={startRename} title="Rename project"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded"
+                <button type="button" onClick={startRename} title="Rename project" aria-label="Rename project"
+                  className="sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity p-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
                   style={{ color: 'var(--color-muted)' }}
                   onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-text)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-muted)'; }}>
@@ -846,8 +926,8 @@ export default function SiteKit() {
             </p>
           </div>
           <button type="button"
-            onClick={() => dispatch({ type: 'RESET_SITE_STARTER' })}
-            className="text-xs font-medium mt-1 transition-colors shrink-0"
+            onClick={() => { if (!blockIfDirty()) dispatch({ type: 'RESET_SITE_STARTER' }); }}
+            className="text-sm font-medium px-2 py-1.5 -mr-2 rounded-lg transition-colors shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
             style={{ color: 'var(--color-muted)' }}
             onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-text)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-muted)'; }}
@@ -856,12 +936,14 @@ export default function SiteKit() {
           </button>
         </div>
 
+        <DataLinks m={m} />
+
         {/* Error */}
         {error && (
           <div className="rounded-xl border px-4 py-3 text-sm flex items-start justify-between gap-3"
             style={{ background: 'var(--color-error-bg)', borderColor: 'var(--color-error-border)', color: 'var(--color-error)' }}>
-            {error}
-            <button type="button" onClick={() => setError('')} className="shrink-0 text-xs">✕</button>
+            <span role="alert">{error}</span>
+            <button type="button" onClick={() => setError('')} aria-label="Dismiss error" className="shrink-0 text-xs p-1">✕</button>
           </div>
         )}
 
@@ -871,7 +953,7 @@ export default function SiteKit() {
             style={{ background: 'var(--color-warning-bg)', borderColor: 'var(--color-warning-border)', color: 'var(--color-warning)' }}>
             <div className="flex items-start justify-between gap-3">
               <p className="text-sm font-semibold">Action required: re-authorize the script</p>
-              <button type="button" onClick={() => setNeedsReauth(false)} className="shrink-0 text-xs">✕</button>
+              <button type="button" onClick={() => setNeedsReauth(false)} aria-label="Dismiss" className="shrink-0 text-xs p-1">✕</button>
             </div>
             <p className="text-xs leading-relaxed">
               The new capability is deployed and your form URL is unchanged — but until you approve the added permission,
@@ -891,19 +973,23 @@ export default function SiteKit() {
           <div className="rounded-xl border px-4 py-3.5 flex flex-col gap-2"
             style={{ background: 'var(--color-accent-subtle)', borderColor: 'var(--color-accent-border)' }}>
             <p className="text-sm font-semibold" style={{ color: 'var(--color-accent-ink)' }}>
-              Important security update
+              {securityCritical ? 'Important security update' : 'Form handler update available'}
             </p>
             {canUpgrade ? (
               <>
                 <p className="text-xs leading-relaxed" style={{ color: 'var(--color-text)' }}>
-                  This update makes your form more secure. It takes a few seconds, your endpoint
-                  URL doesn&apos;t change, and you won&apos;t need to re-authorize.
+                  {securityCritical
+                    ? 'This update makes your form more secure and lets email subjects include form answers.'
+                    : 'Lets email subjects include form answers, like the applicant’s name, and drops a malformed reply-to address instead of the whole notification.'}
+                  {' '}It takes a few seconds, your endpoint URL doesn&apos;t change, and it uses the same
+                  permissions, so Google shouldn&apos;t ask you to re-authorize. Send a test submission afterwards
+                  to confirm.
                 </p>
                 <button type="button" onClick={handleSecureForm} disabled={securing}
                   className="self-start flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold disabled:opacity-40 mt-0.5"
                   style={{ background: 'var(--color-accent)', color: '#fff' }}>
                   {securing ? <SpinnerIcon /> : null}
-                  {securing ? 'Securing…' : 'Secure my form'}
+                  {securing ? 'Updating…' : securityCritical ? 'Secure my form' : 'Update form handler'}
                 </button>
               </>
             ) : (
@@ -919,8 +1005,8 @@ export default function SiteKit() {
         {secured && (
           <div className="rounded-xl border px-4 py-3.5 flex items-start justify-between gap-3"
             style={{ background: 'var(--color-success-bg)', borderColor: 'var(--color-success-border)', color: 'var(--color-success)' }}>
-            <p className="text-sm font-semibold">Done — your endpoint only accepts submissions now.</p>
-            <button type="button" onClick={() => setSecured(false)} className="shrink-0 text-xs">✕</button>
+            <p className="text-sm font-semibold" role="status">Done. Your form handler is up to date. Use Test on a form to confirm it still delivers.</p>
+            <button type="button" onClick={() => setSecured(false)} aria-label="Dismiss" className="shrink-0 text-xs p-1">✕</button>
           </div>
         )}
 
@@ -936,18 +1022,6 @@ export default function SiteKit() {
             <CopyButton text={m.script_url} />
           </div>
           <div className="flex items-center gap-4 flex-wrap">
-            {[
-              { label: 'Open Google Sheet', href: m.sheet_url },
-              { label: 'Open Drive Folder', href: m.drive_root_folder_url },
-            ].map((link) => (
-              <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-medium"
-                style={{ color: 'var(--color-muted)' }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-muted)'; }}>
-                <ExternalLinkIcon /> {link.label}
-              </a>
-            ))}
             <TooltipLink
               href={`${m.script_url}?setup=1`}
               label="Open Script to Authorize"
@@ -1086,23 +1160,11 @@ export default function SiteKit() {
                 changes take effect immediately, no redeploy. See <strong style={{ color: 'var(--color-text)' }}>RGFORMS.md</strong> for the widget snippet.
               </p>
 
-              <label className="flex items-center gap-3 self-start cursor-pointer select-none">
-                <span
-                  className="relative inline-flex h-5 w-9 shrink-0 rounded-full border transition-colors duration-200"
-                  style={{
-                    background:  captcha.enabled ? 'var(--color-accent)' : 'var(--color-surface-2)',
-                    borderColor: captcha.enabled ? 'var(--color-accent)' : 'var(--color-border)',
-                  }}
-                  onClick={() => setCaptchaDraft({ ...captcha, enabled: !captcha.enabled })}
-                >
-                  <span className="pointer-events-none absolute top-0.5 h-4 w-4 rounded-full shadow transition-transform duration-200"
-                    style={{ background: '#fff', transform: captcha.enabled ? 'translateX(16px)' : 'translateX(2px)' }} />
-                </span>
-                <span className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}
-                  onClick={() => setCaptchaDraft({ ...captcha, enabled: !captcha.enabled })}>
-                  Verify submissions with Turnstile
-                </span>
-              </label>
+              <Switch
+                on={captcha.enabled}
+                onChange={(enabled) => setCaptchaDraft({ ...captcha, enabled })}
+                label="Verify submissions with Turnstile"
+              />
 
               {captcha.enabled && !captcha.secret.trim() && (
                 <div className="rounded-lg px-3 py-2 text-xs"
@@ -1141,7 +1203,10 @@ export default function SiteKit() {
               </div>
 
               {captchaDirty && (
-                <div className="flex gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs w-full" style={{ color: 'var(--color-muted)' }}>
+                    Not live until you save.
+                  </span>
                   <button type="button" onClick={handleSaveCaptcha} disabled={captchaSaving}
                     className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
                     style={{ background: 'var(--color-accent)', color: '#fff' }}>
@@ -1156,6 +1221,11 @@ export default function SiteKit() {
               )}
             </>
           )}
+          <p className="text-xs leading-relaxed pt-3 border-t" style={{ color: 'var(--color-muted)', borderColor: 'var(--color-border)' }}>
+            <strong style={{ color: 'var(--color-text)' }}>Honeypot</strong> is a lighter trap set per form:{' '}
+            {m.tabs.filter((t) => t.formConfig?.enableHoneypot).length} of {m.tabs.length} form{m.tabs.length === 1 ? '' : 's'} have it on.
+            Change it under <strong style={{ color: 'var(--color-text)' }}>Edit form → Spam protection</strong>.
+          </p>
         </CollapsibleCard>
         </div>
 
@@ -1188,11 +1258,16 @@ export default function SiteKit() {
                       <div className="mt-1 rounded-xl border p-4 flex flex-col gap-4"
                         style={{ background: 'var(--color-surface)', borderColor: 'var(--color-accent)' }}>
                         <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-accent)' }}>
-                          Edit fields — {tab.label}
+                          Edit form: {tab.label}
                         </p>
-                        <FormFieldEditor config={editFormConfig} onChange={setEditFormConfig} />
+                        <FormFieldEditor config={editFormConfig} onChange={setEditFormConfig}
+                          emailEnabled={emailGranted && !!m.notification_email}
+                          emailOffHint="Turn them on under Email notifications above"
+                          mergeTags={mergeTags}
+                          defaultSubject={`New ${tab.label} submission — ${m.site_name}`} />
                         <div className="flex gap-2">
-                          <button type="button" onClick={handleSaveFormEdit} disabled={saving}
+                          <button type="button" onClick={handleSaveFormEdit}
+                            disabled={saving || formConfigIssues(editFormConfig, mergeTags).length > 0}
                             className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
                             style={{ background: 'var(--color-accent)', color: '#fff' }}>
                             {saving ? <SpinnerIcon /> : null} Save changes
@@ -1224,12 +1299,12 @@ export default function SiteKit() {
               style={{ background: 'var(--color-surface)', borderColor: 'var(--color-accent)' }}>
               <div className="flex items-center justify-between">
                 <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-accent)' }}>Add form</p>
-                <button type="button" onClick={() => setShowAdd(false)} className="text-xs" style={{ color: 'var(--color-muted)' }}>✕</button>
+                <button type="button" onClick={() => setShowAdd(false)} aria-label="Close add form" className="text-xs p-1" style={{ color: 'var(--color-muted)' }}>✕</button>
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>Form name</label>
-                <input type="text" value={addFormLabel} onChange={(e) => setAddFormLabel(e.target.value)}
+                <label htmlFor="add-form-name" className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>Form name</label>
+                <input id="add-form-name" type="text" value={addFormLabel} onChange={(e) => setAddFormLabel(e.target.value)}
                   placeholder="e.g. Newsletter Signup"
                   autoFocus
                   className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
@@ -1239,12 +1314,16 @@ export default function SiteKit() {
 
               <div className="flex flex-col gap-2">
                 <p className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>Form fields</p>
-                <FormFieldEditor config={addFormConfig} onChange={setAddFormConfig} />
+                <FormFieldEditor config={addFormConfig} onChange={setAddFormConfig}
+                  emailEnabled={emailGranted && !!m.notification_email}
+                  emailOffHint="Turn them on under Email notifications above"
+                  mergeTags={mergeTags}
+                  defaultSubject={`New ${addFormLabel.trim() || 'form'} submission — ${m.site_name}`} />
               </div>
 
               <div className="flex gap-2">
                 <button type="button" onClick={handleAddForm}
-                  disabled={saving || addFormLabel.trim().length < 2}
+                  disabled={saving || addFormLabel.trim().length < 2 || formConfigIssues(addFormConfig, mergeTags).length > 0}
                   className="flex items-center gap-1.5 flex-1 justify-center py-2.5 rounded-xl text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{ background: 'var(--color-accent)', color: '#fff' }}>
                   {saving ? <SpinnerIcon /> : null} Add form
