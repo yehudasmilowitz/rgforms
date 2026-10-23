@@ -175,7 +175,7 @@ When you launch a site, `lib/createSite.ts` runs these steps in sequence using y
 
 The generated script (`lib/siteScript.ts`) is a single JS file uploaded to the user's Apps Script project:
 
-- **`doPost(e)`** — reads `_manifest` tab, finds the matching form tab, optionally verifies a Cloudflare Turnstile token (`_captcha`) via `UrlFetchApp`, appends a row, sends email via `MailApp.sendEmail` (supports CC, BCC, custom subject, sender name, reply-to, honeypot)
+- **`doPost(e)`** — reads `_manifest` tab, finds the matching form tab, optionally verifies a Cloudflare Turnstile token (`_captcha`) via `UrlFetchApp`, appends a row, sends email via `MailApp.sendEmail` (supports CC, BCC, sender name, reply-to, honeypot, and a custom subject that can include form answers as `{{field_key}}` merge tags; see `lib/formConfig.ts` for the blank/unknown/long-value rules)
 - **`_manifest` tab** — live JSON config, updated by RG Forms when you add/remove form modules; no script redeploy needed
 - **Response format** — always `{ result: 'success' }` or `{ result: 'error', error: '...' }`
 
